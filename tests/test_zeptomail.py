@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, patch
 
 import azure.connectors.zeptomail as zeptomail_module
 import pytest
+from azure.connectors.aio.zeptomail import ZeptomailClient
 from azure.connectors.zeptomail import (
     ReplyToAddress,
     SendMailInput,
     SendTemplateMailInput,
-    ZeptomailClient,
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
@@ -52,11 +52,11 @@ async def test_send_template_mail_preserves_mixed_values(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"ok": true}'),
     ) as mock_send:
-        result = await client.send_template_mail_async(model)
+        result = await client.send_template_mail(model)
 
     assert type_hints["merge_key_detail"] == Optional[List[Dict[str, Any]]]
     mock_send.assert_awaited_once_with(
@@ -105,11 +105,11 @@ async def test_get_processed_emails_uses_exact_encoded_query(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"data": []}'),
     ) as mock_send:
-        result = await client.get_processed_emails_async(
+        result = await client.get_processed_emails(
             mailagent_key="agent+key",
             subject="Quarterly report",
             from_="sender+alias@example.com",

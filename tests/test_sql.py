@@ -8,8 +8,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.sql import SqlClient
 from azure.connectors.sql import (
-    SqlClient,
     DatabasesList,
     ExecuteProcedureInput,
     GetItemsResponse,
@@ -30,40 +30,43 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import (
+    get_generated_operations,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: SqlClient, operation: str):
     """Invoke a SQL operation by name for shared method tests."""
     if operation == "delete_item":
-        return await client.delete_item_async(
+        return await client.delete_item(
             server="srv", database="db", table="tbl", id="1"
         )
     if operation == "execute_pass_through_native_query":
-        return await client.execute_pass_through_native_query_async(
+        return await client.execute_pass_through_native_query(
             input=SqlPassThroughNativeQueryBody(query="SELECT 1"),
             server="srv",
             database="db",
         )
     if operation == "execute_procedure":
-        return await client.execute_procedure_async(
+        return await client.execute_procedure(
             input=ExecuteProcedureInput(),
             server="srv",
             database="db",
             procedure="proc",
         )
     if operation == "get_item":
-        return await client.get_item_async(
+        return await client.get_item(
             server="srv", database="db", table="tbl", id="1"
         )
     if operation == "get_items":
         return await resolve_generated_result(
-            client.get_items_async(server="srv", database="db", table="tbl")
+            client.get_items(server="srv", database="db", table="tbl")
         )
     if operation == "get_tables":
-        return await client.get_tables_async(server="srv", database="db")
+        return await client.get_tables(server="srv", database="db")
     if operation == "patch_item":
-        return await client.patch_item_async(
+        return await client.patch_item(
             input=PatchItemInput(),
             server="srv",
             database="db",
@@ -71,59 +74,59 @@ async def _invoke_operation(client: SqlClient, operation: str):
             id="1",
         )
     if operation == "post_item":
-        return await client.post_item_async(
+        return await client.post_item(
             input=PostItemInput(), server="srv", database="db", table="tbl"
         )
     if operation == "get_servers":
-        return await client.get_servers_async()
+        return await client.get_servers()
     if operation == "get_databases":
-        return await client.get_databases_async(server="srv")
+        return await client.get_databases(server="srv")
     if operation == "get_tables_for_delete_item":
         return await resolve_generated_result(
-            client.get_tables_for_delete_item_async(server="srv", database="db")
+            client.get_tables_for_delete_item(server="srv", database="db")
         )
     if operation == "get_procedures_v2":
-        return await client.get_procedures_v2_async(server="srv", database="db")
+        return await client.get_procedures_v2(server="srv", database="db")
     if operation == "get_procedure_v2":
-        return await client.get_procedure_v2_async(
+        return await client.get_procedure_v2(
             server="srv", database="db", procedure="proc"
         )
     if operation == "get_tables_for_get_item":
         return await resolve_generated_result(
-            client.get_tables_for_get_item_async(server="srv", database="db")
+            client.get_tables_for_get_item(server="srv", database="db")
         )
     if operation == "get_tables_for_get_on_new_items":
-        return await resolve_generated_result(client.get_tables_for_get_on_new_items_async(
+        return await resolve_generated_result(client.get_tables_for_get_on_new_items(
             server="srv", database="db"
         ))
     if operation == "get_tables_for_get_on_updated_items":
-        return await resolve_generated_result(client.get_tables_for_get_on_updated_items_async(
+        return await resolve_generated_result(client.get_tables_for_get_on_updated_items(
             server="srv", database="db"
         ))
     if operation == "get_tables_for_patch_item":
         return await resolve_generated_result(
-            client.get_tables_for_patch_item_async(server="srv", database="db")
+            client.get_tables_for_patch_item(server="srv", database="db")
         )
     if operation == "get_table_for_patch":
-        return await client.get_table_for_patch_async(
+        return await client.get_table_for_patch(
             server="srv", database="db", table="tbl"
         )
     if operation == "get_tables_for_post_item":
         return await resolve_generated_result(
-            client.get_tables_for_post_item_async(server="srv", database="db")
+            client.get_tables_for_post_item(server="srv", database="db")
         )
     if operation == "get_table":
-        return await client.get_table_async(server="srv", database="db", table="tbl")
+        return await client.get_table(server="srv", database="db", table="tbl")
     if operation == "get_pass_through_native_query_metadata":
-        return await client.get_pass_through_native_query_metadata_async(
+        return await client.get_pass_through_native_query_metadata(
             input=SqlPassThroughNativeQueryBody(query="SELECT 1"),
             server="srv",
             database="db",
         )
     if operation == "get_procedure":
-        return await client.get_procedure_async(procedure="proc")
+        return await client.get_procedure(procedure="proc")
     if operation == "get_procedures":
-        return await client.get_procedures_async()
+        return await client.get_procedures()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -255,11 +258,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_servers_async()
+            result = await client.get_servers()
 
             assert result["value"][0]["name"] == "srv1"
             assert mock_send.call_args[0][1].endswith("/servers")
@@ -275,11 +278,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_databases_async(server="srv1")
+            await client.get_databases(server="srv1")
 
             request_url = mock_send.call_args[0][1]
             assert "/databases" in request_url
@@ -296,11 +299,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.get_items_async(
+            result = await resolve_generated_result(client.get_items(
                 server="srv", database="db", table="tbl"
             ))
 
@@ -318,11 +321,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.get_items(
                 server="srv",
                 database="db",
                 table="tbl",
@@ -345,11 +348,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.post_item_async(
+            await client.post_item(
                 input=PostItemInput(additional_properties={"Name": "Contoso"}),
                 server="srv",
                 database="db",
@@ -372,11 +375,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.patch_item_async(
+            await client.patch_item(
                 input=body,
                 server="srv",
                 database="db",
@@ -399,11 +402,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_item_async(
+            result = await client.delete_item(
                 server="srv", database="db", table="tbl", id="1"
             )
 
@@ -422,11 +425,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.execute_procedure_async(
+            await client.execute_procedure(
                 input=ExecuteProcedureInput(),
                 server="srv",
                 database="db",
@@ -447,11 +450,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.execute_pass_through_native_query_async(
+            await client.execute_pass_through_native_query(
                 input=SqlPassThroughNativeQueryBody(query="SELECT 1"),
                 server="srv",
                 database="db",
@@ -471,11 +474,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_procedures_v2_async(server="srv", database="db")
+            await client.get_procedures_v2(server="srv", database="db")
 
             assert "/v2/datasets/srv,db/procedures" in mock_send.call_args[0][1]
 
@@ -490,11 +493,11 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_table_async(server="srv", database="db", table="tbl")
+            await client.get_table(server="srv", database="db", table="tbl")
 
             assert "/v2/$metadata.json/datasets/srv,db/tables/tbl" in mock_send.call_args[0][1]
 
@@ -508,7 +511,7 @@ class TestSqlClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -537,7 +540,7 @@ class TestSqlClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -615,53 +618,53 @@ class TestSqlTriggerOperations:
     def test_callable_method_signatures(self):
         """Test the client exposes exactly the generated callable methods."""
         expected_signatures = {
-            "delete_item_async": ("self", "server", "database", "table", "id"),
-            "execute_pass_through_native_query_async": (
+            "delete_item": ("self", "server", "database", "table", "id"),
+            "execute_pass_through_native_query": (
                 "self", "input", "server", "database"
             ),
-            "execute_procedure_async": (
+            "execute_procedure": (
                 "self", "input", "server", "database", "procedure"
             ),
-            "get_databases_async": ("self", "server"),
-            "get_item_async": ("self", "server", "database", "table", "id"),
-            "get_items_async": (
+            "get_databases": ("self", "server"),
+            "get_item": ("self", "server", "database", "table", "id"),
+            "get_items": (
                 "self", "server", "database", "table", "apply", "filter",
                 "orderby", "skip", "top", "select", "count",
                 "extract_sensitivity_label", "purview_account_name"
             ),
-            "get_pass_through_native_query_metadata_async": (
+            "get_pass_through_native_query_metadata": (
                 "self", "input", "server", "database"
             ),
-            "get_procedure_async": ("self", "procedure"),
-            "get_procedure_v2_async": (
+            "get_procedure": ("self", "procedure"),
+            "get_procedure_v2": (
                 "self", "server", "database", "procedure"
             ),
-            "get_procedures_async": ("self",),
-            "get_procedures_v2_async": ("self", "server", "database"),
-            "get_servers_async": ("self",),
-            "get_table_async": (
+            "get_procedures": ("self",),
+            "get_procedures_v2": ("self", "server", "database"),
+            "get_servers": ("self",),
+            "get_table": (
                 "self", "server", "database", "table",
                 "extract_sensitivity_label", "purview_account_name"
             ),
-            "get_table_for_patch_async": ("self", "server", "database", "table"),
-            "get_tables_async": (
+            "get_table_for_patch": ("self", "server", "database", "table"),
+            "get_tables": (
                 "self", "server", "database", "extract_sensitivity_label",
                 "purview_account_name"
             ),
-            "get_tables_for_delete_item_async": ("self", "server", "database"),
-            "get_tables_for_get_item_async": ("self", "server", "database"),
-            "get_tables_for_get_on_new_items_async": (
+            "get_tables_for_delete_item": ("self", "server", "database"),
+            "get_tables_for_get_item": ("self", "server", "database"),
+            "get_tables_for_get_on_new_items": (
                 "self", "server", "database"
             ),
-            "get_tables_for_get_on_updated_items_async": (
+            "get_tables_for_get_on_updated_items": (
                 "self", "server", "database"
             ),
-            "get_tables_for_patch_item_async": ("self", "server", "database"),
-            "get_tables_for_post_item_async": ("self", "server", "database"),
-            "patch_item_async": (
+            "get_tables_for_patch_item": ("self", "server", "database"),
+            "get_tables_for_post_item": ("self", "server", "database"),
+            "patch_item": (
                 "self", "input", "server", "database", "table", "id"
             ),
-            "post_item_async": ("self", "input", "server", "database", "table"),
+            "post_item": ("self", "input", "server", "database", "table"),
         }
         request_control_parameters = (
             "timeout",
@@ -673,13 +676,10 @@ class TestSqlTriggerOperations:
             name: parameters + request_control_parameters
             for name, parameters in expected_signatures.items()
         }
+        assert get_generated_operations(SqlClient) == set(expected_signatures)
         actual_signatures = {
-            name: tuple(inspect.signature(method).parameters)
-            for name, method in vars(SqlClient).items()
-            if (
-                inspect.iscoroutinefunction(method)
-                or inspect.isasyncgenfunction(method)
-            )
+            name: tuple(inspect.signature(getattr(SqlClient, name)).parameters)
+            for name in expected_signatures
         }
 
         assert actual_signatures == expected_signatures

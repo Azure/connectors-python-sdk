@@ -295,20 +295,21 @@ az functionapp log tail -g $resourceGroup -n $functionAppName
 
 ## Using the SDK for Actions (Beyond Triggers)
 
-The `azure-connectors` package provides typed async clients for calling connector actions directly from Python applications. Generated clients require a caller-owned asynchronous Azure Identity credential or an `AzureKeyCredential`.
+The `azure-connectors` package provides matching synchronous and asynchronous clients for calling connector actions directly from Python applications. Root clients use synchronous Azure Identity credentials; aio clients use asynchronous credentials. Both modes also accept `AzureKeyCredential`.
 
 ### Example: Send an email
 
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.office365 import Office365Client, SendEmailInput
+from azure.connectors.aio.office365 import Office365Client
+from azure.connectors.office365 import SendEmailInput
 
 
 async def main(connection_url: str):
     async with DefaultAzureCredential() as credential:
         async with Office365Client(connection_url, credential) as client:
-            await client.send_email_async(
+            await client.send_email(
                 input=SendEmailInput(
                     to="recipient@example.com",
                     subject="Hello from Python SDK",
@@ -322,7 +323,7 @@ async def main(connection_url: str):
 ```python
 from azure.identity.aio import DefaultAzureCredential
 
-from azure.connectors.sharepointonline import SharepointonlineClient
+from azure.connectors.aio.sharepointonline import SharepointonlineClient
 
 
 async def list_items(connection_url: str):
@@ -330,7 +331,7 @@ async def list_items(connection_url: str):
         async with SharepointonlineClient(connection_url, credential) as client:
             items = [
                 item
-                async for item in client.get_items_async(
+                async for item in client.get_items(
                     dataset="https://contoso.sharepoint.com/sites/MySite",
                     table="MyList",
                 )
@@ -342,7 +343,8 @@ async def list_items(connection_url: str):
 
 ### Authentication Options
 
-Use `DefaultAzureCredential` or `ManagedIdentityCredential` from `azure.identity.aio` for token authentication. Use `AzureKeyCredential` from `azure.core.credentials` when the connection runtime expects an API key. The caller owns asynchronous credentials and must close them.
+Use credentials from `azure.identity` for root clients and `azure.identity.aio` for aio clients. Use `AzureKeyCredential` from `azure.core.credentials` when the connection runtime expects an API key. The caller owns credentials and must close them through the matching lifecycle.
+
 ### E2E Validated Connectors
 
 | Connector | Package | Status |

@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.kusto import KustoClient
 from azure.connectors.kusto import (
-    KustoClient,
     QueryAndListSchema,
     ControlCommandAndListSchema,
     QueryAndVisualizeSchema,
@@ -124,7 +124,7 @@ class TestListKustoResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -133,7 +133,7 @@ class TestListKustoResults:
                 db="testdb",
                 csl="TestTable | take 10"
             )
-            result = await client.list_kusto_results_async(input_schema)
+            result = await client.list_kusto_results(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -158,12 +158,12 @@ class TestListKustoResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_schema = QueryAndListSchema()
-            result = await client.list_kusto_results_async(input_schema)
+            result = await client.list_kusto_results(input_schema)
 
             assert result is None
 
@@ -182,14 +182,14 @@ class TestListKustoResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_schema = QueryAndListSchema()
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_results_async(input_schema)
+                await client.list_kusto_results(input_schema)
 
             assert exc_info.value.status_code == 400
             assert exc_info.value.response_body == '{"error": "Invalid query"}'
@@ -211,12 +211,12 @@ class TestListKustoResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_results_async(QueryAndListSchema())
+                await client.list_kusto_results(QueryAndListSchema())
 
             assert exc_info.value.status_code == 500
 
@@ -239,7 +239,7 @@ class TestListKustoShowCommandResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -248,7 +248,7 @@ class TestListKustoShowCommandResults:
                 db="testdb",
                 csl=".show tables"
             )
-            result = await client.list_kusto_show_command_results_async(input_schema)
+            result = await client.list_kusto_show_command_results(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -273,11 +273,11 @@ class TestListKustoShowCommandResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_kusto_show_command_results_async(
+            result = await client.list_kusto_show_command_results(
                 ControlCommandAndListSchema()
             )
 
@@ -298,12 +298,12 @@ class TestListKustoShowCommandResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_show_command_results_async(
+                await client.list_kusto_show_command_results(
                     ControlCommandAndListSchema()
                 )
 
@@ -328,7 +328,7 @@ class TestRunKustoQueryAndVisualizeResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -338,7 +338,7 @@ class TestRunKustoQueryAndVisualizeResults:
                 csl="TestTable | summarize count() by timestamp",
                 chart_type="line"
             )
-            result = await client.run_kusto_query_and_visualize_results_async(input_schema)
+            result = await client.run_kusto_query_and_visualize_results(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -366,12 +366,12 @@ class TestRunKustoQueryAndVisualizeResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.run_kusto_query_and_visualize_results_async(
+                await client.run_kusto_query_and_visualize_results(
                     QueryAndVisualizeSchema()
                 )
 
@@ -396,7 +396,7 @@ class TestRunKustoCommandAndVisualizeResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -406,7 +406,7 @@ class TestRunKustoCommandAndVisualizeResults:
                 csl=".show schema",
                 chart_type="bar"
             )
-            result = await client.run_kusto_command_and_visualize_results_async(input_schema)
+            result = await client.run_kusto_command_and_visualize_results(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -431,11 +431,11 @@ class TestRunKustoCommandAndVisualizeResults:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.run_kusto_command_and_visualize_results_async(
+            result = await client.run_kusto_command_and_visualize_results(
                 CommandAndVisualizeSchema()
             )
 
@@ -460,7 +460,7 @@ class TestRunAsyncControlCommandAndWait:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -469,7 +469,7 @@ class TestRunAsyncControlCommandAndWait:
                 db="testdb",
                 csl=".set-or-append async TargetTable <| SourceTable"
             )
-            result = await client.run_async_control_command_and_wait_async(input_schema)
+            result = await client.run_async_control_command_and_wait(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -499,12 +499,12 @@ class TestRunAsyncControlCommandAndWait:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.run_async_control_command_and_wait_async(
+                await client.run_async_control_command_and_wait(
                     ControlCommandAndListSchema()
                 )
 
@@ -529,7 +529,7 @@ class TestMCPKustoQueryManagement:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -539,7 +539,7 @@ class TestMCPKustoQueryManagement:
                 method="query",
                 params={"query": "TestTable | take 1"}
             )
-            result = await client.mcp_kusto_query_management_async(input_request)
+            result = await client.mcp_kusto_query_management(input_request)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -568,12 +568,12 @@ class TestMCPKustoQueryManagement:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_request = MCPQueryRequest(jsonrpc="2.0", id="2", method="init")
-            result = await client.mcp_kusto_query_management_async(
+            result = await client.mcp_kusto_query_management(
                 input_request,
                 session_id="session-123"
             )
@@ -603,11 +603,11 @@ class TestMCPKustoQueryManagement:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.mcp_kusto_query_management_async(
+            await client.mcp_kusto_query_management(
                 MCPQueryRequest(),
                 session_id="session with spaces"
             )
@@ -628,11 +628,11 @@ class TestMCPKustoQueryManagement:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.mcp_kusto_query_management_async(MCPQueryRequest())
+            result = await client.mcp_kusto_query_management(MCPQueryRequest())
 
             assert result is None
 
@@ -651,12 +651,12 @@ class TestMCPKustoQueryManagement:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.mcp_kusto_query_management_async(MCPQueryRequest())
+                await client.mcp_kusto_query_management(MCPQueryRequest())
 
             assert exc_info.value.status_code == 500
 
@@ -759,12 +759,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             side_effect=[mock_response_1, mock_response_2]
         ):
-            result_1 = await client.list_kusto_results_async(QueryAndListSchema())
-            result_2 = await client.list_kusto_results_async(QueryAndListSchema())
+            result_1 = await client.list_kusto_results(QueryAndListSchema())
+            result_2 = await client.list_kusto_results(QueryAndListSchema())
 
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
@@ -781,12 +781,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(json.JSONDecodeError):
-                await client.list_kusto_results_async(QueryAndListSchema())
+                await client.list_kusto_results(QueryAndListSchema())
 
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self):
@@ -828,14 +828,14 @@ class TestListKustoResultsSchema:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
                 text='{"columns": [{"name": "Timestamp"}]}'
             )
         ) as mock_send:
-            result = await client.list_kusto_results_schema_async(input_schema)
+            result = await client.list_kusto_results_schema(input_schema)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -858,12 +858,12 @@ class TestListKustoResultsSchema:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="Invalid query")
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_kusto_results_schema_async(
+                await client.list_kusto_results_schema(
                     QueryAndListSchema()
                 )
 

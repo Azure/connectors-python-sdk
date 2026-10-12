@@ -1,9 +1,7 @@
 """StarRez REST V1 connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
@@ -12,19 +10,19 @@ from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Clie
 CONNECTION_RUNTIME_URL = os.environ.get("STARREZRESTV1_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """List up to ten StarRez bookings."""
     if not CONNECTION_RUNTIME_URL:
         print("Set STARREZRESTV1_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with Starrezrestv1Client(
+            with Starrezrestv1Client(
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                bookings = await client.select_booking_async(
+                bookings = client.select_booking(
                     input=SelectBookingInput(
                         return_empty_array_on_no_result=True,
                         page_size=10,
@@ -36,4 +34,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

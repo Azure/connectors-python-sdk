@@ -1,9 +1,7 @@
 """Meeting Room Map connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.meetingroommap import MeetingroommapClient
@@ -12,23 +10,23 @@ from azure.connectors.meetingroommap import MeetingroommapClient
 CONNECTION_RUNTIME_URL = os.environ.get("MEETINGROOMMAP_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """List Meeting Room Map location categories."""
     if not CONNECTION_RUNTIME_URL:
         print("Set MEETINGROOMMAP_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with MeetingroommapClient(
+            with MeetingroommapClient(
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                categories = await client.get_categories_async()
+                categories = client.get_categories()
                 print(f"Categories: {categories}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

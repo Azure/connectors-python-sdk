@@ -10,15 +10,33 @@ from typing import Optional, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "KustoClient",
+    "AsyncCommandResult",
+    "ChartType",
+    "ClusterName",
+    "CommandAndVisualizeSchema",
+    "ControlCommandAndListSchema",
+    "DatabaseName",
+    "MCPQueryRequest",
+    "MCPQueryResponse",
+    "ObjectEntity",
+    "Query",
+    "QueryAndListSchema",
+    "QueryAndVisualizeSchema",
+    "Row",
+    "Table",
+    "VisualizeResults",
+]
 
 
 # Type Definitions
@@ -211,7 +229,7 @@ class KustoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -220,7 +238,7 @@ class KustoClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -240,8 +258,8 @@ class KustoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -268,7 +286,7 @@ class KustoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "kusto"
 
-    async def list_kusto_results_async(
+    def list_kusto_results(
         self,
         input: QueryAndListSchema,
         *,
@@ -285,7 +303,7 @@ class KustoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResults/false"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -306,7 +324,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_kusto_show_command_results_async(
+    def list_kusto_show_command_results(
         self,
         input: ControlCommandAndListSchema,
         *,
@@ -326,7 +344,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/ListKustoShowCommandResults"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -347,7 +365,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_kusto_query_and_visualize_results_async(
+    def run_kusto_query_and_visualize_results(
         self,
         input: QueryAndVisualizeSchema,
         *,
@@ -366,7 +384,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -387,7 +405,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_kusto_command_and_visualize_results_async(
+    def run_kusto_command_and_visualize_results(
         self,
         input: CommandAndVisualizeSchema,
         *,
@@ -406,7 +424,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -427,7 +445,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_async_control_command_and_wait_async(
+    def run_async_control_command_and_wait(
         self,
         input: ControlCommandAndListSchema,
         *,
@@ -447,7 +465,7 @@ class KustoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -468,7 +486,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mcp_kusto_query_management_async(
+    def mcp_kusto_query_management(
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
@@ -495,7 +513,7 @@ class KustoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -516,7 +534,7 @@ class KustoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_kusto_results_schema_async(
+    def list_kusto_results_schema(
         self,
         input: QueryAndListSchema,
         *,
@@ -532,7 +550,7 @@ class KustoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResultsSchema"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

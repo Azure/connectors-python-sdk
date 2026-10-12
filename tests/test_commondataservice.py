@@ -5,10 +5,10 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.commondataservice import CommondataserviceClient
 from azure.connectors.commondataservice import (
     TRIGGER_OPERATIONS,
     AssociateRecordsPatchItemInput,
-    CommondataserviceClient,
     ItemsList,
     PatchItemInput,
     PostItemInput,
@@ -138,11 +138,11 @@ class TestGetItem:
         mock_response = MockResponse(status=200, text='{"itemInternalId": "1"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_item_async(dataset="default", table="accounts", id="1")
+            result = await client.get_item(dataset="default", table="accounts", id="1")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -156,12 +156,12 @@ class TestGetItem:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_item_async(dataset="default", table="accounts", id="99")
+                await client.get_item(dataset="default", table="accounts", id="99")
 
             assert exc_info.value.status_code == 404
 
@@ -176,12 +176,12 @@ class TestGetItems:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             result = [
-                item async for item in client.get_items_async(
+                item async for item in client.get_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -212,12 +212,12 @@ class TestGetItems:
         ]
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items_async(
+                item async for item in client.get_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -247,12 +247,12 @@ class TestGetItems:
         ]
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items_async(
+                item async for item in client.get_items(
                     dataset="default",
                     table="accounts",
                     filter="statecode eq 0",
@@ -285,12 +285,12 @@ class TestGetItems:
         ]
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items_async(
+                item async for item in client.get_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -322,12 +322,12 @@ class TestGetItems:
         ]
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.side_effect = responses
 
             result = [
-                item async for item in client.get_items_async(
+                item async for item in client.get_items(
                     dataset="default",
                     table="accounts",
                 )
@@ -443,11 +443,11 @@ class TestGetItems:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = client.get_items_async(
+            result = client.get_items(
                 dataset="default",
                 table="contacts",
                 apply="groupby((name))",
@@ -472,13 +472,13 @@ class TestGetItems:
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
                 await anext(
-                    client.get_items_async(dataset="default", table="accounts")
+                    client.get_items(dataset="default", table="accounts")
                 )
 
             assert exc_info.value.status_code == 500
@@ -495,11 +495,11 @@ class TestPatchItem:
         body = PatchItemInput()
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 input=body,
                 dataset="default",
                 table="accounts",
@@ -519,12 +519,12 @@ class TestPatchItem:
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.patch_item_async(
+                await client.patch_item(
                     input=PatchItemInput(),
                     dataset="default",
                     table="accounts",
@@ -545,11 +545,11 @@ class TestPostItem:
         body = PostItemInput()
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.post_item_async(
+            result = await client.post_item(
                 input=body,
                 dataset="default",
                 table="accounts",
@@ -568,12 +568,12 @@ class TestPostItem:
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.post_item_async(
+                await client.post_item(
                     input=PostItemInput(),
                     dataset="default",
                     table="accounts",
@@ -592,11 +592,11 @@ class TestGetDataSets:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_data_sets_async()
+            await client.get_data_sets()
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -609,12 +609,12 @@ class TestGetDataSets:
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_data_sets_async()
+                await client.get_data_sets()
 
             assert exc_info.value.status_code == 500
 
@@ -629,11 +629,11 @@ class TestGetMetadataForPatchItem:
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_metadata_for_patch_item_async(dataset="default", table="accounts")
+            await client.get_metadata_for_patch_item(dataset="default", table="accounts")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -649,12 +649,12 @@ class TestGetMetadataForPatchItem:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_metadata_for_patch_item_async(dataset="default", table="accounts")
+                await client.get_metadata_for_patch_item(dataset="default", table="accounts")
 
             assert exc_info.value.status_code == 404
 
@@ -669,11 +669,11 @@ class TestGetMetadataForPostItem:
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_metadata_for_post_item_async(dataset="default", table="accounts")
+            await client.get_metadata_for_post_item(dataset="default", table="accounts")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -689,12 +689,12 @@ class TestGetMetadataForPostItem:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_metadata_for_post_item_async(dataset="default", table="accounts")
+                await client.get_metadata_for_post_item(dataset="default", table="accounts")
 
             assert exc_info.value.status_code == 404
 
@@ -709,11 +709,11 @@ class TestGetTable:
         mock_response = MockResponse(status=200, text='{"name": "accounts"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_table_async(dataset="default", table="accounts")
+            result = await client.get_table(dataset="default", table="accounts")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -727,12 +727,12 @@ class TestGetTable:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_table_async(dataset="default", table="accounts")
+                await client.get_table(dataset="default", table="accounts")
 
             assert exc_info.value.status_code == 404
 
@@ -750,11 +750,11 @@ class TestGetTables:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_tables_async(dataset="default")
+            result = await client.get_tables(dataset="default")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -769,12 +769,12 @@ class TestGetTables:
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables_async(dataset="default")
+                await client.get_tables(dataset="default")
 
             assert exc_info.value.status_code == 500
 
@@ -789,11 +789,11 @@ class TestGetDataSetsMetadata:
         mock_response = MockResponse(status=200, text='{"tabular": {}}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_data_sets_metadata_async()
+            result = await client.get_data_sets_metadata()
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -807,12 +807,12 @@ class TestGetDataSetsMetadata:
         mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_data_sets_metadata_async()
+                await client.get_data_sets_metadata()
 
             assert exc_info.value.status_code == 500
 
@@ -830,11 +830,11 @@ class TestGetNextPage:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_next_page_async(next_link="token123")
+            result = await client.get_next_page(next_link="token123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -854,11 +854,11 @@ class TestGetNextPage:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_next_page_async(next_link="token123")
+            result = await client.get_next_page(next_link="token123")
 
             assert result is None
 
@@ -869,12 +869,12 @@ class TestGetNextPage:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_next_page_async(next_link="token123")
+                await client.get_next_page(next_link="token123")
 
             assert exc_info.value.status_code == 404
 
@@ -889,11 +889,11 @@ class TestAssociateRecordsPatchItem:
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.associate_records_patch_item_async(
+            await client.associate_records_patch_item(
                 AssociateRecordsPatchItemInput(),
                 dataset="default",
                 table="accounts",
@@ -913,12 +913,12 @@ class TestAssociateRecordsPatchItem:
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.associate_records_patch_item_async(
+                await client.associate_records_patch_item(
                     AssociateRecordsPatchItemInput(),
                     dataset="default",
                     table="accounts",
@@ -939,11 +939,11 @@ class TestCreateAttachment:
         mock_response = MockResponse(status=200, text='{"annotationid": "abc"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.create_attachment_async(
+            result = await client.create_attachment(
                 b"file-bytes",
                 dataset="default",
                 table="accounts",
@@ -968,12 +968,12 @@ class TestCreateAttachment:
         mock_response = MockResponse(status=403, text="Forbidden")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_attachment_async(
+                await client.create_attachment(
                     b"file-bytes",
                     dataset="default",
                     table="accounts",
@@ -994,11 +994,11 @@ class TestGetItemAttachments:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_item_attachments_async(
+            await client.get_item_attachments(
                 dataset="default", table="accounts", id="1"
             )
 
@@ -1013,12 +1013,12 @@ class TestGetItemAttachments:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_item_attachments_async(
+                await client.get_item_attachments(
                     dataset="default", table="accounts", id="1"
                 )
 
@@ -1035,11 +1035,11 @@ class TestGetAttachmentContent:
         mock_response = MockResponse(status=200, content=b"binary-data")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_attachment_content_async(
+            result = await client.get_attachment_content(
                 dataset="default", table="accounts", id="1", attachment_id="att1"
             )
 
@@ -1055,12 +1055,12 @@ class TestGetAttachmentContent:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_attachment_content_async(
+                await client.get_attachment_content(
                     dataset="default", table="accounts", id="1", attachment_id="att1"
                 )
 
@@ -1077,11 +1077,11 @@ class TestDeleteAttachment:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.delete_attachment_async(
+            await client.delete_attachment(
                 dataset="default", table="accounts", id="1", attachment_id="att1"
             )
 
@@ -1096,12 +1096,12 @@ class TestDeleteAttachment:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_attachment_async(
+                await client.delete_attachment(
                     dataset="default", table="accounts", id="1", attachment_id="att1"
                 )
 
@@ -1118,11 +1118,11 @@ class TestDeleteItem:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.delete_item_async(dataset="default", table="accounts", id="1")
+            await client.delete_item(dataset="default", table="accounts", id="1")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "DELETE"
@@ -1135,12 +1135,12 @@ class TestDeleteItem:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_item_async(
+                await client.delete_item(
                     dataset="default", table="accounts", id="1"
                 )
 
@@ -1157,11 +1157,11 @@ class TestDisassociateRecordsPostItem:
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.disassociate_records_post_item_async(
+            await client.disassociate_records_post_item(
                 dataset="default",
                 table="accounts",
                 id="1",
@@ -1181,12 +1181,12 @@ class TestDisassociateRecordsPostItem:
         mock_response = MockResponse(status=400, text="Bad request")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.disassociate_records_post_item_async(
+                await client.disassociate_records_post_item(
                     dataset="default",
                     table="accounts",
                     id="1",
@@ -1207,11 +1207,11 @@ class TestDisassociateSingleValueRecordDeleteItem:
         mock_response = MockResponse(status=200, text='{}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.disassociate_single_value_record_delete_item_async(
+            await client.disassociate_single_value_record_delete_item(
                 dataset="default",
                 table="accounts",
                 id="1",
@@ -1229,12 +1229,12 @@ class TestDisassociateSingleValueRecordDeleteItem:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.disassociate_single_value_record_delete_item_async(
+                await client.disassociate_single_value_record_delete_item(
                     dataset="default",
                     table="accounts",
                     id="1",
@@ -1254,11 +1254,11 @@ class TestGetCollectionRelationships:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_collection_relationships_async(
+            await client.get_collection_relationships(
                 dataset="default",
                 table="accounts",
                 id="1",
@@ -1279,12 +1279,12 @@ class TestGetCollectionRelationships:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_collection_relationships_async(
+                await client.get_collection_relationships(
                     dataset="default",
                     table="accounts",
                     id="1",
@@ -1306,11 +1306,11 @@ class TestGetMultiSelectMetadata:
         mock_response = MockResponse(status=200, text='{"name": "col"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_multi_select_metadata_async(
+            await client.get_multi_select_metadata(
                 dataset="default", table="accounts", item="col"
             )
 
@@ -1325,12 +1325,12 @@ class TestGetMultiSelectMetadata:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_multi_select_metadata_async(
+                await client.get_multi_select_metadata(
                     dataset="default", table="accounts", item="col"
                 )
 
@@ -1347,11 +1347,11 @@ class TestGetOptionSetMetadata:
         mock_response = MockResponse(status=200, text='{"name": "col"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_option_set_metadata_async(
+            await client.get_option_set_metadata(
                 dataset="default", table="accounts", item="col", type_="Picklist"
             )
 
@@ -1367,12 +1367,12 @@ class TestGetOptionSetMetadata:
         mock_response = MockResponse(status=404, text="Not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_option_set_metadata_async(
+                await client.get_option_set_metadata(
                     dataset="default", table="accounts", item="col", type_="Picklist"
                 )
 
@@ -1397,11 +1397,11 @@ class TestPathParameterEncoding:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = client.get_items_async(
+            result = client.get_items(
                 dataset="https://org12345.crm.dynamics.com",
                 table="accounts",
             )
@@ -1424,11 +1424,11 @@ class TestPathParameterEncoding:
         mock_response = MockResponse(status=200, text='{"name": "row"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_item_async(
+            await client.get_item(
                 dataset="https://org12345.crm.dynamics.com",
                 table="my table",
                 id="a/b",
@@ -1452,11 +1452,11 @@ class TestPathParameterEncoding:
         mock_response = MockResponse(status=200, text='{"accountid": "1"}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.post_item_async(
+            await client.post_item(
                 input=PostItemInput(additional_properties={"name": "Contoso"}),
                 dataset="https://org12345.crm.dynamics.com",
                 table="accounts",

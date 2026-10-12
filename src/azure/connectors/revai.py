@@ -10,15 +10,42 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "RevaiClient",
+    "AccountGetResponse",
+    "AlignmentGetResponse",
+    "AlignmentInput",
+    "AlignmentPostResponse",
+    "AlignmentTranscriptGetResponse",
+    "AnalysisGetResponse",
+    "AnalysisInput",
+    "AnalysisPostResponse",
+    "AnalysisResultGetResponse",
+    "ExtractionGetResponse",
+    "ExtractionInput",
+    "ExtractionPostResponse",
+    "ExtractionResultGetResponse",
+    "IdentificationGetResponse",
+    "IdentificationInput",
+    "IdentificationPostResponse",
+    "IdentificationResultGetResponse",
+    "TranscriptGetResponse",
+    "TranscriptionGetResponse",
+    "TranscriptionInput",
+    "TranscriptionPostResponse",
+    "VocabularyGetResponse",
+    "VocabularyInput",
+    "VocabularyPostResponse",
+]
 
 
 # Type Definitions
@@ -429,7 +456,7 @@ class RevaiClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -438,7 +465,7 @@ class RevaiClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -458,8 +485,8 @@ class RevaiClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -486,7 +513,7 @@ class RevaiClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "revai"
 
-    async def transcription_get_async(
+    def transcription_get(
         self,
         id: str,
         *,
@@ -505,7 +532,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -526,7 +553,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transcription_delete_async(
+    def transcription_delete(
         self,
         id: str,
         *,
@@ -547,7 +574,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -568,7 +595,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transcriptions_get_async(
+    def transcriptions_get(
         self,
         limit: Optional[int] = None,
         starting_after: Optional[str] = None,
@@ -599,7 +626,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -620,7 +647,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transcription_async(
+    def transcription(
         self,
         input: TranscriptionInput,
         *,
@@ -637,7 +664,7 @@ class RevaiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/jobs"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -658,7 +685,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transcript_get_async(
+    def transcript_get(
         self,
         id: str,
         *,
@@ -677,7 +704,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/jobs/{quote(str(id), safe='')}/transcript"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -698,7 +725,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def captions_get_async(
+    def captions_get(
         self,
         id: str,
         *,
@@ -718,7 +745,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/jobs/{quote(str(id), safe='')}/captions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -739,7 +766,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def account_get_async(
+    def account_get(
         self,
         *,
         timeout: Optional[float] = None,
@@ -754,7 +781,7 @@ class RevaiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/account"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -775,7 +802,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def vocabularies_get_async(
+    def vocabularies_get(
         self,
         limit: Optional[int] = None,
         *,
@@ -802,7 +829,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -823,7 +850,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def vocabulary_async(
+    def vocabulary(
         self,
         input: VocabularyInput,
         *,
@@ -841,7 +868,7 @@ class RevaiClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/speechtotext/v1/vocabularies"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -862,7 +889,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def vocabulary_get_async(
+    def vocabulary_get(
         self,
         id: str,
         *,
@@ -881,7 +908,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/vocabularies/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -902,7 +929,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def vocabulary_delete_async(
+    def vocabulary_delete(
         self,
         id: str,
         *,
@@ -922,7 +949,7 @@ class RevaiClient(ConnectorClientBase):
             f"/speechtotext/v1/vocabularies/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -943,7 +970,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extractions_get_async(
+    def extractions_get(
         self,
         limit: Optional[int] = None,
         starting_after: Optional[str] = None,
@@ -976,7 +1003,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -997,7 +1024,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extraction_async(
+    def extraction(
         self,
         input: ExtractionInput,
         *,
@@ -1015,7 +1042,7 @@ class RevaiClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/topic_extraction/v1/jobs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1036,7 +1063,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extraction_get_async(
+    def extraction_get(
         self,
         id: str,
         *,
@@ -1055,7 +1082,7 @@ class RevaiClient(ConnectorClientBase):
             f"/topic_extraction/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1076,7 +1103,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extraction_delete_async(
+    def extraction_delete(
         self,
         id: str,
         *,
@@ -1096,7 +1123,7 @@ class RevaiClient(ConnectorClientBase):
             f"/topic_extraction/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1117,7 +1144,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extraction_result_get_async(
+    def extraction_result_get(
         self,
         id: str,
         threshold: Optional[float] = None,
@@ -1145,7 +1172,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1166,7 +1193,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def analysises_get_async(
+    def analysises_get(
         self,
         limit: Optional[int] = None,
         starting_after: Optional[str] = None,
@@ -1199,7 +1226,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1215,7 +1242,7 @@ class RevaiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def analysis_async(
+    def analysis(
         self,
         input: AnalysisInput,
         *,
@@ -1233,7 +1260,7 @@ class RevaiClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/sentiment_analysis/v1/jobs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1254,7 +1281,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def analysis_get_async(
+    def analysis_get(
         self,
         id: str,
         *,
@@ -1273,7 +1300,7 @@ class RevaiClient(ConnectorClientBase):
             f"/sentiment_analysis/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1294,7 +1321,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def analysis_delete_async(
+    def analysis_delete(
         self,
         id: str,
         *,
@@ -1314,7 +1341,7 @@ class RevaiClient(ConnectorClientBase):
             f"/sentiment_analysis/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1335,7 +1362,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def analysis_result_get_async(
+    def analysis_result_get(
         self,
         id: str,
         filter_for: Optional[str] = None,
@@ -1363,7 +1390,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1384,7 +1411,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def identifications_get_async(
+    def identifications_get(
         self,
         limit: Optional[int] = None,
         starting_after: Optional[str] = None,
@@ -1415,7 +1442,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1436,7 +1463,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def identification_async(
+    def identification(
         self,
         input: IdentificationInput,
         *,
@@ -1453,7 +1480,7 @@ class RevaiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/languageid/v1/jobs"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1474,7 +1501,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def identification_get_async(
+    def identification_get(
         self,
         id: str,
         *,
@@ -1493,7 +1520,7 @@ class RevaiClient(ConnectorClientBase):
             f"/languageid/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1514,7 +1541,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def identification_delete_async(
+    def identification_delete(
         self,
         id: str,
         *,
@@ -1534,7 +1561,7 @@ class RevaiClient(ConnectorClientBase):
             f"/languageid/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1555,7 +1582,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def identification_result_get_async(
+    def identification_result_get(
         self,
         id: str,
         *,
@@ -1574,7 +1601,7 @@ class RevaiClient(ConnectorClientBase):
             f"/languageid/v1/jobs/{quote(str(id), safe='')}/result"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1595,7 +1622,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def alignments_get_async(
+    def alignments_get(
         self,
         limit: Optional[int] = None,
         starting_after: Optional[str] = None,
@@ -1626,7 +1653,7 @@ class RevaiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1647,7 +1674,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def alignment_async(
+    def alignment(
         self,
         input: AlignmentInput,
         *,
@@ -1664,7 +1691,7 @@ class RevaiClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/alignment/v1/jobs"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1685,7 +1712,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def alignment_get_async(
+    def alignment_get(
         self,
         id: str,
         *,
@@ -1704,7 +1731,7 @@ class RevaiClient(ConnectorClientBase):
             f"/alignment/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1725,7 +1752,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def alignment_delete_async(
+    def alignment_delete(
         self,
         id: str,
         *,
@@ -1745,7 +1772,7 @@ class RevaiClient(ConnectorClientBase):
             f"/alignment/v1/jobs/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1766,7 +1793,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def alignment_transcript_get_async(
+    def alignment_transcript_get(
         self,
         id: str,
         *,
@@ -1785,7 +1812,7 @@ class RevaiClient(ConnectorClientBase):
             f"/alignment/v1/jobs/{quote(str(id), safe='')}/transcript"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

@@ -4,14 +4,14 @@
 
 from __future__ import annotations
 
-import inspect
 import json
 from types import ModuleType
-from typing import Any
+from typing import Any, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 from urllib.parse import urlsplit
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 
 import azure.connectors.azureautomation as azureautomation
 import azure.connectors.azureblob as azureblob
@@ -20,6 +20,13 @@ import azure.connectors.azurevm as azurevm
 import azure.connectors.excelonlinebusiness as excelonlinebusiness
 import azure.connectors.teams as teams
 import azure.connectors.wdatp as wdatp
+from azure.connectors.aio.azureautomation import AzureautomationClient
+from azure.connectors.aio.azureblob import AzureblobClient
+from azure.connectors.aio.azuredatafactory import AzuredatafactoryClient
+from azure.connectors.aio.azurevm import AzurevmClient
+from azure.connectors.aio.excelonlinebusiness import ExcelonlinebusinessClient
+from azure.connectors.aio.teams import TeamsClient
+from azure.connectors.aio.wdatp import WdatpClient
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import invoke_generated_operation
@@ -28,7 +35,7 @@ from tests.generated_connector_test_utils import invoke_generated_operation
 CONNECTOR_OPERATION_CASES = [
     (
         azureautomation,
-        azureautomation.AzureautomationClient,
+        AzureautomationClient,
         [
             ("subscriptions_list", "GET", "/subscriptions?", False),
             ("resource_groups_list", "GET", "/resourcegroups?", False),
@@ -39,12 +46,12 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         azureblob,
-        azureblob.AzureblobClient,
+        AzureblobClient,
         [("get_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
     ),
     (
         azuredatafactory,
-        azuredatafactory.AzuredatafactoryClient,
+        AzuredatafactoryClient,
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
@@ -59,7 +66,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         azurevm,
-        azurevm.AzurevmClient,
+        AzurevmClient,
         [
             ("subscriptions_list", "GET", "/subscriptions?", False),
             ("resource_groups_list", "GET", "/resourcegroups?", False),
@@ -85,7 +92,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         excelonlinebusiness,
-        excelonlinebusiness.ExcelonlinebusinessClient,
+        ExcelonlinebusinessClient,
         [
             ("get_sources", "GET", "/codeless/v1.0/sources?", False),
             ("get_drives", "GET", "/codeless/v1.0/drives?", False),
@@ -101,7 +108,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         teams,
-        teams.TeamsClient,
+        TeamsClient,
         [
             (
                 "archive_channel",
@@ -119,7 +126,7 @@ CONNECTOR_OPERATION_CASES = [
     ),
     (
         wdatp,
-        wdatp.WdatpClient,
+        WdatpClient,
         [
             (
                 "advanced_hunting_schema",
@@ -145,17 +152,17 @@ CASE_PARAMETER_NAMES = (
 )
 
 EXPECTED_PAGEABLE_OPERATIONS = {
-    (azureautomation.AzureautomationClient, "subscriptions_list"),
-    (azureautomation.AzureautomationClient, "resource_groups_list"),
-    (azuredatafactory.AzuredatafactoryClient, "list_subscriptions"),
-    (azuredatafactory.AzuredatafactoryClient, "list_resource_groups"),
-    (azuredatafactory.AzuredatafactoryClient, "list_data_factories"),
-    (azuredatafactory.AzuredatafactoryClient, "list_pipelines"),
-    (azurevm.AzurevmClient, "subscriptions_list"),
-    (azurevm.AzurevmClient, "resource_groups_list"),
-    (azurevm.AzurevmClient, "virtual_machine_scale_sets_list"),
-    (azurevm.AzurevmClient, "virtual_machines_in_scale_set_list"),
-    (azurevm.AzurevmClient, "virtual_machines_list"),
+    (AzureautomationClient, "subscriptions_list"),
+    (AzureautomationClient, "resource_groups_list"),
+    (AzuredatafactoryClient, "list_subscriptions"),
+    (AzuredatafactoryClient, "list_resource_groups"),
+    (AzuredatafactoryClient, "list_data_factories"),
+    (AzuredatafactoryClient, "list_pipelines"),
+    (AzurevmClient, "subscriptions_list"),
+    (AzurevmClient, "resource_groups_list"),
+    (AzurevmClient, "virtual_machine_scale_sets_list"),
+    (AzurevmClient, "virtual_machines_in_scale_set_list"),
+    (AzurevmClient, "virtual_machines_list"),
 }
 
 PAGEABLE_OPERATION_CASES = [
@@ -165,11 +172,12 @@ PAGEABLE_OPERATION_CASES = [
 
 
 def test_expected_pageable_operations_remain_iterator_contracts() -> None:
-    """Test every declared pageable operation stays in coverage and is an async iterator."""
+    """Test every declared pageable operation returns an asynchronous pager."""
     assert {(case[1], case[2]) for case in PAGEABLE_OPERATION_CASES} == EXPECTED_PAGEABLE_OPERATIONS
     assert len(PAGEABLE_OPERATION_CASES) == 11
     for client_type, operation in EXPECTED_PAGEABLE_OPERATIONS:
-        assert inspect.isasyncgenfunction(getattr(client_type, f"{operation}_async")), operation
+        return_type = get_type_hints(getattr(client_type, operation))["return"]
+        assert get_origin(return_type) is AsyncItemPaged, operation
 
 
 @pytest.mark.parametrize("empty_first_page", [False, True])
@@ -199,7 +207,7 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -255,7 +263,7 @@ async def test_newly_generated_pageable_contract_preserves_empty_response(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=status, text=body),
         ) as transport:
@@ -292,7 +300,7 @@ async def test_newly_generated_operation_success_contract(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text=json.dumps(response_payload)),
     ) as mock_send:
@@ -333,7 +341,7 @@ async def test_newly_generated_operation_rejects_error_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=400, text="bad request"),
     ):

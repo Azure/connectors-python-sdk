@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Generated clients now follow the Azure SDK sync/aio namespace convention** — synchronous clients live in `azure.connectors.<connector>` and asynchronous clients live in `azure.connectors.aio.<connector>`. Both surfaces use the same unsuffixed operation names. The previous root asynchronous clients and `_async` operation aliases are removed without compatibility shims.
+- **Pageable operations now return Azure Core pagers** — root clients return `ItemPaged` and aio clients return `AsyncItemPaged`. Pager construction is not awaited; iterate normally or asynchronously, or use `by_page(continuation_token=...)` for page boundaries.
+- **Generated models have one owner** — dataclasses, aliases, enums, and `TRIGGER_OPERATIONS` are defined in root connector modules and shared by aio modules. Import models from `azure.connectors.<connector>` in both modes.
 - **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and transport errors. Set `retry_unsafe_http_methods=True` directly on a generated client only when replay is acceptable; retry count, timeout, and backoff settings are also direct client keyword arguments. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
 - Jira `list_issues_async` now exposes the live optional `fields` query parameter
@@ -35,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added a synchronous Azure Core runtime alongside the asynchronous runtime and generated 99 matching connector modules for each mode.
+- Replaced the single asynchronous sample catalog with 99 synchronous root samples and 99 asynchronous `aio` samples using identical unsuffixed operation names.
+- Expanded the generated API reference to publish separate sync and aio client and runtime sections.
 - Made `azure-identity` a required runtime dependency so Azure Identity credentials and the shipped samples work with the default package installation.
 - Updated all connector samples to match generated method signatures and added literal-type validation to the sample contract checks.
 - Added focused success, route, request-body, response, and error coverage for newly generated operations.

@@ -6,19 +6,45 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "OnenoteClient",
+    "CreatePageInQuickNotesInput",
+    "CreatePageInSectionInput",
+    "CreateSectionInNotebookResponse",
+    "CreateSectionRequest",
+    "GetPageResponse",
+    "GetPagesInSectionResponse",
+    "GetSectionsInNotebookResponse",
+    "Link",
+    "NewPageResponse",
+    "NewSectionGroupResponse",
+    "NewSectionResponse",
+    "Notebook",
+    "OneNoteClientUrl",
+    "OneNoteWebUrl",
+    "Page",
+    "ParentNotebook",
+    "SectionGroupResponse",
+    "SectionListItem",
+    "SectionResponse",
+    "UpdatePageContentRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -369,7 +395,7 @@ class OnenoteClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -378,7 +404,7 @@ class OnenoteClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -398,8 +424,8 @@ class OnenoteClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -465,7 +491,7 @@ class OnenoteClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_section_in_notebook_async(
+    def create_section_in_notebook(
         self,
         input: CreateSectionRequest,
         notebook_key: str,
@@ -491,7 +517,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -512,7 +538,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_page_in_section_async(
+    def create_page_in_section(
         self,
         input: CreatePageInSectionInput,
         notebook_key: str,
@@ -541,7 +567,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -562,7 +588,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pages_in_section_async(
+    def get_pages_in_section(
         self,
         notebook_key: str,
         section_id: str,
@@ -571,14 +597,14 @@ class OnenoteClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get pages for a specific section
 
         Get pages for a specific section.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
@@ -592,11 +618,16 @@ class OnenoteClient(ConnectorClientBase):
         query_params.append(f"sectionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -611,21 +642,29 @@ class OnenoteClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def create_page_in_quick_notes_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def create_page_in_quick_notes(
         self,
         input: CreatePageInQuickNotesInput,
         *,
@@ -641,7 +680,7 @@ class OnenoteClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/pages"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -662,7 +701,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_page_async(
+    def delete_page(
         self,
         notebook_key: str,
         section_id: str,
@@ -695,7 +734,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -711,7 +750,7 @@ class OnenoteClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_page_content_async(
+    def get_page_content(
         self,
         notebook_key: str,
         section_id: str,
@@ -745,7 +784,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -766,7 +805,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_page_content_async(
+    def update_page_content(
         self,
         input: UpdatePageContentRequest,
         notebook_key: str,
@@ -800,7 +839,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -821,7 +860,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_notebooks_async(
+    def get_notebooks(
         self,
         *,
         timeout: Optional[float] = None,
@@ -836,7 +875,7 @@ class OnenoteClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/notebooks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -857,7 +896,7 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_sections_in_notebook_async(
+    def get_sections_in_notebook(
         self,
         notebook_key: str,
         *,
@@ -882,7 +921,7 @@ class OnenoteClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

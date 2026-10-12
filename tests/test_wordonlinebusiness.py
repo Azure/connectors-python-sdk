@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.wordonlinebusiness import WordonlinebusinessClient
 from azure.connectors.wordonlinebusiness import (
-    WordonlinebusinessClient,
     CreateFileItemInput,
     ContentBody,
     BlobMetadata,
@@ -124,14 +124,14 @@ class TestCreateFileItem:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = CreateFileItemInput(
                 additional_properties={"field1": "value1", "field2": "value2"}
             )
-            result = await client.create_file_item_async(
+            result = await client.create_file_item(
                 input=input_data,
                 source="me",
                 drive="drive-1",
@@ -158,12 +158,12 @@ class TestCreateFileItem:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = CreateFileItemInput()
-            result = await client.create_file_item_async(
+            result = await client.create_file_item(
                 input=input_data,
                 source="me",
                 drive="drive-1",
@@ -183,13 +183,13 @@ class TestCreateFileItem:
         mock_response = MockResponse(status=400, text="Bad Request")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = CreateFileItemInput()
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_file_item_async(
+                await client.create_file_item(
                     input=input_data,
                     source="me",
                     drive="drive-1",
@@ -216,12 +216,12 @@ class TestCreateWordFileWithContent:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = ContentBody(content="Hello World document content")
-            result = await client.create_word_file_with_content_async(
+            result = await client.create_word_file_with_content(
                 input=input_data,
                 file_name="test.docx"
             )
@@ -247,12 +247,12 @@ class TestCreateWordFileWithContent:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = ContentBody(content="Document content")
-            result = await client.create_word_file_with_content_async(input=input_data)
+            result = await client.create_word_file_with_content(input=input_data)
 
             call_args = mock_send.call_args
             assert "fileName=" not in call_args[0][1]
@@ -269,12 +269,12 @@ class TestCreateWordFileWithContent:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = ContentBody(content="Content")
-            result = await client.create_word_file_with_content_async(input=input_data)
+            result = await client.create_word_file_with_content(input=input_data)
 
             assert result is None
 
@@ -289,13 +289,13 @@ class TestCreateWordFileWithContent:
         mock_response = MockResponse(status=500, text="Internal Server Error")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = ContentBody(content="Content")
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_word_file_with_content_async(input=input_data)
+                await client.create_word_file_with_content(input=input_data)
 
             assert exc_info.value.status_code == 500
 
@@ -313,12 +313,12 @@ class TestCreateWordFileWithContent:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             input_data = ContentBody(content="Content")
-            await client.create_word_file_with_content_async(
+            await client.create_word_file_with_content(
                 input=input_data,
                 file_name="my document.docx"
             )
@@ -345,11 +345,11 @@ class TestGetFilePDF:
         )
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_pdf_async(
+            result = await client.get_file_pdf(
                 source="me",
                 drive="drive-1",
                 file="file-1"
@@ -373,11 +373,11 @@ class TestGetFilePDF:
         mock_response = MockResponse(status=200, text="PDF_CONTENT")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_file_pdf_async(
+            await client.get_file_pdf(
                 source="me",
                 drive="drive-1",
                 file="file-1",
@@ -400,11 +400,11 @@ class TestGetFilePDF:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_file_pdf_async(
+            result = await client.get_file_pdf(
                 source="me",
                 drive="drive-1",
                 file="file-1"
@@ -423,12 +423,12 @@ class TestGetFilePDF:
         mock_response = MockResponse(status=404, text="File not found")
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_pdf_async(
+                await client.get_file_pdf(
                     source="me",
                     drive="drive-1",
                     file="file-1"
@@ -447,11 +447,11 @@ class TestGetFilePDF:
         mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock
+            client._http_client, 'send', new_callable=AsyncMock
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_drives_async()
+            await client.get_drives()
 
             call_args = mock_send.call_args
             assert "source=me" in call_args[0][1]

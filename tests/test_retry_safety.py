@@ -10,7 +10,7 @@ from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import ServiceRequestError
 from azure.core.pipeline.transport import AsyncHttpTransport
 
-from azure.connectors.sdk.http_client import ConnectorHttpClient
+from azure.connectors.sdk.aio.http_client import ConnectorHttpClient
 
 
 class RecordingTransport(AsyncHttpTransport):
@@ -78,7 +78,7 @@ async def send_with_transport(
         retry_unsafe_http_methods=retry_unsafe_http_methods,
         transport=transport,
     )
-    response = await client.send_async(
+    response = await client.send(
         method,
         "https://example.com/action",
         body=body,
@@ -136,7 +136,7 @@ async def test_method_case_is_normalized_before_retry_and_dispatch(
             transport=transport,
         )
         with pytest.raises(ServiceRequestError):
-            await client.send_async(method, "https://example.com/action")
+            await client.send(method, "https://example.com/action")
     else:
         response, transport = await send_with_transport(method, *outcomes)
         assert response.status == (200 if expected_attempts == 2 else 500)
@@ -234,7 +234,7 @@ async def test_cancellation_does_not_retry() -> None:
     )
 
     with pytest.raises(asyncio.CancelledError):
-        await client.send_async("GET", "https://example.com/action")
+        await client.send("GET", "https://example.com/action")
 
     assert len(transport.requests) == 1
 

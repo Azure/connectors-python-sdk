@@ -9,15 +9,211 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "CloudmersiveconvertClient",
+    "AddPdfAnnotationRequest",
+    "AlternateFileFormatCandidate",
+    "AutodetectDocumentValidationResult",
+    "AutodetectGetInfoResult",
+    "AutodetectToPngResult",
+    "Base64DecodeRequest",
+    "Base64DecodeResponse",
+    "Base64DetectRequest",
+    "Base64DetectResponse",
+    "Base64EncodeRequest",
+    "Base64EncodeResponse",
+    "ChangeLineEndingResponse",
+    "ClearXlsxCellRequest",
+    "ClearXlsxCellResponse",
+    "ConvertDataJsonToXmlInput",
+    "ConvertWebHtmlToPngResponse",
+    "ConvertedPngPage",
+    "CreateBlankDocxRequest",
+    "CreateBlankDocxResponse",
+    "CreateBlankSpreadsheetRequest",
+    "CreateBlankSpreadsheetResponse",
+    "CreateSpreadsheetFromDataRequest",
+    "CreateSpreadsheetFromDataResponse",
+    "CreateZipArchiveRequest",
+    "DeleteDocxTableRowRangeRequest",
+    "DeleteDocxTableRowRangeResponse",
+    "DeleteDocxTableRowRequest",
+    "DeleteDocxTableRowResponse",
+    "DetectLineEndingsResponse",
+    "DocumentValidationError",
+    "DocumentValidationResult",
+    "DocxBody",
+    "DocxCellStyle",
+    "DocxComment",
+    "DocxFooter",
+    "DocxHeader",
+    "DocxImage",
+    "DocxInsertCommentOnParagraphRequest",
+    "DocxInsertImageRequest",
+    "DocxInsertImageResponse",
+    "DocxPage",
+    "DocxParagraph",
+    "DocxRemoveObjectRequest",
+    "DocxRemoveObjectResponse",
+    "DocxRun",
+    "DocxSection",
+    "DocxSetFooterAddPageNumberRequest",
+    "DocxSetFooterRequest",
+    "DocxSetFooterResponse",
+    "DocxSetHeaderRequest",
+    "DocxSetHeaderResponse",
+    "DocxStyle",
+    "DocxTable",
+    "DocxTableCell",
+    "DocxTableRow",
+    "DocxTemplateApplicationRequest",
+    "DocxTemplateOperation",
+    "DocxText",
+    "DocxTopLevelComment",
+    "EditDocumentXlsxDeleteWorksheetResponse",
+    "ExifValue",
+    "FindRegexMatch",
+    "FindStringMatch",
+    "FindStringRegexRequest",
+    "FindStringRegexResponse",
+    "FindStringSimpleRequest",
+    "FindStringSimpleResponse",
+    "FinishEditingRequest",
+    "GetDocxBodyRequest",
+    "GetDocxBodyResponse",
+    "GetDocxCommentsHierarchicalResponse",
+    "GetDocxCommentsResponse",
+    "GetDocxGetCommentsHierarchicalRequest",
+    "GetDocxGetCommentsRequest",
+    "GetDocxHeadersAndFootersRequest",
+    "GetDocxHeadersAndFootersResponse",
+    "GetDocxImagesRequest",
+    "GetDocxImagesResponse",
+    "GetDocxPagesRequest",
+    "GetDocxPagesResponse",
+    "GetDocxSectionsRequest",
+    "GetDocxSectionsResponse",
+    "GetDocxStylesRequest",
+    "GetDocxStylesResponse",
+    "GetDocxTableByIndexRequest",
+    "GetDocxTableByIndexResponse",
+    "GetDocxTableRowRequest",
+    "GetDocxTableRowResponse",
+    "GetDocxTablesRequest",
+    "GetDocxTablesResponse",
+    "GetImageInfoResult",
+    "GetPdfAnnotationsResult",
+    "GetXlsxCellByIdentifierRequest",
+    "GetXlsxCellByIdentifierResponse",
+    "GetXlsxCellRequest",
+    "GetXlsxCellResponse",
+    "GetXlsxColumnsRequest",
+    "GetXlsxColumnsResponse",
+    "GetXlsxImagesRequest",
+    "GetXlsxImagesResponse",
+    "GetXlsxRowsAndCellsRequest",
+    "GetXlsxRowsAndCellsResponse",
+    "GetXlsxStylesRequest",
+    "GetXlsxStylesResponse",
+    "GetXlsxWorksheetsRequest",
+    "GetXlsxWorksheetsResponse",
+    "HtmlMdResult",
+    "HtmlTemplateApplicationRequest",
+    "HtmlTemplateApplicationResponse",
+    "HtmlTemplateOperation",
+    "HtmlToOfficeRequest",
+    "HtmlToPdfRequest",
+    "HtmlToPngRequest",
+    "HtmlToTextRequest",
+    "HtmlToTextResponse",
+    "InsertDocxCommentOnParagraphResponse",
+    "InsertDocxInsertParagraphRequest",
+    "InsertDocxInsertParagraphResponse",
+    "InsertDocxTableRowRequest",
+    "InsertDocxTableRowResponse",
+    "InsertDocxTablesRequest",
+    "InsertDocxTablesResponse",
+    "InsertXlsxWorksheetRequest",
+    "InsertXlsxWorksheetResponse",
+    "MultipageImageFormatConversionResult",
+    "PageConversionResult",
+    "PdfAnnotation",
+    "PdfDocument",
+    "PdfFormField",
+    "PdfFormFields",
+    "PdfMetadata",
+    "PdfPageText",
+    "PdfTextByPageResult",
+    "PdfToPngResult",
+    "PresentationResult",
+    "RemoveDocxHeadersAndFootersRequest",
+    "RemoveDocxHeadersAndFootersResponse",
+    "RemoveDocxPagesRequest",
+    "RemoveHtmlFromTextRequest",
+    "RemoveHtmlFromTextResponse",
+    "RemovePptxSlidesRequest",
+    "RemoveWhitespaceFromTextRequest",
+    "RemoveWhitespaceFromTextResponse",
+    "RemoveXlsxWorksheetRequest",
+    "ReplaceStringRegexRequest",
+    "ReplaceStringRegexResponse",
+    "ReplaceStringRequest",
+    "ReplaceStringSimpleRequest",
+    "ReplaceStringSimpleResponse",
+    "ScreenshotRequest",
+    "SetFormFieldValue",
+    "SetPdfFormFieldsRequest",
+    "SetPdfMetadataRequest",
+    "SetXlsxCellByIdentifierRequest",
+    "SetXlsxCellByIdentifierResponse",
+    "SetXlsxCellRequest",
+    "SetXlsxCellResponse",
+    "SplitDocumentResult",
+    "SplitDocxDocumentResult",
+    "SplitPdfResult",
+    "SplitPptxPresentationResult",
+    "SplitTextDocumentByLinesResult",
+    "SplitTextDocumentByStringResult",
+    "SplitXlsxWorksheetResult",
+    "TextConversionResult",
+    "TextDocumentElement",
+    "TextDocumentLine",
+    "TextEncodingDetectResponse",
+    "UpdateDocxTableCellRequest",
+    "UpdateDocxTableCellResponse",
+    "UpdateDocxTableRowRequest",
+    "UpdateDocxTableRowResponse",
+    "UrlToTextRequest",
+    "UrlToTextResponse",
+    "ViewerResponse",
+    "WorksheetResult",
+    "XlsxImage",
+    "XlsxSpreadsheetCell",
+    "XlsxSpreadsheetColumn",
+    "XlsxSpreadsheetRow",
+    "XlsxWorksheet",
+    "XmlAddAttributeWithXPathResult",
+    "XmlAddChildWithXPathResult",
+    "XmlFilterWithXPathResult",
+    "XmlQueryWithXQueryMultiResult",
+    "XmlQueryWithXQueryResult",
+    "XmlRemoveAllChildrenWithXPathResult",
+    "XmlRemoveWithXPathResult",
+    "XmlReplaceWithXPathResult",
+    "XmlSetValueWithXPathResult",
+    "ZipDirectory",
+    "ZipExtractResponse",
+    "ZipFile",
+]
 
 
 # Type Definitions
@@ -5150,7 +5346,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -5159,7 +5355,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -5179,8 +5375,8 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -5207,7 +5403,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "cloudmersiveconvert"
 
-    async def edit_document_docx_create_blank_document_async(
+    def edit_document_docx_create_blank_document(
         self,
         input: CreateBlankDocxRequest,
         *,
@@ -5227,7 +5423,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/create/blank"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5248,7 +5444,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_delete_pages_async(
+    def edit_document_docx_delete_pages(
         self,
         input: RemoveDocxPagesRequest,
         *,
@@ -5267,7 +5463,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/delete-pages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5285,7 +5481,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def edit_document_docx_delete_table_row_async(
+    def edit_document_docx_delete_table_row(
         self,
         input: DeleteDocxTableRowRequest,
         *,
@@ -5305,7 +5501,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/delete-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5326,7 +5522,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_delete_table_row_range_async(
+    def edit_document_docx_delete_table_row_range(
         self,
         input: DeleteDocxTableRowRangeRequest,
         *,
@@ -5346,7 +5542,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/delete-table-row/range"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5367,7 +5563,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_body_async(
+    def edit_document_docx_body(
         self,
         input: GetDocxBodyRequest,
         *,
@@ -5386,7 +5582,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-body"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5407,7 +5603,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_comments_hierarchical_async(
+    def edit_document_docx_get_comments_hierarchical(
         self,
         input: GetDocxGetCommentsHierarchicalRequest,
         *,
@@ -5428,7 +5624,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/get-comments/hierarchical"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5449,7 +5645,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_headers_and_footers_async(
+    def edit_document_docx_get_headers_and_footers(
         self,
         input: GetDocxHeadersAndFootersRequest,
         *,
@@ -5468,7 +5664,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/get-headers-and-footers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5489,7 +5685,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_images_async(
+    def edit_document_docx_get_images(
         self,
         input: GetDocxImagesRequest,
         *,
@@ -5507,7 +5703,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-images"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5528,7 +5724,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_pages_async(
+    def edit_document_docx_pages(
         self,
         input: GetDocxPagesRequest,
         *,
@@ -5547,7 +5743,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-pages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5568,7 +5764,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_sections_async(
+    def edit_document_docx_get_sections(
         self,
         input: GetDocxSectionsRequest,
         *,
@@ -5586,7 +5782,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-sections"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5607,7 +5803,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_styles_async(
+    def edit_document_docx_get_styles(
         self,
         input: GetDocxStylesRequest,
         *,
@@ -5625,7 +5821,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-styles"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5646,7 +5842,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_table_row_async(
+    def edit_document_docx_get_table_row(
         self,
         input: GetDocxTableRowRequest,
         *,
@@ -5665,7 +5861,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5686,7 +5882,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_table_by_index_async(
+    def edit_document_docx_get_table_by_index(
         self,
         input: GetDocxTableByIndexRequest,
         *,
@@ -5706,7 +5902,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/get-table/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5727,7 +5923,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_get_tables_async(
+    def edit_document_docx_get_tables(
         self,
         input: GetDocxTablesRequest,
         *,
@@ -5745,7 +5941,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/get-tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5766,7 +5962,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_comment_on_paragraph_async(
+    def edit_document_docx_insert_comment_on_paragraph(
         self,
         input: DocxInsertCommentOnParagraphRequest,
         *,
@@ -5787,7 +5983,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/insert-comment/on/paragraph"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5808,7 +6004,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_image_async(
+    def edit_document_docx_insert_image(
         self,
         input: DocxInsertImageRequest,
         *,
@@ -5827,7 +6023,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/insert-image"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5848,7 +6044,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_paragraph_async(
+    def edit_document_docx_insert_paragraph(
         self,
         input: InsertDocxInsertParagraphRequest,
         *,
@@ -5870,7 +6066,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/insert-paragraph"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5891,7 +6087,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_table_async(
+    def edit_document_docx_insert_table(
         self,
         input: InsertDocxTablesRequest,
         *,
@@ -5910,7 +6106,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/insert-table"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5931,7 +6127,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_insert_table_row_async(
+    def edit_document_docx_insert_table_row(
         self,
         input: InsertDocxTableRowRequest,
         *,
@@ -5951,7 +6147,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/insert-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5972,7 +6168,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_remove_headers_and_footers_async(
+    def edit_document_docx_remove_headers_and_footers(
         self,
         input: RemoveDocxHeadersAndFootersRequest,
         *,
@@ -5992,7 +6188,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/remove-headers-and-footers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6013,7 +6209,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_remove_object_async(
+    def edit_document_docx_remove_object(
         self,
         input: DocxRemoveObjectRequest,
         *,
@@ -6035,7 +6231,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/remove-object"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6056,7 +6252,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_replace_async(
+    def edit_document_docx_replace(
         self,
         input: ReplaceStringRequest,
         *,
@@ -6074,7 +6270,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/replace-all"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6092,7 +6288,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def edit_document_docx_set_footer_async(
+    def edit_document_docx_set_footer(
         self,
         input: DocxSetFooterRequest,
         *,
@@ -6111,7 +6307,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/set-footer"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6132,7 +6328,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_set_footer_add_page_number_async(
+    def edit_document_docx_set_footer_add_page_number(
         self,
         input: DocxSetFooterAddPageNumberRequest,
         *,
@@ -6152,7 +6348,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/set-footer/add-page-number"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6173,7 +6369,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_set_header_async(
+    def edit_document_docx_set_header(
         self,
         input: DocxSetHeaderRequest,
         *,
@@ -6192,7 +6388,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/docx/set-header"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6213,7 +6409,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_update_table_cell_async(
+    def edit_document_docx_update_table_cell(
         self,
         input: UpdateDocxTableCellRequest,
         *,
@@ -6234,7 +6430,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/update-table-cell"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6255,7 +6451,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_docx_update_table_row_async(
+    def edit_document_docx_update_table_row(
         self,
         input: UpdateDocxTableRowRequest,
         *,
@@ -6277,7 +6473,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/docx/update-table-row"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6298,7 +6494,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_finish_editing_async(
+    def edit_document_finish_editing(
         self,
         input: FinishEditingRequest,
         *,
@@ -6318,7 +6514,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/finish-editing"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6336,7 +6532,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def edit_document_pptx_delete_slides_async(
+    def edit_document_pptx_delete_slides(
         self,
         input: RemovePptxSlidesRequest,
         *,
@@ -6355,7 +6551,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/pptx/delete-slides"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6373,7 +6569,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def edit_document_pptx_replace_async(
+    def edit_document_pptx_replace(
         self,
         input: ReplaceStringRequest,
         *,
@@ -6392,7 +6588,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/pptx/replace-all"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6410,7 +6606,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def edit_document_xlsx_clear_cell_by_index_async(
+    def edit_document_xlsx_clear_cell_by_index(
         self,
         input: ClearXlsxCellRequest,
         *,
@@ -6430,7 +6626,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/clear-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6451,7 +6647,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_create_blank_spreadsheet_async(
+    def edit_document_xlsx_create_blank_spreadsheet(
         self,
         input: CreateBlankSpreadsheetRequest,
         *,
@@ -6469,7 +6665,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/xlsx/create/blank"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6490,7 +6686,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_create_spreadsheet_from_data_async(
+    def edit_document_xlsx_create_spreadsheet_from_data(
         self,
         input: CreateSpreadsheetFromDataRequest,
         *,
@@ -6510,7 +6706,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/create/from/data"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6531,7 +6727,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_delete_worksheet_async(
+    def edit_document_xlsx_delete_worksheet(
         self,
         input: RemoveXlsxWorksheetRequest,
         *,
@@ -6552,7 +6748,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/delete-worksheet"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6573,7 +6769,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_cell_by_identifier_async(
+    def edit_document_xlsx_get_cell_by_identifier(
         self,
         input: GetXlsxCellByIdentifierRequest,
         *,
@@ -6593,7 +6789,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/get-cell/by-identifier"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6614,7 +6810,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_cell_by_index_async(
+    def edit_document_xlsx_get_cell_by_index(
         self,
         input: GetXlsxCellRequest,
         *,
@@ -6634,7 +6830,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/get-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6655,7 +6851,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_columns_async(
+    def edit_document_xlsx_get_columns(
         self,
         input: GetXlsxColumnsRequest,
         *,
@@ -6673,7 +6869,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-columns"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6694,7 +6890,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_images_async(
+    def edit_document_xlsx_get_images(
         self,
         input: GetXlsxImagesRequest,
         *,
@@ -6712,7 +6908,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-images"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6733,7 +6929,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_rows_and_cells_async(
+    def edit_document_xlsx_get_rows_and_cells(
         self,
         input: GetXlsxRowsAndCellsRequest,
         *,
@@ -6752,7 +6948,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/get-rows-and-cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6773,7 +6969,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_styles_async(
+    def edit_document_xlsx_get_styles(
         self,
         input: GetXlsxStylesRequest,
         *,
@@ -6791,7 +6987,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-styles"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6812,7 +7008,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_get_worksheets_async(
+    def edit_document_xlsx_get_worksheets(
         self,
         input: GetXlsxWorksheetsRequest,
         *,
@@ -6831,7 +7027,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-worksheets"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6852,7 +7048,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_insert_worksheet_async(
+    def edit_document_xlsx_insert_worksheet(
         self,
         input: InsertXlsxWorksheetRequest,
         *,
@@ -6871,7 +7067,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/insert-worksheet"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6892,7 +7088,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_set_cell_by_identifier_async(
+    def edit_document_xlsx_set_cell_by_identifier(
         self,
         input: SetXlsxCellByIdentifierRequest,
         *,
@@ -6913,7 +7109,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/set-cell/by-identifier"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6934,7 +7130,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_document_xlsx_set_cell_by_index_async(
+    def edit_document_xlsx_set_cell_by_index(
         self,
         input: SetXlsxCellRequest,
         *,
@@ -6955,7 +7151,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"/convert/edit/xlsx/set-cell/by-index"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6976,7 +7172,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_docx_async(
+    def convert_web_html_to_docx(
         self,
         input: HtmlToOfficeRequest,
         *,
@@ -6992,7 +7188,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/html/to/docx"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7010,7 +7206,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def convert_data_json_to_xml_async(
+    def convert_data_json_to_xml(
         self,
         input: ConvertDataJsonToXmlInput,
         *,
@@ -7026,7 +7222,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/json/to/xml"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7047,7 +7243,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_template_apply_html_template_async(
+    def convert_template_apply_html_template(
         self,
         input: HtmlTemplateApplicationRequest,
         *,
@@ -7066,7 +7262,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/template/html/apply"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7087,7 +7283,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_pdf_async(
+    def convert_web_html_to_pdf(
         self,
         input: HtmlToPdfRequest,
         *,
@@ -7104,7 +7300,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/pdf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7122,7 +7318,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def convert_web_html_to_png_async(
+    def convert_web_html_to_png(
         self,
         input: HtmlToPngRequest,
         *,
@@ -7139,7 +7335,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/png"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7160,7 +7356,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_html_to_txt_async(
+    def convert_web_html_to_txt(
         self,
         input: HtmlToTextRequest,
         *,
@@ -7176,7 +7372,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/txt"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7197,7 +7393,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def convert_web_url_to_pdf_async(
+    def convert_web_url_to_pdf(
         self,
         input: ScreenshotRequest,
         *,
@@ -7214,7 +7410,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/pdf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7232,7 +7428,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def convert_web_url_to_screenshot_async(
+    def convert_web_url_to_screenshot(
         self,
         input: ScreenshotRequest,
         *,
@@ -7252,7 +7448,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/convert/web/url/to/screenshot"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7270,7 +7466,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         return response.content
 
-    async def convert_web_url_to_txt_async(
+    def convert_web_url_to_txt(
         self,
         input: UrlToTextRequest,
         *,
@@ -7286,7 +7482,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/txt"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

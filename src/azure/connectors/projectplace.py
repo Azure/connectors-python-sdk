@@ -10,15 +10,26 @@ from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "ProjectplaceClient",
+    "CreateCardInput",
+    "CreateCardResponse",
+    "MoveCardInput",
+    "MoveCardResponse",
+    "SetWebhookCardCreateInput",
+    "SetWebhookCardDueDateInput",
+    "SetWebhookPropertiesChangeInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -212,7 +223,7 @@ class ProjectplaceClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -221,7 +232,7 @@ class ProjectplaceClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -241,8 +252,8 @@ class ProjectplaceClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -269,7 +280,7 @@ class ProjectplaceClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "projectplace"
 
-    async def create_card_async(
+    def create_card(
         self,
         input: CreateCardInput,
         board_id: int,
@@ -292,7 +303,7 @@ class ProjectplaceClient(ConnectorClientBase):
             f"/create_card"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -313,7 +324,7 @@ class ProjectplaceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_card_async(
+    def move_card(
         self,
         input: MoveCardInput,
         board_id: int,
@@ -336,7 +347,7 @@ class ProjectplaceClient(ConnectorClientBase):
             f"/move_card"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -357,7 +368,7 @@ class ProjectplaceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_boards_async(
+    def list_boards(
         self,
         *,
         timeout: Optional[float] = None,
@@ -375,7 +386,7 @@ class ProjectplaceClient(ConnectorClientBase):
             f"/v1/external_notifications/lists/list_boards"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

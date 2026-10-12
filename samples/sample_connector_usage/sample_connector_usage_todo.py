@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_todo.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.todo import CreateToDo, CreateToDoList, TodoClient, UpdateToDo
@@ -32,13 +30,13 @@ from azure.connectors.todo import CreateToDo, CreateToDoList, TodoClient, Update
 CONNECTION_RUNTIME_URL = os.environ.get("TODO_CONNECTION_URL", "")
 
 
-async def example_1_list_lists() -> list[dict]:
+def example_1_list_lists() -> list[dict]:
     """Example 1: List all to-do lists."""
     print("\n=== Example 1: List To-Do Lists ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists_response = await client.get_all_todo_lists_async()
+    with DefaultAzureCredential() as credential:
+        with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists_response = client.get_all_todo_lists()
             lists = lists_response.get("value", []) if lists_response else []
 
             print(f"Found {len(lists)} lists")
@@ -48,14 +46,14 @@ async def example_1_list_lists() -> list[dict]:
             return lists
 
 
-async def example_2_create_list() -> str | None:
+def example_2_create_list() -> str | None:
     """Example 2: Create a to-do list."""
     print("\n=== Example 2: Create To-Do List ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
             request = CreateToDoList(display_name="SDK Sample List")
-            created = await client.create_to_do_list_async(input=request)
+            created = client.create_to_do_list(input=request)
 
             if not created:
                 print("No list was created")
@@ -66,14 +64,14 @@ async def example_2_create_list() -> str | None:
             return list_id
 
 
-async def example_3_create_and_update_todo(list_id: str) -> None:
+def example_3_create_and_update_todo(list_id: str) -> None:
     """Example 3: Create and update a to-do item."""
     print("\n=== Example 3: Create And Update To-Do ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
+    with DefaultAzureCredential() as credential:
+        with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
             create_request = CreateToDo(title="SDK sample task", status="notStarted")
-            created_todo = await client.create_to_do_async(input=create_request, folder_id=list_id)
+            created_todo = client.create_to_do(input=create_request, folder_id=list_id)
 
             if not created_todo:
                 print("No to-do item returned from create operation")
@@ -86,7 +84,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
                 return
 
             update_request = UpdateToDo(title="SDK sample task (updated)", status="inProgress")
-            updated_todo = await client.update_to_do_async(
+            updated_todo = client.update_to_do(
                 input=update_request,
                 folder_id=list_id,
                 id=todo_id,
@@ -94,7 +92,7 @@ async def example_3_create_and_update_todo(list_id: str) -> None:
             print(f"Updated title: {updated_todo.get('title') if updated_todo else 'n/a'}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: TODO_CONNECTION_URL environment variable not set.")
@@ -105,11 +103,11 @@ async def main() -> None:
     print("=" * 50)
 
     try:
-        await example_1_list_lists()
-        list_id = await example_2_create_list()
+        example_1_list_lists()
+        list_id = example_2_create_list()
 
         if list_id:
-            await example_3_create_and_update_todo(list_id)
+            example_3_create_and_update_todo(list_id)
         else:
             print("Skipping to-do create/update because no list id was returned.")
 
@@ -120,4 +118,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

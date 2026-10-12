@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_mailchimp.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.mailchimp import (
@@ -36,33 +34,33 @@ from azure.connectors.mailchimp import (
 CONNECTION_RUNTIME_URL = os.environ.get("MAILCHIMP_CONNECTION_URL", "")
 
 
-async def example_1_list_campaigns() -> None:
+def example_1_list_campaigns() -> None:
     """Example 1: List campaigns in the account."""
     print("\n=== Example 1: List Campaigns ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            campaigns = await client.get_campaigns_async()
+    with DefaultAzureCredential() as credential:
+        with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            campaigns = client.get_campaigns()
             print(f"Campaigns: {campaigns}")
 
 
-async def example_2_get_lists() -> None:
+def example_2_get_lists() -> None:
     """Example 2: Get all audience lists."""
     print("\n=== Example 2: Get Lists ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists = await client.get_lists_async(count=10, offset=0)
+    with DefaultAzureCredential() as credential:
+        with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            lists = client.get_lists(count=10, offset=0)
             print(f"Lists: {lists}")
 
 
-async def example_3_new_list() -> None:
+def example_3_new_list() -> None:
     """Example 3: Create a new audience list."""
     print("\n=== Example 3: New List ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            new_list = await client.newlist_async(
+    with DefaultAzureCredential() as credential:
+        with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            new_list = client.newlist(
                 input=NewListRequest(
                     name="SDK sample list",
                     permission_reminder="You signed up via the SDK sample.",
@@ -71,13 +69,13 @@ async def example_3_new_list() -> None:
             print(f"Created list: {new_list}")
 
 
-async def example_4_add_member() -> None:
+def example_4_add_member() -> None:
     """Example 4: Add a member to an audience list."""
     print("\n=== Example 4: Add Member ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            member = await client.addmember_async(
+    with DefaultAzureCredential() as credential:
+        with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
+            member = client.addmember(
                 input=NewMemberInListRequest(
                     email_address="sample.user@example.com",
                     status="subscribed",
@@ -87,7 +85,7 @@ async def example_4_add_member() -> None:
             print(f"Added member: {member}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Mailchimp connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: MAILCHIMP_CONNECTION_URL environment variable not set.")
@@ -112,4 +110,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

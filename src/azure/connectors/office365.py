@@ -6,19 +6,142 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "Office365Client",
+    "ApprovalEmailResponse",
+    "ApprovalEmailSubscription",
+    "ApprovalMessage",
+    "AssignCategoryBulkInput",
+    "Attendee",
+    "AutomaticRepliesSettingClient",
+    "BatchItemFailureResult",
+    "BatchOperationResult",
+    "BatchResponseClientReceiveMessage",
+    "BatchResponseGraphClientReceiveMessage",
+    "BatchResponseSensitivityLabel",
+    "BlobDataSetsMetadata",
+    "CalendarEventBackend",
+    "CalendarEventClient",
+    "CalendarEventClientReceive",
+    "CalendarEventClientReceiveStringEnums",
+    "CalendarEventClientWithActionType",
+    "CalendarEventHtmlClient",
+    "CalendarEventList",
+    "CalendarEventListClientReceive",
+    "CalendarEventListWithActionType",
+    "CalendarGetTablesResponse",
+    "ClientReceiveFileAttachment",
+    "ClientReceiveMessage",
+    "ClientReceiveMessageStringEnums",
+    "ClientSendAttachment",
+    "ClientSendMessage",
+    "ClientSubscription",
+    "Contact",
+    "ContactResponse",
+    "DataSet",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DateTimeTimeZone",
+    "DirectForwardMessage",
+    "DraftEmailInput",
+    "EmailAddress",
+    "EmailAddressV2",
+    "EntityListResponseCalendarEventBackend",
+    "EntityListResponseCalendarEventClientReceiveStringEnums",
+    "EntityListResponseContactResponse",
+    "EntityListResponseFilePickerFile",
+    "EntityListResponseGraphCalendarEventClientReceive",
+    "EntityListResponseGraphContactFolder",
+    "EntityListResponseTable",
+    "FilePickerFile",
+    "FindMeetingTimesInput",
+    "FindMeetingTimesResponse",
+    "GeoCoordinates",
+    "GetAttachmentResponse",
+    "GetMailTipsInput",
+    "GetMailTipsResponse",
+    "GetRoomListsResponse",
+    "GetRoomsInRoomListResponse",
+    "GetRoomsResponse",
+    "GraphCalendarEventClient",
+    "GraphCalendarEventClientReceive",
+    "GraphCalendarEventClientWithActionType",
+    "GraphCalendarEventListClientReceive",
+    "GraphCalendarEventListWithActionType",
+    "GraphClientReceiveFileAttachment",
+    "GraphClientReceiveMessage",
+    "GraphContactFolder",
+    "GraphOutlookCategory",
+    "InternetMessageHeader",
+    "ItemBody",
+    "Location",
+    "LocationConstraint",
+    "MCPQueryRequest",
+    "MCPQueryResponse",
+    "MailTipsAutomaticReplies",
+    "MailTipsClientReceive",
+    "MarkAsReadInput",
+    "MeetingTimeSuggestions",
+    "MessageWithOptions",
+    "ObjectEntity",
+    "ObjectWithoutType",
+    "OptionsEmailSubscription",
+    "OutlookReceiveAttachment",
+    "OutlookReceiveMessage",
+    "PaginatedListResponseCalendarEventClientReceiveStringEnums",
+    "PassThroughNativeQuery",
+    "PatternedRecurrence",
+    "PhysicalAddress",
+    "Procedure",
+    "ReceiveMessageMetadata",
+    "Recipient",
+    "RecurrencePattern",
+    "RecurrenceRange",
+    "ReplyEmailInput",
+    "ReplyMessage",
+    "ResponseStatus",
+    "ResponseToEventInvite",
+    "SendEmailInput",
+    "SensitivityLabel",
+    "SensitivityLabelMetadata",
+    "SetAutomaticRepliesSettingInput",
+    "SetAutomaticRepliesSettingResponse",
+    "SharedMailboxClientSendMessage",
+    "SharedMailboxSendEmailInput",
+    "SubscriptionEvent",
+    "SubscriptionPayloadEntityOutlookReceiveMessage",
+    "SubscriptionPayloadEntitySubscriptionEvent",
+    "SubscriptionPayloadOutlookReceiveMessage",
+    "SubscriptionPayloadSubscriptionEvent",
+    "SubscriptionResponse",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TabularDataSetsMetadata",
+    "TriggerBatchResponseClientReceiveMessage",
+    "TriggerBatchResponseGraphClientReceiveMessage",
+    "TriggerBatchResponseReceiveMessageMetadata",
+    "UpdateEmailFlag",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -4085,7 +4208,7 @@ class Office365Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -4094,7 +4217,7 @@ class Office365Client(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -4114,8 +4237,8 @@ class Office365Client(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -4181,7 +4304,7 @@ class Office365Client(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_outlook_category_names_async(
+    def get_outlook_category_names(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4196,7 +4319,7 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Categories"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4217,7 +4340,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def draft_email_async(
+    def draft_email(
         self,
         input: DraftEmailInput,
         message_id: Optional[str] = None,
@@ -4254,7 +4377,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4275,7 +4398,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_draft_email_async(
+    def update_draft_email(
         self,
         input: DraftEmailInput,
         message_id: str,
@@ -4299,7 +4422,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4315,7 +4438,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def send_draft_email_async(
+    def send_draft_email(
         self,
         message_id: str,
         *,
@@ -4334,7 +4457,7 @@ class Office365Client(ConnectorClientBase):
             f"/Draft/Send/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4350,7 +4473,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def assign_category_async(
+    def assign_category(
         self,
         message_id: str,
         category: str,
@@ -4378,7 +4501,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4394,7 +4517,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def assign_category_bulk_async(
+    def assign_category_bulk(
         self,
         input: AssignCategoryBulkInput,
         category_name: str,
@@ -4414,7 +4537,7 @@ class Office365Client(ConnectorClientBase):
             f"/Mail/Category/Bulk/{quote(str(category_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4435,7 +4558,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_mail_with_options_async(
+    def send_mail_with_options(
         self,
         input: OptionsEmailSubscription,
         *,
@@ -4457,7 +4580,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4478,7 +4601,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_approval_mail_async(
+    def send_approval_mail(
         self,
         input: ApprovalEmailSubscription,
         *,
@@ -4499,7 +4622,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/approvalmail/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4520,7 +4643,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_my_contact_photo_async(
+    def update_my_contact_photo(
         self,
         input: bytes,
         folder: str,
@@ -4550,7 +4673,7 @@ class Office365Client(ConnectorClientBase):
             f"/$value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT",
             request_url,
             body=input,
@@ -4569,7 +4692,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def http_request_async(
+    def http_request(
         self,
         input: bytes,
         *,
@@ -4589,7 +4712,7 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -4613,7 +4736,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mcp_emails_management_async(
+    def mcp_emails_management(
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
@@ -4638,7 +4761,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4659,7 +4782,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mcp_meeting_management_async(
+    def mcp_meeting_management(
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
@@ -4684,7 +4807,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4705,7 +4828,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mcp_contacts_management_async(
+    def mcp_contacts_management(
         self,
         input: MCPQueryRequest,
         session_id: Optional[str] = None,
@@ -4730,7 +4853,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4751,7 +4874,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_delete_item_async(
+    def calendar_delete_item(
         self,
         calendar: str,
         event: str,
@@ -4777,7 +4900,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(event), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4793,7 +4916,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def calendar_get_item_async(
+    def calendar_get_item(
         self,
         table: str,
         id: str,
@@ -4819,7 +4942,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4840,7 +4963,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_get_items_async(
+    def calendar_get_items(
         self,
         table: str,
         filter: Optional[str] = None,
@@ -4891,7 +5014,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4912,7 +5035,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_get_tables_async(
+    def calendar_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4935,7 +5058,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4956,7 +5079,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_patch_item_async(
+    def calendar_patch_item(
         self,
         input: GraphCalendarEventClient,
         table: str,
@@ -4983,7 +5106,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5004,7 +5127,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_post_item_async(
+    def calendar_post_item(
         self,
         input: GraphCalendarEventClient,
         table: str,
@@ -5029,7 +5152,7 @@ class Office365Client(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5050,7 +5173,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_delete_item_async(
+    def contact_delete_item(
         self,
         folder: str,
         id: str,
@@ -5076,7 +5199,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5092,7 +5215,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def contact_get_item_async(
+    def contact_get_item(
         self,
         folder: str,
         id: str,
@@ -5118,7 +5241,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5139,7 +5262,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_get_items_async(
+    def contact_get_items(
         self,
         folder: str,
         filter: Optional[str] = None,
@@ -5151,14 +5274,14 @@ class Office365Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get contacts
 
         This operation gets contacts from a contacts folder.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5192,11 +5315,16 @@ class Office365Client(ConnectorClientBase):
             query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -5211,21 +5339,29 @@ class Office365Client(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def contact_get_tables_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def contact_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5242,7 +5378,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5263,7 +5399,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_patch_item_async(
+    def contact_patch_item(
         self,
         input: Contact,
         folder: str,
@@ -5290,7 +5426,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5311,7 +5447,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_post_item_async(
+    def contact_post_item(
         self,
         input: Contact,
         folder: str,
@@ -5336,7 +5472,7 @@ class Office365Client(ConnectorClientBase):
             f"/contacts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5357,7 +5493,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_email_async(
+    def delete_email(
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
@@ -5385,7 +5521,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5401,7 +5537,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def export_email_async(
+    def export_email(
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
@@ -5434,7 +5570,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5452,7 +5588,7 @@ class Office365Client(ConnectorClientBase):
 
         return response.content
 
-    async def find_meeting_times_async(
+    def find_meeting_times(
         self,
         input: FindMeetingTimesInput,
         *,
@@ -5471,7 +5607,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5492,7 +5628,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flag_async(
+    def flag(
         self,
         input: UpdateEmailFlag,
         message_id: str,
@@ -5526,7 +5662,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5542,7 +5678,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def forward_email_async(
+    def forward_email(
         self,
         input: DirectForwardMessage,
         message_id: str,
@@ -5588,7 +5724,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5604,7 +5740,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_attachment_async(
+    def get_attachment(
         self,
         message_id: str,
         attachment_id: str,
@@ -5651,7 +5787,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5672,7 +5808,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_email_async(
+    def get_email(
         self,
         message_id: str,
         mailbox_address: Optional[str] = None,
@@ -5724,7 +5860,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5745,7 +5881,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_emails_async(
+    def get_emails(
         self,
         folder_path: Optional[str] = None,
         to: Optional[str] = None,
@@ -5846,7 +5982,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5867,7 +6003,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_events_calendar_view_async(
+    def get_events_calendar_view(
         self,
         calendar_id: str,
         start_date_time_utc: str,
@@ -5934,7 +6070,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5955,7 +6091,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_mail_tips_async(
+    def get_mail_tips(
         self,
         input: GetMailTipsInput,
         *,
@@ -5974,7 +6110,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5995,7 +6131,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_room_lists_async(
+    def get_room_lists(
         self,
         *,
         timeout: Optional[float] = None,
@@ -6012,7 +6148,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6033,7 +6169,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_rooms_async(
+    def get_rooms(
         self,
         *,
         timeout: Optional[float] = None,
@@ -6050,7 +6186,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6071,7 +6207,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_rooms_in_room_list_async(
+    def get_rooms_in_room_list(
         self,
         room_list: str,
         *,
@@ -6093,7 +6229,7 @@ class Office365Client(ConnectorClientBase):
             f"/findRooms(RoomList='{quote(str(room_list), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6114,7 +6250,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mark_as_read_async(
+    def mark_as_read(
         self,
         input: MarkAsReadInput,
         message_id: str,
@@ -6149,7 +6285,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6165,7 +6301,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def move_async(
+    def move(
         self,
         message_id: str,
         folder_path: str,
@@ -6199,7 +6335,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6220,7 +6356,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_to_async(
+    def reply_to(
         self,
         input: ReplyEmailInput,
         message_id: str,
@@ -6249,7 +6385,7 @@ class Office365Client(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6265,7 +6401,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def respond_to_event_async(
+    def respond_to_event(
         self,
         input: ResponseToEventInvite,
         event_id: str,
@@ -6291,7 +6427,7 @@ class Office365Client(ConnectorClientBase):
             f"/{quote(str(response), safe='')}"
         )
 
-        http_response = await self.http_client.send_async(
+        http_response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6307,7 +6443,7 @@ class Office365Client(ConnectorClientBase):
                 http_response.text,
             )
 
-    async def send_email_async(
+    def send_email(
         self,
         input: SendEmailInput,
         *,
@@ -6323,7 +6459,7 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/Mail"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6339,7 +6475,7 @@ class Office365Client(ConnectorClientBase):
                 response.text,
             )
 
-    async def set_automatic_replies_setting_async(
+    def set_automatic_replies_setting(
         self,
         input: SetAutomaticRepliesSettingInput,
         *,
@@ -6357,7 +6493,7 @@ class Office365Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6378,7 +6514,7 @@ class Office365Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def shared_mailbox_send_email_async(
+    def shared_mailbox_send_email(
         self,
         input: SharedMailboxSendEmailInput,
         *,
@@ -6396,7 +6532,7 @@ class Office365Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

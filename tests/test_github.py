@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.github import GithubClient
 from azure.connectors.github import (
     CreateRepositorySecretRequest,
-    GithubClient,
     IssueBasicDetailsModel,
     PullRequestUpdateRequest,
     QueryRequest,
@@ -122,11 +122,11 @@ class TestInvokeMcpServerAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.invoke_mcp_server_async(input=payload)
+            await client.invoke_mcp_server(input=payload)
 
             mock_send.assert_called_once_with(
                 "POST",
@@ -150,12 +150,12 @@ class TestInvokeMcpServerAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.invoke_mcp_server_async(input=QueryRequest())
+                await client.invoke_mcp_server(input=QueryRequest())
 
 
 class TestGetUserAsync:
@@ -175,11 +175,11 @@ class TestGetUserAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_user_async()
+            result = await client.get_user()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -202,12 +202,12 @@ class TestGetUserAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_user_async()
+                await client.get_user()
 
 
 class TestCreateIssueAsync:
@@ -231,11 +231,11 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_issue_async(
+            result = await client.create_issue(
                 input=payload,
                 repository_owner="octocat",
                 repository_name="hello-world",
@@ -265,12 +265,12 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_issue_async(
+                await client.create_issue(
                     input=payload,
                     repository_owner="octocat",
                     repository_name="hello-world",
@@ -294,11 +294,11 @@ class TestGetIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_issues_async(
+            result = await client.get_issues(
                 repository_owner="octocat",
                 repository_name="hello-world",
                 state="open",
@@ -328,12 +328,12 @@ class TestGetIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_issues_async(
+                await client.get_issues(
                     repository_owner="octocat",
                     repository_name="hello-world",
                 )
@@ -357,11 +357,11 @@ class TestCreateUpdateRepositorySecretAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_update_repository_secret_async(
+            result = await client.create_update_repository_secret(
                 input=payload,
                 repository_owner="octocat",
                 repository_name="hello world",
@@ -395,12 +395,12 @@ class TestCreateUpdateRepositorySecretAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_update_repository_secret_async(
+                await client.create_update_repository_secret(
                     input=payload,
                     repository_owner="octocat",
                     repository_name="hello-world",
@@ -428,11 +428,11 @@ class TestUpdatePullRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_pull_request_async(
+            result = await client.update_pull_request(
                 input=payload,
                 repository_owner="octocat",
                 repository_name="hello-world",
@@ -462,12 +462,12 @@ class TestUpdatePullRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.update_pull_request_async(
+                await client.update_pull_request(
                     input=payload,
                     repository_owner="octocat",
                     repository_name="hello-world",
@@ -490,11 +490,11 @@ class TestRemoveReviewersPullRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.remove_reviewers_pull_request_async(
+            await client.remove_reviewers_pull_request(
                 input=payload,
                 repository_owner="octocat",
                 repository_name="hello-world",
@@ -517,12 +517,12 @@ class TestRemoveReviewersPullRequestAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.remove_reviewers_pull_request_async(
+                await client.remove_reviewers_pull_request(
                     input=payload,
                     repository_owner="octocat",
                     repository_name="missing-repo",

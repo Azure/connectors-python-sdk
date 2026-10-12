@@ -9,10 +9,10 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.wordpress as wordpress_module
 from azure.connectors.sdk import ConnectorException
+from azure.connectors.aio.wordpress import WordpressClient
 from azure.connectors.wordpress import (
     CreatePostModel,
     TRIGGER_OPERATIONS,
-    WordpressClient,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -94,7 +94,7 @@ class TestWordpressClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -117,11 +117,11 @@ class TestWordpressClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=response,
         ) as mock_send:
-            result = await client.create_async(
+            result = await client.create(
                 input=CreatePostModel(title="Generated SDK", content="Hello"),
                 site_id="site/one",
             )
@@ -142,11 +142,11 @@ class TestWordpressClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"sites": []}'),
         ) as mock_send:
-            result = await client.list_sites_async()
+            result = await client.list_sites()
 
         method, url = mock_send.call_args.args[:2]
         assert method == "GET"
@@ -176,7 +176,7 @@ class TestWordpressClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

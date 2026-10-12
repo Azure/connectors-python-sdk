@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azureautomation import AzureautomationClient
 from azure.connectors.azureautomation import (
-    AzureautomationClient,
     CreateJobInput,
     CreateJobResponse,
     AutomationAccountResponse,
@@ -271,11 +271,11 @@ class TestGetJobOutputAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_job_output_async(
+            result = await client.get_job_output(
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation",
@@ -306,12 +306,12 @@ class TestGetJobOutputAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_job_output_async(
+                await client.get_job_output(
                     subscription_id="sub123",
                     resource_group_name="rg-test",
                     automation_account="myAutomation",
@@ -328,8 +328,8 @@ class TestGetJobOutputAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'get_job_output_async')
-        assert callable(client.get_job_output_async)
+        assert hasattr(client, 'get_job_output')
+        assert callable(client.get_job_output)
 
 
 class TestGetStatusOfJobAsync:
@@ -350,11 +350,11 @@ class TestGetStatusOfJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_status_of_job_async(
+            result = await client.get_status_of_job(
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation",
@@ -383,11 +383,11 @@ class TestGetStatusOfJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_status_of_job_async(
+            result = await client.get_status_of_job(
                 subscription_id="sub123",
                 resource_group_name="rg-test",
                 automation_account="myAutomation",
@@ -411,12 +411,12 @@ class TestGetStatusOfJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_status_of_job_async(
+                await client.get_status_of_job(
                     subscription_id="sub123",
                     resource_group_name="rg-test",
                     automation_account="myAutomation",
@@ -433,8 +433,8 @@ class TestGetStatusOfJobAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'get_status_of_job_async')
-        assert callable(client.get_status_of_job_async)
+        assert hasattr(client, 'get_status_of_job')
+        assert callable(client.get_status_of_job)
 
 
 class TestCreateJobAsync:
@@ -458,11 +458,11 @@ class TestCreateJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_job_async(
+            result = await client.create_job(
                 input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
@@ -496,11 +496,11 @@ class TestCreateJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_job_async(
+            result = await client.create_job(
                 input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
@@ -526,11 +526,11 @@ class TestCreateJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_job_async(
+            result = await client.create_job(
                 input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
@@ -554,12 +554,12 @@ class TestCreateJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_job_async(
+                await client.create_job(
                     input=CreateJobInput(),
                     subscription_id="sub123",
                     resource_group_name="rg-test",
@@ -576,8 +576,8 @@ class TestCreateJobAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'create_job_async')
-        assert callable(client.create_job_async)
+        assert hasattr(client, 'create_job')
+        assert callable(client.create_job)
 
     @pytest.mark.asyncio
     async def test_wait_parameter_is_optional(self, mock_credential):
@@ -594,12 +594,12 @@ class TestCreateJobAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             # Call without wait parameter
-            await client.create_job_async(
+            await client.create_job(
                 input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",
@@ -611,7 +611,7 @@ class TestCreateJobAsync:
             mock_send.reset_mock()
 
             # Call with wait parameter
-            await client.create_job_async(
+            await client.create_job(
                 input=CreateJobInput(),
                 subscription_id="sub123",
                 resource_group_name="rg-test",

@@ -27,10 +27,8 @@ Usage:
 
     python sample_connector_usage_documentdb.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.documentdb import DocumentdbClient
 
@@ -51,7 +49,7 @@ DATABASE_ID = os.environ.get("DOCUMENTDB_DATABASE", "")
 CONTAINER_ID = os.environ.get("DOCUMENTDB_CONTAINER", "")
 
 
-async def example_1_query_all_documents():
+def example_1_query_all_documents():
     """Example 1: Query all documents in a container."""
     print("\n=== Example 1: Query All Documents ===")
 
@@ -62,11 +60,11 @@ async def example_1_query_all_documents():
         print("  $env:DOCUMENTDB_CONTAINER = '<container-id>'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                documents = [item async for item in client.query_documents_async(
+                documents = [item for item in client.query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -90,7 +88,7 @@ async def example_1_query_all_documents():
                 print(f"Error: {ex}")
 
 
-async def example_2_query_with_filter():
+def example_2_query_with_filter():
     """Example 2: Query documents with a filter condition."""
     print("\n=== Example 2: Query with Filter ===")
 
@@ -98,12 +96,12 @@ async def example_2_query_with_filter():
         print("Set environment variables to query documents.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query with WHERE clause - adjust field names for your schema
-                documents = [item async for item in client.query_documents_async(
+                documents = [item for item in client.query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -126,7 +124,7 @@ async def example_2_query_with_filter():
                 print(f"Error: {ex}")
 
 
-async def example_3_query_with_pagination():
+def example_3_query_with_pagination():
     """Example 3: Query documents across automatically followed pages."""
     print("\n=== Example 3: Query with Automatic Pagination ===")
 
@@ -134,12 +132,12 @@ async def example_3_query_with_pagination():
         print("Set environment variables to query documents.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # The iterator follows continuation links until all pages are consumed.
-                documents = [item async for item in client.query_documents_async(
+                documents = [item for item in client.query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -160,7 +158,7 @@ async def example_3_query_with_pagination():
                 print(f"Error: {ex}")
 
 
-async def example_4_query_with_partition_key():
+def example_4_query_with_partition_key():
     """Example 4: Query documents with a specific partition key."""
     print("\n=== Example 4: Query with Partition Key ===")
 
@@ -175,12 +173,12 @@ async def example_4_query_with_partition_key():
         print("Skipping partition key example...")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query within a specific partition
-                documents = [item async for item in client.query_documents_async(
+                documents = [item for item in client.query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -201,7 +199,7 @@ async def example_4_query_with_partition_key():
                 print(f"Error: {ex}")
 
 
-async def example_5_query_with_consistency():
+def example_5_query_with_consistency():
     """Example 5: Query documents with a specific consistency level."""
     print("\n=== Example 5: Query with Consistency Level ===")
 
@@ -209,13 +207,13 @@ async def example_5_query_with_consistency():
         print("Set environment variables to query documents.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocumentdbClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Query with Session consistency (common for read-your-writes)
                 # Valid levels: Strong, BoundedStaleness, Session, Eventual
-                documents = [item async for item in client.query_documents_async(
+                documents = [item for item in client.query_documents(
                     cosmos_db_account_name=COSMOS_DB_ACCOUNT,
                     database_id=DATABASE_ID,
                     container_id=CONTAINER_ID,
@@ -238,7 +236,7 @@ async def example_5_query_with_consistency():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     print("Azure Cosmos DB (DocumentDB) Connector SDK - Sample Usage")
     print("=" * 60)
@@ -249,15 +247,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/documentdb/[id]")
         return
 
-    await example_1_query_all_documents()
-    await example_2_query_with_filter()
-    await example_3_query_with_pagination()
-    await example_4_query_with_partition_key()
-    await example_5_query_with_consistency()
+    example_1_query_all_documents()
+    example_2_query_with_filter()
+    example_3_query_with_pagination()
+    example_4_query_with_partition_key()
+    example_5_query_with_consistency()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

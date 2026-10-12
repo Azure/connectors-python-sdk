@@ -10,15 +10,26 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "BoxClient",
+    "BlobDataSetsMetadata",
+    "BlobMetadata",
+    "BlobMetadataPage",
+    "BlobMetadataResponse",
+    "DataSetsMetadata",
+    "ObjectEntity",
+    "TabularDataSetsMetadata",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -211,7 +222,7 @@ class BoxClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -220,7 +231,7 @@ class BoxClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -240,8 +251,8 @@ class BoxClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -268,7 +279,7 @@ class BoxClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "box"
 
-    async def get_file_metadata_async(
+    def get_file_metadata(
         self,
         id: str,
         *,
@@ -290,7 +301,7 @@ class BoxClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -311,7 +322,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_file_async(
+    def update_file(
         self,
         input: bytes,
         id: str,
@@ -334,7 +345,7 @@ class BoxClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT",
             request_url,
             body=input,
@@ -358,7 +369,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_file_async(
+    def delete_file(
         self,
         id: str,
         *,
@@ -380,7 +391,7 @@ class BoxClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -396,7 +407,7 @@ class BoxClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_file_metadata_by_path_async(
+    def get_file_metadata_by_path(
         self,
         path: str,
         *,
@@ -422,7 +433,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -443,7 +454,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_content_by_path_async(
+    def get_file_content_by_path(
         self,
         path: str,
         infer_content_type: Optional[bool] = None,
@@ -476,7 +487,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -494,7 +505,7 @@ class BoxClient(ConnectorClientBase):
 
         return response.content
 
-    async def get_file_content_async(
+    def get_file_content(
         self,
         id: str,
         infer_content_type: Optional[bool] = None,
@@ -526,7 +537,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -544,7 +555,7 @@ class BoxClient(ConnectorClientBase):
 
         return response.content
 
-    async def create_file_async(
+    def create_file(
         self,
         input: bytes,
         folder_path: str,
@@ -574,7 +585,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -598,7 +609,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def copy_file_async(
+    def copy_file(
         self,
         source: str,
         destination: str,
@@ -635,7 +646,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -656,7 +667,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_folder_async(
+    def list_folder(
         self,
         id: str,
         *,
@@ -678,7 +689,7 @@ class BoxClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -699,7 +710,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_root_folder_async(
+    def list_root_folder(
         self,
         *,
         timeout: Optional[float] = None,
@@ -716,7 +727,7 @@ class BoxClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/folders"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -737,7 +748,7 @@ class BoxClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extract_folder_async(
+    def extract_folder(
         self,
         source: str,
         destination: str,
@@ -774,7 +785,7 @@ class BoxClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,

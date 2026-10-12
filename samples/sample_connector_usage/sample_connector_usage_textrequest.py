@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_textrequest.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.textrequest import (
@@ -39,13 +37,13 @@ CONNECTION_RUNTIME_URL = os.environ.get("TEXTREQUEST_CONNECTION_URL", "")
 DASHBOARD_ID = int(os.environ.get("TEXTREQUEST_DASHBOARD_ID", "0"))
 
 
-async def example_1_send_message() -> None:
+def example_1_send_message() -> None:
     """Example 1: Send a message to a contact by phone number."""
     print("\n=== Example 1: Send Message ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.send_message_by_phone_number_async(
+    with DefaultAzureCredential() as credential:
+        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = client.send_message_by_phone_number(
                 input=SendMessageByPhoneNumberInput(
                     body="Hello from the TextRequest connector SDK.",
                     sender_name="Support Team",
@@ -56,13 +54,13 @@ async def example_1_send_message() -> None:
             print(f"Send result: {result}")
 
 
-async def example_2_get_conversations() -> None:
+def example_2_get_conversations() -> None:
     """Example 2: List all conversations for the dashboard."""
     print("\n=== Example 2: Get Conversations ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            conversations = await client.get_conversations_async(
+    with DefaultAzureCredential() as credential:
+        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            conversations = client.get_conversations(
                 dashboard_id=DASHBOARD_ID,
                 page=1,
                 page_size=20,
@@ -70,13 +68,13 @@ async def example_2_get_conversations() -> None:
             print(f"Conversations: {conversations}")
 
 
-async def example_3_create_contact() -> None:
+def example_3_create_contact() -> None:
     """Example 3: Create or update a contact."""
     print("\n=== Example 3: Create Contact ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.create_contact_async(
+    with DefaultAzureCredential() as credential:
+        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = client.create_contact(
                 input=CreateContactInput(
                     first_name="Ada",
                     last_name="Lovelace",
@@ -88,17 +86,17 @@ async def example_3_create_contact() -> None:
             print(f"Contact result: {result}")
 
 
-async def example_4_get_dashboards() -> None:
+def example_4_get_dashboards() -> None:
     """Example 4: Get all dashboards in the account."""
     print("\n=== Example 4: Get Dashboards ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            dashboards = await client.get_dashboards_async(page=1, page_size=20)
+    with DefaultAzureCredential() as credential:
+        with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
+            dashboards = client.get_dashboards(page=1, page_size=20)
             print(f"Dashboards: {dashboards}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run TextRequest connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: TEXTREQUEST_CONNECTION_URL environment variable not set.")
@@ -124,4 +122,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

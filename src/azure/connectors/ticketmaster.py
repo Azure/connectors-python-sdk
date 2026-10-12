@@ -10,15 +10,31 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "TicketmasterClient",
+    "AttractionGetResponse",
+    "AttractionsGetResponse",
+    "ClassificationGetResponse",
+    "ClassificationsGetResponse",
+    "EventGetResponse",
+    "EventImagesGetResponse",
+    "EventsGetResponse",
+    "GenreGetResponse",
+    "SegmentGetResponse",
+    "SubGenreGetResponse",
+    "SuggestionsGetResponse",
+    "VenueGetResponse",
+    "VenuesGetResponse",
+]
 
 
 # Type Definitions
@@ -304,7 +320,7 @@ class TicketmasterClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -313,7 +329,7 @@ class TicketmasterClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -333,8 +349,8 @@ class TicketmasterClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -361,7 +377,7 @@ class TicketmasterClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "ticketmaster"
 
-    async def events_get_async(
+    def events_get(
         self,
         size: Optional[int] = None,
         id: Optional[str] = None,
@@ -825,7 +841,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -846,7 +862,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def event_get_async(
+    def event_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -893,7 +909,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -914,7 +930,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def event_images_get_async(
+    def event_images_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -960,7 +976,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -981,7 +997,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attractions_get_async(
+    def attractions_get(
         self,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
@@ -1203,7 +1219,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1224,7 +1240,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def attraction_get_async(
+    def attraction_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1270,7 +1286,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1291,7 +1307,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def classifications_get_async(
+    def classifications_get(
         self,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
@@ -1395,7 +1411,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1416,7 +1432,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def classification_get_async(
+    def classification_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1462,7 +1478,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1483,7 +1499,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def genre_get_async(
+    def genre_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1528,7 +1544,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1549,7 +1565,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def segment_get_async(
+    def segment_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1594,7 +1610,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1615,7 +1631,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def sub_genre_get_async(
+    def sub_genre_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1664,7 +1680,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1685,7 +1701,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def venues_get_async(
+    def venues_get(
         self,
         id: Optional[str] = None,
         keyword: Optional[str] = None,
@@ -1816,7 +1832,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1837,7 +1853,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def venue_get_async(
+    def venue_get(
         self,
         id: str,
         locale: Optional[str] = None,
@@ -1883,7 +1899,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1904,7 +1920,7 @@ class TicketmasterClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def suggestions_get_async(
+    def suggestions_get(
         self,
         keyword: Optional[str] = None,
         latlong: Optional[str] = None,
@@ -2088,7 +2104,7 @@ class TicketmasterClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

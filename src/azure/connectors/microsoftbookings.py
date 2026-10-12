@@ -9,15 +9,30 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MicrosoftbookingsClient",
+    "AppointmentData",
+    "CancelAppointmentInput",
+    "CreateAppointmentInput",
+    "CustomQuestion",
+    "CustomerData",
+    "DeleteWebhookResponse",
+    "ListMailboxResponse",
+    "MailboxEntity",
+    "StaffMemberData",
+    "UpdateAppointmentInput",
+    "WebhookResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -320,7 +335,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -329,7 +344,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -349,8 +364,8 @@ class MicrosoftbookingsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -377,7 +392,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "microsoftbookings"
 
-    async def list_bookings_business_user_as_admin_async(
+    def list_bookings_business_user_as_admin(
         self,
         *,
         timeout: Optional[float] = None,
@@ -396,7 +411,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
             f"/BookingsService/api/V1/bookingBusinessesUserAsAdmin"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

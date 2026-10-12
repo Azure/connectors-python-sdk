@@ -10,15 +10,27 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MeetingroommapClient",
+    "AADMeetingRoom",
+    "AADMeetingRoomCollection",
+    "GetCustomLocationListByImageNameQuery",
+    "GetCustomLocationsByCategoriesQuery",
+    "GetCustomLocationsByImageNameResponse",
+    "GetOfficeLocationsByImageResponse",
+    "GetRoomWithPersonsDetailsResponse",
+    "GetRoomsByImageNameResponse",
+    "UserDetailsDTO",
+]
 
 
 # Type Definitions
@@ -155,7 +167,7 @@ class MeetingroommapClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -164,7 +176,7 @@ class MeetingroommapClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -184,8 +196,8 @@ class MeetingroommapClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -212,7 +224,7 @@ class MeetingroommapClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "meetingroommap"
 
-    async def get_custom_locations_async(
+    def get_custom_locations(
         self,
         input: GetCustomLocationsByCategoriesQuery,
         *,
@@ -231,7 +243,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/CustomLocations/GetCustomLocations"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -247,7 +259,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_custom_locations_by_image_name_async(
+    def get_custom_locations_by_image_name(
         self,
         input: GetCustomLocationListByImageNameQuery,
         *,
@@ -266,7 +278,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/CustomLocations/GetCustomLocationsByImageName"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -287,7 +299,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_categories_async(
+    def get_categories(
         self,
         *,
         timeout: Optional[float] = None,
@@ -304,7 +316,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/CustomLocations/categories"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -325,7 +337,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def location_details_async(
+    def location_details(
         self,
         location_id: str,
         *,
@@ -344,7 +356,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/CustomLocations/{quote(str(location_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -360,7 +372,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def search_locations_async(
+    def search_locations(
         self,
         location_name: str,
         category: Optional[str] = None,
@@ -391,7 +403,7 @@ class MeetingroommapClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -412,7 +424,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_custom_location_image_async(
+    def get_custom_location_image(
         self,
         location_id: str,
         large: Optional[bool] = None,
@@ -443,7 +455,7 @@ class MeetingroommapClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -461,7 +473,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return response.content
 
-    async def images_async(
+    def images(
         self,
         *,
         timeout: Optional[float] = None,
@@ -476,7 +488,7 @@ class MeetingroommapClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/MapImage/thumbnails"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -497,7 +509,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_room_image_async(
+    def get_meeting_room_image(
         self,
         room_name: str,
         large: Optional[bool] = None,
@@ -525,7 +537,7 @@ class MeetingroommapClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -543,7 +555,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return response.content
 
-    async def next_meetings_async(
+    def next_meetings(
         self,
         meeting_count: int,
         *,
@@ -566,7 +578,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/roomdetails"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -582,7 +594,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_meeting_room_details_async(
+    def get_meeting_room_details(
         self,
         room_name: str,
         *,
@@ -601,7 +613,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/MapImage/roomdetails_v2/{quote(str(room_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -617,7 +629,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_office_locations_async(
+    def get_office_locations(
         self,
         *,
         timeout: Optional[float] = None,
@@ -632,7 +644,7 @@ class MeetingroommapClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/officelocations"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -648,7 +660,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def search_coworkers_async(
+    def search_coworkers(
         self,
         person_search: str,
         *,
@@ -670,7 +682,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/{quote(str(person_search), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -691,7 +703,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_office_locations_by_image_async(
+    def get_office_locations_by_image(
         self,
         image_name: str,
         *,
@@ -713,7 +725,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/{quote(str(image_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -734,7 +746,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_room_with_persons_details_async(
+    def get_room_with_persons_details(
         self,
         office_location_name: str,
         inlude_user_info: Optional[bool] = None,
@@ -766,7 +778,7 @@ class MeetingroommapClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -787,7 +799,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_office_location_image_async(
+    def get_office_location_image(
         self,
         office_location_name: str,
         large: Optional[bool] = None,
@@ -818,7 +830,7 @@ class MeetingroommapClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -836,7 +848,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return response.content
 
-    async def get_rooms_async(
+    def get_rooms(
         self,
         *,
         timeout: Optional[float] = None,
@@ -851,7 +863,7 @@ class MeetingroommapClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/rooms"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -872,7 +884,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_meeting_rooms_async(
+    def search_meeting_rooms(
         self,
         name: str,
         *,
@@ -891,7 +903,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/rooms/findbyname/{quote(str(name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -912,7 +924,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def room_lists_async(
+    def room_lists(
         self,
         *,
         timeout: Optional[float] = None,
@@ -927,7 +939,7 @@ class MeetingroommapClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/rooms/lists"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -948,7 +960,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def rooms_by_list_address_async(
+    def rooms_by_list_address(
         self,
         meeting_room_list_address: str,
         *,
@@ -967,7 +979,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/rooms/{quote(str(meeting_room_list_address), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -988,7 +1000,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_rooms_by_image_name_async(
+    def get_rooms_by_image_name(
         self,
         image_name: str,
         *,
@@ -1007,7 +1019,7 @@ class MeetingroommapClient(ConnectorClientBase):
             f"/api/rooms/GetRoomsByImageName/{quote(str(image_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

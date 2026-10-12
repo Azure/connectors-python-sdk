@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.sharepointonline import SharepointonlineClient
 from azure.connectors.sharepointonline import (
-    SharepointonlineClient,
     PostItemInput,
     PatchItemInput,
     CreateApprovalRequestInput,
@@ -136,11 +136,11 @@ class TestGetAllTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
+            result = await client.get_all_tables("https://contoso.sharepoint.com/sites/site1")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -161,11 +161,11 @@ class TestGetAllTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_tables_async(
+            await client.get_all_tables(
                 "https://contoso.sharepoint.com/sites/site with spaces"
             )
 
@@ -186,11 +186,11 @@ class TestGetAllTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
+            result = await client.get_all_tables("https://contoso.sharepoint.com/sites/site1")
             assert result is None
 
     @pytest.mark.asyncio
@@ -208,12 +208,12 @@ class TestGetAllTables:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_tables_async("https://contoso.sharepoint.com/sites/missing")
+                await client.get_all_tables("https://contoso.sharepoint.com/sites/missing")
 
             assert exc_info.value.status_code == 404
 
@@ -239,12 +239,12 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b"document content"
-            result = await client.create_file_async(
+            result = await client.create_file(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "/Shared Documents",
@@ -271,11 +271,11 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_metadata_async(
+            result = await client.get_file_metadata(
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
@@ -299,12 +299,12 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b"updated document content"
-            result = await client.update_file_async(
+            result = await client.update_file(
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123",
                 input_data
@@ -326,11 +326,11 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.delete_file_async(
+            result = await client.delete_file(
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
@@ -355,11 +355,11 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_content_async(
+            result = await client.get_file_content(
                 "https://contoso.sharepoint.com/sites/site1",
                 "file123"
             )
@@ -381,12 +381,12 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_file_async(
+                await client.create_file(
                     b"document content",
                     "https://contoso.sharepoint.com/sites/site1",
                     "/Shared Documents",
@@ -410,12 +410,12 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_metadata_async(
+                await client.get_file_metadata(
                     "https://contoso.sharepoint.com/sites/site1",
                     "missing_file"
                 )
@@ -437,12 +437,12 @@ class TestFileOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_file_async(
+                await client.delete_file(
                     "https://contoso.sharepoint.com/sites/site1",
                     "protected_file"
                 )
@@ -468,11 +468,11 @@ class TestFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_new_folder_async(
+            result = await client.create_new_folder(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "/Shared Documents",
@@ -496,11 +496,11 @@ class TestFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_folder_metadata_async(
+            result = await client.get_folder_metadata(
                 "https://contoso.sharepoint.com/sites/site1",
                 "folder123"
             )
@@ -522,12 +522,12 @@ class TestFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_new_folder_async(
+                await client.create_new_folder(
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
                     "/Shared Documents",
@@ -551,12 +551,12 @@ class TestFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_folder_metadata_async(
+                await client.get_folder_metadata(
                     "https://contoso.sharepoint.com/sites/site1",
                     "missing_folder"
                 )
@@ -582,11 +582,11 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_items_async(
+            result = await resolve_generated_result(client.get_items(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList"
             ))
@@ -609,12 +609,12 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = PostItemInput()
-            result = await client.post_item_async(
+            result = await client.post_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 input_data
@@ -639,11 +639,11 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_item_async(
+            result = await client.get_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 1
@@ -667,12 +667,12 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = PatchItemInput()
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 1,
@@ -695,11 +695,11 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.delete_item_async(
+            result = await client.delete_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 1
@@ -724,12 +724,12 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_items_async(
+                await resolve_generated_result(client.get_items(
                     "https://contoso.sharepoint.com/sites/site1",
                     "MissingList"
                 ))
@@ -751,12 +751,12 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.post_item_async(
+                await client.post_item(
                     "https://contoso.sharepoint.com/sites/site1",
                     "CustomList",
                     PostItemInput()
@@ -779,12 +779,12 @@ class TestItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_item_async(
+                await client.delete_item(
                     "https://contoso.sharepoint.com/sites/site1",
                     "CustomList",
                     999
@@ -811,12 +811,12 @@ class TestSharingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = ItemPermissionCreateLinkBody()
-            result = await client.create_sharing_link_async(
+            result = await client.create_sharing_link(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
@@ -837,13 +837,13 @@ class TestSharingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             from azure.connectors.sharepointonline import ItemGrantAccessBody
             input_data = ItemGrantAccessBody()
-            result = await client.grant_access_async(
+            result = await client.grant_access(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
@@ -869,12 +869,12 @@ class TestSharingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_sharing_link_async(
+                await client.create_sharing_link(
                     ItemPermissionCreateLinkBody(),
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
@@ -898,12 +898,12 @@ class TestSharingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.grant_access_async(
+                await client.grant_access(
                     ItemGrantAccessBody(),
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
@@ -931,11 +931,11 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.copy_file_async(
+            result = await client.copy_file(
                 dataset="https://contoso.sharepoint.com/sites/site1",
                 source="/Shared Documents/document.docx",
                 destination="/Shared Documents/Backup/document_copy.docx"
@@ -960,11 +960,11 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.copy_file_2_async(
+            result = await client.copy_file_2(
                 input=input_data,
                 dataset="https://contoso.sharepoint.com/sites/site1"
             )
@@ -1008,12 +1008,12 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.copy_file_2_async(
+                await client.copy_file_2(
                     input=input_data,
                     dataset="https://contoso.sharepoint.com/sites/site1"
                 )
@@ -1035,13 +1035,13 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             from azure.connectors.sharepointonline import MoveFileParameters
             input_data = MoveFileParameters()
-            result = await client.move_file_async(
+            result = await client.move_file(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
@@ -1060,12 +1060,12 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = CopyFolderParameters()
-            result = await client.copy_folder_async(
+            result = await client.copy_folder(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
@@ -1087,12 +1087,12 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.copy_file_async(
+                await client.copy_file(
                     dataset="https://contoso.sharepoint.com/sites/site1",
                     source="/Shared Documents/missing.docx",
                     destination="/Backup/missing.docx"
@@ -1115,12 +1115,12 @@ class TestCopyMoveOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.move_file_async(
+                await client.move_file(
                     MoveFileParameters(),
                     "https://contoso.sharepoint.com/sites/site1"
                 )
@@ -1146,12 +1146,12 @@ class TestApprovalOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = CreateApprovalRequestInput()
-            result = await client.create_approval_request_async(
+            result = await client.create_approval_request(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
@@ -1173,11 +1173,11 @@ class TestApprovalOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.set_approval_status_async(
+            result = await client.set_approval_status(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "item123",
@@ -1201,12 +1201,12 @@ class TestApprovalOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_approval_request_async(
+                await client.create_approval_request(
                     CreateApprovalRequestInput(),
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
@@ -1231,12 +1231,12 @@ class TestApprovalOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.set_approval_status_async(
+                await client.set_approval_status(
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
                     "missing_item",
@@ -1276,13 +1276,13 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             side_effect=[mock_response_1, mock_response_2]
         ):
             site_url = "https://contoso.sharepoint.com/sites/site1"
-            result_1 = await client.get_all_tables_async(site_url)
-            result_2 = await client.get_all_tables_async(site_url)
+            result_1 = await client.get_all_tables(site_url)
+            result_2 = await client.get_all_tables(site_url)
 
             assert result_1 == {"result": "first"}
             assert result_2 == {"result": "second"}
@@ -1299,12 +1299,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(json.JSONDecodeError):
-                await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
+                await client.get_all_tables("https://contoso.sharepoint.com/sites/site1")
 
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self):
@@ -1338,11 +1338,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_all_tables_async(
+            await client.get_all_tables(
                 "https://contoso.sharepoint.com/sites/site-name/subsite"
             )
 
@@ -1364,12 +1364,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_tables_async("https://contoso.sharepoint.com/sites/site1")
+                await client.get_all_tables("https://contoso.sharepoint.com/sites/site1")
 
             assert exc_info.value.status_code == 500
 
@@ -1389,11 +1389,11 @@ class TestCheckInOutOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.check_out_file_async(
+            await client.check_out_file(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "file123"
@@ -1415,12 +1415,12 @@ class TestCheckInOutOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = FileCheckInParameters()
-            await client.check_in_file_async(
+            await client.check_in_file(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
@@ -1443,11 +1443,11 @@ class TestCheckInOutOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.discard_file_check_out_async(
+            await client.discard_file_check_out(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "file123"
@@ -1472,12 +1472,12 @@ class TestCheckInOutOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.check_out_file_async(
+                await client.check_out_file(
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
                     "locked_file"
@@ -1504,11 +1504,11 @@ class TestAttachmentOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_item_attachments_async(
+            result = await client.get_item_attachments(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 "1"
@@ -1531,12 +1531,12 @@ class TestAttachmentOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b"attachment content"
-            result = await client.create_attachment_async(
+            result = await client.create_attachment(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
@@ -1562,11 +1562,11 @@ class TestAttachmentOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_attachment_async(
+            await client.delete_attachment(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 "1",
@@ -1592,11 +1592,11 @@ class TestAttachmentOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_attachment_content_async(
+            result = await client.get_attachment_content(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 "1",
@@ -1620,12 +1620,12 @@ class TestAttachmentOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_attachment_async(
+                await client.create_attachment(
                     b"attachment content",
                     "https://contoso.sharepoint.com/sites/site1",
                     "CustomList",
@@ -1654,11 +1654,11 @@ class TestSearchOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.search_for_user_async(
+            result = await client.search_for_user(
                 "https://contoso.sharepoint.com/sites/site1",
                 "CustomList",
                 "entity1",
@@ -1682,12 +1682,12 @@ class TestSearchOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.search_for_user_async(
+                await client.search_for_user(
                     "https://contoso.sharepoint.com/sites/site1",
                     "CustomList",
                     "entity1",
@@ -1715,11 +1715,11 @@ class TestFileItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_item_async(
+            result = await client.get_file_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "file123"
@@ -1742,12 +1742,12 @@ class TestFileItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = PatchFileItemInput()
-            result = await client.patch_file_item_async(
+            result = await client.patch_file_item(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
@@ -1770,11 +1770,11 @@ class TestFileItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.unshare_item_async(
+            await client.unshare_item(
                 "https://contoso.sharepoint.com/sites/site1",
                 "Documents",
                 "item123"
@@ -1799,12 +1799,12 @@ class TestFileItemOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_item_async(
+                await client.get_file_item(
                     "https://contoso.sharepoint.com/sites/site1",
                     "Documents",
                     "missing_file"
@@ -1831,12 +1831,12 @@ class TestMoveFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = MoveFolderParameters()
-            result = await client.move_folder_async(
+            result = await client.move_folder(
                 input_data,
                 "https://contoso.sharepoint.com/sites/site1"
             )
@@ -1858,12 +1858,12 @@ class TestMoveFolderOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.move_folder_async(
+                await client.move_folder(
                     MoveFolderParameters(),
                     "https://contoso.sharepoint.com/sites/site1"
                 )
@@ -1887,7 +1887,7 @@ class TestGeneratedContractSurface:
 
     def test_day_of_week_discovery_is_generated(self):
         """Test day-of-week option discovery is callable."""
-        assert hasattr(SharepointonlineClient, "get_day_of_week_options_async")
+        assert hasattr(SharepointonlineClient, "get_day_of_week_options")
 
 
 class TestByPathOperations:
@@ -1909,11 +1909,11 @@ class TestByPathOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_metadata_by_path_async(
+            result = await client.get_file_metadata_by_path(
                 "https://contoso.sharepoint.com/sites/site1",
                 "/Shared Documents/document.docx"
             )
@@ -1936,11 +1936,11 @@ class TestByPathOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_file_content_by_path_async(
+            result = await client.get_file_content_by_path(
                 "https://contoso.sharepoint.com/sites/site1",
                 "/Shared Documents/document.docx"
             )
@@ -1962,11 +1962,11 @@ class TestByPathOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_folder_metadata_by_path_async(
+            result = await client.get_folder_metadata_by_path(
                 "https://contoso.sharepoint.com/sites/site1",
                 "/Shared Documents"
             )
@@ -1988,12 +1988,12 @@ class TestByPathOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_file_metadata_by_path_async(
+                await client.get_file_metadata_by_path(
                     "https://contoso.sharepoint.com/sites/site1",
                     "/Shared Documents/missing.docx"
                 )

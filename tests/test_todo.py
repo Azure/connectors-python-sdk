@@ -7,11 +7,11 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.todo import TodoClient
 from azure.connectors.todo import (
     CreateToDo,
     CreateToDoList,
     TRIGGER_OPERATIONS,
-    TodoClient,
     ToDoHtml,
     UpdateToDo,
 )
@@ -135,11 +135,11 @@ class TestGetAllTodoListsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_todo_lists_async()
+            result = await client.get_all_todo_lists()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -159,12 +159,12 @@ class TestGetAllTodoListsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_all_todo_lists_async()
+                await client.get_all_todo_lists()
 
 
 class TestGetTodoListAsync:
@@ -184,11 +184,11 @@ class TestGetTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_to_do_list_async(folder_id="list 1")
+            result = await client.get_to_do_list(folder_id="list 1")
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -212,12 +212,12 @@ class TestGetTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_to_do_list_async(folder_id="missing-list")
+                await client.get_to_do_list(folder_id="missing-list")
 
             assert exc_info.value.status_code == 404
 
@@ -237,11 +237,11 @@ class TestCreateTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_to_do_list_async(input=payload)
+            result = await client.create_to_do_list(input=payload)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -263,12 +263,12 @@ class TestCreateTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_to_do_list_async(input=payload)
+                await client.create_to_do_list(input=payload)
 
 
 class TestUpdateTodoListAsync:
@@ -289,11 +289,11 @@ class TestUpdateTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_to_do_list_async(
+            result = await client.update_to_do_list(
                 input=payload,
                 folder_id="list 1",
             )
@@ -321,12 +321,12 @@ class TestUpdateTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.update_to_do_list_async(
+                await client.update_to_do_list(
                     input=payload,
                     folder_id="missing-list",
                 )
@@ -348,11 +348,11 @@ class TestDeleteTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_to_do_list_async(folder_id="list 1")
+            result = await client.delete_to_do_list(folder_id="list 1")
 
             mock_send.assert_called_once_with(
                 "DELETE",
@@ -376,12 +376,12 @@ class TestDeleteTodoListAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_to_do_list_async(folder_id="missing-list")
+                await client.delete_to_do_list(folder_id="missing-list")
 
             assert exc_info.value.status_code == 404
 
@@ -403,11 +403,11 @@ class TestGetTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_to_do_async(
+            result = await client.get_to_do(
                 folder_id="list 1",
                 id="task 1",
             )
@@ -434,12 +434,12 @@ class TestGetTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_to_do_async(
+                await client.get_to_do(
                     folder_id="list-1",
                     id="missing-task",
                 )
@@ -462,11 +462,11 @@ class TestCreateAndUpdateTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_to_do_async(input=payload, folder_id="list-1")
+            result = await client.create_to_do(input=payload, folder_id="list-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -489,11 +489,11 @@ class TestCreateAndUpdateTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_to_do_async(input=payload, folder_id="list-1", id="task-1")
+            result = await client.update_to_do(input=payload, folder_id="list-1", id="task-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -518,11 +518,11 @@ class TestDeleteTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_to_do_async(
+            result = await client.delete_to_do(
                 folder_id="list 1",
                 id="task 1",
             )
@@ -549,12 +549,12 @@ class TestDeleteTodoAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_to_do_async(
+                await client.delete_to_do(
                     folder_id="list-1",
                     id="task-1",
                 )
@@ -576,11 +576,11 @@ class TestListTodosByFolderAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_to_dos_by_folder_async(folder_id="list-1", top="10")
+            result = await client.list_to_dos_by_folder(folder_id="list-1", top="10")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]

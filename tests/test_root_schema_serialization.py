@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from azure.connectors.sdk.http_client import ConnectorHttpClient
+from azure.connectors.sdk.aio.http_client import ConnectorHttpClient
 from azure.connectors.sdk.serialization import to_wire
 from azure.connectors.signinghub import HandSignature, ValidationRule
 from azure.connectors.teams import (
@@ -62,7 +62,7 @@ async def test_array_root_is_serialized_through_send_async(
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/messages",
                 body=messages,

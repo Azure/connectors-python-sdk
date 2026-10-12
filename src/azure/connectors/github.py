@@ -10,15 +10,58 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "GithubClient",
+    "ActionsPublicKey",
+    "Commit",
+    "CommitComparison",
+    "CreateReferenceRequest",
+    "CreateRepositorySecretRequest",
+    "CreateRepositoryUsingTemplateRequest",
+    "DiffEntry",
+    "GeneralAPIModel",
+    "GitReference",
+    "GitUser",
+    "GraphQlQuery",
+    "IssueBasicDetailsModel",
+    "IssueDetailsModel",
+    "IssueUpdateModel",
+    "Label",
+    "LicenseDetails",
+    "Link",
+    "Milestone",
+    "MilestoneUpdateModel",
+    "MultipleFetchModel",
+    "MultipleSearchFetchModel",
+    "PullRequest",
+    "PullRequestCreateRequest",
+    "PullRequestFile",
+    "PullRequestMergeRequest",
+    "PullRequestMergeResult",
+    "PullRequestUpdateRequest",
+    "QueryRequest",
+    "RepositoryDetails",
+    "RepositoryDispatchEvent",
+    "RepositoryMiniDetails",
+    "RequestReviewersBody",
+    "SingleSearchFetchModel",
+    "TeamDetails",
+    "UserDetailsModel",
+    "Verification",
+    "WebhookCreationResponse",
+    "WebhookPullRequestResponse",
+    "WebhookRequestBody",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1088,7 +1131,7 @@ class GithubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1097,7 +1140,7 @@ class GithubClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1117,8 +1160,8 @@ class GithubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1145,7 +1188,7 @@ class GithubClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "github"
 
-    async def create_issue_async(
+    def create_issue(
         self,
         input: IssueBasicDetailsModel,
         repository_owner: str,
@@ -1169,7 +1212,7 @@ class GithubClient(ConnectorClientBase):
             f"/issues"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1190,7 +1233,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_issues_async(
+    def get_issues(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1282,7 +1325,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1303,7 +1346,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_repository_public_key_async(
+    def get_repository_public_key(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1329,7 +1372,7 @@ class GithubClient(ConnectorClientBase):
             f"/public-key"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1350,7 +1393,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_update_repository_secret_async(
+    def create_update_repository_secret(
         self,
         input: CreateRepositorySecretRequest,
         repository_owner: str,
@@ -1378,7 +1421,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(secret_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1394,7 +1437,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def create_repository_using_template_async(
+    def create_repository_using_template(
         self,
         input: CreateRepositoryUsingTemplateRequest,
         template_owner: str,
@@ -1420,7 +1463,7 @@ class GithubClient(ConnectorClientBase):
             f"/generate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1441,7 +1484,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_repository_by_id_async(
+    def get_repository_by_id(
         self,
         repository_id: int,
         *,
@@ -1460,7 +1503,7 @@ class GithubClient(ConnectorClientBase):
             f"/repositories/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1481,7 +1524,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_reference_async(
+    def create_reference(
         self,
         input: CreateReferenceRequest,
         repository_owner: str,
@@ -1508,7 +1551,7 @@ class GithubClient(ConnectorClientBase):
             f"/refs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1529,7 +1572,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_reference_async(
+    def get_reference(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1558,7 +1601,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(reference), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1579,7 +1622,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def merge_pull_request_async(
+    def merge_pull_request(
         self,
         input: PullRequestMergeRequest,
         repository_owner: str,
@@ -1606,7 +1649,7 @@ class GithubClient(ConnectorClientBase):
             f"/merge"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1627,7 +1670,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_request_async(
+    def get_pull_request(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1652,7 +1695,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1673,7 +1716,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_pull_request_async(
+    def update_pull_request(
         self,
         input: PullRequestUpdateRequest,
         repository_owner: str,
@@ -1703,7 +1746,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(pull_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1724,7 +1767,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_request_files_async(
+    def get_pull_request_files(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1751,7 +1794,7 @@ class GithubClient(ConnectorClientBase):
             f"/files"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1772,7 +1815,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def request_reviewers_pull_request_async(
+    def request_reviewers_pull_request(
         self,
         input: RequestReviewersBody,
         repository_owner: str,
@@ -1800,7 +1843,7 @@ class GithubClient(ConnectorClientBase):
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1816,7 +1859,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remove_reviewers_pull_request_async(
+    def remove_reviewers_pull_request(
         self,
         input: RequestReviewersBody,
         repository_owner: str,
@@ -1844,7 +1887,7 @@ class GithubClient(ConnectorClientBase):
             f"/requested_reviewers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1860,7 +1903,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def create_pull_request_async(
+    def create_pull_request(
         self,
         input: PullRequestCreateRequest,
         repository_owner: str,
@@ -1888,7 +1931,7 @@ class GithubClient(ConnectorClientBase):
             f"/pulls"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1909,7 +1952,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_pull_requests_async(
+    def get_pull_requests(
         self,
         repository_owner: str,
         repository_name: str,
@@ -1977,7 +2020,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1998,7 +2041,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_repository_dispatch_event_async(
+    def create_repository_dispatch_event(
         self,
         input: RepositoryDispatchEvent,
         repository_owner: str,
@@ -2026,7 +2069,7 @@ class GithubClient(ConnectorClientBase):
             f"/dispatches"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2042,7 +2085,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def compare_repository_commits_async(
+    def compare_repository_commits(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2072,7 +2115,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(base), safe='')}...{quote(str(head), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2093,7 +2136,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_selected_repo_to_org_secret_async(
+    def add_selected_repo_to_org_secret(
         self,
         repository_owner: str,
         repository_id: int,
@@ -2126,7 +2169,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2142,7 +2185,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remove_selected_repo_from_org_secret_async(
+    def remove_selected_repo_from_org_secret(
         self,
         repository_owner: str,
         repository_id: int,
@@ -2175,7 +2218,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(repository_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2191,7 +2234,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def delete_webhook_trigger_async(
+    def delete_webhook_trigger(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2216,7 +2259,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(webhook_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2232,7 +2275,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_issue_num_async(
+    def get_issue_num(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2257,7 +2300,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2278,7 +2321,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_issue_num_async(
+    def update_issue_num(
         self,
         input: IssueUpdateModel,
         repository_owner: str,
@@ -2304,7 +2347,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(issue_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2325,7 +2368,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_milestone_async(
+    def update_milestone(
         self,
         input: MilestoneUpdateModel,
         repository_owner: str,
@@ -2351,7 +2394,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(milestone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2372,7 +2415,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_async(
+    def get_user(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2387,7 +2430,7 @@ class GithubClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/user"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2408,7 +2451,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_github_with_query_async(
+    def search_github_with_query(
         self,
         input: GraphQlQuery,
         *,
@@ -2424,7 +2467,7 @@ class GithubClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/graphql"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2440,7 +2483,7 @@ class GithubClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_assignees_async(
+    def get_assignees(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2478,7 +2521,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2499,7 +2542,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_collaborators_async(
+    def list_collaborators(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2537,7 +2580,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2558,7 +2601,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def check_collaborator_async(
+    def check_collaborator(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2583,7 +2626,7 @@ class GithubClient(ConnectorClientBase):
             f"/{quote(str(user_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2604,7 +2647,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_milestones_async(
+    def get_milestones(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2660,7 +2703,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2681,7 +2724,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_labels_async(
+    def get_labels(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2719,7 +2762,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2740,7 +2783,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_issue_labels_async(
+    def get_issue_labels(
         self,
         repository_owner: str,
         repository_name: str,
@@ -2781,7 +2824,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2802,7 +2845,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_repos_async(
+    def get_repos(
         self,
         repository_owner: str,
         type_: Optional[str] = None,
@@ -2854,7 +2897,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2875,7 +2918,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_org_repos_async(
+    def get_org_repos(
         self,
         repository_owner: str,
         type_: Optional[str] = None,
@@ -2927,7 +2970,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2948,7 +2991,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_repos_async(
+    def get_user_repos(
         self,
         visibility: Optional[str] = None,
         affiliation: Optional[str] = None,
@@ -3021,7 +3064,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3042,7 +3085,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_issues_async(
+    def search_issues(
         self,
         q: str,
         sort: Optional[str] = None,
@@ -3089,7 +3132,7 @@ class GithubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3110,7 +3153,7 @@ class GithubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def invoke_mcp_server_async(
+    def invoke_mcp_server(
         self,
         input: QueryRequest,
         *,
@@ -3126,7 +3169,7 @@ class GithubClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/mcp"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

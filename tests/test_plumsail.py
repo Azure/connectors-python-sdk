@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.plumsail import PlumsailClient
 from azure.connectors.plumsail import (
-    PlumsailClient,
     Pdf2TextRequest,
     TRIGGER_OPERATIONS,
 )
@@ -118,11 +118,11 @@ class TestProfilesMeGetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.profiles_me_get_async()
+            result = await client.profiles_me_get()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -143,12 +143,12 @@ class TestProfilesMeGetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.profiles_me_get_async()
+                await client.profiles_me_get()
 
             assert exc_info.value.status_code == 401
 
@@ -168,11 +168,11 @@ class TestExtractTextFromPdfAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.flow_v1_documents_jobs_extract_text_from_pdf_async(input=request)
+            result = await client.flow_v1_documents_jobs_extract_text_from_pdf(input=request)
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -193,12 +193,12 @@ class TestExtractTextFromPdfAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.flow_v1_documents_jobs_extract_text_from_pdf_async(
+                await client.flow_v1_documents_jobs_extract_text_from_pdf(
                     input=Pdf2TextRequest()
                 )
 
@@ -263,7 +263,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: PlumsailClient, operation: str):
     """Invoke a Plumsail operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
@@ -279,7 +279,7 @@ class TestPlumsailClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -305,7 +305,7 @@ class TestPlumsailClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

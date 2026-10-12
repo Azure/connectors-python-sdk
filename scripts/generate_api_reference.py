@@ -58,7 +58,7 @@ def _defined_public_names(source_path: Path) -> list[str]:
 def _module_title(source_path: Path, names: list[str]) -> str:
     """Create a readable navigation title for a source module."""
     client_names = [name for name in names if name.endswith("Client")]
-    if source_path.parent == PACKAGE_ROOT and len(client_names) == 1:
+    if source_path.parent in {PACKAGE_ROOT, PACKAGE_ROOT / "aio"} and len(client_names) == 1:
         return client_names[0]
 
     return source_path.stem.replace("_", " ").title()
@@ -107,12 +107,27 @@ def _generate_reference() -> None:
     navigation = mkdocs_gen_files.Nav()
     navigation["Home"] = "index.md"
     navigation[("Guides", "Connection setup")] = "connection-setup.md"
+    navigation[("Guides", "Sync/aio migration")] = "migration-sync-aio.md"
     navigation[("Guides", "SDK-type bindings")] = "sdk-type-bindings.md"
+    navigation[("Design", "Azure SDK guidelines")] = "azure-sdk-guidelines.md"
+    navigation[("Design", "Generated contract")] = "generated-contract.md"
     navigation[("API reference",)] = "api/index.md"
 
     sections = (
         ("Core SDK", "core", PACKAGE_ROOT / "sdk", "azure.connectors.sdk"),
-        ("Connectors", "connectors", PACKAGE_ROOT, "azure.connectors"),
+        (
+            "Async core SDK",
+            "core-aio",
+            PACKAGE_ROOT / "sdk" / "aio",
+            "azure.connectors.sdk.aio",
+        ),
+        ("Sync connectors", "connectors", PACKAGE_ROOT, "azure.connectors"),
+        (
+            "Async connectors",
+            "connectors-aio",
+            PACKAGE_ROOT / "aio",
+            "azure.connectors.aio",
+        ),
     )
 
     for navigation_title, section, directory, package_name in sections:

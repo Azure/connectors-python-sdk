@@ -6,10 +6,10 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.ftp import FtpClient
 from azure.connectors.ftp import (
     BlobMetadata,
     BlobMetadataPage,
-    FtpClient,
 )
 from azure.connectors.sdk import (
     ConnectorException,
@@ -20,35 +20,35 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: FtpClient, operation: str):
     """Invoke an FTP operation by name for shared error tests."""
     if operation == "create_file":
-        return await client.create_file_async(
+        return await client.create_file(
             input=b"file content",
             folder_path="/inbound",
             name="sample.txt",
         )
     if operation == "get_file_metadata":
-        return await client.get_file_metadata_async(id="file123")
+        return await client.get_file_metadata(id="file123")
     if operation == "update_file":
-        return await client.update_file_async(input=b"updated content", id="file123")
+        return await client.update_file(input=b"updated content", id="file123")
     if operation == "delete_file":
-        return await client.delete_file_async(id="file123")
+        return await client.delete_file(id="file123")
     if operation == "copy_file":
-        return await client.copy_file_async(
+        return await client.copy_file(
             source="/inbound/sample.txt",
             destination="/archive/sample.txt",
             overwrite="true",
         )
     if operation == "get_file_metadata_by_path":
-        return await client.get_file_metadata_by_path_async(path="/inbound/sample.txt")
+        return await client.get_file_metadata_by_path(path="/inbound/sample.txt")
     if operation == "get_file_content_by_path":
-        return await client.get_file_content_by_path_async(path="/inbound/sample.txt")
+        return await client.get_file_content_by_path(path="/inbound/sample.txt")
     if operation == "get_file_content":
-        return await client.get_file_content_async(id="file123")
+        return await client.get_file_content(id="file123")
     if operation == "list_folder":
-        return await client.list_folder_async(id="folder123")
+        return await client.list_folder(id="folder123")
     if operation == "list_root_folder":
-        return await client.list_root_folder_async()
+        return await client.list_root_folder()
     if operation == "extract_folder":
-        return await client.extract_folder_async(
+        return await client.extract_folder(
             source="/inbound/archive.zip",
             destination="/expanded",
             overwrite="true",
@@ -149,7 +149,7 @@ class TestFtpClientMethods:
 
     @pytest.mark.asyncio
     async def test_create_file_success(self, mock_credential):
-        """Test create_file_async sends query parameters and body."""
+        """Test create_file sends query parameters and body."""
         client = FtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -158,11 +158,11 @@ class TestFtpClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_file_async(
+            result = await client.create_file(
                 input=b"file content",
                 folder_path="/inbound",
                 name="sample.txt",
@@ -176,7 +176,7 @@ class TestFtpClientMethods:
 
     @pytest.mark.asyncio
     async def test_get_file_metadata_success(self, mock_credential):
-        """Test get_file_metadata_async returns parsed JSON."""
+        """Test get_file_metadata returns parsed JSON."""
         client = FtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -185,18 +185,18 @@ class TestFtpClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_metadata_async(id="file123")
+            result = await client.get_file_metadata(id="file123")
 
             assert result["name"] == "sample.txt"
             assert "/datasets/default/files/file123" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
     async def test_get_file_content_by_path_success(self, mock_credential):
-        """Test get_file_content_by_path_async returns bytes content."""
+        """Test get_file_content_by_path returns bytes content."""
         client = FtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -205,17 +205,17 @@ class TestFtpClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_file_content_by_path_async(path="/inbound/sample.txt")
+            result = await client.get_file_content_by_path(path="/inbound/sample.txt")
 
             assert result == b"ftp file content"
 
     @pytest.mark.asyncio
     async def test_list_root_folder_success(self, mock_credential):
-        """Test list_root_folder_async returns parsed JSON response."""
+        """Test list_root_folder returns parsed JSON response."""
         client = FtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -224,18 +224,18 @@ class TestFtpClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_root_folder_async()
+            result = await client.list_root_folder()
 
             assert len(result["value"]) == 1
             assert result["value"][0]["name"] == "inbound"
 
     @pytest.mark.asyncio
     async def test_extract_folder_success(self, mock_credential):
-        """Test extract_folder_async serializes extraction query parameters."""
+        """Test extract_folder serializes extraction query parameters."""
         client = FtpClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -244,11 +244,11 @@ class TestFtpClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.extract_folder_async(
+            result = await client.extract_folder(
                 source="/inbound/archive.zip",
                 destination="/expanded",
                 overwrite="true",
@@ -295,7 +295,7 @@ class TestFtpClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

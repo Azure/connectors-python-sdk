@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.signinghub import SigninghubClient
 from azure.connectors.signinghub import (
-    SigninghubClient,
     CheckBoxFieldRequest,
     UploadDocument,
     UpdateCheckBoxFieldRequest,
@@ -127,11 +127,11 @@ class TestDocumentsUploadStreamAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.documents_upload_stream_async(
+            await client.documents_upload_stream(
                 input=document,
                 package_id="package-1",
             )
@@ -166,11 +166,11 @@ class TestContactsGetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.contacts_get_async(
+            result = await client.contacts_get(
                 record_per_page="10",
                 page_no="1",
                 sort_by="name",
@@ -197,12 +197,12 @@ class TestContactsGetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.contacts_get_async(record_per_page="10", page_no="1")
+                await client.contacts_get(record_per_page="10", page_no="1")
 
             assert exc_info.value.status_code == 404
 
@@ -222,11 +222,11 @@ class TestCheckboxAddCheckBoxAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.checkbox_add_check_box_async(
+            result = await client.checkbox_add_check_box(
                 input=request,
                 package_id="pkg-1",
                 document_id="doc-1",
@@ -250,12 +250,12 @@ class TestCheckboxAddCheckBoxAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.checkbox_add_check_box_async(
+                await client.checkbox_add_check_box(
                     input=CheckBoxFieldRequest(),
                     package_id="pkg-1",
                     document_id="doc-1",
@@ -277,11 +277,11 @@ class TestCheckboxUpdateCheckBoxAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.checkbox_update_check_box_async(
+            result = await client.checkbox_update_check_box(
                 input=request,
                 package_id="pkg-1",
                 document_id="doc-1",
@@ -303,12 +303,12 @@ class TestCheckboxUpdateCheckBoxAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.checkbox_update_check_box_async(
+                await client.checkbox_update_check_box(
                     input=UpdateCheckBoxFieldRequest(),
                     package_id="pkg-1",
                     document_id="doc-1",
@@ -329,11 +329,11 @@ class TestAttachmentDeleteAttachmentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.attachment_delete_attachment_async(
+            result = await client.attachment_delete_attachment(
                 package_id="pkg-1",
                 document_id="doc-1",
                 attachment_id="att-1",
@@ -358,12 +358,12 @@ class TestAttachmentDeleteAttachmentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.attachment_delete_attachment_async(
+                await client.attachment_delete_attachment(
                     package_id="pkg-1",
                     document_id="doc-1",
                     attachment_id="missing",
@@ -382,12 +382,12 @@ class TestAttachmentDeleteAttachmentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.attachment_delete_attachment_async(
+                await client.attachment_delete_attachment(
                     package_id="pkg-1",
                     document_id="doc-1",
                     attachment_id="att-1",
@@ -629,7 +629,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: SigninghubClient, operation: str):
     """Invoke a SigningHub operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
@@ -645,7 +645,7 @@ class TestSigninghubClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -671,7 +671,7 @@ class TestSigninghubClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.clicksendsms import ClicksendsmsClient
 from azure.connectors.clicksendsms import (
-    ClicksendsmsClient,
     CreateListContactInput,
     CreateListInput,
     DeleteListResponse,
@@ -131,10 +131,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.sms_send_async(input=payload)
+            result = await client.sms_send(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/sms/send" in mock_send.call_args[0][1]
@@ -149,10 +149,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_list_async(input=payload)
+            result = await client.create_list(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/lists" in mock_send.call_args[0][1]
@@ -166,10 +166,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contact_lists_async(page="2", limit="10")
+            result = await client.get_contact_lists(page="2", limit="10")
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
@@ -186,10 +186,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_voice_async(input=payload)
+            result = await client.send_voice(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/voice/send" in mock_send.call_args[0][1]
@@ -203,10 +203,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_list_async(list_id="123")
+            result = await client.delete_list(list_id="123")
 
             assert mock_send.call_args[0][0] == "DELETE"
             assert "/lists/123" in mock_send.call_args[0][1]
@@ -220,10 +220,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_list_contact_async(input=payload, list_id="123")
+            result = await client.create_list_contact(input=payload, list_id="123")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/lists/123/contacts" in mock_send.call_args[0][1]
@@ -237,10 +237,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.view_list_contacts_async(list_id="123")
+            result = await client.view_list_contacts(list_id="123")
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/lists/123/contacts" in mock_send.call_args[0][1]
@@ -253,10 +253,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_list_contact_async(list_id="123", contact_id="456")
+            result = await client.delete_list_contact(list_id="123", contact_id="456")
 
             assert mock_send.call_args[0][0] == "DELETE"
             assert "/lists/123/contacts/456" in mock_send.call_args[0][1]
@@ -270,10 +270,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_mms_async(input=payload)
+            result = await client.send_mms(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/mms/send" in mock_send.call_args[0][1]
@@ -288,10 +288,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_fax_async(input=payload)
+            result = await client.send_fax(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/fax/send" in mock_send.call_args[0][1]
@@ -306,10 +306,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.upload_media_async(input=payload, convert="mms")
+            result = await client.upload_media(input=payload, convert="mms")
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "POST"
@@ -325,10 +325,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.search_contact_list_async(q="friends")
+            result = await client.search_contact_list(q="friends")
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
@@ -344,10 +344,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_letter_async(input=payload)
+            result = await client.send_letter(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/post/letters/send" in mock_send.call_args[0][1]
@@ -362,10 +362,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_postcard_async(input=payload)
+            result = await client.send_postcard(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/post/postcards/send" in mock_send.call_args[0][1]
@@ -379,10 +379,10 @@ class TestClicksendsmsClientOperations:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.view_list_contacts_async(list_id="123")
+            result = await client.view_list_contacts(list_id="123")
 
             assert result is None
 
@@ -419,40 +419,40 @@ class TestClicksendsmsClientErrorHandling:
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "sms_send":
-                    await client.sms_send_async(input=SmsSendInput())
+                    await client.sms_send(input=SmsSendInput())
                 elif operation == "create_list":
-                    await client.create_list_async(input=CreateListInput())
+                    await client.create_list(input=CreateListInput())
                 elif operation == "get_contact_lists":
-                    await client.get_contact_lists_async()
+                    await client.get_contact_lists()
                 elif operation == "send_voice":
-                    await client.send_voice_async(input=SendVoiceInput())
+                    await client.send_voice(input=SendVoiceInput())
                 elif operation == "delete_list":
-                    await client.delete_list_async(list_id="123")
+                    await client.delete_list(list_id="123")
                 elif operation == "create_list_contact":
-                    await client.create_list_contact_async(
+                    await client.create_list_contact(
                         input=CreateListContactInput(), list_id="123"
                     )
                 elif operation == "view_list_contacts":
-                    await client.view_list_contacts_async(list_id="123")
+                    await client.view_list_contacts(list_id="123")
                 elif operation == "delete_list_contact":
-                    await client.delete_list_contact_async(list_id="123", contact_id="456")
+                    await client.delete_list_contact(list_id="123", contact_id="456")
                 elif operation == "send_mms":
-                    await client.send_mms_async(input=SendMmsInput())
+                    await client.send_mms(input=SendMmsInput())
                 elif operation == "send_fax":
-                    await client.send_fax_async(input=SendFaxInput())
+                    await client.send_fax(input=SendFaxInput())
                 elif operation == "upload_media":
-                    await client.upload_media_async(input=UploadMediaInput(), convert="mms")
+                    await client.upload_media(input=UploadMediaInput(), convert="mms")
                 elif operation == "search_contact_list":
-                    await client.search_contact_list_async(q="friends")
+                    await client.search_contact_list(q="friends")
                 elif operation == "send_letter":
-                    await client.send_letter_async(input=SendLetterInput())
+                    await client.send_letter(input=SendLetterInput())
                 else:
-                    await client.send_postcard_async(input=SendPostcardInput())
+                    await client.send_postcard(input=SendPostcardInput())
 
             assert exc_info.value.status_code == 500
 

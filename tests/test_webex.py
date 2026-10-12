@@ -7,13 +7,13 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.webex import WebexClient
 from azure.connectors.webex import (
     CreateSpaceInput,
     CreateSpaceMemberInput,
     CreateTeamMemberInput,
     SendMessageInput,
     TRIGGER_OPERATIONS,
-    WebexClient,
 )
 from azure.connectors.sdk import (
     ConnectorException,
@@ -121,11 +121,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_space_member_async(
+            result = await client.create_space_member(
                 input=CreateSpaceMemberInput(room_id="R1", person_email="a@b.com"),
             )
 
@@ -146,11 +146,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_messages_async(room_id="R1")
+            result = await client.get_messages(room_id="R1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -169,11 +169,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_message_async(
+            result = await client.send_message(
                 input=SendMessageInput(room_id="R1", text="hello"),
             )
 
@@ -194,11 +194,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_message_details_async(message_id="msg1")
+            result = await client.get_message_details(message_id="msg1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -216,11 +216,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_people_async(email="a@b.com")
+            result = await client.get_people(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -239,11 +239,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_my_own_details_async()
+            result = await client.get_my_own_details()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -261,11 +261,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_spaces_async()
+            result = await client.get_spaces()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -283,11 +283,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_space_async(
+            result = await client.create_space(
                 input=CreateSpaceInput(title="My Space"),
             )
 
@@ -308,11 +308,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_space_detail_async(room_id="R1")
+            result = await client.get_space_detail(room_id="R1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -330,11 +330,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_team_member_async(
+            result = await client.create_team_member(
                 input=CreateTeamMemberInput(team_id="T1", person_email="a@b.com"),
             )
 
@@ -355,11 +355,11 @@ class TestWebexClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_spaces_async()
+            result = await client.get_spaces()
 
             assert result is None
 
@@ -393,31 +393,31 @@ class TestWebexClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "create_space_member":
-                    await client.create_space_member_async(input=CreateSpaceMemberInput())
+                    await client.create_space_member(input=CreateSpaceMemberInput())
                 elif operation == "get_messages":
-                    await client.get_messages_async(room_id="R1")
+                    await client.get_messages(room_id="R1")
                 elif operation == "send_message":
-                    await client.send_message_async(input=SendMessageInput())
+                    await client.send_message(input=SendMessageInput())
                 elif operation == "get_message_details":
-                    await client.get_message_details_async(message_id="msg1")
+                    await client.get_message_details(message_id="msg1")
                 elif operation == "get_people":
-                    await client.get_people_async(email="a@b.com")
+                    await client.get_people(email="a@b.com")
                 elif operation == "get_my_own_details":
-                    await client.get_my_own_details_async()
+                    await client.get_my_own_details()
                 elif operation == "get_spaces":
-                    await client.get_spaces_async()
+                    await client.get_spaces()
                 elif operation == "create_space":
-                    await client.create_space_async(input=CreateSpaceInput())
+                    await client.create_space(input=CreateSpaceInput())
                 elif operation == "get_space_detail":
-                    await client.get_space_detail_async(room_id="R1")
+                    await client.get_space_detail(room_id="R1")
                 else:
-                    await client.create_team_member_async(input=CreateTeamMemberInput())
+                    await client.create_team_member(input=CreateTeamMemberInput())
 
             assert exc_info.value.status_code == 500
 

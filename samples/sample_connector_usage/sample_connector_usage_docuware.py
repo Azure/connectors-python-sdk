@@ -20,11 +20,9 @@ Usage:
 
     python sample_connector_usage_docuware.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.docuware import (
@@ -37,15 +35,15 @@ from azure.connectors.docuware import (
 CONNECTION_RUNTIME_URL = os.environ.get("DOCUWARE_CONNECTION_URL", "")
 
 
-async def example_1_get_file_cabinets():
+def example_1_get_file_cabinets():
     """Example 1: List available file cabinets and document trays."""
     print("\n=== Example 1: Get file cabinets ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_file_cabinets_async(
+                result = client.get_file_cabinets(
                     file_cabinet_type="<file-cabinet-type>",
                 )
 
@@ -57,17 +55,17 @@ async def example_1_get_file_cabinets():
                 print(f"Error: {ex}")
 
 
-async def example_2_search_documents():
+def example_2_search_documents():
     """Example 2: Search a file cabinet for matching documents."""
     print("\n=== Example 2: Search documents in file cabinet ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = SearchForDocumentsInFileCabinetInput()
 
-                result = await client.search_for_documents_in_file_cabinet_async(
+                result = client.search_for_documents_in_file_cabinet(
                     input=request,
                     file_cabinet="<file-cabinet-id>",
                     search_dialog_id="<search-dialog-id>",
@@ -81,7 +79,7 @@ async def example_2_search_documents():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: DOCUWARE_CONNECTION_URL environment variable not set.")
@@ -90,11 +88,11 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_get_file_cabinets()
-    await example_2_search_documents()
+    example_1_get_file_cabinets()
+    example_2_search_documents()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

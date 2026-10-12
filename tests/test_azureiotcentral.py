@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azureiotcentral import AzureiotcentralClient
 from azure.connectors.azureiotcentral import (
-    AzureiotcentralClient,
     Device,
     DeviceCloudProperties,
     DeviceCommand,
@@ -232,7 +232,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: AzureiotcentralClient, operation: str):
     """Invoke an IoT Central operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
@@ -329,11 +329,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.devices_list_async(application="app-1"))
+            result = await resolve_generated_result(client.devices_list(application="app-1"))
 
             assert result[0]["id"] == "d-1"
             assert mock_send.call_args[0][0] == "GET"
@@ -349,11 +349,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.devices_get_async(device_id="d-1", application="app-1")
+            result = await client.devices_get(device_id="d-1", application="app-1")
 
             assert result["id"] == "d-1"
             assert "/devices/d-1" in mock_send.call_args[0][1]
@@ -367,11 +367,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.device_groups_set_async(
+            result = await client.device_groups_set(
                 input=body,
                 device_group_id="dg-1",
                 application="app-1",
@@ -394,11 +394,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.devices_execute_component_command_async(
+            await client.devices_execute_component_command(
                 input=body,
                 device_id="d-1",
                 component_name="component-1",
@@ -421,11 +421,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.device_relationships_update_async(
+            await client.device_relationships_update(
                 input=body,
                 device_id="d-1",
                 relationship_id="relationship-1",
@@ -443,11 +443,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.device_groups_remove_async(
+            result = await client.device_groups_remove(
                 device_group_id="dg-1",
                 application="app-1",
             )
@@ -463,11 +463,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.jobs_set_async(
+            await client.jobs_set(
                 input=Job(display_name="job"),
                 job_id="j-1",
                 application="app-1",
@@ -485,11 +485,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.devices_get_command_response_async(
+            await client.devices_get_command_response(
                 device_id="d-1",
                 command_name="cmd-1",
                 application="app one",
@@ -508,11 +508,11 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await resolve_generated_result(client.devices_list_async(application="app-1"))
+            result = await resolve_generated_result(client.devices_list(application="app-1"))
 
             assert result == []
 
@@ -525,7 +525,7 @@ class TestAzureiotcentralClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -551,7 +551,7 @@ class TestAzureiotcentralClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

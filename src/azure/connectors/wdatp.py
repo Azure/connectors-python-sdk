@@ -6,19 +6,65 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "WdatpClient",
+    "AdvancedHuntingInput",
+    "AdvancedHuntingResponse",
+    "AdvancedHuntingSchemaInput",
+    "AdvancedHuntingSchemaResponse",
+    "Alert",
+    "CancelSingleMachineActionInput",
+    "CollectInvestigationPackageInput",
+    "CreateAlertByReferenceInput",
+    "DomainStats",
+    "FileStats",
+    "GetAlertsResponse",
+    "GetInvestigationPackageUriResponse",
+    "GetInvestigationsResponse",
+    "GetLiveResponseDownloadLinkResponse",
+    "GetMachineActionsResponse",
+    "GetMachinesResponse",
+    "GetRemediationActivitiesResponse",
+    "GetRemediationActivityMachineListResponse",
+    "InitiateInvestigationInput",
+    "InitiateInvestigationResponse",
+    "Investigation",
+    "IpStats",
+    "IsolateMachineInput",
+    "LiveResponseCommand",
+    "LiveResponseCommandStatus",
+    "Machine",
+    "MachineAction",
+    "MachineTagInput",
+    "OnNewRemediationActivityResponse",
+    "PatchAlertInput",
+    "RemediationActivity",
+    "RestrictAppExecutionInput",
+    "RunAntivirusScanInput",
+    "RunLiveResponseInput",
+    "StartInvestigationInput",
+    "UnisolateMachineInput",
+    "UnrestrictAppExecutionInput",
+    "WebHookNotification",
+    "WebHookSubscriptionRequest",
+    "WebHookSubscriptionTableEntity",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1086,7 +1132,7 @@ class WdatpClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1095,7 +1141,7 @@ class WdatpClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1115,8 +1161,8 @@ class WdatpClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1182,7 +1228,7 @@ class WdatpClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def advanced_hunting_async(
+    def advanced_hunting(
         self,
         input: AdvancedHuntingInput,
         *,
@@ -1202,7 +1248,7 @@ class WdatpClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/api/advancedqueries/run"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1223,7 +1269,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_alert_by_reference_async(
+    def create_alert_by_reference(
         self,
         input: CreateAlertByReferenceInput,
         *,
@@ -1241,7 +1287,7 @@ class WdatpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/alerts/createAlertByReference"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1262,7 +1308,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_alerts_async(
+    def get_alerts(
         self,
         expand: Optional[str] = None,
         filter: Optional[str] = None,
@@ -1276,14 +1322,14 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Alerts - Get list of alerts
 
         Retrieve from Windows Defender ATP the most recent alerts
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/alerts"
         query_params = []
@@ -1324,11 +1370,16 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1343,21 +1394,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_alert_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_single_alert(
         self,
         alert_id: str,
         *,
@@ -1376,7 +1435,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/alerts/{quote(str(alert_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1397,7 +1456,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def patch_alert_async(
+    def patch_alert(
         self,
         input: PatchAlertInput,
         alert_id: str,
@@ -1417,7 +1476,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/alerts/{quote(str(alert_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1438,7 +1497,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def initiate_investigation_async(
+    def initiate_investigation(
         self,
         input: InitiateInvestigationInput,
         machine_id: str,
@@ -1461,7 +1520,7 @@ class WdatpClient(ConnectorClientBase):
             f"/initiateInvestigation"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1482,7 +1541,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def start_investigation_async(
+    def start_investigation(
         self,
         input: StartInvestigationInput,
         machine_id: str,
@@ -1505,7 +1564,7 @@ class WdatpClient(ConnectorClientBase):
             f"/startInvestigation"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1526,7 +1585,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_machine_action_async(
+    def get_single_machine_action(
         self,
         machine_action_id: str,
         *,
@@ -1545,7 +1604,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machineactions/{quote(str(machine_action_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1566,7 +1625,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_single_machine_action_async(
+    def cancel_single_machine_action(
         self,
         input: CancelSingleMachineActionInput,
         machine_action_id: str,
@@ -1589,7 +1648,7 @@ class WdatpClient(ConnectorClientBase):
             f"/cancel"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1610,7 +1669,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_live_response_download_link_async(
+    def get_live_response_download_link(
         self,
         machine_action_id: str,
         command_index: int,
@@ -1635,7 +1694,7 @@ class WdatpClient(ConnectorClientBase):
             f")"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1656,7 +1715,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_machine_actions_async(
+    def get_machine_actions(
         self,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -1669,14 +1728,14 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Actions - Get list of machine actions
 
         Retrieve from Windows Defender ATP the most recent machine actions
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/machineactions"
         query_params = []
@@ -1712,11 +1771,16 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1731,21 +1795,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_file_stats_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_file_stats(
         self,
         file_id: str,
         look_back_hours: Optional[int] = None,
@@ -1774,7 +1846,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1795,7 +1867,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_domain_stats_async(
+    def get_domain_stats(
         self,
         domain_name: str,
         look_back_hours: Optional[int] = None,
@@ -1824,7 +1896,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1845,7 +1917,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_ip_stats_async(
+    def get_ip_stats(
         self,
         ip_address: str,
         look_back_hours: Optional[int] = None,
@@ -1874,7 +1946,7 @@ class WdatpClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1895,7 +1967,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_investigation_async(
+    def get_single_investigation(
         self,
         investigation_id: str,
         *,
@@ -1914,7 +1986,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/investigations/{quote(str(investigation_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1935,7 +2007,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_investigations_async(
+    def get_investigations(
         self,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -1948,14 +2020,14 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Actions - Get list of investigation
 
         Retrieve from Microsoft Defender ATP the most recent investigations
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/investigations"
         query_params = []
@@ -1991,11 +2063,16 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2010,21 +2087,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def collect_investigation_package_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def collect_investigation_package(
         self,
         input: CollectInvestigationPackageInput,
         machine_id: str,
@@ -2047,7 +2132,7 @@ class WdatpClient(ConnectorClientBase):
             f"/collectInvestigationPackage"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2068,7 +2153,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_investigation_package_uri_async(
+    def get_investigation_package_uri(
         self,
         machine_action_id: str,
         *,
@@ -2090,7 +2175,7 @@ class WdatpClient(ConnectorClientBase):
             f"/getPackageUri"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2111,7 +2196,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def isolate_machine_async(
+    def isolate_machine(
         self,
         input: IsolateMachineInput,
         machine_id: str,
@@ -2131,7 +2216,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}/isolate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2152,7 +2237,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unisolate_machine_async(
+    def unisolate_machine(
         self,
         input: UnisolateMachineInput,
         machine_id: str,
@@ -2172,7 +2257,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}/unisolate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2193,7 +2278,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def restrict_app_execution_async(
+    def restrict_app_execution(
         self,
         input: RestrictAppExecutionInput,
         machine_id: str,
@@ -2217,7 +2302,7 @@ class WdatpClient(ConnectorClientBase):
             f"/restrictCodeExecution"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2238,7 +2323,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unrestrict_app_execution_async(
+    def unrestrict_app_execution(
         self,
         input: UnrestrictAppExecutionInput,
         machine_id: str,
@@ -2261,7 +2346,7 @@ class WdatpClient(ConnectorClientBase):
             f"/unrestrictCodeExecution"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2282,7 +2367,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_antivirus_scan_async(
+    def run_antivirus_scan(
         self,
         input: RunAntivirusScanInput,
         machine_id: str,
@@ -2302,7 +2387,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}/runAntiVirusScan"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2323,7 +2408,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_live_response_async(
+    def run_live_response(
         self,
         input: RunLiveResponseInput,
         machine_id: str,
@@ -2343,7 +2428,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}/runliveresponse"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2364,7 +2449,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_remediation_activities_async(
+    def get_remediation_activities(
         self,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -2377,14 +2462,14 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Remediation tasks - Get list of remediation activities (Preview)
 
         Retrieve from Windows Defender ATP the remediation activities
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/remediationtasks"
         query_params = []
@@ -2420,11 +2505,16 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2439,21 +2529,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_remediation_activity_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_single_remediation_activity(
         self,
         remediation_id: str,
         *,
@@ -2472,7 +2570,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/remediationtasks/{quote(str(remediation_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2493,7 +2591,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_remediation_activity_machine_list_async(
+    def get_remediation_activity_machine_list(
         self,
         remediation_id: str,
         *,
@@ -2501,15 +2599,15 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Remediation activities - Get list of related machines (Preview)
 
         Retrieve from Windows Defender ATP the related machines to a specific
         remediation activity
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2518,11 +2616,16 @@ class WdatpClient(ConnectorClientBase):
             f"/{quote(str(remediation_id), safe='')}"
             f"/machinereferences"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2537,21 +2640,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_machines_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_machines(
         self,
         filter: Optional[str] = None,
         select: Optional[str] = None,
@@ -2564,14 +2675,14 @@ class WdatpClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Machines - Get list of machines
 
         Retrieve from Windows Defender ATP the most recent machines
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/machines"
         query_params = []
@@ -2607,11 +2718,16 @@ class WdatpClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2626,21 +2742,29 @@ class WdatpClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_single_machine_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_single_machine(
         self,
         machine_id: str,
         *,
@@ -2659,7 +2783,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2680,7 +2804,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def machine_tag_async(
+    def machine_tag(
         self,
         input: MachineTagInput,
         machine_id: str,
@@ -2700,7 +2824,7 @@ class WdatpClient(ConnectorClientBase):
             f"/api/machines/{quote(str(machine_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2721,7 +2845,7 @@ class WdatpClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def advanced_hunting_schema_async(
+    def advanced_hunting_schema(
         self,
         input: AdvancedHuntingSchemaInput,
         *,
@@ -2739,7 +2863,7 @@ class WdatpClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/api/advancedqueries/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

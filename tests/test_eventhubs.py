@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.eventhubs import EventhubsClient
 from azure.connectors.eventhubs import (
-    EventhubsClient,
     Event,
     SendEventsInput,
     ObjectEntity,
@@ -125,11 +125,11 @@ class TestTriggerOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.generate_event_schema_async(
+            result = await client.generate_event_schema(
                 content_type="application/json",
                 content_schema="schema-1"
             )
@@ -159,11 +159,11 @@ class TestSendEvent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_event_async(
+            await client.send_event(
                 input=event_input,
                 event_hub_name="myeventhub"
             )
@@ -189,11 +189,11 @@ class TestSendEvent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_event_async(
+            await client.send_event(
                 input=event_input,
                 event_hub_name="myeventhub",
                 partition_key="partition-1"
@@ -216,12 +216,12 @@ class TestSendEvent:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_event_async(
+                await client.send_event(
                     input=event_input,
                     event_hub_name="myeventhub"
                 )
@@ -248,11 +248,11 @@ class TestSendEvents:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_events_async(
+            await client.send_events(
                 input=events_input,
                 event_hub_name="myeventhub",
                 partition_key="partition-1"
@@ -276,11 +276,11 @@ class TestSendEvents:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.send_events_async(
+            await client.send_events(
                 input=events_input,
                 event_hub_name="myeventhub",
                 partition_key="partition-2"
@@ -304,12 +304,12 @@ class TestSendEvents:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_events_async(
+                await client.send_events(
                     input=events_input,
                     event_hub_name="myeventhub",
                     partition_key="partition-1"
@@ -428,12 +428,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_partition_keys_async(event_hub_name="hub1")
-            await client.get_partition_keys_async(event_hub_name="hub2")
+            await client.get_partition_keys(event_hub_name="hub1")
+            await client.get_partition_keys(event_hub_name="hub2")
 
             assert mock_send.call_count == 2
 
@@ -449,11 +449,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_partition_keys_async(
+            await client.get_partition_keys(
                 event_hub_name="my-event-hub"
             )
 
@@ -473,11 +473,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_event_hubs_async()
+                await client.get_event_hubs()
 
             assert exc_info.value.status_code == 401

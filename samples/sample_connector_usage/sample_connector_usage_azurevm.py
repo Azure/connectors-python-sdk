@@ -20,10 +20,8 @@ Usage:
 
     python sample_connector_usage_azurevm.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azurevm import AzurevmClient
 
@@ -42,15 +40,15 @@ VMSS_NAME = os.environ.get("AZURE_VMSS_NAME", "your-vmss-name")
 VMSS_INSTANCE_ID = os.environ.get("AZURE_VMSS_INSTANCE_ID", "0")
 
 
-async def example_1_get_virtual_machine():
+def example_1_get_virtual_machine():
     """Example 1: Get details of a virtual machine."""
     print("\n=== Example 1: Get Virtual Machine ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.virtual_machine_get_async(
+                result = client.virtual_machine_get(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -70,15 +68,15 @@ async def example_1_get_virtual_machine():
                 print(f"Error: {ex}")
 
 
-async def example_2_start_virtual_machine():
+def example_2_start_virtual_machine():
     """Example 2: Start a virtual machine."""
     print("\n=== Example 2: Start Virtual Machine ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_start_async(
+                client.virtual_machine_start(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -93,15 +91,15 @@ async def example_2_start_virtual_machine():
                 print(f"Error: {ex}")
 
 
-async def example_3_deallocate_virtual_machine():
+def example_3_deallocate_virtual_machine():
     """Example 3: Deallocate (stop and release resources) a virtual machine."""
     print("\n=== Example 3: Deallocate Virtual Machine ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_deallocate_async(
+                client.virtual_machine_deallocate(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -116,15 +114,15 @@ async def example_3_deallocate_virtual_machine():
                 print(f"Error: {ex}")
 
 
-async def example_4_restart_virtual_machine():
+def example_4_restart_virtual_machine():
     """Example 4: Restart a virtual machine."""
     print("\n=== Example 4: Restart Virtual Machine ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                await client.virtual_machine_restart_async(
+                client.virtual_machine_restart(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_name=VM_NAME
@@ -138,15 +136,15 @@ async def example_4_restart_virtual_machine():
                 print(f"Error: {ex}")
 
 
-async def example_5_get_vm_in_scale_set():
+def example_5_get_vm_in_scale_set():
     """Example 5: Get details of a VM in a scale set."""
     print("\n=== Example 5: Get VM in Scale Set ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.virtual_machine_in_scale_set_get_async(
+                result = client.virtual_machine_in_scale_set_get(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_scale_set_name=VMSS_NAME,
@@ -167,17 +165,17 @@ async def example_5_get_vm_in_scale_set():
                 print(f"Error: {ex}")
 
 
-async def example_6_scale_set_operations():
+def example_6_scale_set_operations():
     """Example 6: Perform operations on a VM in a scale set."""
     print("\n=== Example 6: Scale Set VM Operations ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with AzurevmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Start VM in scale set
                 print(f"Starting VMSS instance {VMSS_INSTANCE_ID}...")
-                await client.virtual_machine_in_scale_set_start_async(
+                client.virtual_machine_in_scale_set_start(
                     subscription_id=SUBSCRIPTION_ID,
                     resource_group_name=RESOURCE_GROUP,
                     virtual_machine_scale_set_name=VMSS_NAME,
@@ -186,11 +184,11 @@ async def example_6_scale_set_operations():
                 print("Start command sent")
 
                 # Other available operations (commented out):
-                # - virtual_machine_in_scale_set_deallocate_async
-                # - virtual_machine_in_scale_set_power_off_async
-                # - virtual_machine_in_scale_set_restart_async
-                # - virtual_machine_in_scale_set_redeploy_async
-                # - virtual_machine_in_scale_set_reimage_async
+                # - virtual_machine_in_scale_set_deallocate
+                # - virtual_machine_in_scale_set_power_off
+                # - virtual_machine_in_scale_set_restart
+                # - virtual_machine_in_scale_set_redeploy
+                # - virtual_machine_in_scale_set_reimage
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -198,7 +196,7 @@ async def example_6_scale_set_operations():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREVM_CONNECTION_URL environment variable not set.")
@@ -208,7 +206,7 @@ async def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     # Only run the read-only example by default
-    await example_1_get_virtual_machine()
+    example_1_get_virtual_machine()
 
     # Uncomment to run VM control operations:
     # await example_2_start_virtual_machine()
@@ -221,4 +219,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

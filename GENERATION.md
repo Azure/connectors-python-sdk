@@ -7,9 +7,9 @@ This document describes how to generate typed Python connector clients using the
 The **CodefulSdkGenerator** tool generates typed Python clients from managed connector swagger definitions. The generated code provides:
 
 - **Type-safe contracts** - Dataclass models with proper JSON field mappings
-- **Typed client classes** - Async methods for each connector action with comprehensive docstrings
+- **Paired client classes** - Root sync and `.aio` async clients with identical unsuffixed operations
 - **Authentication handling** - Caller-owned Azure Core token or key credentials
-- **Async/await support** - Native asyncio integration through the Azure Core pipeline
+- **Azure Core paging** - `ItemPaged` and `AsyncItemPaged` for pageable operations
 
 ## Prerequisites
 
@@ -66,7 +66,7 @@ responses from an earlier run.
 
 ### Generate Python Client SDK (Recommended)
 
-Generates typed async Python clients for calling connectors directly from Azure Functions:
+Generates synchronous and asynchronous Python clients in one request:
 
 ```powershell
 # Generate all connectors
@@ -81,9 +81,12 @@ LogicAppsCompiler.exe "<path-to-sdk>/src/azure/connectors" --pythonDirectClient 
 
 **Output structure per connector:**
 
-- `{connector}.py` - Combined dataclass models and client in one file (e.g., `office365.py`, `sharepointonline.py`)
+- `{connector}.py` - Synchronous client plus shared models, aliases, enums, and trigger metadata
+- `aio/{connector}.py` - Asynchronous client importing and re-exporting shared declarations from root
 
-**Note:** The CLI accepts one positional output directory. Use `--pythonDirectClient` for Python generation.
+The generator writes each pair atomically and removes both outputs if either
+member fails. The CLI accepts one positional output directory. Use
+`--pythonDirectClient` for Python generation.
 
 ### Generate C# DirectClient SDK
 
@@ -135,13 +138,21 @@ investigate live differences instead of substituting cached inputs to make them 
 
 ### Pageable Results
 
-Pageable operations expose async iterators. Iteration follows continuation links and
-yields items directly; an empty response yields no items. Do not await a page envelope:
+Pageable operations return Azure Core pagers. Iteration follows continuation
+links and yields items directly; an empty response yields no items. Do not await
+pager construction:
 
 ```python
-async for item in client.get_items_async(...):
+for item in sync_client.get_items(...):
+    process_item(item)
+
+async for item in async_client.get_items(...):
     process_item(item)
 ```
+
+Root clients return `ItemPaged`; aio clients return `AsyncItemPaged`. Both
+support `by_page(continuation_token=...)`. Request controls and response hooks
+apply to every page request.
 
 ### Consumer Review Checks
 
@@ -169,9 +180,8 @@ async for item in client.get_items_async(...):
 from dataclasses import dataclass, field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import ConnectorClientBase
 
@@ -200,11 +210,11 @@ class Office365Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """Initialize the Office 365 client with an Azure Core credential."""
@@ -220,7 +230,7 @@ class Office365Client(ConnectorClientBase):
         )
         self._connection_runtime_url = connection_runtime_url.rstrip("/")
     
-    async def send_email_v2_async(
+    def send_email_v2(
         self,
         to: str,
         subject: str,
@@ -244,9 +254,14 @@ class Office365Client(ConnectorClientBase):
             importance: Email importance (Low, Normal, High)
             is_html: Whether body is HTML
         """
-        # Generated implementation calls self._http_client.send_async(...)
+        # Generated implementation calls self._http_client.send(...)
         # with proper serialization and error handling
 ```
+
+The paired `aio/office365.py` defines the same `Office365Client` operations
+with `async def`, `AsyncTokenCredential`, and `AsyncHttpTransport`. It imports
+models and other shared declarations from `azure.connectors.office365` rather
+than generating duplicate definitions.
 
 ### Key Patterns in Generated Code
 
@@ -290,31 +305,33 @@ class SharepointonlineClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
     ):
         super().__init__(credential)
         self._connection_runtime_url = connection_runtime_url.rstrip("/")
 ```
 
 This inheritance provides:
+
 - HTTP client with retry logic
 - Authentication through caller-owned Azure Core credentials
-- Lifecycle management (async context manager, close)
+- Lifecycle management through matching sync or async context managers
 - Error handling with `ConnectorException`
 
-#### 4. Async Method Signatures
+#### 4. Matching Method Signatures
 
-All connector actions are generated as async methods:
+Root and aio clients expose the same unsuffixed operation names and parameters.
+The execution model and pager type differ:
 
 ```python
-async def get_items_async(
+def get_items(
     self,
     dataset: str,
     table: str,
     filter_query: Optional[str] = None,
     order_by: Optional[str] = None,
-    top: Optional[int] = None
-) -> Dict[str, Any]:
+    top: Optional[int] = None,
+) -> ItemPaged[dict[str, Any]]:
     """
     Get items from a SharePoint list.
     
@@ -324,15 +341,27 @@ async def get_items_async(
         filter_query: OData filter expression
         order_by: OData orderBy expression
         top: Maximum number of items to return
-    
-    Returns:
-        Dictionary with 'value' key containing list of items
     """
+    ...
+```
+
+```python
+def get_items(
+    self,
+    dataset: str,
+    table: str,
+    filter_query: Optional[str] = None,
+    order_by: Optional[str] = None,
+    top: Optional[int] = None,
+) -> AsyncItemPaged[dict[str, Any]]:
+    """Return the asynchronous item pager without awaiting construction."""
+    ...
 ```
 
 #### 5. Type Hints and Docstrings
 
 The generator produces:
+
 - Full type hints for all parameters and return types
 - Docstrings from connector metadata
 - Optional parameter defaults
@@ -342,22 +371,16 @@ The generator produces:
 
 After generating a new connector client:
 
-1. **Copy the generated file** to `src/azure/connectors/`:
+1. **Copy the generated pair** to `src/azure/connectors/`:
 
    ```powershell
    Copy-Item "output\office365.py" "src\azure\connectors\office365.py"
+    Copy-Item "output\aio\office365.py" "src\azure\connectors\aio\office365.py"
    ```
 
-2. **Update `src/azure/connectors/__init__.py`** to export the client:
-
-   ```python
-   from azure.connectors.office365 import Office365Client
-   
-   __all__ = [
-       "Office365Client",
-       # ... other clients
-   ]
-   ```
+2. **Do not add package-level client exports.** Consumers import each client
+    from its connector module. Keep root and aio package `__init__.py` files
+    minimal.
 
 3. **Create unit tests** following the pattern in `tests/`:
 
@@ -378,7 +401,10 @@ After generating a new connector client:
    pytest
    ```
 
-5. **Update documentation**:
+5. **Create both sample variants** under `samples/sample_connector_usage/` and
+    `samples/sample_connector_usage/aio/`.
+
+6. **Update documentation**:
    - Add connector to README.md validated connectors table
    - Update ROADMAP.md status
    - Add sample code to `samples/` directory
@@ -468,7 +494,7 @@ Every generated connector client MUST satisfy these invariants before merge:
 
 **Correct pattern:**
 ```python
-response = await self.http_client.send_async(
+response = self.http_client.send(
     method="DELETE",
     url=request_uri,
 )
@@ -485,13 +511,16 @@ if not (200 <= response.status < 300):
 
 **Incorrect pattern (MUST NOT pass review):**
 ```python
-await self.http_client.send_async(  # Result discarded - silent failures!
+self.http_client.send(  # Result discarded - silent failures!
     method="DELETE",
     url=request_uri,
 )
 ```
 
-**Validation:** The `test_no_unchecked_send_async_calls` test in `tests/test_code_quality.py` scans for unchecked `send_async` calls. Additionally, unit tests for void methods MUST assert that non-2xx responses raise `ConnectorException`.
+The aio pattern awaits the same `send` method. **Validation:**
+`test_no_unchecked_send_calls` in `tests/test_code_quality.py` scans root and aio
+modules for discarded calls. Unit tests for void methods must also assert that
+non-2xx responses raise `ConnectorException`.
 
 ### 3. Test Coverage
 
@@ -531,7 +560,10 @@ When fixing generator bugs (per the "fix the generator, not generated output" ru
 
 ### Key Differences from .NET Generator
 
-The .NET SDK centralizes error handling in `ConnectorClientBase.CallConnectorAsync()` — this base method auto-throws on non-2xx for both value-returning and void operations. The Python emitter must explicitly generate the status check in each method body because Python's `http_client.send_async()` does not auto-raise.
+The .NET SDK centralizes error handling in
+`ConnectorClientBase.CallConnectorAsync()`. The Python emitter must explicitly
+generate the status check in each root and aio method body because
+`http_client.send()` does not auto-raise.
 
 **If you find a Python generator bug:**
 1. Fix it in `DirectClientPythonCodeGenerator.cs`

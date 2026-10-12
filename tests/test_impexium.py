@@ -3,7 +3,8 @@
 """Contract tests for ImpexiumClient."""
 
 import azure.connectors.impexium as impexium_module
-from azure.connectors.impexium import ImpexiumClient, TRIGGER_OPERATIONS
+from azure.connectors.aio.impexium import ImpexiumClient
+from azure.connectors.impexium import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 

@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.sendgrid import SendgridClient
 from azure.connectors.sendgrid import (
     AddGlobalSuppressRequestAndResponse,
     EmailRequest,
-    SendgridClient,
 )
 from azure.connectors.sdk import (
     ConnectorException,
@@ -118,11 +118,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_global_suppression_async(
+            result = await client.add_global_suppression(
                 input=AddGlobalSuppressRequestAndResponse(recipient_emails=["a@b.com"]),
             )
 
@@ -143,11 +143,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_global_suppression_async(email="a@b.com")
+            result = await client.get_global_suppression(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -165,11 +165,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_global_suppression_async(email="a@b.com")
+            result = await client.delete_global_suppression(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
@@ -187,11 +187,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_recipient_to_list_async(
+            result = await client.add_recipient_to_list(
                 list_id="L1",
                 recipient_id="R1",
             )
@@ -212,11 +212,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_bounce_async(email="a@b.com")
+            result = await client.get_bounce(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -234,11 +234,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_bounce_async(email="a@b.com")
+            result = await client.delete_bounce(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
@@ -256,11 +256,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.check_email_is_in_unsubscribes_list_async(email="a@b.com")
+            result = await client.check_email_is_in_unsubscribes_list(email="a@b.com")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -278,11 +278,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_email_async(
+            result = await client.send_email(
                 input=EmailRequest(to="a@b.com", subject="Hi", text="Hello"),
             )
 
@@ -303,11 +303,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_recipient_lists_async()
+            result = await client.list_recipient_lists()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -325,11 +325,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_recipients_async()
+            result = await client.list_recipients()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -347,11 +347,11 @@ class TestSendgridClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_recipients_async()
+            result = await client.list_recipients()
 
             assert result is None
 
@@ -385,35 +385,35 @@ class TestSendgridClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "add_global_suppression":
-                    await client.add_global_suppression_async(
+                    await client.add_global_suppression(
                         input=AddGlobalSuppressRequestAndResponse()
                     )
                 elif operation == "get_global_suppression":
-                    await client.get_global_suppression_async(email="a@b.com")
+                    await client.get_global_suppression(email="a@b.com")
                 elif operation == "delete_global_suppression":
-                    await client.delete_global_suppression_async(email="a@b.com")
+                    await client.delete_global_suppression(email="a@b.com")
                 elif operation == "add_recipient_to_list":
-                    await client.add_recipient_to_list_async(
+                    await client.add_recipient_to_list(
                         list_id="L1", recipient_id="R1"
                     )
                 elif operation == "get_bounce":
-                    await client.get_bounce_async(email="a@b.com")
+                    await client.get_bounce(email="a@b.com")
                 elif operation == "delete_bounce":
-                    await client.delete_bounce_async(email="a@b.com")
+                    await client.delete_bounce(email="a@b.com")
                 elif operation == "check_email_is_in_unsubscribes_list":
-                    await client.check_email_is_in_unsubscribes_list_async(email="a@b.com")
+                    await client.check_email_is_in_unsubscribes_list(email="a@b.com")
                 elif operation == "send_email":
-                    await client.send_email_async(input=EmailRequest())
+                    await client.send_email(input=EmailRequest())
                 elif operation == "list_recipient_lists":
-                    await client.list_recipient_lists_async()
+                    await client.list_recipient_lists()
                 else:
-                    await client.list_recipients_async()
+                    await client.list_recipients()
 
             assert exc_info.value.status_code == 500
 

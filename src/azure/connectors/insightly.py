@@ -10,15 +10,41 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "InsightlyClient",
+    "Address",
+    "Contact",
+    "ContactInfo",
+    "ContactRequest",
+    "Event",
+    "Lead",
+    "LeadRequest",
+    "ListContactsResponse",
+    "ListEventsResponse",
+    "ListLeadsResponse",
+    "ListProjectsResponse",
+    "ListTasksResponse",
+    "ListUsersResponse",
+    "ObjectEntity",
+    "Organization",
+    "OrganizationRequest",
+    "Project",
+    "ProjectRequest",
+    "Tag",
+    "TaskObject",
+    "TaskRequest",
+    "User",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1389,7 +1415,7 @@ class InsightlyClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1398,7 +1424,7 @@ class InsightlyClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1418,8 +1444,8 @@ class InsightlyClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1446,7 +1472,7 @@ class InsightlyClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "insightly"
 
-    async def list_tasks_async(
+    def list_tasks(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1461,7 +1487,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Tasks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1482,7 +1508,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_async(
+    def update_task(
         self,
         input: TaskRequest,
         id: str,
@@ -1506,7 +1532,7 @@ class InsightlyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1527,7 +1553,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_task_async(
+    def add_task(
         self,
         input: TaskRequest,
         *,
@@ -1543,7 +1569,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Tasks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1564,7 +1590,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_projects_async(
+    def list_projects(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1579,7 +1605,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Projects"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1600,7 +1626,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_project_async(
+    def update_project(
         self,
         input: ProjectRequest,
         id: str,
@@ -1624,7 +1650,7 @@ class InsightlyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1645,7 +1671,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_project_async(
+    def add_project(
         self,
         input: ProjectRequest,
         *,
@@ -1661,7 +1687,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Projects"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1682,7 +1708,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_leads_async(
+    def list_leads(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1697,7 +1723,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Leads"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1718,7 +1744,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_lead_async(
+    def update_lead(
         self,
         input: LeadRequest,
         id: str,
@@ -1742,7 +1768,7 @@ class InsightlyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1763,7 +1789,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_lead_async(
+    def add_lead(
         self,
         input: LeadRequest,
         *,
@@ -1779,7 +1805,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Leads"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1800,7 +1826,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_contacts_async(
+    def list_contacts(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1815,7 +1841,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Contacts"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1836,7 +1862,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_contact_async(
+    def update_contact(
         self,
         input: ContactRequest,
         id: str,
@@ -1860,7 +1886,7 @@ class InsightlyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1881,7 +1907,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_contact_async(
+    def add_contact(
         self,
         input: ContactRequest,
         *,
@@ -1897,7 +1923,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Contacts"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1918,7 +1944,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_users_async(
+    def list_users(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1933,7 +1959,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Users"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1954,7 +1980,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_task_async(
+    def delete_task(
         self,
         task_id: int,
         *,
@@ -1973,7 +1999,7 @@ class InsightlyClient(ConnectorClientBase):
             f"/Tasks/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1994,7 +2020,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def follow_task_async(
+    def follow_task(
         self,
         task_id: int,
         *,
@@ -2013,7 +2039,7 @@ class InsightlyClient(ConnectorClientBase):
             f"/Tasks/{quote(str(task_id), safe='')}/Follow"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2034,7 +2060,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_project_async(
+    def delete_project(
         self,
         project_id: int,
         *,
@@ -2053,7 +2079,7 @@ class InsightlyClient(ConnectorClientBase):
             f"/Projects/{quote(str(project_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2074,7 +2100,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_lead_async(
+    def delete_lead(
         self,
         lead_id: int,
         *,
@@ -2093,7 +2119,7 @@ class InsightlyClient(ConnectorClientBase):
             f"/Leads/{quote(str(lead_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2114,7 +2140,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_contact_async(
+    def delete_contact(
         self,
         contact_id: int,
         *,
@@ -2133,7 +2159,7 @@ class InsightlyClient(ConnectorClientBase):
             f"/Contacts/{quote(str(contact_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2154,7 +2180,7 @@ class InsightlyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_organization_async(
+    def add_organization(
         self,
         input: OrganizationRequest,
         *,
@@ -2170,7 +2196,7 @@ class InsightlyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Organisations"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

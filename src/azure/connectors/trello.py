@@ -10,15 +10,49 @@ from typing import Optional, Dict, List as TypingList, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "TrelloClient",
+    "Badges",
+    "Board",
+    "BoardLabel",
+    "BoardWithChecklists",
+    "Card",
+    "CardInAction",
+    "CardWithChecklists",
+    "CheckItemState",
+    "Checkitem",
+    "Checklist",
+    "ClientSubscription",
+    "Comment",
+    "CommentPost",
+    "CreateBoard",
+    "CreateCard",
+    "CreateList",
+    "CreateListResponse",
+    "Label",
+    "List",
+    "Member",
+    "Membership",
+    "ObjectEntity",
+    "Perfs",
+    "SubscriptionPayload",
+    "SubscriptionResponse",
+    "Team",
+    "TeamPreferences",
+    "UpdateBoard",
+    "UpdateCard",
+    "Webhook",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1177,7 +1211,7 @@ class TrelloClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1186,7 +1220,7 @@ class TrelloClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1206,8 +1240,8 @@ class TrelloClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1234,7 +1268,7 @@ class TrelloClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "trello"
 
-    async def list_cards_async(
+    def list_cards(
         self,
         board_id: str,
         actions: Optional[str] = None,
@@ -1334,7 +1368,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1355,7 +1389,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_cards_simple_async(
+    def list_cards_simple(
         self,
         board_id: str,
         *,
@@ -1374,7 +1408,7 @@ class TrelloClient(ConnectorClientBase):
             f"/simple/boards/{quote(str(board_id), safe='')}/cards"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1395,7 +1429,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_card_async(
+    def get_card(
         self,
         card_id: str,
         board_id: str,
@@ -1560,7 +1594,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1581,7 +1615,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_card_async(
+    def delete_card(
         self,
         card_id: str,
         board_id: str,
@@ -1608,7 +1642,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1629,7 +1663,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_boards_async(
+    def list_boards(
         self,
         filter: Optional[str] = None,
         fields: Optional[str] = None,
@@ -1719,7 +1753,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1740,7 +1774,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_boards_simple_async(
+    def list_boards_simple(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1756,7 +1790,7 @@ class TrelloClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/simple/member/me/boards"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1777,7 +1811,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_board_async(
+    def get_board(
         self,
         board_id: str,
         actions: Optional[str] = None,
@@ -2021,7 +2055,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2042,7 +2076,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_board_async(
+    def update_board(
         self,
         input: UpdateBoard,
         board_id: str,
@@ -2062,7 +2096,7 @@ class TrelloClient(ConnectorClientBase):
             f"/boards/{quote(str(board_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2083,7 +2117,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_lists_async(
+    def list_lists(
         self,
         board_id: str,
         cards: Optional[str] = None,
@@ -2129,7 +2163,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2150,7 +2184,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_lists_simple_async(
+    def list_lists_simple(
         self,
         board_id: str,
         *,
@@ -2169,7 +2203,7 @@ class TrelloClient(ConnectorClientBase):
             f"/simple/boards/{quote(str(board_id), safe='')}/lists"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2190,7 +2224,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_list_async(
+    def get_list(
         self,
         list_id: str,
         board_id: str,
@@ -2248,7 +2282,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2269,7 +2303,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_list_async(
+    def update_list(
         self,
         list_id: str,
         board_id: str,
@@ -2326,7 +2360,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2347,7 +2381,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_profile_async(
+    def get_user_profile(
         self,
         fields: Optional[str] = None,
         *,
@@ -2371,7 +2405,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2392,7 +2426,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_teams_async(
+    def list_teams(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2409,7 +2443,7 @@ class TrelloClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/members/me/organizations"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2430,7 +2464,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_team_members_async(
+    def list_team_members(
         self,
         team_id: str,
         *,
@@ -2449,7 +2483,7 @@ class TrelloClient(ConnectorClientBase):
             f"/organizations/{quote(str(team_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2470,7 +2504,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_board_members_async(
+    def list_board_members(
         self,
         board_id: str,
         *,
@@ -2489,7 +2523,7 @@ class TrelloClient(ConnectorClientBase):
             f"/boards/{quote(str(board_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2510,7 +2544,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_board_labels_async(
+    def list_board_labels(
         self,
         board_id: str,
         *,
@@ -2533,7 +2567,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2554,7 +2588,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_team_for_board_async(
+    def get_team_for_board(
         self,
         board_id: str,
         *,
@@ -2573,7 +2607,7 @@ class TrelloClient(ConnectorClientBase):
             f"/boards/{quote(str(board_id), safe='')}/organization"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2594,7 +2628,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_card_members_async(
+    def list_card_members(
         self,
         card_id: str,
         board_id: str,
@@ -2621,7 +2655,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2642,7 +2676,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_card_comments_async(
+    def list_card_comments(
         self,
         card_id: str,
         board_id: str,
@@ -2669,7 +2703,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2690,7 +2724,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_comment_to_card_async(
+    def add_comment_to_card(
         self,
         input: CommentPost,
         card_id: str,
@@ -2718,7 +2752,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2739,7 +2773,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_member_to_card_async(
+    def add_member_to_card(
         self,
         card_id: str,
         board_id: str,
@@ -2771,7 +2805,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2792,7 +2826,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_board_async(
+    def create_board(
         self,
         input: CreateBoard,
         *,
@@ -2808,7 +2842,7 @@ class TrelloClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/boards"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2829,7 +2863,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_list_async(
+    def create_list(
         self,
         input: CreateList,
         *,
@@ -2845,7 +2879,7 @@ class TrelloClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2866,7 +2900,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def close_board_async(
+    def close_board(
         self,
         board_id: str,
         *,
@@ -2885,7 +2919,7 @@ class TrelloClient(ConnectorClientBase):
             f"/boards/{quote(str(board_id), safe='')}/closed"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2906,7 +2940,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_card_async(
+    def create_card(
         self,
         input: CreateCard,
         board_id: str,
@@ -2930,7 +2964,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2951,7 +2985,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_card_async(
+    def update_card(
         self,
         input: UpdateCard,
         card_id: str,
@@ -2979,7 +3013,7 @@ class TrelloClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,

@@ -10,15 +10,27 @@ from typing import Optional, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "KeyvaultClient",
+    "KeyDecryptInput",
+    "KeyDecryptOutput",
+    "KeyEncryptInput",
+    "KeyEncryptOutput",
+    "KeyMetadata",
+    "KeyMetadataCollection",
+    "Secret",
+    "SecretMetadata",
+    "SecretMetadataCollection",
+]
 
 
 # Type Definitions
@@ -250,7 +262,7 @@ class KeyvaultClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -259,7 +271,7 @@ class KeyvaultClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -279,8 +291,8 @@ class KeyvaultClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -307,7 +319,7 @@ class KeyvaultClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "keyvault"
 
-    async def list_keys_async(
+    def list_keys(
         self,
         *,
         timeout: Optional[float] = None,
@@ -322,7 +334,7 @@ class KeyvaultClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/keys"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -343,7 +355,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_key_versions_async(
+    def list_key_versions(
         self,
         key_name: str,
         *,
@@ -362,7 +374,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/keys/{quote(str(key_name), safe='')}/versions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -383,7 +395,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_key_metadata_async(
+    def get_key_metadata(
         self,
         key_name: str,
         *,
@@ -402,7 +414,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/keys/{quote(str(key_name), safe='')}/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -423,7 +435,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_key_version_metadata_async(
+    def get_key_version_metadata(
         self,
         key_name: str,
         key_version: str,
@@ -447,7 +459,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -468,7 +480,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def encrypt_data_async(
+    def encrypt_data(
         self,
         input: KeyEncryptInput,
         key_name: str,
@@ -488,7 +500,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/keys/{quote(str(key_name), safe='')}/encrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -509,7 +521,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def encrypt_data_with_version_async(
+    def encrypt_data_with_version(
         self,
         input: KeyEncryptInput,
         key_name: str,
@@ -534,7 +546,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/encrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -555,7 +567,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def decrypt_data_async(
+    def decrypt_data(
         self,
         input: KeyDecryptInput,
         key_name: str,
@@ -577,7 +589,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/keys/{quote(str(key_name), safe='')}/decrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -598,7 +610,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def decrypt_data_with_version_async(
+    def decrypt_data_with_version(
         self,
         input: KeyDecryptInput,
         key_name: str,
@@ -625,7 +637,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/decrypt"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -646,7 +658,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_secrets_async(
+    def list_secrets(
         self,
         *,
         timeout: Optional[float] = None,
@@ -661,7 +673,7 @@ class KeyvaultClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/secrets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -682,7 +694,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_secret_versions_async(
+    def list_secret_versions(
         self,
         secret_name: str,
         *,
@@ -701,7 +713,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/secrets/{quote(str(secret_name), safe='')}/versions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -722,7 +734,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_metadata_async(
+    def get_secret_metadata(
         self,
         secret_name: str,
         *,
@@ -741,7 +753,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/secrets/{quote(str(secret_name), safe='')}/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -762,7 +774,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_version_metadata_async(
+    def get_secret_version_metadata(
         self,
         secret_name: str,
         secret_version: str,
@@ -786,7 +798,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/metadata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -807,7 +819,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_async(
+    def get_secret(
         self,
         secret_name: str,
         *,
@@ -827,7 +839,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/secrets/{quote(str(secret_name), safe='')}/value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -848,7 +860,7 @@ class KeyvaultClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_secret_version_async(
+    def get_secret_version(
         self,
         secret_name: str,
         secret_version: str,
@@ -873,7 +885,7 @@ class KeyvaultClient(ConnectorClientBase):
             f"/value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

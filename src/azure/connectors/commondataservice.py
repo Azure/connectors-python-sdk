@@ -6,19 +6,69 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "CommondataserviceClient",
+    "ActionsDynamicValuesList",
+    "AssociateEntityRequest",
+    "AssociateRecordsPatchItemInput",
+    "BlobDataSetsMetadata",
+    "CallbackRegistration",
+    "DataSet",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DisplayCollectionName",
+    "EntitiesDynamicValuesList",
+    "EntitiesDynamicValuesListItem",
+    "EntityItem",
+    "EntityItemList",
+    "EntityMetadata",
+    "EntityRelationshipsDynamicValuesList",
+    "GetItemResponse",
+    "Item",
+    "ItemsList",
+    "ObjectEntity",
+    "OrganizationsDynamicValuesList",
+    "OrganizationsDynamicValuesListItem",
+    "PassThroughNativeQuery",
+    "PatchItemInput",
+    "PatchItemResponse",
+    "PostItemInput",
+    "PostItemResponse",
+    "Procedure",
+    "SearchOutput",
+    "SearchRequestBody",
+    "SubscriptionRequest",
+    "SubscriptionResponse",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "UpdateTriggerSubscriptionRequest",
+    "UserLocalizedLabel",
+    "WebhookNotificationContent",
+    "WebhookNotificationContentForWhenAnActionIsPerformed",
+    "WhenAnActionIsPerformedSubscriptionRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -772,7 +822,7 @@ class CommondataserviceClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -781,7 +831,7 @@ class CommondataserviceClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -801,8 +851,8 @@ class CommondataserviceClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -869,7 +919,7 @@ class CommondataserviceClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_data_sets_metadata_async(
+    def get_data_sets_metadata(
         self,
         *,
         timeout: Optional[float] = None,
@@ -882,7 +932,7 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/$metadata.json/datasets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -903,7 +953,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_next_page_async(
+    def get_next_page(
         self,
         next_link: str,
         *,
@@ -922,7 +972,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/nextLink/{quote(str(next_link), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -943,7 +993,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def associate_records_patch_item_async(
+    def associate_records_patch_item(
         self,
         input: AssociateRecordsPatchItemInput,
         dataset: str,
@@ -974,7 +1024,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(relationship), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -995,7 +1045,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_attachment_async(
+    def create_attachment(
         self,
         input: bytes,
         dataset: str,
@@ -1032,7 +1082,7 @@ class CommondataserviceClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -1056,7 +1106,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_attachment_async(
+    def delete_attachment(
         self,
         dataset: str,
         table: str,
@@ -1086,7 +1136,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(attachment_id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1102,7 +1152,7 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def delete_item_async(
+    def delete_item(
         self,
         dataset: str,
         table: str,
@@ -1129,7 +1179,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1145,7 +1195,7 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def disassociate_records_post_item_async(
+    def disassociate_records_post_item(
         self,
         dataset: str,
         table: str,
@@ -1178,7 +1228,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(related_id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1199,7 +1249,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def disassociate_single_value_record_delete_item_async(
+    def disassociate_single_value_record_delete_item(
         self,
         dataset: str,
         table: str,
@@ -1229,7 +1279,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(relationship), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1250,7 +1300,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_attachment_content_async(
+    def get_attachment_content(
         self,
         dataset: str,
         table: str,
@@ -1281,7 +1331,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/$value"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1299,7 +1349,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return response.content
 
-    async def get_collection_relationships_async(
+    def get_collection_relationships(
         self,
         dataset: str,
         table: str,
@@ -1334,7 +1384,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(target), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1355,7 +1405,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_data_sets_async(
+    def get_data_sets(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1368,7 +1418,7 @@ class CommondataserviceClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/datasets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1389,7 +1439,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    def get_item(
         self,
         dataset: str,
         table: str,
@@ -1416,7 +1466,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1437,7 +1487,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_attachments_async(
+    def get_item_attachments(
         self,
         dataset: str,
         table: str,
@@ -1465,7 +1515,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/attachments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1486,7 +1536,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_items_async(
+    def get_items(
         self,
         dataset: str,
         table: str,
@@ -1500,14 +1550,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List rows (legacy)
 
         This operation gets rows for a table
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1546,11 +1596,16 @@ class CommondataserviceClient(ConnectorClientBase):
             query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1565,21 +1620,29 @@ class CommondataserviceClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_metadata_for_patch_item_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_metadata_for_patch_item(
         self,
         dataset: str,
         table: str,
@@ -1605,7 +1668,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/patchitem"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1626,7 +1689,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_metadata_for_post_item_async(
+    def get_metadata_for_post_item(
         self,
         dataset: str,
         table: str,
@@ -1652,7 +1715,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/postitem"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1673,7 +1736,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_multi_select_metadata_async(
+    def get_multi_select_metadata(
         self,
         dataset: str,
         table: str,
@@ -1701,7 +1764,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/MultiSelect"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1722,7 +1785,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_option_set_metadata_async(
+    def get_option_set_metadata(
         self,
         dataset: str,
         table: str,
@@ -1752,7 +1815,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(str(type_), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1773,7 +1836,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_table_async(
+    def get_table(
         self,
         dataset: str,
         table: str,
@@ -1798,7 +1861,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1819,7 +1882,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_async(
+    def get_tables(
         self,
         dataset: str,
         *,
@@ -1839,7 +1902,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1860,7 +1923,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def patch_item_async(
+    def patch_item(
         self,
         input: PatchItemInput,
         dataset: str,
@@ -1888,7 +1951,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1909,7 +1972,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_item_async(
+    def post_item(
         self,
         input: PostItemInput,
         dataset: str,
@@ -1935,7 +1998,7 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

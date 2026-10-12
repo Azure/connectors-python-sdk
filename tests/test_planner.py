@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.planner import PlannerClient
 from azure.connectors.planner import (
-    PlannerClient,
     UnassignUsersInput,
     GetTaskResponse,
     AssignUsersInput,
@@ -149,11 +149,11 @@ class TestListMyTasksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_my_tasks_async())
+            result = await resolve_generated_result(client.list_my_tasks())
 
             mock_send.assert_called_once()
             assert result is not None
@@ -171,11 +171,11 @@ class TestListMyTasksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.list_my_tasks_async())
+            result = await resolve_generated_result(client.list_my_tasks())
             assert result == []
 
     @pytest.mark.asyncio
@@ -190,12 +190,12 @@ class TestListMyTasksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await resolve_generated_result(client.list_my_tasks_async())
+                await resolve_generated_result(client.list_my_tasks())
 
 
 class TestListGroupPlansAsync:
@@ -216,11 +216,11 @@ class TestListGroupPlansAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_group_plans_async(group_id="group-123")
+            result = await client.list_group_plans(group_id="group-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -239,12 +239,12 @@ class TestListGroupPlansAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.list_group_plans_async(group_id="invalid")
+                await client.list_group_plans(group_id="invalid")
 
 
 class TestGetTaskAsync:
@@ -265,11 +265,11 @@ class TestGetTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_task_async(id="task-123")
+            result = await client.get_task(id="task-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -289,12 +289,12 @@ class TestGetTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_task_async(id="invalid")
+                await client.get_task(id="invalid")
 
 
 class TestGetTaskDetailsAsync:
@@ -315,11 +315,11 @@ class TestGetTaskDetailsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_task_details_async(id="task-123")
+            result = await client.get_task_details(id="task-123")
 
             mock_send.assert_called_once()
             assert result is not None
@@ -337,11 +337,11 @@ class TestGetTaskDetailsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_task_details_async(id="task-123")
+            result = await client.get_task_details(id="task-123")
             assert result is None
 
 
@@ -363,11 +363,11 @@ class TestGetPlanDetailsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_plan_details_async(id="plan-123")
+            result = await client.get_plan_details(id="plan-123")
 
             mock_send.assert_called_once()
             assert result is not None
@@ -384,12 +384,12 @@ class TestGetPlanDetailsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_plan_details_async(id="plan-123")
+                await client.get_plan_details(id="plan-123")
 
 
 class TestCreateTaskAsync:
@@ -416,11 +416,11 @@ class TestCreateTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_task_async(input=task_input)
+            result = await client.create_task(input=task_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -442,12 +442,12 @@ class TestCreateTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.create_task_async(input=task_input)
+                await client.create_task(input=task_input)
 
 
 class TestCreateBucketAsync:
@@ -474,11 +474,11 @@ class TestCreateBucketAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_bucket_async(input=bucket_input)
+            result = await client.create_bucket(input=bucket_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -510,11 +510,11 @@ class TestUpdateTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.update_task_async(
+            result = await client.update_task(
                 input=update_input,
                 id="task-123"
             )
@@ -539,12 +539,12 @@ class TestUpdateTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.update_task_async(input=update_input, id="invalid")
+                await client.update_task(input=update_input, id="invalid")
 
 
 class TestUpdateTaskDetailsAsync:
@@ -569,11 +569,11 @@ class TestUpdateTaskDetailsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.update_task_details_async(
+            result = await client.update_task_details(
                 input=update_input,
                 id="task-123"
             )
@@ -599,11 +599,11 @@ class TestDeleteTaskAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_task_async(id="task-123")
+            await client.delete_task(id="task-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -633,11 +633,11 @@ class TestAssignUsersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.assign_users_async(
+            result = await client.assign_users(
                 input=assign_input,
                 id="task-123"
             )
@@ -661,12 +661,12 @@ class TestAssignUsersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.assign_users_async(input=assign_input, id="task-123")
+                await client.assign_users(input=assign_input, id="task-123")
 
 
 class TestUnassignUsersAsync:
@@ -691,11 +691,11 @@ class TestUnassignUsersAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.unassign_users_async(
+            result = await client.unassign_users(
                 input=unassign_input,
                 id="task-123"
             )

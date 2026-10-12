@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azuread import AzureadClient
 from azure.connectors.azuread import (
-    AzureadClient,
     CreateOffice365GroupInput,
     CreateSecurityGroupInput,
     CreateUserRequest,
@@ -141,11 +141,11 @@ class TestCreateOffice365Group:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_office365_group_async(input=group_input)
+            result = await client.create_office365_group(input=group_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -167,11 +167,11 @@ class TestCreateOffice365Group:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_office365_group_async(input=group_input)
+            result = await client.create_office365_group(input=group_input)
             assert result is None
 
     @pytest.mark.asyncio
@@ -187,12 +187,12 @@ class TestCreateOffice365Group:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_office365_group_async(input=group_input)
+                await client.create_office365_group(input=group_input)
 
             assert exc_info.value.status_code == 400
 
@@ -222,11 +222,11 @@ class TestCreateSecurityGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_security_group_async(input=group_input)
+            result = await client.create_security_group(input=group_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -248,12 +248,12 @@ class TestCreateSecurityGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_security_group_async(input=group_input)
+                await client.create_security_group(input=group_input)
 
             assert exc_info.value.status_code == 403
 
@@ -270,11 +270,11 @@ class TestCreateSecurityGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_security_group_async(input=group_input)
+            result = await client.create_security_group(input=group_input)
             assert result is None
 
 
@@ -308,11 +308,11 @@ class TestCreateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_user_async(input=user_input)
+            result = await client.create_user(input=user_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -347,11 +347,11 @@ class TestCreateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_user_async(input=user_input)
+            result = await client.create_user(input=user_input)
             assert result["id"] == "user-full"
 
     @pytest.mark.asyncio
@@ -370,12 +370,12 @@ class TestCreateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_user_async(input=user_input)
+                await client.create_user(input=user_input)
 
             assert exc_info.value.status_code == 409
 
@@ -392,11 +392,11 @@ class TestCreateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_user_async(input=user_input)
+            result = await client.create_user(input=user_input)
             assert result is None
 
 
@@ -415,11 +415,11 @@ class TestRemoveMemberFromGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_member_from_group_async(
+            await client.remove_member_from_group(
                 group_id="group-abc123",
                 member_id="user-xyz789"
             )
@@ -441,11 +441,11 @@ class TestRemoveMemberFromGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_member_from_group_async(
+            await client.remove_member_from_group(
                 group_id="5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b",
                 member_id="8a9bf2d1-c322-5933-7bbf-4g7c9bf6f06c"
             )
@@ -466,12 +466,12 @@ class TestRemoveMemberFromGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.remove_member_from_group_async(
+                await client.remove_member_from_group(
                     group_id="group-abc123",
                     member_id="nonexistent-user"
                 )
@@ -505,11 +505,11 @@ class TestCreateGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_group_async(input=group_input)
+            result = await client.create_group(input=group_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -532,12 +532,12 @@ class TestCreateGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_group_async(input=group_input)
+                await client.create_group(input=group_input)
 
             assert exc_info.value.status_code == 400
 
@@ -554,11 +554,11 @@ class TestCreateGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_group_async(input=group_input)
+            result = await client.create_group(input=group_input)
             assert result is None
 
 
@@ -720,11 +720,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.remove_member_from_group_async(
+            await client.remove_member_from_group(
                 group_id="5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b",
                 member_id="8a9bf2d1-c322-5933-7bbf-4g7c9bf6f06c"
             )
@@ -744,15 +744,15 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             group_input = CreateGroupInput(display_name="Group 1")
-            await client.create_group_async(input=group_input)
+            await client.create_group(input=group_input)
 
             group_input2 = CreateGroupInput(display_name="Group 2")
-            await client.create_group_async(input=group_input2)
+            await client.create_group(input=group_input2)
 
             assert mock_send.call_count == 2
 
@@ -775,11 +775,11 @@ class TestGetGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_group_async(id="group-123")
+            result = await client.get_group(id="group-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -800,11 +800,11 @@ class TestGetGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_group_async(id="group-123")
+            result = await client.get_group(id="group-123")
             assert result is None
 
     @pytest.mark.asyncio
@@ -819,12 +819,12 @@ class TestGetGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_group_async(id="nonexistent-group")
+                await client.get_group(id="nonexistent-group")
 
             assert exc_info.value.status_code == 404
 
@@ -850,11 +850,11 @@ class TestGetUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_user_async(id="user-456")
+            result = await client.get_user(id="user-456")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -875,11 +875,11 @@ class TestGetUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_user_async(id="user-456")
+            result = await client.get_user(id="user-456")
             assert result is None
 
     @pytest.mark.asyncio
@@ -894,12 +894,12 @@ class TestGetUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_user_async(id="nonexistent-user")
+                await client.get_user(id="nonexistent-user")
 
             assert exc_info.value.status_code == 404
 
@@ -923,11 +923,11 @@ class TestUpdateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.update_user_async(input=user_input, id="user-123")
+            await client.update_user(input=user_input, id="user-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -961,11 +961,11 @@ class TestUpdateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            await client.update_user_async(input=user_input, id="user-123")
+            await client.update_user(input=user_input, id="user-123")
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -980,12 +980,12 @@ class TestUpdateUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.update_user_async(input=user_input, id="user-123")
+                await client.update_user(input=user_input, id="user-123")
 
             assert exc_info.value.status_code == 400
 
@@ -1005,11 +1005,11 @@ class TestRefreshTokens:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.refresh_tokens_async(id="user-123")
+            await client.refresh_tokens(id="user-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1028,12 +1028,12 @@ class TestRefreshTokens:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.refresh_tokens_async(id="nonexistent-user")
+                await client.refresh_tokens(id="nonexistent-user")
 
             assert exc_info.value.status_code == 404
 
@@ -1059,11 +1059,11 @@ class TestGetGroupMembers:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_group_members_async(id="group-123"))
+            result = await resolve_generated_result(client.get_group_members(id="group-123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1096,12 +1096,12 @@ class TestGetGroupMembers:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=responses,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.get_group_members_async(id="group-123", top="10")
+                client.get_group_members(id="group-123", top="10")
             )
 
         assert "$top=10" in mock_send.call_args_list[0].args[1]
@@ -1121,11 +1121,11 @@ class TestGetGroupMembers:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.get_group_members_async(id="group-123"))
+            result = await resolve_generated_result(client.get_group_members(id="group-123"))
             assert result == []
 
     @pytest.mark.asyncio
@@ -1140,13 +1140,13 @@ class TestGetGroupMembers:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.get_group_members_async(id="nonexistent-group")
+                    client.get_group_members(id="nonexistent-group")
                 )
 
             assert exc_info.value.status_code == 404
@@ -1168,11 +1168,11 @@ class TestAddUserToGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.add_user_to_group_async(input=user_ref, id="group-123")
+            await client.add_user_to_group(input=user_ref, id="group-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1192,12 +1192,12 @@ class TestAddUserToGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.add_user_to_group_async(input=user_ref, id="group-123")
+                await client.add_user_to_group(input=user_ref, id="group-123")
 
             assert exc_info.value.status_code == 400
 
@@ -1218,11 +1218,11 @@ class TestAssignManager:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.assign_manager_async(input=manager_ref, id="user-123")
+            await client.assign_manager(input=manager_ref, id="user-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1242,12 +1242,12 @@ class TestAssignManager:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.assign_manager_async(input=manager_ref, id="nonexistent-user")
+                await client.assign_manager(input=manager_ref, id="nonexistent-user")
 
             assert exc_info.value.status_code == 404
 
@@ -1271,11 +1271,11 @@ class TestCheckMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.check_member_groups_async(input=check_input, id="user-123")
+            result = await client.check_member_groups(input=check_input, id="user-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1296,11 +1296,11 @@ class TestCheckMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.check_member_groups_async(input=check_input, id="user-123")
+            result = await client.check_member_groups(input=check_input, id="user-123")
             assert result["value"] == []
 
     @pytest.mark.asyncio
@@ -1316,11 +1316,11 @@ class TestCheckMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.check_member_groups_async(input=check_input, id="user-123")
+            result = await client.check_member_groups(input=check_input, id="user-123")
             assert result is None
 
     @pytest.mark.asyncio
@@ -1336,12 +1336,12 @@ class TestCheckMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.check_member_groups_async(input=check_input, id="nonexistent-user")
+                await client.check_member_groups(input=check_input, id="nonexistent-user")
 
             assert exc_info.value.status_code == 404
 
@@ -1365,11 +1365,11 @@ class TestGetMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_member_groups_async(input=member_input, id="user-123")
+            result = await client.get_member_groups(input=member_input, id="user-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -1390,11 +1390,11 @@ class TestGetMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_member_groups_async(input=member_input, id="user-123")
+            result = await client.get_member_groups(input=member_input, id="user-123")
             assert len(result["value"]) == 1
 
     @pytest.mark.asyncio
@@ -1410,11 +1410,11 @@ class TestGetMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_member_groups_async(input=member_input, id="user-123")
+            result = await client.get_member_groups(input=member_input, id="user-123")
             assert result is None
 
     @pytest.mark.asyncio
@@ -1430,12 +1430,12 @@ class TestGetMemberGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_member_groups_async(input=member_input, id="user-123")
+                await client.get_member_groups(input=member_input, id="user-123")
 
             assert exc_info.value.status_code == 403
 
@@ -1502,7 +1502,7 @@ async def test_group_members_continuation_yields_later_members(
     ) as client:
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             side_effect=[
                 MockResponse(status=200, text=json.dumps({
@@ -1516,7 +1516,7 @@ async def test_group_members_continuation_yields_later_members(
             ],
         ) as transport:
             members = [
-                member async for member in client.get_group_members_async(
+                member async for member in client.get_group_members(
                     id="group-123"
                 )
             ]
@@ -1553,12 +1553,12 @@ async def test_group_members_empty_response_yields_no_items(mock_credential):
     )
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text=""),
     ):
         members = [
-            member async for member in client.get_group_members_async(
+            member async for member in client.get_group_members(
                 id="group-123"
             )
         ]

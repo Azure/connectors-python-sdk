@@ -1,21 +1,17 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 
-"""Asynchronous HTTP client for connector operations."""
+"""Synchronous HTTP client for connector operations."""
 
-import asyncio
 import json
 import random
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
-from azure.core.pipeline import AsyncPipeline
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline import Pipeline
 from azure.core.pipeline.policies import (
-    AsyncBearerTokenCredentialPolicy,
-    AsyncRetryPolicy,
     AzureKeyCredentialPolicy,
+    BearerTokenCredentialPolicy,
     ContentDecodePolicy,
     CustomHookPolicy,
     DistributedTracingPolicy,
@@ -25,9 +21,10 @@ from azure.core.pipeline.policies import (
     ProxyPolicy,
     RequestIdPolicy,
     RetryMode,
+    RetryPolicy,
     UserAgentPolicy,
 )
-from azure.core.pipeline.transport import AioHttpTransport, AsyncHttpTransport
+from azure.core.pipeline.transport import HttpTransport, RequestsTransport
 from azure.core.rest import HttpRequest
 
 from .exceptions import ConnectorException
@@ -50,7 +47,7 @@ except PackageNotFoundError:
     _SDK_VERSION = "0.0.0"
 
 
-class _JitterRetryPolicy(AsyncRetryPolicy):
+class _JitterRetryPolicy(RetryPolicy):
     """Add bounded positive jitter to Azure Core retry backoff."""
 
     def __init__(self, *, jitter_factor: float = 0.0, **kwargs: Any):
@@ -89,13 +86,13 @@ class ConnectorResponse(Generic[ResponseT]):
 
 
 class ConnectorHttpClient:
-    """Asynchronous HTTP client with Azure Core policies."""
+    """Synchronous HTTP client with Azure Core policies."""
 
     API_HUB_SCOPES = ["https://apihub.azure.com/.default"]
 
     def __init__(
         self,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -104,7 +101,7 @@ class ConnectorHttpClient:
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """Initialize the HTTP client."""
@@ -114,7 +111,7 @@ class ConnectorHttpClient:
         self._credential = credential
         self._timeout_seconds = timeout_seconds
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
-        self._transport = transport or AioHttpTransport()
+        self._transport = transport or RequestsTransport()
         policy_options = dict(kwargs)
         per_call_policies = self._as_policy_list(
             policy_options.pop("per_call_policies", [])
@@ -143,13 +140,13 @@ class ConnectorHttpClient:
                 per_retry_policies=per_retry_policies,
             )
         self._has_retry_policy = any(
-            isinstance(policy, AsyncRetryPolicy) for policy in policies
+            isinstance(policy, RetryPolicy) for policy in policies
         )
-        self._pipeline = AsyncPipeline(self._transport, policies=policies)
+        self._pipeline = Pipeline(self._transport, policies=policies)
 
     def _build_policies(
         self,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         policy_options: Dict[str, Any],
         *,
         per_call_policies: List[Any],
@@ -161,7 +158,7 @@ class ConnectorHttpClient:
         maximum_retry_delay_seconds: float,
         retry_jitter_factor: float,
     ) -> List[Any]:
-        """Build the standard Azure Core asynchronous policy chain."""
+        """Build the standard Azure Core synchronous policy chain."""
         default_headers = {
             name: value
             for name, value in policy_options.pop("headers", {}).items()
@@ -255,14 +252,14 @@ class ConnectorHttpClient:
             (
                 index
                 for index in range(len(composed_policies) - 1, -1, -1)
-                if isinstance(composed_policies[index], AsyncRetryPolicy)
+                if isinstance(composed_policies[index], RetryPolicy)
             ),
             None,
         )
         if retry_policy_index is None:
             raise ValueError(
                 "Cannot add per_retry_policies because the explicit policy "
-                "chain has no AsyncRetryPolicy."
+                "chain has no RetryPolicy."
             )
 
         insertion_index = retry_policy_index + 1
@@ -275,7 +272,7 @@ class ConnectorHttpClient:
     @classmethod
     def _build_authentication_policy(
         cls,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         policy_options: Dict[str, Any],
     ) -> Any:
         """Build the authentication policy for the credential type."""
@@ -287,7 +284,7 @@ class ConnectorHttpClient:
                 **policy_options,
             )
 
-        return AsyncBearerTokenCredentialPolicy(
+        return BearerTokenCredentialPolicy(
             credential,
             *cls.API_HUB_SCOPES,
             **policy_options,
@@ -302,11 +299,11 @@ class ConnectorHttpClient:
             return list(policies)
         return [policies]
 
-    async def close(self) -> None:
+    def close(self) -> None:
         """Close the HTTP transport without closing the caller credential."""
-        await self._pipeline.__aexit__(None, None, None)
+        self._pipeline.__exit__(None, None, None)
 
-    async def send_async(
+    def send(
         self,
         method: str,
         url: str,
@@ -335,7 +332,7 @@ class ConnectorHttpClient:
         if body is not None:
             request_body = bytes(body) if is_binary_body else json.dumps(to_wire(body))
 
-        response = await self._send_with_retry(
+        response = self._send_with_retry(
             self._pipeline,
             method,
             url,
@@ -348,9 +345,9 @@ class ConnectorHttpClient:
             response_hook(response, response.headers)
         return response
 
-    async def _send_with_retry(
+    def _send_with_retry(
         self,
-        pipeline: AsyncPipeline,
+        pipeline: Pipeline,
         method: str,
         url: str,
         headers: Dict[str, str],
@@ -370,14 +367,14 @@ class ConnectorHttpClient:
             if self._has_retry_policy:
                 request_options["timeout"] = selected_timeout
             if self._has_retry_policy and isinstance(
-                self._transport, AioHttpTransport
+                self._transport, RequestsTransport
             ):
                 request_options["read_timeout"] = selected_timeout
         else:
             if self._has_retry_policy:
                 request_options["timeout"] = float("inf")
             request_options["connection_timeout"] = None
-            if isinstance(self._transport, AioHttpTransport):
+            if isinstance(self._transport, RequestsTransport):
                 request_options["read_timeout"] = None
         if self._has_retry_policy and normalized_method not in _SAFE_RETRY_METHODS:
             if self._retry_unsafe_http_methods:
@@ -389,37 +386,19 @@ class ConnectorHttpClient:
         if client_request_id is not None:
             request_options["request_id"] = client_request_id
 
-        async def send_request() -> ConnectorResponseSnapshot:
-            pipeline_response = await pipeline.run(request, **request_options)
-            http_response = pipeline_response.http_response
-            response_content = http_response.body()
-            return ConnectorResponseSnapshot(
-                status=http_response.status_code,
-                headers=dict(http_response.headers),
-                text=http_response.text(),
-                content=response_content,
-            )
+        pipeline_response = pipeline.run(request, **request_options)
+        http_response = pipeline_response.http_response
+        response_content = http_response.body()
+        return ConnectorResponseSnapshot(
+            status=http_response.status_code,
+            headers=dict(http_response.headers),
+            text=http_response.text(),
+            content=response_content,
+        )
 
-        if selected_timeout <= 0:
-            return await send_request()
-
-        try:
-            return await asyncio.wait_for(
-                send_request(),
-                timeout=selected_timeout,
-            )
-        except asyncio.TimeoutError as ex:
-            raise ServiceResponseTimeoutError(
-                message=(
-                    f"Request to '{url}' exceeded the total timeout of "
-                    f"'{selected_timeout}' seconds."
-                ),
-                error=ex,
-            ) from ex
-
-    async def get_async(self, request_uri: str) -> Any:
+    def get(self, request_uri: str) -> Any:
         """Send a GET request."""
-        response = await self.send_async("GET", request_uri)
+        response = self.send("GET", request_uri)
         if not 200 <= response.status < 300:
             raise ConnectorException(
                 "GET",
@@ -430,9 +409,9 @@ class ConnectorHttpClient:
 
         return json.loads(response.text) if response.text else None
 
-    async def post_async(self, request_uri: str, body: Any) -> Any:
+    def post(self, request_uri: str, body: Any) -> Any:
         """Send a POST request with a JSON body."""
-        response = await self.send_async("POST", request_uri, body)
+        response = self.send("POST", request_uri, body)
         if not 200 <= response.status < 300:
             raise ConnectorException(
                 "POST",

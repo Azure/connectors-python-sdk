@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.mq import MqClient
 from azure.connectors.mq import (
-    MqClient,
     SingleGetValidOptions,
     MultipleGetValidOptions,
     SendValidDataOptions,
@@ -122,11 +122,11 @@ class TestDelete:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.delete_async(input=input_options)
+            result = await client.delete(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -146,11 +146,11 @@ class TestDelete:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.delete_async(input=SingleGetValidOptions())
+            result = await client.delete(input=SingleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -165,12 +165,12 @@ class TestDelete:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_async(input=SingleGetValidOptions())
+                await client.delete(input=SingleGetValidOptions())
 
             assert exc_info.value.status_code == 404
 
@@ -194,11 +194,11 @@ class TestDeleteAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.delete_all_async(input=input_options)
+            result = await client.delete_all(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -218,11 +218,11 @@ class TestDeleteAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.delete_all_async(input=MultipleGetValidOptions())
+            result = await client.delete_all(input=MultipleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -237,12 +237,12 @@ class TestDeleteAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_all_async(input=MultipleGetValidOptions())
+                await client.delete_all(input=MultipleGetValidOptions())
 
             assert exc_info.value.status_code == 500
 
@@ -266,11 +266,11 @@ class TestRead:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.read_async(input=input_options)
+            result = await client.read(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -290,11 +290,11 @@ class TestRead:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.read_async(input=SingleGetValidOptions())
+            result = await client.read(input=SingleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -309,12 +309,12 @@ class TestRead:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.read_async(input=SingleGetValidOptions())
+                await client.read(input=SingleGetValidOptions())
 
             assert exc_info.value.status_code == 403
 
@@ -338,11 +338,11 @@ class TestReadAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.read_all_async(input=input_options)
+            result = await client.read_all(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -362,11 +362,11 @@ class TestReadAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.read_all_async(input=MultipleGetValidOptions())
+            result = await client.read_all(input=MultipleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -381,12 +381,12 @@ class TestReadAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.read_all_async(input=MultipleGetValidOptions())
+                await client.read_all(input=MultipleGetValidOptions())
 
             assert exc_info.value.status_code == 408
 
@@ -410,11 +410,11 @@ class TestReceive:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.receive_async(input=input_options)
+            result = await client.receive(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -434,11 +434,11 @@ class TestReceive:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.receive_async(input=SingleGetValidOptions())
+            result = await client.receive(input=SingleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -453,12 +453,12 @@ class TestReceive:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.receive_async(input=SingleGetValidOptions())
+                await client.receive(input=SingleGetValidOptions())
 
             assert exc_info.value.status_code == 503
 
@@ -486,11 +486,11 @@ class TestReceiveAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.receive_all_async(input=input_options)
+            result = await client.receive_all(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -510,11 +510,11 @@ class TestReceiveAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.receive_all_async(input=MultipleGetValidOptions())
+            result = await client.receive_all(input=MultipleGetValidOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -529,12 +529,12 @@ class TestReceiveAll:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.receive_all_async(input=MultipleGetValidOptions())
+                await client.receive_all(input=MultipleGetValidOptions())
 
             assert exc_info.value.status_code == 401
 
@@ -562,11 +562,11 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.send_async(input=input_options)
+            result = await client.send(input=input_options)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -594,11 +594,11 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.send_async(input=input_options)
+            result = await client.send(input=input_options)
 
             mock_send.assert_called_once()
             assert result["correlationId"] == "corr123"
@@ -621,11 +621,11 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.send_async(input=input_options)
+            result = await client.send(input=input_options)
 
             mock_send.assert_called_once()
             assert result["itemInternalId"] == "item789"
@@ -642,11 +642,11 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.send_async(input=SendValidDataOptions())
+            result = await client.send(input=SendValidDataOptions())
             assert result is None
 
     @pytest.mark.asyncio
@@ -661,12 +661,12 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_async(input=SendValidDataOptions())
+                await client.send(input=SendValidDataOptions())
 
             assert exc_info.value.status_code == 400
 
@@ -682,11 +682,11 @@ class TestSend:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send_async(input=SendValidDataOptions(message="test"))
+                await client.send(input=SendValidDataOptions(message="test"))
 
             assert exc_info.value.status_code == 507

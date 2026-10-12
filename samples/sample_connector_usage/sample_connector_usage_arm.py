@@ -24,10 +24,8 @@ Note:
     The ARM connector uses OAuth (user-delegated Azure AD token).
     The connection requires OAuth consent via the consent link flow.
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.arm import ArmClient
 
@@ -39,16 +37,16 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_subscriptions():
+def example_1_list_subscriptions():
     """Example 1: List all subscriptions accessible to the authenticated user."""
     print("\n=== Example 1: List Subscriptions ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item for item in client.subscriptions_list()
                 ]
 
                 if subscriptions:
@@ -69,16 +67,16 @@ async def example_1_list_subscriptions():
                 print(f"Error: {ex}")
 
 
-async def example_2_list_subscriptions_with_details():
+def example_2_list_subscriptions_with_details():
     """Example 2: List subscriptions with full details."""
     print("\n=== Example 2: List Subscriptions with Details ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item for item in client.subscriptions_list()
                 ]
 
                 if subscriptions:
@@ -112,16 +110,16 @@ async def example_2_list_subscriptions_with_details():
                 print(f"Error: {ex}")
 
 
-async def example_3_filter_enabled_subscriptions():
+def example_3_filter_enabled_subscriptions():
     """Example 3: List only enabled subscriptions."""
     print("\n=== Example 3: Filter Enabled Subscriptions ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ArmClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 subscriptions = [
-                    item async for item in client.subscriptions_list_async()
+                    item for item in client.subscriptions_list()
                 ]
 
                 if subscriptions:
@@ -156,7 +154,7 @@ async def example_3_filter_enabled_subscriptions():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     print("Azure Resource Manager (ARM) Connector SDK - Sample Usage")
     print("=" * 60)
@@ -167,13 +165,13 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/arm/[connection-id]")
         return
 
-    await example_1_list_subscriptions()
-    await example_2_list_subscriptions_with_details()
-    await example_3_filter_enabled_subscriptions()
+    example_1_list_subscriptions()
+    example_2_list_subscriptions_with_details()
+    example_3_filter_enabled_subscriptions()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

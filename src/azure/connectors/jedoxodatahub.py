@@ -10,15 +10,63 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "JedoxodatahubClient",
+    "Cell",
+    "CellArray",
+    "Cube",
+    "CubeArray",
+    "CubeCellsResponse",
+    "CubesResponse",
+    "Database",
+    "DatabaseArray",
+    "DatabasesResponse",
+    "Dimension",
+    "DimensionArray",
+    "DimensionsResponse",
+    "Element",
+    "ElementArray",
+    "ElementsResponse",
+    "Error",
+    "ExtractRowsResponse",
+    "ExtractsResponse",
+    "GetCubeCellResultSchemaResponse",
+    "GetExtractRowsResultSchemaResponse",
+    "GetTransformRowsResultSchemaResponse",
+    "GetViewCellResultSchemaResponse",
+    "IntegratorComponent",
+    "IntegratorComponentArray",
+    "IntegratorExtractComponentRow",
+    "IntegratorExtractComponentRowArray",
+    "IntegratorProject",
+    "IntegratorProjectArray",
+    "IntegratorProjectGroup",
+    "IntegratorProjectGroupArray",
+    "IntegratorProjectGroupsResponse",
+    "IntegratorProjectsResponse",
+    "IntegratorRunResult",
+    "IntegratorTransformComponentRow",
+    "IntegratorTransformComponentRowArray",
+    "JobsResponse",
+    "LoadsResponse",
+    "TransformRowsResponse",
+    "TransformsResponse",
+    "View",
+    "ViewArray",
+    "ViewCell",
+    "ViewCellArray",
+    "ViewCellsResponse",
+    "ViewsResponse",
+]
 
 
 # Type Definitions
@@ -513,7 +561,7 @@ class JedoxodatahubClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -522,7 +570,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -542,8 +590,8 @@ class JedoxodatahubClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -570,7 +618,7 @@ class JedoxodatahubClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "jedoxodatahub"
 
-    async def databases_async(
+    def databases(
         self,
         top: Optional[int] = None,
         skip: Optional[int] = None,
@@ -608,7 +656,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -629,7 +677,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def database_by_id_async(
+    def database_by_id(
         self,
         database_id: int,
         *,
@@ -648,7 +696,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Databases({quote(str(database_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -669,7 +717,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cubes_async(
+    def cubes(
         self,
         database_id: int,
         top: Optional[int] = None,
@@ -711,7 +759,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -732,7 +780,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cube_by_id_async(
+    def cube_by_id(
         self,
         database_id: int,
         cube_id: int,
@@ -755,7 +803,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Cubes({quote(str(cube_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -776,7 +824,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cube_cells_async(
+    def cube_cells(
         self,
         database_id: int,
         cube_id: int,
@@ -845,7 +893,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -866,7 +914,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def dimensions_async(
+    def dimensions(
         self,
         database_id: int,
         top: Optional[int] = None,
@@ -906,7 +954,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -927,7 +975,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def dimension_by_id_async(
+    def dimension_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -948,7 +996,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Dimensions({quote(str(dimension_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -969,7 +1017,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def elements_async(
+    def elements(
         self,
         database_id: int,
         dimension_id: int,
@@ -1012,7 +1060,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1033,7 +1081,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def element_by_id_async(
+    def element_by_id(
         self,
         database_id: int,
         dimension_id: int,
@@ -1056,7 +1104,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Elements({quote(str(element_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1077,7 +1125,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def views_async(
+    def views(
         self,
         database_id: int,
         top: Optional[int] = None,
@@ -1117,7 +1165,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1138,7 +1186,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def view_by_id_async(
+    def view_by_id(
         self,
         database_id: int,
         view_id: str,
@@ -1159,7 +1207,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Views({quote(str(view_id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1180,7 +1228,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def view_cells_async(
+    def view_cells(
         self,
         database_id: int,
         view_id: str,
@@ -1249,7 +1297,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1270,7 +1318,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def integrator_project_groups_async(
+    def integrator_project_groups(
         self,
         top: Optional[int] = None,
         skip: Optional[int] = None,
@@ -1306,7 +1354,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1327,7 +1375,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def integrator_projects_by_id_async(
+    def integrator_projects_by_id(
         self,
         group_identifier: str,
         *,
@@ -1346,7 +1394,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Integrator('{quote(str(group_identifier), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1367,7 +1415,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def integrator_projects_async(
+    def integrator_projects(
         self,
         group_identifier: str,
         top: Optional[int] = None,
@@ -1407,7 +1455,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1428,7 +1476,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def integrator_projects_by_name_async(
+    def integrator_projects_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1449,7 +1497,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Projects('{quote(str(project_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1470,7 +1518,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extracts_async(
+    def extracts(
         self,
         group_identifier: str,
         project_name: str,
@@ -1513,7 +1561,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1534,7 +1582,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extract_by_name_async(
+    def extract_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1557,7 +1605,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Extracts('{quote(str(extract_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1578,7 +1626,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def extract_rows_async(
+    def extract_rows(
         self,
         group_identifier: str,
         project_name: str,
@@ -1624,7 +1672,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1645,7 +1693,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def jobs_async(
+    def jobs(
         self,
         group_identifier: str,
         project_name: str,
@@ -1688,7 +1736,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1709,7 +1757,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def job_by_name_async(
+    def job_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1732,7 +1780,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Jobs('{quote(str(job_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1753,7 +1801,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_job_async(
+    def run_job(
         self,
         group_identifier: str,
         project_name: str,
@@ -1778,7 +1826,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1799,7 +1847,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_job_with_variables_async(
+    def run_job_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -1827,7 +1875,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1848,7 +1896,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def loads_async(
+    def loads(
         self,
         group_identifier: str,
         project_name: str,
@@ -1891,7 +1939,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1912,7 +1960,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def load_by_name_async(
+    def load_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -1935,7 +1983,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Loads('{quote(str(load_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1956,7 +2004,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_load_async(
+    def run_load(
         self,
         group_identifier: str,
         project_name: str,
@@ -1981,7 +2029,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Run()"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2002,7 +2050,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def run_load_with_variables_async(
+    def run_load_with_variables(
         self,
         group_identifier: str,
         project_name: str,
@@ -2030,7 +2078,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2051,7 +2099,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transforms_async(
+    def transforms(
         self,
         group_identifier: str,
         project_name: str,
@@ -2094,7 +2142,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2115,7 +2163,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transform_by_name_async(
+    def transform_by_name(
         self,
         group_identifier: str,
         project_name: str,
@@ -2138,7 +2186,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/Transforms('{quote(str(transform_name), safe='')}')"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2159,7 +2207,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transform_rows_async(
+    def transform_rows(
         self,
         group_identifier: str,
         project_name: str,
@@ -2205,7 +2253,7 @@ class JedoxodatahubClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2226,7 +2274,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_cube_cell_result_schema_async(
+    def get_cube_cell_result_schema(
         self,
         database_id: int,
         cube_id: int,
@@ -2254,7 +2302,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2275,7 +2323,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_extract_rows_result_schema_async(
+    def get_extract_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -2305,7 +2353,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2326,7 +2374,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_transform_rows_result_schema_async(
+    def get_transform_rows_result_schema(
         self,
         group_identifier: str,
         project_name: str,
@@ -2356,7 +2404,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/rows"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2377,7 +2425,7 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_view_cell_result_schema_async(
+    def get_view_cell_result_schema(
         self,
         database_id: int,
         view_id: str,
@@ -2405,7 +2453,7 @@ class JedoxodatahubClient(ConnectorClientBase):
             f"/cells"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

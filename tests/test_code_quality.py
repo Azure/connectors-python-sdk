@@ -64,11 +64,11 @@ class TestCodeQuality(unittest.TestCase):
             raise AssertionError(
                 f'flake8 validation failed:\n{output}') from None
 
-    def test_no_unchecked_send_async_calls(self):
-        """Verify all send_async calls capture their response.
+    def test_no_unchecked_send_calls(self):
+        """Verify all sync and aio send calls capture their response.
 
-        Generated connector code must not discard send_async responses.
-        This check catches the most egregious error: calling send_async
+        Generated connector code must not discard send responses.
+        This check catches the most egregious error: calling send
         without capturing the response at all (fire-and-forget). It does
         NOT validate that the captured response is checked with the correct
         status guard pattern — that requires manual review or regeneration.
@@ -80,34 +80,42 @@ class TestCodeQuality(unittest.TestCase):
 
         violations: list[LintViolation] = []
 
-        for filepath in connector_dir.glob('*.py'):
+        connector_paths = [
+            *connector_dir.glob('*.py'),
+            *(connector_dir / 'aio').glob('*.py'),
+        ]
+        for filepath in connector_paths:
             if filepath.name in skip_files:
                 continue
 
-            violations.extend(self._find_unchecked_send_async(filepath))
+            violations.extend(self._find_unchecked_send(filepath))
 
         if violations:
             messages = [
                 f"  {v.file}:{v.line}: {v.message}"
-                for v in sorted(violations, key=lambda x: (x.file, x.line))
+                for v in sorted(
+                    violations,
+                    key=lambda violation: (violation.file, violation.line),
+                )
             ]
             violation_text = "\n".join(messages)
 
             raise AssertionError(
-                f"Found {len(violations)} unchecked send_async call(s).\n"
-                f"All send_async calls must capture the response.\n"
+                f"Found {len(violations)} unchecked send call(s).\n"
+                f"All sync and aio send calls must capture the response.\n"
                 f"Fix the generator (see GENERATION.md) and regenerate, "
                 f"or regenerate with the latest generator.\n\n"
                 f"{violation_text}"
             )
 
-    def _find_unchecked_send_async(
+    def _find_unchecked_send(
         self, filepath: pathlib.Path
     ) -> list[LintViolation]:
-        """Find send_async calls whose result is not captured.
+        """Find sync or aio send calls whose result is not captured.
 
         Detects the pattern:
-            await self.http_client.send_async(...)  # Result discarded!
+            self.http_client.send(...)  # Result discarded!
+            await self.http_client.send(...)  # Result discarded!
 
         This is a minimal check that catches discarded responses. It does
         NOT validate that captured responses are checked with the correct
@@ -124,20 +132,27 @@ class TestCodeQuality(unittest.TestCase):
 
         for node in ast.walk(tree):
             # NOTE(victoriahall): ast.Expr means the value is discarded, not assigned.
-            if isinstance(node, ast.Expr) and isinstance(node.value, ast.Await):
-                await_expr = node.value.value
+            if not isinstance(node, ast.Expr):
+                continue
 
-                if isinstance(await_expr, ast.Call):
-                    func = await_expr.func
+            expression = node.value
+            if isinstance(expression, ast.Await):
+                expression = expression.value
 
-                    if isinstance(func, ast.Attribute) and func.attr == 'send_async':
-                        if isinstance(func.value, ast.Attribute):
-                            attr_name = func.value.attr
-                            if attr_name in ('http_client', '_http_client'):
-                                violations.append(LintViolation(
-                                    file=filepath.name,
-                                    line=node.lineno,
-                                    message='Unchecked send_async call'
-                                ))
+            if not isinstance(expression, ast.Call):
+                continue
+
+            function = expression.func
+            if not isinstance(function, ast.Attribute) or function.attr != 'send':
+                continue
+
+            if isinstance(function.value, ast.Attribute):
+                attribute_name = function.value.attr
+                if attribute_name in ('http_client', '_http_client'):
+                    violations.append(LintViolation(
+                        file=filepath.relative_to(ROOT_PATH).as_posix(),
+                        line=node.lineno,
+                        message='Unchecked send call'
+                    ))
 
         return violations

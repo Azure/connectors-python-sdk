@@ -21,10 +21,8 @@ Usage:
 
     python sample_connector_usage_msgraphgroupsanduser.py
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.msgraphgroupsanduser import MsgraphgroupsanduserClient
 
@@ -36,15 +34,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_users():
+def example_1_list_users():
     """Example 1: List users in the tenant."""
     print("\n=== Example 1: List Users ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                users = await client.list_users_async()
+                users = client.list_users()
 
                 if users and "value" in users:
                     print(f"Found {len(users['value'])} users:")
@@ -61,17 +59,17 @@ async def example_1_list_users():
                 print(f"Error: {ex}")
 
 
-async def example_2_list_groups():
+def example_2_list_groups():
     """Example 2: Search for groups by display name."""
     print("\n=== Example 2: List Groups (Search) ===")
 
     search_term = os.environ.get("TEST_GROUP_SEARCH", None)
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                groups = await client.list_groups_by_display_name_search_async(
+                groups = client.list_groups_by_display_name_search(
                     search=search_term,
                 )
 
@@ -95,7 +93,7 @@ async def example_2_list_groups():
                 print(f"Error: {ex}")
 
 
-async def example_3_get_group_properties():
+def example_3_get_group_properties():
     """Example 3: Get properties of a specific group."""
     print("\n=== Example 3: Get Group Properties ===")
 
@@ -105,11 +103,11 @@ async def example_3_get_group_properties():
         print("You can get a group ID from Example 2 output.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                group = await client.get_group_properties_async(group_id=group_id)
+                group = client.get_group_properties(group_id=group_id)
 
                 if group:
                     print(f"Group properties for '{group.get('displayName', 'Unknown')}':")
@@ -128,7 +126,7 @@ async def example_3_get_group_properties():
                 print(f"Error: {ex}")
 
 
-async def example_4_list_group_members():
+def example_4_list_group_members():
     """Example 4: List direct members of a group."""
     print("\n=== Example 4: List Group Members ===")
 
@@ -138,11 +136,11 @@ async def example_4_list_group_members():
         print("You can get a group ID from Example 2 output.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                members = await client.list_direct_group_members_async(
+                members = client.list_direct_group_members(
                     group_id=group_id,
                 )
 
@@ -161,15 +159,15 @@ async def example_4_list_group_members():
                 print(f"Error: {ex}")
 
 
-async def example_5_list_subscribed_skus():
+def example_5_list_subscribed_skus():
     """Example 5: List organization's subscribed license SKUs."""
     print("\n=== Example 5: List Subscribed SKUs ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with MsgraphgroupsanduserClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                skus = await client.list_subscribed_skus_async()
+                skus = client.list_subscribed_skus()
 
                 if skus and "value" in skus:
                     print(f"Found {len(skus['value'])} subscribed SKUs:")
@@ -186,7 +184,7 @@ async def example_5_list_subscribed_skus():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     print("MS Graph Groups & Users Connector SDK - Sample Usage")
     print("=" * 60)
@@ -197,15 +195,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/msgraphgroupsanduser/[connection-id]")
         return
 
-    await example_1_list_users()
-    await example_2_list_groups()
-    await example_3_get_group_properties()
-    await example_4_list_group_members()
-    await example_5_list_subscribed_skus()
+    example_1_list_users()
+    example_2_list_groups()
+    example_3_get_group_properties()
+    example_4_list_group_members()
+    example_5_list_subscribed_skus()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

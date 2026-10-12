@@ -8,7 +8,8 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.plivo as plivo_module
-from azure.connectors.plivo import Call, PlivoClient, SMS
+from azure.connectors.aio.plivo import PlivoClient
+from azure.connectors.plivo import Call, SMS
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -84,7 +85,7 @@ class TestPlivoClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -106,11 +107,11 @@ class TestPlivoClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=202, text='{"message_uuid": ["id"]}'),
         ) as mock_send:
-            result = await client.send_sms_async(
+            result = await client.send_sms(
                 input=SMS(src="15550000000", dst="15551111111", text="Hello"),
                 auth_id="account/id",
             )
@@ -131,11 +132,11 @@ class TestPlivoClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=201, text='{"request_uuid": "id"}'),
         ) as mock_send:
-            await client.make_call_async(
+            await client.make_call(
                 input=Call(
                     from_="15550000000",
                     to="15551111111",
@@ -162,7 +163,7 @@ class TestPlivoClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

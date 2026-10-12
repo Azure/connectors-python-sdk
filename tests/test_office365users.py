@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.office365users import Office365usersClient
 from azure.connectors.office365users import (
-    Office365usersClient,
     GraphUserUpdateable,
 )
 from azure.connectors.sdk import (
@@ -118,11 +118,11 @@ class TestUpdateMyProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.update_my_profile_async(input=profile_input)
+            await client.update_my_profile(input=profile_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -146,11 +146,11 @@ class TestUpdateMyPhoto:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.update_my_photo_async(input=photo_input)
+            await client.update_my_photo(input=photo_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -176,11 +176,11 @@ class TestMyTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.my_trending_documents_async()
+            result = await client.my_trending_documents()
 
             mock_send.assert_called_once()
             assert "value" in result
@@ -198,11 +198,11 @@ class TestMyTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.my_trending_documents_async(filter="resourceVisualization/type eq 'Excel'")
+            await client.my_trending_documents(filter="resourceVisualization/type eq 'Excel'")
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -219,11 +219,11 @@ class TestMyTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.my_trending_documents_async()
+            result = await client.my_trending_documents()
             assert result is None
 
     @pytest.mark.asyncio
@@ -238,12 +238,12 @@ class TestMyTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.my_trending_documents_async()
+                await client.my_trending_documents()
 
             assert exc_info.value.status_code == 401
 
@@ -266,11 +266,11 @@ class TestRelevantPeople:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.relevant_people_async(user_id="user123")
+            result = await client.relevant_people(user_id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -289,12 +289,12 @@ class TestRelevantPeople:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.relevant_people_async(user_id="invalid")
+                await client.relevant_people(user_id="invalid")
 
             assert exc_info.value.status_code == 404
 
@@ -317,11 +317,11 @@ class TestUserPhotoMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.user_photo_metadata_async(user_id="user123")
+            result = await client.user_photo_metadata(user_id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -340,11 +340,11 @@ class TestUserPhotoMetadata:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.user_photo_metadata_async(user_id=None)
+            result = await client.user_photo_metadata(user_id=None)
             assert result is None
 
 
@@ -366,11 +366,11 @@ class TestTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.trending_documents_async(id="user123")
+            result = await client.trending_documents(id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -389,11 +389,11 @@ class TestTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.trending_documents_async(
+            await client.trending_documents(
                 id="user123",
                 filter="resourceVisualization/type eq 'Word'"
             )
@@ -413,12 +413,12 @@ class TestTrendingDocuments:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.trending_documents_async(id="user123")
+                await client.trending_documents(id="user123")
 
             assert exc_info.value.status_code == 500
 
@@ -442,11 +442,11 @@ class TestHttpRequest:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.http_request_async(input=request_input)
+            result = await client.http_request(input=request_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -466,11 +466,11 @@ class TestHttpRequest:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.http_request_async(input=b"request content")
+            result = await client.http_request(input=b"request content")
             assert result is None
 
     @pytest.mark.asyncio
@@ -485,12 +485,12 @@ class TestHttpRequest:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.http_request_async(input=b"request content")
+                await client.http_request(input=b"request content")
 
             assert exc_info.value.status_code == 400
 
@@ -513,11 +513,11 @@ class TestDirectReports:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.direct_reports_async(id="manager123")
+            result = await client.direct_reports(id="manager123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -536,11 +536,11 @@ class TestDirectReports:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.direct_reports_async(
+            await client.direct_reports(
                 id="manager123",
                 select="displayName,mail",
                 top="10"
@@ -562,11 +562,11 @@ class TestDirectReports:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.direct_reports_async(id="manager123")
+            result = await client.direct_reports(id="manager123")
             assert result is None
 
     @pytest.mark.asyncio
@@ -581,12 +581,12 @@ class TestDirectReports:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.direct_reports_async(id="manager123")
+                await client.direct_reports(id="manager123")
 
             assert exc_info.value.status_code == 403
 
@@ -609,11 +609,11 @@ class TestManager:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.manager_async(id="user123")
+            result = await client.manager(id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -632,11 +632,11 @@ class TestManager:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.manager_async(id="user123", select="displayName")
+            await client.manager(id="user123", select="displayName")
 
             call_args = mock_send.call_args
             assert "$select=displayName" in call_args[0][1]
@@ -653,12 +653,12 @@ class TestManager:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.manager_async(id="user123")
+                await client.manager(id="user123")
 
             assert exc_info.value.status_code == 404
 
@@ -681,11 +681,11 @@ class TestMyProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.my_profile_async()
+            result = await client.my_profile()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -704,11 +704,11 @@ class TestMyProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.my_profile_async(select="displayName,mail")
+            await client.my_profile(select="displayName,mail")
 
             call_args = mock_send.call_args
             assert "$select=" in call_args[0][1]
@@ -725,11 +725,11 @@ class TestMyProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.my_profile_async()
+            result = await client.my_profile()
             assert result is None
 
     @pytest.mark.asyncio
@@ -744,12 +744,12 @@ class TestMyProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.my_profile_async()
+                await client.my_profile()
 
             assert exc_info.value.status_code == 401
 
@@ -772,11 +772,11 @@ class TestSearchUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.search_user_async(search_term="John"))
+            result = await resolve_generated_result(client.search_user(search_term="John"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -795,11 +795,11 @@ class TestSearchUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.search_user_async(
+            await resolve_generated_result(client.search_user(
                 search_term="John",
                 top=25,
                 is_search_term_required=True
@@ -822,11 +822,11 @@ class TestSearchUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await resolve_generated_result(client.search_user_async())
+            result = await resolve_generated_result(client.search_user())
             assert result == []
 
     @pytest.mark.asyncio
@@ -841,12 +841,12 @@ class TestSearchUser:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.search_user_async(search_term="test"))
+                await resolve_generated_result(client.search_user(search_term="test"))
 
             assert exc_info.value.status_code == 500
 
@@ -867,11 +867,11 @@ class TestUserPhoto:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.user_photo_async(id="user123")
+            result = await client.user_photo(id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -890,12 +890,12 @@ class TestUserPhoto:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.user_photo_async(id="user123")
+                await client.user_photo(id="user123")
 
             assert exc_info.value.status_code == 404
 
@@ -918,11 +918,11 @@ class TestUserProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.user_profile_async(id="user123")
+            result = await client.user_profile(id="user123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -941,11 +941,11 @@ class TestUserProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.user_profile_async(id="user123", select="displayName,mail,jobTitle")
+            await client.user_profile(id="user123", select="displayName,mail,jobTitle")
 
             call_args = mock_send.call_args
             assert "$select=" in call_args[0][1]
@@ -962,11 +962,11 @@ class TestUserProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.user_profile_async(id="user123")
+            result = await client.user_profile(id="user123")
             assert result is None
 
     @pytest.mark.asyncio
@@ -981,11 +981,11 @@ class TestUserProfile:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.user_profile_async(id="invalid_user")
+                await client.user_profile(id="invalid_user")
 
             assert exc_info.value.status_code == 404

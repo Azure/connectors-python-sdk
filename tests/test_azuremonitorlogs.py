@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azuremonitorlogs import AzuremonitorlogsClient
 from azure.connectors.azuremonitorlogs import (
-    AzuremonitorlogsClient,
     QueryDataInput,
     QuerySchemaInput,
     VisualizeQueryInput,
@@ -189,11 +189,11 @@ class TestListSubscriptionsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await resolve_generated_result(client.list_subscriptions_async())
+            result = await resolve_generated_result(client.list_subscriptions())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -216,12 +216,12 @@ class TestListSubscriptionsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=500, text="Server error"),
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.list_subscriptions_async())
+                await resolve_generated_result(client.list_subscriptions())
 
             assert exc_info.value.status_code == 500
 
@@ -239,12 +239,12 @@ class TestListResourceGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"value": []}'),
         ) as mock_send:
             await resolve_generated_result(
-                client.list_resource_groups_async(subscriptions="sub-id")
+                client.list_resource_groups(subscriptions="sub-id")
             )
 
             call_args = mock_send.call_args
@@ -273,11 +273,11 @@ class TestListResourcesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"value": []}'),
         ) as mock_send:
-            await resolve_generated_result(client.list_resources_async(
+            await resolve_generated_result(client.list_resources(
                 subscriptions="sub-id",
                 resourcegroups="rg1",
                 resourcetype="Microsoft.OperationalInsights/workspaces",
@@ -308,11 +308,11 @@ class TestQueryDataAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"value": [{"Computer": "vm1"}]}'),
         ) as mock_send:
-            result = await client.query_data_async(
+            result = await client.query_data(
                 input=request_body,
                 subscriptions="sub-id",
                 resourcegroups="rg1",
@@ -334,11 +334,11 @@ class TestQueryDataAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text=""),
         ):
-            result = await client.query_data_async(
+            result = await client.query_data(
                 input=QueryDataInput(),
                 subscriptions="sub-id",
                 resourcegroups="rg1",
@@ -365,14 +365,14 @@ class TestQuerySchemaAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
                 text='{"type": "object", "properties": {"Computer": {"type": "string"}}}'
             ),
         ):
-            result = await client.query_schema_async(
+            result = await client.query_schema(
                 input=QuerySchemaInput(),
                 subscriptions="sub-id",
                 resourcegroups="rg1",
@@ -402,11 +402,11 @@ class TestVisualizeQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"body": "ok"}'),
         ) as mock_send:
-            result = await client.visualize_query_async(
+            result = await client.visualize_query(
                 input=body,
                 subscriptions="sub-id",
                 resourcegroups="rg1",
@@ -430,7 +430,7 @@ class TestVisualizeQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=400,
@@ -438,7 +438,7 @@ class TestVisualizeQueryAsync:
             ),
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.visualize_query_async(
+                await client.visualize_query(
                     input=VisualizeQueryInput(),
                     subscriptions="sub-id",
                     resourcegroups="rg1",
@@ -463,14 +463,14 @@ class TestGetTimeRangeSelectionControlAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
                 text='{"type": "Relative"}',
             ),
         ) as mock_send:
-            result = await client.get_time_range_selection_control_async(
+            result = await client.get_time_range_selection_control(
                 timerangetype="Relative range",
             )
 
@@ -496,12 +496,12 @@ class TestGetTimeRangeSelectionControlAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="Invalid time range"),
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_time_range_selection_control_async(
+                await client.get_time_range_selection_control(
                     timerangetype="invalid",
                 )
 

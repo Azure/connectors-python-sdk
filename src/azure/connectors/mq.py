@@ -9,15 +9,27 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MqClient",
+    "Item",
+    "ItemsList",
+    "MultipleGetValidOptions",
+    "ObjectEntity",
+    "ProcedureMetadata",
+    "SendResponse",
+    "SendValidDataOptions",
+    "SendValidDataOptionsArray",
+    "SingleGetValidOptions",
+]
 
 
 # Type Definitions
@@ -362,7 +374,7 @@ class MqClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -371,7 +383,7 @@ class MqClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -391,8 +403,8 @@ class MqClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -419,7 +431,7 @@ class MqClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "mq"
 
-    async def delete_async(
+    def delete(
         self,
         input: SingleGetValidOptions,
         *,
@@ -435,7 +447,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/delete"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -456,7 +468,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_all_async(
+    def delete_all(
         self,
         input: MultipleGetValidOptions,
         *,
@@ -472,7 +484,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/deleteall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -493,7 +505,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def read_async(
+    def read(
         self,
         input: SingleGetValidOptions,
         *,
@@ -509,7 +521,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/read"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -530,7 +542,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def read_all_async(
+    def read_all(
         self,
         input: MultipleGetValidOptions,
         *,
@@ -546,7 +558,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/readall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -567,7 +579,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receive_async(
+    def receive(
         self,
         input: SingleGetValidOptions,
         *,
@@ -583,7 +595,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/receive"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -604,7 +616,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def receive_all_async(
+    def receive_all(
         self,
         input: MultipleGetValidOptions,
         *,
@@ -620,7 +632,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/receiveall"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -641,7 +653,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_async(
+    def send(
         self,
         input: SendValidDataOptions,
         *,
@@ -657,7 +669,7 @@ class MqClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

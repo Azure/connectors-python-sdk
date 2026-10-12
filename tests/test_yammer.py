@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.yammer import YammerClient
 from azure.connectors.yammer import (
-    YammerClient,
     Network,
     YammerEntity,
     User,
@@ -143,11 +143,11 @@ class TestGetNetworks:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_networks_async()
+            result = await client.get_networks()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -168,12 +168,12 @@ class TestGetNetworks:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_networks_async()
+                await client.get_networks()
 
             assert exc_info.value.status_code == 401
 
@@ -196,11 +196,11 @@ class TestGetGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_groups_async()
+            result = await client.get_groups()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -220,11 +220,11 @@ class TestGetGroups:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_groups_async(
+            await client.get_groups(
                 network_id="net123",
                 mine="1",
                 show_all_company_group="true"
@@ -255,11 +255,11 @@ class TestGetUserDetailsById:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_user_details_by_id_async(user_id="12345")
+            result = await client.get_user_details_by_id(user_id="12345")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -283,11 +283,11 @@ class TestLikeMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.like_message_async(message_id="msg123")
+            await client.like_message(message_id="msg123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -314,11 +314,11 @@ class TestGetAllMessages:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_all_messages_async())
+            _ = await resolve_generated_result(client.get_all_messages())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -337,11 +337,11 @@ class TestGetAllMessages:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_all_messages_async(
+            await resolve_generated_result(client.get_all_messages(
                 network_id="net123",
                 older_than="100",
                 newer_than="50",
@@ -376,11 +376,11 @@ class TestGetMessagesFollowing:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_following_async())
+            _ = await resolve_generated_result(client.get_messages_following())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -406,11 +406,11 @@ class TestGetMessagesInGroup:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_in_group_async(group_id="123"))
+            _ = await resolve_generated_result(client.get_messages_in_group(group_id="123"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -436,11 +436,11 @@ class TestGetMessagesInThread:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await resolve_generated_result(client.get_messages_in_thread_async(thread_id="456"))
+            _ = await resolve_generated_result(client.get_messages_in_thread(thread_id="456"))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -490,11 +490,11 @@ class TestPostMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.post_message_async(input=message_input)
+            _ = await client.post_message(input=message_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -514,11 +514,11 @@ class TestPostMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.post_message_async(
+            await client.post_message(
                 input=message_input,
                 network_id="net123"
             )
@@ -542,12 +542,12 @@ class TestPostMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.post_message_async(input=message_input)
+                await client.post_message(input=message_input)
 
             assert exc_info.value.status_code == 403
 
@@ -695,11 +695,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_networks_async()
+            result = await client.get_networks()
             assert result is None
 
     @pytest.mark.asyncio
@@ -714,12 +714,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_networks_async()
-            await client.get_groups_async()
+            await client.get_networks()
+            await client.get_groups()
 
             assert mock_send.call_count == 2
 
@@ -737,11 +737,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.get_all_messages_async())
+                await resolve_generated_result(client.get_all_messages())
 
             assert exc_info.value.status_code == 500

@@ -6,19 +6,181 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Literal, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "TeamsClient",
+    "Activities",
+    "AddMemberToChannelInput",
+    "AddMemberToChatInput",
+    "AddMemberToTagInput",
+    "AddMemberToTagResponseSchema",
+    "AddMemberToTeamInput",
+    "AddSectionItemInput",
+    "AiInsightActionItem",
+    "AiInsightCollectionResponse",
+    "AiInsightDetailResponse",
+    "AiInsightMeetingNote",
+    "AiInsightMeetingNoteSubpoint",
+    "AiInsightMentionEvent",
+    "AiInsightResponse",
+    "AiInsightViewpoint",
+    "AiInsightWebhookResponseSchema",
+    "ArchiveChannelInput",
+    "AssociatedTeamInfo",
+    "AsyncOperationResponse",
+    "AtMentionBotResponse",
+    "AtMentionTagResponse",
+    "AtMentionUser",
+    "BotIdForChat",
+    "BotMentionRequest",
+    "CallEventWebhookResponseSchema",
+    "CallRecordingCollectionResponse",
+    "CallRecordingResponse",
+    "CallTranscriptCollectionResponse",
+    "CallTranscriptResponse",
+    "CardResponseTriggerMetadata",
+    "ChannelIdForTeam",
+    "ChannelIds",
+    "ChannelWithOwnerTeamId",
+    "ChatId",
+    "ChatMessage",
+    "ChatMessageList",
+    "ChatMessageWebhookResponseSchema",
+    "ComposeMessageTriggerMetadata",
+    "ConnectorMetadata",
+    "CreateATeamInput",
+    "CreateATeamResponse",
+    "CreateChannelInput",
+    "CreateChannelResponse",
+    "CreateSectionInput",
+    "CreateTagInput",
+    "CreateTagResponseSchema",
+    "DiscoverySettings",
+    "DraftOpenShift",
+    "DraftShift",
+    "DynamicAiInsightTriggerRequest",
+    "DynamicAtMentionWebhookTriggerResponseSchema",
+    "DynamicCallEventTriggerRequest",
+    "DynamicCardResponseTriggerResult",
+    "DynamicChannelAdaptiveCardRequest",
+    "DynamicChannelFlowContinuationSubscriptionResult",
+    "DynamicChannelNotificationRequest",
+    "DynamicComposeMessageTriggerResult",
+    "DynamicGatherInputSubscriptionResult",
+    "DynamicGetMessageDetailsResponseSchema",
+    "DynamicGetMessageDetailsSchema",
+    "DynamicKeywordWebhookTriggerResponseSchema",
+    "DynamicListMembersSchema",
+    "DynamicNewMessageWebhookTriggerResponseSchema",
+    "DynamicPostCardAndWaitRequest",
+    "DynamicPostCardRequest",
+    "DynamicPostConversationNotificationRequest",
+    "DynamicPostFeedNotificationRequest",
+    "DynamicPostGatherInputToConversationResponse",
+    "DynamicPostMessageRequest",
+    "DynamicPostToConversationResponse",
+    "DynamicRecordingTriggerRequest",
+    "DynamicReplyCardRequest",
+    "DynamicReplyMessageRequest",
+    "DynamicResponseSchema",
+    "DynamicSelectedMessageTriggerResult",
+    "DynamicTranscriptTriggerRequest",
+    "DynamicUpdateCardRequest",
+    "DynamicUserAdaptiveCardRequest",
+    "DynamicUserFlowContinuationSubscriptionResult",
+    "DynamicUserMessageWithOptionsSubscriptionRequest",
+    "DynamicUserMessageWithOptionsSubscriptionResult",
+    "DynamicUserNotificationRequest",
+    "DynamicWebhookTriggerRequestSchema",
+    "EditOpenShiftRequest",
+    "FunSettings",
+    "GetAllAssociatedTeamsResponse",
+    "GetAllChannelsForTeamResponse",
+    "GetAllTeamsResponse",
+    "GetChannelResponse",
+    "GetChannelsForGroupResponse",
+    "GetChatsResponse",
+    "GetFlowContinuationSubscriptionWithPosterOutputMetadataInput",
+    "GetMessageDetailsSchema",
+    "GetMessageLocationsResponse",
+    "GetMessagesFromConversationResponse",
+    "GetOnlineMeetingResponse",
+    "GetTagMembersResponseSchema",
+    "GetTagsResponseSchema",
+    "GetTeamResponse",
+    "GetTimeOffReasonsResponse",
+    "GuestSettings",
+    "LastModifiedBy",
+    "ListMembersResponseSchema",
+    "ListMembersSchema",
+    "ListRepliesResponseSchema",
+    "ListSectionItemsResponse",
+    "ListSectionsResponse",
+    "MemberSettings",
+    "MessageId",
+    "MessageReactionWebhookResponseSchema",
+    "MessagingSettings",
+    "MoveSectionItemInput",
+    "NewChat",
+    "NewChatResponse",
+    "NewMeeting",
+    "NewMeetingResponse",
+    "ObjectEntity",
+    "ObjectWithoutType",
+    "OfferShiftRequestResponse",
+    "OnGroupMemberChangeResponse",
+    "OpenShiftChangeRequestResponse",
+    "OpenShiftResponse",
+    "PostCardAndWaitForResponseInput",
+    "PostCardAndWaitSchema",
+    "PostCardSchema",
+    "PostFeedSchema",
+    "PostMessageSchema",
+    "PostMessageToSelfRequest",
+    "PostToConversationResponse",
+    "RecordingWebhookResponseSchema",
+    "ScheduleResponse",
+    "SchedulingGroupResponse",
+    "SectionItemConflictError",
+    "SectionItemResponse",
+    "SectionResponse",
+    "SelectedMessageTriggerMetadata",
+    "SharedOpenShift",
+    "SharedShift",
+    "ShiftResponse",
+    "SingleTagMemberTriggerRequest",
+    "SingleTagTriggerRequest",
+    "SwapShiftsChangeRequestResponse",
+    "TagMemberWebhookResponseSchema",
+    "TagWebhookResponseSchema",
+    "TeamsIdentitySet",
+    "ThemeEditor",
+    "TimeOffRequestResponse",
+    "TranscriptWebhookResponseSchema",
+    "UnifiedActionSchema",
+    "UpdateChannelPropertiesInput",
+    "UpdateSectionInput",
+    "UpdateTagInput",
+    "VirtualAgentBots",
+    "WebhookChatMessageTriggerInput",
+    "WebhookRequest",
+    "WebhookTriggerSchema",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -3419,7 +3581,7 @@ class TeamsClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -3428,7 +3590,7 @@ class TeamsClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -3448,8 +3610,8 @@ class TeamsClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -3515,7 +3677,7 @@ class TeamsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def create_teams_meeting_async(
+    def create_teams_meeting(
         self,
         input: NewMeeting,
         calendarid: str,
@@ -3536,7 +3698,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/me/calendars/{quote(str(calendarid), safe='')}/events"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3557,7 +3719,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_teams_async(
+    def get_all_teams(
         self,
         *,
         timeout: Optional[float] = None,
@@ -3572,7 +3734,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/beta/me/joinedTeams"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3593,7 +3755,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_associated_teams_async(
+    def get_all_associated_teams(
         self,
         *,
         timeout: Optional[float] = None,
@@ -3611,7 +3773,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3632,7 +3794,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_channels_for_group_async(
+    def get_channels_for_group(
         self,
         group_id: str,
         filter: Optional[str] = None,
@@ -3666,7 +3828,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3687,7 +3849,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_channel_async(
+    def create_channel(
         self,
         input: CreateChannelInput,
         group_id: str,
@@ -3707,7 +3869,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/groups/{quote(str(group_id), safe='')}/channels"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3728,7 +3890,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_channel_async(
+    def get_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -3752,7 +3914,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3773,7 +3935,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_channel_properties_async(
+    def update_channel_properties(
         self,
         input: UpdateChannelPropertiesInput,
         group_id: str,
@@ -3801,7 +3963,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3817,7 +3979,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def archive_channel_async(
+    def archive_channel(
         self,
         input: ArchiveChannelInput,
         group_id: str,
@@ -3846,7 +4008,7 @@ class TeamsClient(ConnectorClientBase):
             f"/archive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3867,7 +4029,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_channels_for_team_async(
+    def get_all_channels_for_team(
         self,
         group_id: str,
         filter: Optional[str] = None,
@@ -3902,7 +4064,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3923,7 +4085,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_chats_async(
+    def get_chats(
         self,
         chat_type: str,
         topic: str,
@@ -3951,7 +4113,7 @@ class TeamsClient(ConnectorClientBase):
             f"/false"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3972,7 +4134,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_feed_notification_async(
+    def post_feed_notification(
         self,
         input: DynamicPostFeedNotificationRequest,
         poster: str,
@@ -3999,7 +4161,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4015,7 +4177,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def at_mention_tag_async(
+    def at_mention_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -4040,7 +4202,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4061,7 +4223,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_from_channel_async(
+    def get_messages_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4070,7 +4232,7 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages in a channel
 
@@ -4078,8 +4240,8 @@ class TeamsClient(ConnectorClientBase):
         the team ID must refer to the host team, which is the team that owns
         the shared channel.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4090,11 +4252,16 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(channel_id), safe='')}"
             f"/messages"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4109,21 +4276,29 @@ class TeamsClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_message_details_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_message_details(
         self,
         input: DynamicGetMessageDetailsSchema,
         message_id: str,
@@ -4149,7 +4324,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4170,7 +4345,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_replies_to_message_async(
+    def list_replies_to_message(
         self,
         group_id: str,
         channel_id: str,
@@ -4209,7 +4384,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4230,7 +4405,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_members_async(
+    def list_members(
         self,
         input: DynamicListMembersSchema,
         thread_type: str,
@@ -4263,7 +4438,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4284,7 +4459,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def subscribe_user_message_with_options_async(
+    def subscribe_user_message_with_options(
         self,
         input: DynamicUserMessageWithOptionsSubscriptionRequest,
         *,
@@ -4310,7 +4485,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4326,7 +4501,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_team_async(
+    def get_team(
         self,
         team_id: str,
         *,
@@ -4345,7 +4520,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/teams/{quote(str(team_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4366,7 +4541,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def at_mention_user_async(
+    def at_mention_user(
         self,
         user_id: str,
         *,
@@ -4386,7 +4561,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(user_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4407,7 +4582,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_chat_async(
+    def create_chat(
         self,
         input: NewChat,
         *,
@@ -4423,7 +4598,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/beta/chats"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4444,7 +4619,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_from_chat_async(
+    def get_messages_from_chat(
         self,
         chat_id: str,
         filter: Optional[str] = None,
@@ -4455,14 +4630,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages in a chat
 
         Retrieves messages from a one on one or group chat
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4486,11 +4661,16 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4505,21 +4685,29 @@ class TeamsClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_message_to_self_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_message_to_self(
         self,
         input: PostMessageToSelfRequest,
         *,
@@ -4538,7 +4726,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4559,7 +4747,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_a_team_async(
+    def create_a_team(
         self,
         input: CreateATeamInput,
         *,
@@ -4575,7 +4763,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/beta/teams"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4596,7 +4784,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_team_members_async(
+    def list_team_members(
         self,
         team_id: str,
         filter: Optional[str] = None,
@@ -4630,7 +4818,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4651,7 +4839,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_member_to_team_async(
+    def add_member_to_team(
         self,
         input: AddMemberToTeamInput,
         team_id: str,
@@ -4671,7 +4859,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{quote(str(team_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4687,7 +4875,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remove_member_from_team_async(
+    def remove_member_from_team(
         self,
         team_id: str,
         membership_id: str,
@@ -4711,7 +4899,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4727,7 +4915,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def add_member_to_channel_async(
+    def add_member_to_channel(
         self,
         input: AddMemberToChannelInput,
         group_id: str,
@@ -4754,7 +4942,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4770,7 +4958,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remove_member_from_channel_async(
+    def remove_member_from_channel(
         self,
         group_id: str,
         channel_id: str,
@@ -4798,7 +4986,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4814,7 +5002,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def post_message_to_conversation_async(
+    def post_message_to_conversation(
         self,
         input: DynamicPostMessageRequest,
         poster: str,
@@ -4842,7 +5030,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4863,7 +5051,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_with_message_to_conversation_async(
+    def reply_with_message_to_conversation(
         self,
         input: DynamicReplyMessageRequest,
         poster: str,
@@ -4891,7 +5079,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4912,7 +5100,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_card_to_conversation_async(
+    def post_card_to_conversation(
         self,
         input: DynamicPostCardRequest,
         poster: str,
@@ -4940,7 +5128,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4961,7 +5149,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_card_and_wait_for_response_async(
+    def post_card_and_wait_for_response(
         self,
         input: PostCardAndWaitForResponseInput,
         poster: str,
@@ -4991,7 +5179,7 @@ class TeamsClient(ConnectorClientBase):
             f"/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5012,7 +5200,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_with_card_to_conversation_async(
+    def reply_with_card_to_conversation(
         self,
         input: DynamicReplyCardRequest,
         poster: str,
@@ -5040,7 +5228,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5061,7 +5249,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_card_in_conversation_async(
+    def update_card_in_conversation(
         self,
         input: DynamicUpdateCardRequest,
         poster: str,
@@ -5089,7 +5277,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(location), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5110,7 +5298,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def http_request_async(
+    def http_request(
         self,
         input: bytes,
         *,
@@ -5130,7 +5318,7 @@ class TeamsClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST",
             request_url,
             body=input,
@@ -5154,7 +5342,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_member_to_chat_async(
+    def add_member_to_chat(
         self,
         input: AddMemberToChatInput,
         chat_id: str,
@@ -5174,7 +5362,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/chats/{quote(str(chat_id), safe='')}/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5190,7 +5378,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remove_member_from_chat_async(
+    def remove_member_from_chat(
         self,
         chat_id: str,
         membership_id: str,
@@ -5215,7 +5403,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(membership_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5231,7 +5419,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_online_meeting_async(
+    def get_online_meeting(
         self,
         lookup_type: str,
         lookup_value: str,
@@ -5262,7 +5450,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5283,7 +5471,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_meeting_transcripts_async(
+    def list_meeting_transcripts(
         self,
         meeting_id: str,
         *,
@@ -5306,7 +5494,7 @@ class TeamsClient(ConnectorClientBase):
             f"/transcripts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5327,7 +5515,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_transcript_async(
+    def get_meeting_transcript(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -5352,7 +5540,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5373,7 +5561,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_transcript_content_async(
+    def get_meeting_transcript_content(
         self,
         meeting_id: str,
         transcript_id: str,
@@ -5399,7 +5587,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5420,7 +5608,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_meeting_recordings_async(
+    def list_meeting_recordings(
         self,
         meeting_id: str,
         *,
@@ -5443,7 +5631,7 @@ class TeamsClient(ConnectorClientBase):
             f"/recordings"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5464,7 +5652,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_recording_async(
+    def get_meeting_recording(
         self,
         meeting_id: str,
         recording_id: str,
@@ -5489,7 +5677,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5510,7 +5698,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_meeting_recording_content_async(
+    def get_meeting_recording_content(
         self,
         meeting_id: str,
         recording_id: str,
@@ -5536,7 +5724,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5554,7 +5742,7 @@ class TeamsClient(ConnectorClientBase):
 
         return response.content
 
-    async def list_sections_async(
+    def list_sections(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5571,7 +5759,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5592,7 +5780,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_section_async(
+    def create_section(
         self,
         input: CreateSectionInput,
         *,
@@ -5610,7 +5798,7 @@ class TeamsClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5631,7 +5819,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_section_async(
+    def get_section(
         self,
         section_id: str,
         *,
@@ -5650,7 +5838,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5671,7 +5859,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_section_async(
+    def update_section(
         self,
         input: UpdateSectionInput,
         section_id: str,
@@ -5691,7 +5879,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5712,7 +5900,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_section_async(
+    def delete_section(
         self,
         section_id: str,
         *,
@@ -5731,7 +5919,7 @@ class TeamsClient(ConnectorClientBase):
             f"/beta/me/teamwork/sections/{quote(str(section_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5747,7 +5935,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def list_section_items_async(
+    def list_section_items(
         self,
         section_id: str,
         *,
@@ -5772,7 +5960,7 @@ class TeamsClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5793,7 +5981,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_section_item_async(
+    def add_section_item(
         self,
         input: AddSectionItemInput,
         section_id: str,
@@ -5820,7 +6008,7 @@ class TeamsClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5841,7 +6029,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_section_item_async(
+    def remove_section_item(
         self,
         section_id: str,
         section_item_id: str,
@@ -5869,7 +6057,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(section_item_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5885,7 +6073,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def move_section_item_async(
+    def move_section_item(
         self,
         input: MoveSectionItemInput,
         section_id: str,
@@ -5916,7 +6104,7 @@ class TeamsClient(ConnectorClientBase):
             f"/move"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5937,7 +6125,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    def get_tags(
         self,
         group_id: str,
         *,
@@ -5956,7 +6144,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5977,7 +6165,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_tag_async(
+    def create_tag(
         self,
         input: CreateTagInput,
         group_id: str,
@@ -5997,7 +6185,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/teams/{quote(str(group_id), safe='')}/tags"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6018,7 +6206,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tag_async(
+    def get_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -6042,7 +6230,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6063,7 +6251,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_tag_async(
+    def update_tag(
         self,
         input: UpdateTagInput,
         group_id: str,
@@ -6088,7 +6276,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6109,7 +6297,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_tag_async(
+    def delete_tag(
         self,
         group_id: str,
         tag_id: str,
@@ -6133,7 +6321,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6149,7 +6337,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def add_member_to_tag_async(
+    def add_member_to_tag(
         self,
         input: AddMemberToTagInput,
         group_id: str,
@@ -6175,7 +6363,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6196,7 +6384,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tag_members_async(
+    def get_tag_members(
         self,
         group_id: str,
         tag_id: str,
@@ -6221,7 +6409,7 @@ class TeamsClient(ConnectorClientBase):
             f"/members"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6242,7 +6430,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_tag_member_async(
+    def delete_tag_member(
         self,
         group_id: str,
         tag_id: str,
@@ -6269,7 +6457,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_member_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6285,7 +6473,7 @@ class TeamsClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def list_call_recordings_async(
+    def list_call_recordings(
         self,
         call_id: str,
         *,
@@ -6304,7 +6492,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/recordings"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6325,7 +6513,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_recording_async(
+    def get_call_recording(
         self,
         call_id: str,
         recording_id: str,
@@ -6350,7 +6538,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(recording_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6371,7 +6559,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_recording_content_async(
+    def get_call_recording_content(
         self,
         call_id: str,
         recording_id: str,
@@ -6397,7 +6585,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6415,7 +6603,7 @@ class TeamsClient(ConnectorClientBase):
 
         return response.content
 
-    async def list_call_transcripts_async(
+    def list_call_transcripts(
         self,
         call_id: str,
         *,
@@ -6434,7 +6622,7 @@ class TeamsClient(ConnectorClientBase):
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/transcripts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6455,7 +6643,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_transcript_async(
+    def get_call_transcript(
         self,
         call_id: str,
         transcript_id: str,
@@ -6480,7 +6668,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(transcript_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6501,7 +6689,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_call_transcript_content_async(
+    def get_call_transcript_content(
         self,
         call_id: str,
         transcript_id: str,
@@ -6527,7 +6715,7 @@ class TeamsClient(ConnectorClientBase):
             f"/content"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6548,7 +6736,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_adhoc_call_recordings_async(
+    def get_all_adhoc_call_recordings(
         self,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
@@ -6599,7 +6787,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6620,7 +6808,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_adhoc_call_transcripts_async(
+    def get_all_adhoc_call_transcripts(
         self,
         start_date_time: Optional[str] = None,
         end_date_time: Optional[str] = None,
@@ -6671,7 +6859,7 @@ class TeamsClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6692,7 +6880,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_ai_insights_async(
+    def list_ai_insights(
         self,
         meeting_id: str,
         *,
@@ -6717,7 +6905,7 @@ class TeamsClient(ConnectorClientBase):
             f"/aiInsights"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6738,7 +6926,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_ai_insight_async(
+    def get_ai_insight(
         self,
         meeting_id: str,
         ai_insight_id: str,
@@ -6765,7 +6953,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(ai_insight_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6786,7 +6974,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_locations_async(
+    def get_message_locations(
         self,
         message_type: str,
         poster: str,
@@ -6811,7 +6999,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(poster), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6832,7 +7020,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_details_input_schema_async(
+    def get_message_details_input_schema(
         self,
         thread_type: str,
         *,
@@ -6854,7 +7042,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6875,7 +7063,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_details_response_schema_async(
+    def get_message_details_response_schema(
         self,
         thread_type: str,
         *,
@@ -6897,7 +7085,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6918,7 +7106,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_members_input_schema_async(
+    def list_members_input_schema(
         self,
         thread_type: str,
         *,
@@ -6940,7 +7128,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -6961,7 +7149,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_feed_notification_input_schema_async(
+    def get_feed_notification_input_schema(
         self,
         poster: str,
         notification_type: str,
@@ -6986,7 +7174,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(notification_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7007,7 +7195,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_unified_action_schema_async(
+    def get_unified_action_schema(
         self,
         action_type: str,
         poster: str,
@@ -7035,7 +7223,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7056,7 +7244,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_with_options_subscription_input_metadata_async(
+    def get_message_with_options_subscription_input_metadata(
         self,
         recipient_type: str,
         *,
@@ -7082,7 +7270,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptioninputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7103,7 +7291,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_with_options_subscription_output_metadata_async(
+    def get_message_with_options_subscription_output_metadata(
         self,
         recipient_type: str,
         *,
@@ -7129,7 +7317,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7150,7 +7338,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_webhook_trigger_request_schema_async(
+    def get_webhook_trigger_request_schema(
         self,
         thread_type: str,
         *,
@@ -7173,7 +7361,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7194,7 +7382,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_webhook_trigger_response_schema_async(
+    def get_webhook_trigger_response_schema(
         self,
         trigger_type: str,
         thread_type: str,
@@ -7220,7 +7408,7 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(thread_type), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7241,7 +7429,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_post_to_conversation_response_schema_async(
+    def get_post_to_conversation_response_schema(
         self,
         action_type: str,
         poster: str,
@@ -7270,7 +7458,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -7291,7 +7479,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_flow_continuation_subscription_with_poster_output_metadata_async(
+    def get_flow_continuation_subscription_with_poster_output_metadata(
         self,
         input: GetFlowContinuationSubscriptionWithPosterOutputMetadataInput,
         poster: str,
@@ -7321,7 +7509,7 @@ class TeamsClient(ConnectorClientBase):
             f"/subscriptionoutputs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -7342,7 +7530,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subscription_scope_schema_async(
+    def get_subscription_scope_schema(
         self,
         scope_type: str,
         *,
@@ -7366,7 +7554,7 @@ class TeamsClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

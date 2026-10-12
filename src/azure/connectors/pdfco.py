@@ -9,15 +9,124 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "PdfcoClient",
+    "BarcodeGeneratorInput",
+    "BarcodeGeneratorResponse",
+    "BarcodeReaderInput",
+    "BarcodeReaderResponse",
+    "DocumentParserInput",
+    "DocumentParserResponse",
+    "EmailAttachmentExtractionInput",
+    "EmailAttachmentExtractionResponse",
+    "EmailDecodeInput",
+    "EmailDecodeResponse",
+    "EmailSendInput",
+    "EmailSendResponse",
+    "HtmlToPdfInput",
+    "HtmlToPdfResponse",
+    "JobCheckInput",
+    "JobCheckResponse",
+    "MergePdfInput",
+    "MergePdfResponse",
+    "MergePdfSimplifiedInput",
+    "MergePdfSimplifiedResponse",
+    "PDFAddSecurityInput",
+    "PDFAddSecurityResponse",
+    "PDFAttachmentExtractionInput",
+    "PDFAttachmentExtractionResponse",
+    "PDFAutoRotatePagesInput",
+    "PDFAutoRotatePagesResponse",
+    "PDFClassifierInput",
+    "PDFClassifierResponse",
+    "PDFCompressInput",
+    "PDFCompressResponse",
+    "PDFDeletePagesInput",
+    "PDFDeletePagesResponse",
+    "PDFFindTableInput",
+    "PDFFindTableResponse",
+    "PDFFormsInfoReaderInput",
+    "PDFFormsInfoReaderResponse",
+    "PDFFromCSVInput",
+    "PDFFromCSVResponse",
+    "PDFFromDocInput",
+    "PDFFromDocResponse",
+    "PDFFromEmailInput",
+    "PDFFromEmailResponse",
+    "PDFFromImagesInput",
+    "PDFFromImagesResponse",
+    "PDFFromXLSXLSXInput",
+    "PDFFromXLSXLSXResponse",
+    "PDFInfoReaderInput",
+    "PDFInfoReaderResponse",
+    "PDFRotatePagesInput",
+    "PDFRotatePagesResponse",
+    "PDFSearchTextInput",
+    "PDFSearchTextResponse",
+    "PDFSearchableInput",
+    "PDFSearchableResponse",
+    "PDFSecurityRemoveInput",
+    "PDFSecurityRemoveResponse",
+    "PDFToCSVInput",
+    "PDFToCSVResponse",
+    "PDFToJPGInput",
+    "PDFToJPGResponse",
+    "PDFToJSONInput",
+    "PDFToJSONMetaInput",
+    "PDFToJSONMetaResponse",
+    "PDFToJSONResponse",
+    "PDFToPNGInput",
+    "PDFToPNGResponse",
+    "PDFToTIFFInput",
+    "PDFToTIFFResponse",
+    "PDFToTextInput",
+    "PDFToTextResponse",
+    "PDFToTextSimpleInput",
+    "PDFToTextSimpleResponse",
+    "PDFToWEBPInput",
+    "PDFToWEBPResponse",
+    "PDFToXLSInput",
+    "PDFToXLSResponse",
+    "PDFToXLSXInput",
+    "PDFToXLSXResponse",
+    "PDFToXMLInput",
+    "PDFToXMLResponse",
+    "PDFUnSearchableInput",
+    "PDFUnSearchableResponse",
+    "PdfFillerInput",
+    "PdfFillerResponse",
+    "SearchAndDeleteTextInput",
+    "SearchAndDeleteTextResponse",
+    "SearchAndReplaceInput",
+    "SearchAndReplaceResponse",
+    "SearchAndReplaceWithImageInput",
+    "SearchAndReplaceWithImageResponse",
+    "SplitPdf2Input",
+    "SplitPdf2Response",
+    "SplitPdfInput",
+    "SplitPdfResponse",
+    "UrlToPdfInput",
+    "UrlToPdfResponse",
+    "XLStoCSVInput",
+    "XLStoCSVResponse",
+    "XLStoHTMLInput",
+    "XLStoHTMLResponse",
+    "XLStoJSONInput",
+    "XLStoJSONResponse",
+    "XLStoTXTInput",
+    "XLStoTXTResponse",
+    "XLStoXMLInput",
+    "XLStoXMLResponse",
+]
 
 
 # Type Definitions
@@ -4764,7 +4873,7 @@ class PdfcoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -4773,7 +4882,7 @@ class PdfcoClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -4793,8 +4902,8 @@ class PdfcoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -4821,7 +4930,7 @@ class PdfcoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "pdfco"
 
-    async def html_to_pdf_async(
+    def html_to_pdf(
         self,
         input: HtmlToPdfInput,
         *,
@@ -4841,7 +4950,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/convert/from/html"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4862,7 +4971,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def url_to_pdf_async(
+    def url_to_pdf(
         self,
         input: UrlToPdfInput,
         *,
@@ -4880,7 +4989,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/url"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4901,7 +5010,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_filler_async(
+    def pdf_filler(
         self,
         input: PdfFillerInput,
         *,
@@ -4920,7 +5029,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/add"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4941,7 +5050,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def merge_pdf_simplified_async(
+    def merge_pdf_simplified(
         self,
         input: MergePdfSimplifiedInput,
         *,
@@ -4959,7 +5068,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4980,7 +5089,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def merge_pdf_async(
+    def merge_pdf(
         self,
         input: MergePdfInput,
         *,
@@ -5000,7 +5109,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5021,7 +5130,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def split_pdf_async(
+    def split_pdf(
         self,
         input: SplitPdfInput,
         *,
@@ -5040,7 +5149,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/split"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5061,7 +5170,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def split_pdf2_async(
+    def split_pdf2(
         self,
         input: SplitPdf2Input,
         *,
@@ -5080,7 +5189,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/split2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5101,7 +5210,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_search_text_async(
+    def pdf_search_text(
         self,
         input: PDFSearchTextInput,
         *,
@@ -5120,7 +5229,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/find"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5141,7 +5250,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def document_parser_async(
+    def document_parser(
         self,
         input: DocumentParserInput,
         *,
@@ -5162,7 +5271,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/documentparser"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5183,7 +5292,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def job_check_async(
+    def job_check(
         self,
         input: JobCheckInput,
         *,
@@ -5202,7 +5311,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/job/check"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5223,7 +5332,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def barcode_generator_async(
+    def barcode_generator(
         self,
         input: BarcodeGeneratorInput,
         *,
@@ -5243,7 +5352,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/barcode/generate"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5264,7 +5373,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def barcode_reader_async(
+    def barcode_reader(
         self,
         input: BarcodeReaderInput,
         *,
@@ -5286,7 +5395,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/barcode/read/from/url"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5307,7 +5416,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_info_reader_async(
+    def pdf_info_reader(
         self,
         input: PDFInfoReaderInput,
         *,
@@ -5326,7 +5435,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/info"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5347,7 +5456,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_forms_info_reader_async(
+    def pdf_forms_info_reader(
         self,
         input: PDFFormsInfoReaderInput,
         *,
@@ -5366,7 +5475,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/info/fields"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5387,7 +5496,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_find_table_async(
+    def pdf_find_table(
         self,
         input: PDFFindTableInput,
         *,
@@ -5407,7 +5516,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/find/table"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5428,7 +5537,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_and_replace_async(
+    def search_and_replace(
         self,
         input: SearchAndReplaceInput,
         *,
@@ -5449,7 +5558,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/edit/replace-text"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5470,7 +5579,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_and_replace_with_image_async(
+    def search_and_replace_with_image(
         self,
         input: SearchAndReplaceWithImageInput,
         *,
@@ -5492,7 +5601,7 @@ class PdfcoClient(ConnectorClientBase):
             f"/v1/pdf/edit/replace-text-with-image"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5513,7 +5622,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_and_delete_text_async(
+    def search_and_delete_text(
         self,
         input: SearchAndDeleteTextInput,
         *,
@@ -5532,7 +5641,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/delete-text"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5553,7 +5662,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_searchable_async(
+    def pdf_searchable(
         self,
         input: PDFSearchableInput,
         *,
@@ -5572,7 +5681,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/makesearchable"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5593,7 +5702,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_unsearchable_async(
+    def pdf_unsearchable(
         self,
         input: PDFUnSearchableInput,
         *,
@@ -5612,7 +5721,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/makeunsearchable"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5633,7 +5742,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_csv_async(
+    def pdf_to_csv(
         self,
         input: PDFToCSVInput,
         *,
@@ -5652,7 +5761,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/csv"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5673,7 +5782,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_json_async(
+    def pdf_to_json(
         self,
         input: PDFToJSONInput,
         *,
@@ -5692,7 +5801,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/json2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5713,7 +5822,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_json_meta_async(
+    def pdf_to_json_meta(
         self,
         input: PDFToJSONMetaInput,
         *,
@@ -5735,7 +5844,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/convert/to/json-meta"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5756,7 +5865,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_text_async(
+    def pdf_to_text(
         self,
         input: PDFToTextInput,
         *,
@@ -5775,7 +5884,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/text"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5796,7 +5905,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_text_simple_async(
+    def pdf_to_text_simple(
         self,
         input: PDFToTextSimpleInput,
         *,
@@ -5817,7 +5926,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/convert/to/text-simple"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5838,7 +5947,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_xls_async(
+    def pdf_to_xls(
         self,
         input: PDFToXLSInput,
         *,
@@ -5857,7 +5966,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xls"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5878,7 +5987,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_xlsx_async(
+    def pdf_to_xlsx(
         self,
         input: PDFToXLSXInput,
         *,
@@ -5897,7 +6006,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xlsx"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5918,7 +6027,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_xml_async(
+    def pdf_to_xml(
         self,
         input: PDFToXMLInput,
         *,
@@ -5937,7 +6046,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xml"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5958,7 +6067,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_jpg_async(
+    def pdf_to_jpg(
         self,
         input: PDFToJPGInput,
         *,
@@ -5977,7 +6086,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/jpg"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -5998,7 +6107,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_png_async(
+    def pdf_to_png(
         self,
         input: PDFToPNGInput,
         *,
@@ -6017,7 +6126,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/png"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6038,7 +6147,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_webp_async(
+    def pdf_to_webp(
         self,
         input: PDFToWEBPInput,
         *,
@@ -6057,7 +6166,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/webp"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6078,7 +6187,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_to_tiff_async(
+    def pdf_to_tiff(
         self,
         input: PDFToTIFFInput,
         *,
@@ -6098,7 +6207,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/tiff"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6119,7 +6228,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_csv_async(
+    def pdf_from_csv(
         self,
         input: PDFFromCSVInput,
         *,
@@ -6138,7 +6247,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/csv"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6159,7 +6268,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_doc_async(
+    def pdf_from_doc(
         self,
         input: PDFFromDocInput,
         *,
@@ -6178,7 +6287,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/doc"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6199,7 +6308,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_images_async(
+    def pdf_from_images(
         self,
         input: PDFFromImagesInput,
         *,
@@ -6220,7 +6329,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/convert/from/image"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6241,7 +6350,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_email_async(
+    def pdf_from_email(
         self,
         input: PDFFromEmailInput,
         *,
@@ -6263,7 +6372,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/convert/from/email"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6284,7 +6393,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_add_security_async(
+    def pdf_add_security(
         self,
         input: PDFAddSecurityInput,
         *,
@@ -6303,7 +6412,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/add"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6324,7 +6433,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_security_remove_async(
+    def pdf_security_remove(
         self,
         input: PDFSecurityRemoveInput,
         *,
@@ -6343,7 +6452,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/remove"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6364,7 +6473,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_from_xls_xlsx_async(
+    def pdf_from_xls_xlsx(
         self,
         input: PDFFromXLSXLSXInput,
         *,
@@ -6382,7 +6491,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/pdf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6403,7 +6512,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xls_to_csv_async(
+    def xls_to_csv(
         self,
         input: XLStoCSVInput,
         *,
@@ -6422,7 +6531,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/csv"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6443,7 +6552,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xls_to_json_async(
+    def xls_to_json(
         self,
         input: XLStoJSONInput,
         *,
@@ -6461,7 +6570,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6482,7 +6591,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xls_to_html_async(
+    def xls_to_html(
         self,
         input: XLStoHTMLInput,
         *,
@@ -6500,7 +6609,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/html"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6521,7 +6630,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xls_to_txt_async(
+    def xls_to_txt(
         self,
         input: XLStoTXTInput,
         *,
@@ -6539,7 +6648,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/txt"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6560,7 +6669,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def xls_to_xml_async(
+    def xls_to_xml(
         self,
         input: XLStoXMLInput,
         *,
@@ -6578,7 +6687,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/xml"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6599,7 +6708,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_rotate_pages_async(
+    def pdf_rotate_pages(
         self,
         input: PDFRotatePagesInput,
         *,
@@ -6617,7 +6726,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6638,7 +6747,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_auto_rotate_pages_async(
+    def pdf_auto_rotate_pages(
         self,
         input: PDFAutoRotatePagesInput,
         *,
@@ -6657,7 +6766,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate/auto"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6678,7 +6787,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_delete_pages_async(
+    def pdf_delete_pages(
         self,
         input: PDFDeletePagesInput,
         *,
@@ -6698,7 +6807,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/edit/delete-pages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6719,7 +6828,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_compress_async(
+    def pdf_compress(
         self,
         input: PDFCompressInput,
         *,
@@ -6737,7 +6846,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/optimize"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6758,7 +6867,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_classifier_async(
+    def pdf_classifier(
         self,
         input: PDFClassifierInput,
         *,
@@ -6779,7 +6888,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/classifier"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6800,7 +6909,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def email_send_async(
+    def email_send(
         self,
         input: EmailSendInput,
         *,
@@ -6818,7 +6927,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/email/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6839,7 +6948,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def email_decode_async(
+    def email_decode(
         self,
         input: EmailDecodeInput,
         *,
@@ -6858,7 +6967,7 @@ class PdfcoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/email/decode"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6879,7 +6988,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def email_attachment_extraction_async(
+    def email_attachment_extraction(
         self,
         input: EmailAttachmentExtractionInput,
         *,
@@ -6900,7 +7009,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/email/extract-attachments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -6921,7 +7030,7 @@ class PdfcoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def pdf_attachment_extraction_async(
+    def pdf_attachment_extraction(
         self,
         input: PDFAttachmentExtractionInput,
         *,
@@ -6942,7 +7051,7 @@ class PdfcoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/pdf/attachments/extract"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.docuware import DocuwareClient
 from azure.connectors.docuware import (
-    DocuwareClient,
     SearchForDocumentsInFileCabinetInput,
     UpdateIndexFieldsInput,
 )
@@ -118,11 +118,11 @@ class TestGetOrganizationAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_organization_async()
+            result = await client.get_organization()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -143,12 +143,12 @@ class TestGetOrganizationAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_organization_async()
+                await client.get_organization()
 
             assert exc_info.value.status_code == 401
 
@@ -167,11 +167,11 @@ class TestGetFileCabinetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_file_cabinets_async(file_cabinet_type="FileCabinet")
+            result = await client.get_file_cabinets(file_cabinet_type="FileCabinet")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -196,11 +196,11 @@ class TestSearchForDocumentsInFileCabinetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.search_for_documents_in_file_cabinet_async(
+            result = await client.search_for_documents_in_file_cabinet(
                 input=request,
                 file_cabinet="cabinet-1",
                 search_dialog_id="dialog-1",
@@ -227,12 +227,12 @@ class TestSearchForDocumentsInFileCabinetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.search_for_documents_in_file_cabinet_async(
+                await client.search_for_documents_in_file_cabinet(
                     input=request,
                     file_cabinet="cabinet-1",
                     search_dialog_id="dialog-1",
@@ -256,11 +256,11 @@ class TestUpdateIndexFieldsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_index_fields_async(
+            await client.update_index_fields(
                 input=request,
                 file_cabinet_id="cabinet-1",
                 document_id="document-1",
@@ -284,11 +284,11 @@ class TestDeleteDocumentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_document_async(
+            result = await client.delete_document(
                 file_cabinet_id="cabinet-1",
                 document_id="doc-1",
             )
@@ -310,12 +310,12 @@ class TestDeleteDocumentAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_document_async(
+                await client.delete_document(
                     file_cabinet_id="cabinet-1",
                     document_id="doc-1",
                 )
@@ -337,11 +337,11 @@ class TestDownloadFileAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.download_file_async(
+            result = await client.download_file(
                 file_cabinet_id="cabinet-1",
                 document_id="doc-1",
                 file_number="1",
@@ -401,7 +401,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 
 async def _invoke_operation(client: DocuwareClient, operation: str):
     """Invoke a DocuWare operation by name for shared method tests."""
-    method = getattr(client, f"{operation}_async")
+    method = getattr(client, f"{operation}")
     return await method(**OPERATION_ARGS[operation])
 
 
@@ -417,7 +417,7 @@ class TestDocuwareClientAllOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
@@ -443,7 +443,7 @@ class TestDocuwareClientAllOperationsErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azuredatafactory import AzuredatafactoryClient
 from azure.connectors.azuredatafactory import (
-    AzuredatafactoryClient,
     CreatePipelineRunResponse,
     PipelineRun,
     DataFactoryListResult,
@@ -151,14 +151,14 @@ class TestCreatePipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = ParameterValueSpecification(
                 additional_properties={"param1": "value1"}
             )
-            result = await client.create_pipeline_run_async(
+            result = await client.create_pipeline_run(
                 input=input_data,
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
@@ -189,12 +189,12 @@ class TestCreatePipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = ParameterValueSpecification()
-            result = await client.create_pipeline_run_async(
+            result = await client.create_pipeline_run(
                 input=input_data,
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
@@ -219,12 +219,12 @@ class TestCreatePipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = ParameterValueSpecification()
-            result = await client.create_pipeline_run_async(
+            result = await client.create_pipeline_run(
                 input=input_data,
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
@@ -249,14 +249,14 @@ class TestCreatePipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = ParameterValueSpecification()
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_pipeline_run_async(
+                await client.create_pipeline_run(
                     input=input_data,
                     subscription_id="sub-123",
                     resource_group_name="rg-test",
@@ -274,8 +274,8 @@ class TestCreatePipelineRunAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'create_pipeline_run_async')
-        assert callable(client.create_pipeline_run_async)
+        assert hasattr(client, 'create_pipeline_run')
+        assert callable(client.create_pipeline_run)
 
 
 class TestCancelPipelineRunAsync:
@@ -293,11 +293,11 @@ class TestCancelPipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.cancel_pipeline_run_async(
+            await client.cancel_pipeline_run(
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
@@ -317,8 +317,8 @@ class TestCancelPipelineRunAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'cancel_pipeline_run_async')
-        assert callable(client.cancel_pipeline_run_async)
+        assert hasattr(client, 'cancel_pipeline_run')
+        assert callable(client.cancel_pipeline_run)
 
 
 class TestGetPipelineRunAsync:
@@ -340,11 +340,11 @@ class TestGetPipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_pipeline_run_async(
+            result = await client.get_pipeline_run(
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
@@ -370,11 +370,11 @@ class TestGetPipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_pipeline_run_async(
+            result = await client.get_pipeline_run(
                 subscription_id="sub-123",
                 resource_group_name="rg-test",
                 data_factory_name="adf-test",
@@ -398,12 +398,12 @@ class TestGetPipelineRunAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_pipeline_run_async(
+                await client.get_pipeline_run(
                     subscription_id="sub-123",
                     resource_group_name="rg-test",
                     data_factory_name="adf-test",
@@ -420,8 +420,8 @@ class TestGetPipelineRunAsync:
             credential=mock_credential
         )
 
-        assert hasattr(client, 'get_pipeline_run_async')
-        assert callable(client.get_pipeline_run_async)
+        assert hasattr(client, 'get_pipeline_run')
+        assert callable(client.get_pipeline_run)
 
 
 class TestDataClasses:

@@ -24,11 +24,9 @@ Usage:
 
     python sample_connector_usage_servicebus.py
 """
-
-import asyncio
 import json
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.servicebus import (
     ServicebusClient,
@@ -48,7 +46,7 @@ TOPIC_NAME = os.environ.get("SERVICEBUS_TOPIC_NAME", "")
 SUBSCRIPTION_NAME = os.environ.get("SERVICEBUS_SUBSCRIPTION_NAME", "")
 
 
-async def example_1_send_message_to_queue():
+def example_1_send_message_to_queue():
     """Example 1: Send a single message to a Service Bus queue."""
     print("\n=== Example 1: Send Message to Queue ===")
 
@@ -57,9 +55,9 @@ async def example_1_send_message_to_queue():
         print("Example: $env:SERVICEBUS_QUEUE_NAME = 'my-queue'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create a message
                 message = ServiceBusMessage(
@@ -74,7 +72,7 @@ async def example_1_send_message_to_queue():
                     correlation_id="corr-abc-123"
                 )
 
-                await client.send_message_async(
+                client.send_message(
                     input=message,
                     entity_name=QUEUE_NAME
                 )
@@ -90,7 +88,7 @@ async def example_1_send_message_to_queue():
                 print(f"Error: {ex}")
 
 
-async def example_2_receive_message_from_queue():
+def example_2_receive_message_from_queue():
     """Example 2: Receive one queue message with a peek lock."""
     print("\n=== Example 2: Receive Message from Queue ===")
 
@@ -98,11 +96,11 @@ async def example_2_receive_message_from_queue():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                result = client.get_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )
@@ -124,7 +122,7 @@ async def example_2_receive_message_from_queue():
                 print(f"Error: {ex}")
 
 
-async def example_3_receive_with_peek_lock():
+def example_3_receive_with_peek_lock():
     """Example 3: Receive a message with peek-lock and complete it."""
     print("\n=== Example 3: Receive with Peek-Lock and Complete ===")
 
@@ -132,12 +130,12 @@ async def example_3_receive_with_peek_lock():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Receive message with peek-lock (message is locked, not removed)
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                result = client.get_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )
@@ -155,7 +153,7 @@ async def example_3_receive_with_peek_lock():
 
                     # Complete the message (remove from queue)
                     if lock_token:
-                        await client.complete_message_in_queue_async(
+                        client.complete_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                         )
@@ -169,7 +167,7 @@ async def example_3_receive_with_peek_lock():
                 print(f"Error: {ex}")
 
 
-async def example_4_receive_and_abandon():
+def example_4_receive_and_abandon():
     """Example 4: Receive a message and abandon it (return to queue)."""
     print("\n=== Example 4: Receive and Abandon Message ===")
 
@@ -177,11 +175,11 @@ async def example_4_receive_and_abandon():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                result = client.get_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )
@@ -195,7 +193,7 @@ async def example_4_receive_and_abandon():
 
                     # Abandon the message (return to queue for retry)
                     if lock_token:
-                        await client.abandon_message_in_queue_async(
+                        client.abandon_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                         )
@@ -209,7 +207,7 @@ async def example_4_receive_and_abandon():
                 print(f"Error: {ex}")
 
 
-async def example_5_send_message_to_topic():
+def example_5_send_message_to_topic():
     """Example 5: Send a message to a Service Bus topic."""
     print("\n=== Example 5: Send Message to Topic ===")
 
@@ -218,9 +216,9 @@ async def example_5_send_message_to_topic():
         print("Example: $env:SERVICEBUS_TOPIC_NAME = 'my-topic'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 message = ServiceBusMessage(
                     content_data=json.dumps({
@@ -232,7 +230,7 @@ async def example_5_send_message_to_topic():
                     label="user-event"
                 )
 
-                await client.send_message_async(
+                client.send_message(
                     input=message,
                     entity_name=TOPIC_NAME
                 )
@@ -246,7 +244,7 @@ async def example_5_send_message_to_topic():
                 print(f"Error: {ex}")
 
 
-async def example_6_receive_from_topic_subscription():
+def example_6_receive_from_topic_subscription():
     """Example 6: Receive a message from a topic subscription."""
     print("\n=== Example 6: Receive from Topic Subscription ===")
 
@@ -254,11 +252,11 @@ async def example_6_receive_from_topic_subscription():
         print("Set SERVICEBUS_TOPIC_NAME and SERVICEBUS_SUBSCRIPTION_NAME.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_topic_with_peek_lock_async(
+                result = client.get_messages_from_topic_with_peek_lock(
                     topic_name=TOPIC_NAME,
                     subscription_name=SUBSCRIPTION_NAME,
                     max_message_count=1,
@@ -279,7 +277,7 @@ async def example_6_receive_from_topic_subscription():
                 print(f"Error: {ex}")
 
 
-async def example_7_dead_letter_message():
+def example_7_dead_letter_message():
     """Example 7: Move a message to the dead-letter queue."""
     print("\n=== Example 7: Dead-Letter a Message ===")
 
@@ -287,11 +285,11 @@ async def example_7_dead_letter_message():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                result = client.get_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )
@@ -305,7 +303,7 @@ async def example_7_dead_letter_message():
 
                     # Move to dead-letter queue
                     if lock_token:
-                        await client.dead_letter_message_in_queue_async(
+                        client.dead_letter_message_in_queue(
                             queue_name=QUEUE_NAME,
                             lock_token=lock_token,
                             dead_letter_reason="Processing failed",
@@ -321,7 +319,7 @@ async def example_7_dead_letter_message():
                 print(f"Error: {ex}")
 
 
-async def example_8_batch_receive():
+def example_8_batch_receive():
     """Example 8: Receive multiple messages in batch."""
     print("\n=== Example 8: Batch Receive Messages ===")
 
@@ -329,11 +327,11 @@ async def example_8_batch_receive():
         print("Set SERVICEBUS_QUEUE_NAME environment variable.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock_async(
+                result = client.get_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=5,
                 )
@@ -352,7 +350,7 @@ async def example_8_batch_receive():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: SERVICEBUS_CONNECTION_URL environment variable not set.")
@@ -365,21 +363,21 @@ async def main():
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
     # Queue operations
-    await example_1_send_message_to_queue()
-    await example_2_receive_message_from_queue()
-    await example_3_receive_with_peek_lock()
-    await example_4_receive_and_abandon()
+    example_1_send_message_to_queue()
+    example_2_receive_message_from_queue()
+    example_3_receive_with_peek_lock()
+    example_4_receive_and_abandon()
 
     # Topic operations
-    await example_5_send_message_to_topic()
-    await example_6_receive_from_topic_subscription()
+    example_5_send_message_to_topic()
+    example_6_receive_from_topic_subscription()
 
     # Advanced operations
-    await example_7_dead_letter_message()
-    await example_8_batch_receive()
+    example_7_dead_letter_message()
+    example_8_batch_receive()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

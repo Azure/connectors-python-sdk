@@ -6,19 +6,104 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "AzureiotcentralClient",
+    "Action",
+    "ActionGroupsAction",
+    "Application",
+    "ApplicationCollection",
+    "CloudPropertyJobData",
+    "CommandJobData",
+    "DateJobSchedule",
+    "Device",
+    "DeviceCloudProperties",
+    "DeviceCollection",
+    "DeviceCommand",
+    "DeviceCommandV1",
+    "DeviceComponentCommand",
+    "DeviceComponentTelemetry",
+    "DeviceGroup",
+    "DeviceGroupCollection",
+    "DeviceGroupDeviceCollection",
+    "DeviceModuleCommand",
+    "DeviceModuleComponentCommand",
+    "DeviceModuleComponentTelemetry",
+    "DeviceModuleTelemetry",
+    "DeviceProperties",
+    "DeviceRelationship",
+    "DeviceRelationshipCollection",
+    "DeviceRelationshipStatic",
+    "DeviceTelemetry",
+    "DeviceTemplate",
+    "DeviceTemplateCollection",
+    "DeviceTemplateCollectionV1",
+    "DeviceTemplateMigrationJobData",
+    "DeviceTemplateV1",
+    "DeviceV1",
+    "DeviceV2",
+    "DynamicValues",
+    "EmailAction",
+    "EmailUser",
+    "Job",
+    "JobBatch",
+    "JobCancellationThreshold",
+    "JobCollection",
+    "JobDeviceStatus",
+    "JobDeviceStatusCollection",
+    "JobSchedule",
+    "JobScheduleEnd",
+    "JobStatic",
+    "LogicAppsAction",
+    "ModuleProperties",
+    "OccurrencesJobSchedule",
+    "Organization",
+    "OrganizationCollection",
+    "OrganizationStatic",
+    "PowerAutomateAction",
+    "PropertyJobData",
+    "Role",
+    "RoleAssignment",
+    "RoleCollection",
+    "Rule",
+    "RuleCollection",
+    "ScheduledJob",
+    "ScheduledJobCollection",
+    "ScheduledJobJobCollection",
+    "ScheduledJobPatch",
+    "ScheduledJobStatic",
+    "SchemaDeviceCloudPropertiesResponse",
+    "SchemaDeviceCommandResponse",
+    "SchemaDevicePropertiesResponse",
+    "SchemaDeviceTelemetryResponse",
+    "SchemaJobResponse",
+    "SchemaScheduledJobResponse",
+    "SchemaUserResponse",
+    "ServicePrincipalUser",
+    "User",
+    "UserCollection",
+    "UserPatch",
+    "UserStatic",
+    "WebhookAction",
+    "WebhookActionBody",
+    "WebhookActionDevice",
+    "WorkflowTrigger",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1471,7 +1556,7 @@ class AzureiotcentralClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1480,7 +1565,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1500,8 +1585,8 @@ class AzureiotcentralClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1567,7 +1652,7 @@ class AzureiotcentralClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def device_groups_list_async(
+    def device_groups_list(
         self,
         application: str,
         *,
@@ -1575,14 +1660,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List device groups
 
         Get the list of device groups in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
@@ -1594,11 +1679,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1613,21 +1703,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_groups_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def device_groups_get(
         self,
         device_group_id: str,
         application: str,
@@ -1657,7 +1755,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1678,7 +1776,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_groups_set_async(
+    def device_groups_set(
         self,
         input: DeviceGroup,
         device_group_id: str,
@@ -1709,7 +1807,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1730,7 +1828,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_groups_remove_async(
+    def device_groups_remove(
         self,
         device_group_id: str,
         application: str,
@@ -1760,7 +1858,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1776,7 +1874,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def device_groups_get_devices_async(
+    def device_groups_get_devices(
         self,
         device_group_id: str,
         application: str,
@@ -1785,14 +1883,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get devices by device group ID
 
         Get the list of devices in a device group in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1809,11 +1907,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1828,21 +1931,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_get_cloud_properties_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def devices_get_cloud_properties(
         self,
         device_id: str,
         application: str,
@@ -1879,7 +1990,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1900,7 +2011,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_cloud_properties_async(
+    def devices_update_cloud_properties(
         self,
         input: DeviceCloudProperties,
         device_id: str,
@@ -1938,7 +2049,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1959,7 +2070,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_execute_component_command_async(
+    def devices_execute_component_command(
         self,
         input: DeviceCommand,
         device_id: str,
@@ -2002,7 +2113,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2023,7 +2134,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_list_async(
+    def device_relationships_list(
         self,
         device_id: str,
         application: str,
@@ -2032,14 +2143,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List relationships
 
         List all relationships based on device ID.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2056,11 +2167,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2075,21 +2191,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_relationships_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def device_relationships_get(
         self,
         device_id: str,
         relationship_id: str,
@@ -2123,7 +2247,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2144,7 +2268,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_set_async(
+    def device_relationships_set(
         self,
         input: DeviceRelationship,
         relationship_id: str,
@@ -2179,7 +2303,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2200,7 +2324,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_update_async(
+    def device_relationships_update(
         self,
         input: DeviceRelationship,
         device_id: str,
@@ -2235,7 +2359,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2256,7 +2380,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_relationships_remove_async(
+    def device_relationships_remove(
         self,
         device_id: str,
         relationship_id: str,
@@ -2290,7 +2414,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2306,7 +2430,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def jobs_list_async(
+    def jobs_list(
         self,
         application: str,
         *,
@@ -2314,14 +2438,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List jobs
 
         Get the list of jobs in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
@@ -2331,11 +2455,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2350,21 +2479,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def jobs_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def jobs_get(
         self,
         job_id: str,
         application: str,
@@ -2391,7 +2528,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2412,7 +2549,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def jobs_set_async(
+    def jobs_set(
         self,
         input: Job,
         job_id: str,
@@ -2446,7 +2583,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2467,7 +2604,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def jobs_get_devices_async(
+    def jobs_get_devices(
         self,
         job_id: str,
         application: str,
@@ -2476,14 +2613,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get device statuses
 
         Get the list of individual device statuses by job ID.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2496,11 +2633,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2515,21 +2657,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def jobs_stop_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def jobs_stop(
         self,
         job_id: str,
         application: str,
@@ -2556,7 +2706,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2572,7 +2722,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def jobs_resume_async(
+    def jobs_resume(
         self,
         job_id: str,
         application: str,
@@ -2599,7 +2749,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2615,7 +2765,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def jobs_rerun_async(
+    def jobs_rerun(
         self,
         job_id: str,
         rerun_id: str,
@@ -2648,7 +2798,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2669,7 +2819,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_list_async(
+    def organizations_list(
         self,
         application: str,
         *,
@@ -2677,14 +2827,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List organizations
 
         Get the list of organizations in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
@@ -2696,11 +2846,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2715,21 +2870,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def organizations_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def organizations_get(
         self,
         organization_id: str,
         application: str,
@@ -2759,7 +2922,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2780,7 +2943,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_set_async(
+    def organizations_set(
         self,
         input: Organization,
         organization_id: str,
@@ -2811,7 +2974,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2832,7 +2995,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def organizations_remove_async(
+    def organizations_remove(
         self,
         organization_id: str,
         application: str,
@@ -2862,7 +3025,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2878,7 +3041,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def scheduled_jobs_list_async(
+    def scheduled_jobs_list(
         self,
         application: str,
         *,
@@ -2886,14 +3049,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List scheduled jobs
 
         Get the list of scheduled jobs in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
@@ -2905,11 +3068,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2924,21 +3092,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def scheduled_jobs_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def scheduled_jobs_get(
         self,
         scheduled_job_id: str,
         application: str,
@@ -2968,7 +3144,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2989,7 +3165,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_set_async(
+    def scheduled_jobs_set(
         self,
         input: ScheduledJob,
         scheduled_job_id: str,
@@ -3032,7 +3208,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3053,7 +3229,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_update_async(
+    def scheduled_jobs_update(
         self,
         input: ScheduledJobPatch,
         scheduled_job_id: str,
@@ -3090,7 +3266,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3111,7 +3287,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def scheduled_jobs_remove_async(
+    def scheduled_jobs_remove(
         self,
         scheduled_job_id: str,
         application: str,
@@ -3141,7 +3317,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3157,7 +3333,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def scheduled_jobs_list_jobs_async(
+    def scheduled_jobs_list_jobs(
         self,
         scheduled_job_id: str,
         application: str,
@@ -3166,14 +3342,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get jobs by scheduled job ID
 
         Get the list of jobs for a scheduled job definition.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3190,11 +3366,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3209,21 +3390,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def devices_get(
         self,
         device_id: str,
         application: str,
@@ -3250,7 +3439,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3271,7 +3460,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_command_response_async(
+    def devices_get_command_response(
         self,
         device_id: str,
         command_name: str,
@@ -3310,7 +3499,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3331,7 +3520,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_component_command_response_async(
+    def devices_get_component_command_response(
         self,
         device_id: str,
         component_name: str,
@@ -3373,7 +3562,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3394,7 +3583,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_component_telemetry_value_async(
+    def devices_get_component_telemetry_value(
         self,
         device_id: str,
         component_name: str,
@@ -3436,7 +3625,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3457,7 +3646,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_command_response_async(
+    def devices_get_module_command_response(
         self,
         device_id: str,
         module: str,
@@ -3499,7 +3688,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3520,7 +3709,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_component_command_response_async(
+    def devices_get_module_component_command_response(
         self,
         device_id: str,
         module: str,
@@ -3565,7 +3754,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3586,7 +3775,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_component_telemetry_value_async(
+    def devices_get_module_component_telemetry_value(
         self,
         device_id: str,
         module: str,
@@ -3631,7 +3820,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3652,7 +3841,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_properties_async(
+    def devices_get_module_properties(
         self,
         device_id: str,
         module: str,
@@ -3692,7 +3881,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3713,7 +3902,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_module_telemetry_value_async(
+    def devices_get_module_telemetry_value(
         self,
         device_id: str,
         module: str,
@@ -3755,7 +3944,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3776,7 +3965,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_properties_async(
+    def devices_get_properties(
         self,
         device_id: str,
         application: str,
@@ -3809,7 +3998,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3830,7 +4019,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_get_telemetry_value_async(
+    def devices_get_telemetry_value(
         self,
         device_id: str,
         telemetry_name: str,
@@ -3869,7 +4058,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3890,7 +4079,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_list_async(
+    def devices_list(
         self,
         application: str,
         *,
@@ -3898,14 +4087,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List devices
 
         Get the list of devices in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
@@ -3915,11 +4104,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -3934,21 +4128,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def devices_remove_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def devices_remove(
         self,
         device_id: str,
         application: str,
@@ -3975,7 +4177,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3991,7 +4193,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def devices_run_command_async(
+    def devices_run_command(
         self,
         input: DeviceCommandV1,
         device_id: str,
@@ -4031,7 +4233,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4052,7 +4254,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_component_command_async(
+    def devices_run_component_command(
         self,
         input: DeviceComponentCommand,
         device_id: str,
@@ -4095,7 +4297,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4116,7 +4318,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_module_command_async(
+    def devices_run_module_command(
         self,
         input: DeviceModuleCommand,
         device_id: str,
@@ -4159,7 +4361,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4180,7 +4382,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_run_module_component_command_async(
+    def devices_run_module_component_command(
         self,
         input: DeviceModuleComponentCommand,
         device_id: str,
@@ -4226,7 +4428,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4247,7 +4449,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_set_async(
+    def devices_set(
         self,
         input: DeviceV2,
         device_id: str,
@@ -4275,7 +4477,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4296,7 +4498,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_module_properties_async(
+    def devices_update_module_properties(
         self,
         input: ModuleProperties,
         device_id: str,
@@ -4337,7 +4539,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4358,7 +4560,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def devices_update_properties_async(
+    def devices_update_properties(
         self,
         input: DeviceProperties,
         device_id: str,
@@ -4392,7 +4594,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4413,7 +4615,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_get_async(
+    def device_templates_get(
         self,
         template_id: str,
         application: str,
@@ -4440,7 +4642,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4461,7 +4663,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def device_templates_list_async(
+    def device_templates_list(
         self,
         application: str,
         *,
@@ -4469,14 +4671,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
@@ -4486,11 +4688,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4505,21 +4712,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_templates_remove_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def device_templates_remove(
         self,
         template_id: str,
         application: str,
@@ -4546,7 +4761,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4562,7 +4777,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def roles_get_async(
+    def roles_get(
         self,
         role_id: str,
         application: str,
@@ -4589,7 +4804,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4610,7 +4825,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def roles_list_async(
+    def roles_list(
         self,
         application: str,
         *,
@@ -4633,7 +4848,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4654,7 +4869,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_create_async(
+    def users_create(
         self,
         input: User,
         user_id: str,
@@ -4688,7 +4903,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4709,7 +4924,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_get_async(
+    def users_get(
         self,
         user_id: str,
         application: str,
@@ -4736,7 +4951,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4757,7 +4972,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_list_async(
+    def users_list(
         self,
         application: str,
         *,
@@ -4780,7 +4995,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4801,7 +5016,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_remove_async(
+    def users_remove(
         self,
         user_id: str,
         application: str,
@@ -4828,7 +5043,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4844,7 +5059,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def users_update_async(
+    def users_update(
         self,
         input: UserPatch,
         user_id: str,
@@ -4878,7 +5093,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4899,28 +5114,33 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def applications_list_async(
+    def applications_list(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get the list of applications accessible to the signed-in user
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4935,21 +5155,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def device_templates_list_2_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def device_templates_list_2(
         self,
         application: str,
         *,
@@ -4957,14 +5185,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List device templates
 
         Get the list of device templates in an application.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/deviceTemplates"
@@ -4976,11 +5204,16 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -4995,21 +5228,29 @@ class AzureiotcentralClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def workflow_get_components_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def workflow_get_components(
         self,
         application: str,
         template: str,
@@ -5044,7 +5285,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5065,7 +5306,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_capabilities_async(
+    def workflow_get_capabilities(
         self,
         application: str,
         template: str,
@@ -5112,7 +5353,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5133,7 +5374,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_capabilities_v1_async(
+    def workflow_get_capabilities_v1(
         self,
         application: str,
         template: str,
@@ -5180,7 +5421,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5201,7 +5442,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_components_v1_async(
+    def workflow_get_components_v1(
         self,
         application: str,
         template: str,
@@ -5236,7 +5477,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5257,7 +5498,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def workflow_get_modules_async(
+    def workflow_get_modules(
         self,
         application: str,
         template: str,
@@ -5285,7 +5526,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5306,7 +5547,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_cloud_properties_async(
+    def schema_device_cloud_properties(
         self,
         application: str,
         instance_of: Optional[str] = None,
@@ -5336,7 +5577,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5357,7 +5598,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_command_async(
+    def schema_device_command(
         self,
         application: str,
         instance_of: Optional[str] = None,
@@ -5399,7 +5640,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5420,7 +5661,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_command_v1_async(
+    def schema_device_command_v1(
         self,
         application: str,
         template: Optional[str] = None,
@@ -5468,7 +5709,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5489,7 +5730,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_properties_async(
+    def schema_device_properties(
         self,
         application: str,
         template: Optional[str] = None,
@@ -5525,7 +5766,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5546,7 +5787,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_device_telemetry_async(
+    def schema_device_telemetry(
         self,
         application: str,
         template: Optional[str] = None,
@@ -5594,7 +5835,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5615,7 +5856,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_job_async(
+    def schema_job(
         self,
         application: str,
         job_type: Optional[str] = None,
@@ -5645,7 +5886,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5666,7 +5907,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_scheduled_job_async(
+    def schema_scheduled_job(
         self,
         application: str,
         scheduled_job_end_type: Optional[str] = None,
@@ -5708,7 +5949,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5729,7 +5970,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_user_async(
+    def schema_user(
         self,
         application: str,
         user_type: Optional[str] = None,
@@ -5765,7 +6006,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5786,7 +6027,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def schema_webhook_action_body_async(
+    def schema_webhook_action_body(
         self,
         application: str,
         rule: Optional[str] = None,
@@ -5816,7 +6057,7 @@ class AzureiotcentralClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

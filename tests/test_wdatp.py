@@ -6,8 +6,8 @@ import json
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.wdatp import WdatpClient
 from azure.connectors.wdatp import (
-    WdatpClient,
     AdvancedHuntingInput,
     PatchAlertInput,
     StartInvestigationInput,
@@ -128,10 +128,10 @@ class TestAdvancedHunting:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = AdvancedHuntingInput(query="DeviceInfo | take 10")
-            result = await client.advanced_hunting_async(input=input_data)
+            result = await client.advanced_hunting(input=input_data)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -149,11 +149,11 @@ class TestAdvancedHunting:
 
         mock_response = MockResponse(400, "Invalid query")
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             input_data = AdvancedHuntingInput(query="invalid")
             with pytest.raises(ConnectorException):
-                await client.advanced_hunting_async(input=input_data)
+                await client.advanced_hunting(input=input_data)
 
 
 class TestGetAlerts:
@@ -176,9 +176,9 @@ class TestGetAlerts:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_alerts_async())
+            result = await resolve_generated_result(client.get_alerts())
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -195,9 +195,9 @@ class TestGetAlerts:
 
         mock_response = MockResponse(200, '{"count": 0, "value": []}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_alerts_async(filter="severity eq 'High'"))
+            await resolve_generated_result(client.get_alerts(filter="severity eq 'High'"))
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -212,9 +212,9 @@ class TestGetAlerts:
 
         mock_response = MockResponse(200, '{"count": 0, "value": []}')
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.get_alerts_async(top="10", skip="5"))
+            await resolve_generated_result(client.get_alerts(top="10", skip="5"))
 
             call_args = mock_send.call_args
             assert "$top=10" in call_args[0][1]
@@ -235,9 +235,9 @@ class TestGetSingleAlert:
         response_data = {"id": "alert-123", "title": "Test Alert", "severity": "High"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_single_alert_async(alert_id="alert-123")
+            result = await client.get_single_alert(alert_id="alert-123")
 
             call_args = mock_send.call_args
             assert "api/alerts/alert-123" in call_args[0][1]
@@ -253,10 +253,10 @@ class TestGetSingleAlert:
 
         mock_response = MockResponse(404, "Alert not found")
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_single_alert_async(alert_id="nonexistent")
+                await client.get_single_alert(alert_id="nonexistent")
 
 
 class TestPatchAlert:
@@ -273,10 +273,10 @@ class TestPatchAlert:
         response_data = {"id": "alert-123", "status": "Resolved"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = PatchAlertInput(status="Resolved")
-            result = await client.patch_alert_async(input=input_data, alert_id="alert-123")
+            result = await client.patch_alert(input=input_data, alert_id="alert-123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "PATCH"
@@ -304,9 +304,9 @@ class TestGetMachines:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_machines_async())
+            result = await resolve_generated_result(client.get_machines())
 
             call_args = mock_send.call_args
             assert "api/machines" in call_args[0][1]
@@ -327,9 +327,9 @@ class TestGetSingleMachine:
         response_data = {"id": "machine-123", "computerDnsName": "TestPC"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_single_machine_async(machine_id="machine-123")
+            result = await client.get_single_machine(machine_id="machine-123")
 
             call_args = mock_send.call_args
             assert "api/machines/machine-123" in call_args[0][1]
@@ -350,10 +350,10 @@ class TestIsolateMachine:
         response_data = {"id": "action-123", "type": "Isolate", "status": "InProgress"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = IsolateMachineInput(comment="Security investigation")
-            result = await client.isolate_machine_async(
+            result = await client.isolate_machine(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -378,10 +378,10 @@ class TestUnisolateMachine:
         response_data = {"id": "action-124", "type": "Unisolate", "status": "InProgress"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = UnisolateMachineInput(comment="Investigation complete")
-            await client.unisolate_machine_async(
+            await client.unisolate_machine(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -404,10 +404,10 @@ class TestRunAntivirusScan:
         response_data = {"id": "action-125", "type": "RunAntiVirusScan", "status": "InProgress"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = RunAntivirusScanInput(comment="Routine scan", scan_type="Quick")
-            await client.run_antivirus_scan_async(
+            await client.run_antivirus_scan(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -430,10 +430,10 @@ class TestCollectInvestigationPackage:
         response_data = {"id": "action-126", "type": "CollectInvestigationPackage"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = CollectInvestigationPackageInput(comment="Forensic analysis")
-            await client.collect_investigation_package_async(
+            await client.collect_investigation_package(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -459,9 +459,9 @@ class TestGetMachineActions:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_machine_actions_async())
+            result = await resolve_generated_result(client.get_machine_actions())
 
             call_args = mock_send.call_args
             assert "api/machineactions" in call_args[0][1]
@@ -485,9 +485,9 @@ class TestGetInvestigations:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_investigations_async())
+            result = await resolve_generated_result(client.get_investigations())
 
             call_args = mock_send.call_args
             assert "api/investigations" in call_args[0][1]
@@ -508,10 +508,10 @@ class TestStartInvestigation:
         response_data = {"id": "inv-123", "state": "Running"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = StartInvestigationInput(comment="Suspicious activity")
-            await client.start_investigation_async(
+            await client.start_investigation(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -534,10 +534,10 @@ class TestMachineTag:
         response_data = {"id": "machine-123", "machineTags": ["HighValue"]}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = MachineTagInput(value="HighValue", action="Add")
-            result = await client.machine_tag_async(
+            result = await client.machine_tag(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -561,9 +561,9 @@ class TestGetFileStats:
         response_data = {"sha1": "abc123", "globallyPrevalence": 100}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_stats_async(file_id="abc123")
+            result = await client.get_file_stats(file_id="abc123")
 
             call_args = mock_send.call_args
             assert "api/files/abc123/stats" in call_args[0][1]
@@ -584,9 +584,9 @@ class TestGetDomainStats:
         response_data = {"host": "example.com", "organizationPrevalence": 50}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_domain_stats_async(domain_name="example.com")
+            result = await client.get_domain_stats(domain_name="example.com")
 
             call_args = mock_send.call_args
             assert "api/domains/example.com/stats" in call_args[0][1]
@@ -607,9 +607,9 @@ class TestGetIpStats:
         response_data = {"ipAddress": "192.168.1.1", "organizationPrevalence": 25}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await client.get_ip_stats_async(ip_address="192.168.1.1")
+            result = await client.get_ip_stats(ip_address="192.168.1.1")
 
             call_args = mock_send.call_args
             assert "api/ips/192.168.1.1/stats" in call_args[0][1]
@@ -630,10 +630,10 @@ class TestRestrictAppExecution:
         response_data = {"id": "action-127", "type": "RestrictCodeExecution"}
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
             input_data = RestrictAppExecutionInput(comment="Containment")
-            await client.restrict_app_execution_async(
+            await client.restrict_app_execution(
                 input=input_data,
                 machine_id="machine-123"
             )
@@ -659,9 +659,9 @@ class TestGetRemediationActivities:
         }
         mock_response = MockResponse(200, json.dumps(response_data))
         with patch.object(
-            client._http_client, 'send_async', new_callable=AsyncMock, return_value=mock_response
+            client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_remediation_activities_async())
+            result = await resolve_generated_result(client.get_remediation_activities())
 
             call_args = mock_send.call_args
             assert "api/remediationtasks" in call_args[0][1]

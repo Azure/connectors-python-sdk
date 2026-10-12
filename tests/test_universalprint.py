@@ -8,7 +8,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.universalprint import UniversalprintClient
+from azure.connectors.aio.universalprint import UniversalprintClient
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -18,13 +18,13 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: UniversalprintClient, operation: str):
     """Invoke a Universal Print operation by name for shared tests."""
     if operation == "print_file":
-        return await client.print_file_async(
+        return await client.print_file(
             input=b"%PDF-1.4 test",
             printer="printer123",
             file_name="document.pdf",
         )
     if operation == "list_recent_shares":
-        return await client.list_recent_shares_async()
+        return await client.list_recent_shares()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -130,11 +130,11 @@ class TestUniversalprintClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.print_file_async(
+            result = await client.print_file(
                 input=body,
                 printer="printer123",
                 file_name="document.pdf",
@@ -160,11 +160,11 @@ class TestUniversalprintClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.print_file_async(
+            await client.print_file(
                 input=b"%PDF-1.4 test",
                 printer="printer123",
                 file_name="document.pdf",
@@ -189,11 +189,11 @@ class TestUniversalprintClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_recent_shares_async()
+            result = await client.list_recent_shares()
 
             assert result["value"][0]["id"] == "share123"
             assert mock_send.call_args[0][0] == "GET"
@@ -210,11 +210,11 @@ class TestUniversalprintClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_recent_shares_async()
+            result = await client.list_recent_shares()
 
             assert result is None
 
@@ -244,7 +244,7 @@ class TestUniversalprintClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -257,21 +257,21 @@ class TestUniversalprintClientSignatures:
 
     def test_print_file_required_params_have_no_default(self):
         """Test printer and file_name are required (no default value)."""
-        signature = inspect.signature(UniversalprintClient.print_file_async)
+        signature = inspect.signature(UniversalprintClient.print_file)
 
         assert signature.parameters["printer"].default is inspect.Parameter.empty
         assert signature.parameters["file_name"].default is inspect.Parameter.empty
 
     def test_print_file_required_params_annotated_as_str(self):
         """Test printer and file_name are annotated as str, not Optional."""
-        signature = inspect.signature(UniversalprintClient.print_file_async)
+        signature = inspect.signature(UniversalprintClient.print_file)
 
         assert signature.parameters["printer"].annotation == "str"
         assert signature.parameters["file_name"].annotation == "str"
 
     def test_print_file_optional_params_default_to_none(self):
         """Test optional configuration params default to None."""
-        signature = inspect.signature(UniversalprintClient.print_file_async)
+        signature = inspect.signature(UniversalprintClient.print_file)
 
         assert signature.parameters["configuration_copies"].default is None
         assert signature.parameters["configuration_color_mode"].default is None
@@ -285,4 +285,4 @@ class TestUniversalprintClientSignatures:
         )
 
         with pytest.raises(TypeError):
-            await client.print_file_async(input=b"%PDF-1.4 test")
+            await client.print_file(input=b"%PDF-1.4 test")

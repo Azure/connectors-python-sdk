@@ -1,9 +1,7 @@
 """Orderful connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.orderful import OrderfulClient
@@ -12,20 +10,20 @@ from azure.connectors.orderful import OrderfulClient
 CONNECTION_RUNTIME_URL = os.environ.get("ORDERFUL_CONNECTION_URL", "")
 
 
-async def main() -> None:
+def main() -> None:
     """List Orderful transactions."""
     if not CONNECTION_RUNTIME_URL:
         print("Set ORDERFUL_CONNECTION_URL to run this sample.")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         try:
-            async with OrderfulClient(CONNECTION_RUNTIME_URL, credential) as client:
-                await client.list_transactions_async()
+            with OrderfulClient(CONNECTION_RUNTIME_URL, credential) as client:
+                client.list_transactions()
                 print("Transactions requested.")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.keyvault import KeyvaultClient
 from azure.connectors.keyvault import (
-    KeyvaultClient,
     KeyMetadataCollection,
     KeyMetadata,
     KeyEncryptOutput,
@@ -146,11 +146,11 @@ class TestListKeysAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_keys_async()
+            result = await client.list_keys()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -171,11 +171,11 @@ class TestListKeysAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_keys_async()
+            result = await client.list_keys()
             assert result is None
 
     @pytest.mark.asyncio
@@ -193,12 +193,12 @@ class TestListKeysAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_keys_async()
+                await client.list_keys()
 
             assert exc_info.value.status_code == 403
 
@@ -219,11 +219,11 @@ class TestListKeyVersionsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_key_versions_async(key_name="mykey")
+            result = await client.list_key_versions(key_name="mykey")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -251,11 +251,11 @@ class TestGetKeyMetadataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_key_metadata_async(key_name="mykey")
+            result = await client.get_key_metadata(key_name="mykey")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -276,12 +276,12 @@ class TestGetKeyMetadataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_key_metadata_async(key_name="nonexistent")
+                await client.get_key_metadata(key_name="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -302,11 +302,11 @@ class TestGetKeyVersionMetadataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_key_version_metadata_async(
+            result = await client.get_key_version_metadata(
                 key_name="mykey",
                 key_version="v1"
             )
@@ -339,11 +339,11 @@ class TestEncryptDataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.encrypt_data_async(
+            result = await client.encrypt_data(
                 input=encrypt_input,
                 key_name="mykey"
             )
@@ -375,12 +375,12 @@ class TestEncryptDataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.encrypt_data_async(
+                await client.encrypt_data(
                     input=encrypt_input,
                     key_name="mykey"
                 )
@@ -409,11 +409,11 @@ class TestEncryptDataWithVersionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.encrypt_data_with_version_async(
+            result = await client.encrypt_data_with_version(
                 input=encrypt_input,
                 key_name="mykey",
                 key_version="v1"
@@ -447,11 +447,11 @@ class TestDecryptDataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.decrypt_data_async(
+            result = await client.decrypt_data(
                 input=decrypt_input,
                 key_name="mykey"
             )
@@ -485,11 +485,11 @@ class TestDecryptDataWithVersionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.decrypt_data_with_version_async(
+            result = await client.decrypt_data_with_version(
                 input=decrypt_input,
                 key_name="mykey",
                 key_version="v1"
@@ -518,11 +518,11 @@ class TestListSecretsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_secrets_async()
+            result = await client.list_secrets()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -542,12 +542,12 @@ class TestListSecretsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_secrets_async()
+                await client.list_secrets()
 
             assert exc_info.value.status_code == 403
 
@@ -568,11 +568,11 @@ class TestListSecretVersionsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_secret_versions_async(
+            result = await client.list_secret_versions(
                 secret_name="mysecret"
             )
 
@@ -602,11 +602,11 @@ class TestGetSecretMetadataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_secret_metadata_async(
+            result = await client.get_secret_metadata(
                 secret_name="mysecret"
             )
 
@@ -634,11 +634,11 @@ class TestGetSecretVersionMetadataAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_secret_version_metadata_async(
+            result = await client.get_secret_version_metadata(
                 secret_name="mysecret",
                 secret_version="v1"
             )
@@ -669,11 +669,11 @@ class TestGetSecretAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_secret_async(secret_name="mysecret")
+            result = await client.get_secret(secret_name="mysecret")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -694,12 +694,12 @@ class TestGetSecretAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_secret_async(secret_name="nonexistent")
+                await client.get_secret(secret_name="nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -720,11 +720,11 @@ class TestGetSecretVersionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_secret_version_async(
+            result = await client.get_secret_version(
                 secret_name="mysecret",
                 secret_version="v1"
             )

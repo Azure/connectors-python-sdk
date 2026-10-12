@@ -10,15 +10,79 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "PlumsailClient",
+    "AddPowerAutomateWebhookData",
+    "Any2PdfRequest",
+    "ApplyDocxTemplateRequest",
+    "ApplyHtmlFlowTemplateRequest",
+    "ApplyHtmlTemplateResponse",
+    "ApplyPptxTemplateRequest",
+    "ApplyXlsxTemplateRequest",
+    "BooleanResultResponse",
+    "CompressPdfRequest",
+    "CreateArchiveRequest",
+    "Csv2XlsxColumnMapping",
+    "Csv2XlsxRequest",
+    "Doc2DocxRequest",
+    "DocumentContentWithFilenameResponse",
+    "DocumentProcessingResponse",
+    "DocumentsArrayResponse",
+    "DocumentsWithFilenamesResponse",
+    "Docx2PdfRequest",
+    "Email2PdfRequest",
+    "ExtractArchiveRequest",
+    "FileData",
+    "FillInPdfFormRequest",
+    "FlowDocumentsJobsAddWatermarkToPdfInput",
+    "FlowDocumentsJobsGetPdfFormPostResponse",
+    "FlowDocumentsJobsSplitPdfInput",
+    "FlowProcessesFlowJobsExecuteProcessInput",
+    "GetPdfFormRequest",
+    "GetPdfProtectionInfoResponse",
+    "Html2DocxFlowRequest",
+    "Html2PdfFlowRequest",
+    "Image2PdfRequest",
+    "Json2CsvRequest",
+    "Json2XlsxColumnMapping",
+    "Json2XlsxRequest",
+    "LicenseInfo",
+    "MergeAny2PdfFileData",
+    "MergeAny2PdfRequest",
+    "MergeDocxRequest",
+    "MergeFieldsTemplateRequest",
+    "MergePdfRequest",
+    "MergeXlsxRequest",
+    "ParseCsvFlowRequest",
+    "ParseCsvSchemaResponse",
+    "Pdf2ImageRequest",
+    "Pdf2TextRequest",
+    "PdfProtectionInfoRequest",
+    "Ppt2PptxRequest",
+    "Pptx2PdfRequest",
+    "ProcessJsonData",
+    "ProcessSchemaDynamicType",
+    "ProfileInfo",
+    "ProtectPdfRequest",
+    "RegExpMatchRequest",
+    "RegExpMatchSchemaResponseClass",
+    "RegExpReplaceRequest",
+    "RegExpTestRequest",
+    "SplitPdfRequest",
+    "StringResultResponse",
+    "Xls2XlsxRequest",
+    "Xlsx2PdfRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1166,7 +1230,7 @@ class PlumsailClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1175,7 +1239,7 @@ class PlumsailClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1195,8 +1259,8 @@ class PlumsailClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1223,7 +1287,7 @@ class PlumsailClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "plumsail"
 
-    async def profiles_me_get_async(
+    def profiles_me_get(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1238,7 +1302,7 @@ class PlumsailClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/profiles/me"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1259,7 +1323,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_apply_docx_template_async(
+    def flow_v1_documents_jobs_apply_docx_template(
         self,
         input: ApplyDocxTemplateRequest,
         *,
@@ -1279,7 +1343,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ApplyDocxTemplate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1297,7 +1361,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_apply_xlsx_template_async(
+    def flow_v1_documents_jobs_apply_xlsx_template(
         self,
         input: ApplyXlsxTemplateRequest,
         *,
@@ -1317,7 +1381,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ApplyXlsxTemplate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1335,7 +1399,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_apply_pptx_async(
+    def flow_v1_documents_jobs_apply_pptx(
         self,
         input: ApplyPptxTemplateRequest,
         *,
@@ -1354,7 +1418,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyPptx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1375,7 +1439,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_apply_docx_async(
+    def flow_v1_documents_jobs_apply_docx(
         self,
         input: MergeFieldsTemplateRequest,
         *,
@@ -1397,7 +1461,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyDocx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1418,7 +1482,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_apply_html_async(
+    def flow_v1_documents_jobs_apply_html(
         self,
         input: ApplyHtmlFlowTemplateRequest,
         *,
@@ -1440,7 +1504,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyHtml"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1461,7 +1525,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_html2_pdf_async(
+    def flow_v1_documents_jobs_html2_pdf(
         self,
         input: Html2PdfFlowRequest,
         *,
@@ -1481,7 +1545,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1502,7 +1566,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_html2_docx_async(
+    def flow_v1_documents_jobs_html2_docx(
         self,
         input: Html2DocxFlowRequest,
         *,
@@ -1522,7 +1586,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Docx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1543,7 +1607,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_docx2_pdf_async(
+    def flow_v1_documents_jobs_docx2_pdf(
         self,
         input: Docx2PdfRequest,
         *,
@@ -1563,7 +1627,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Docx2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1584,7 +1648,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_xslx2_pdf_async(
+    def flow_v1_documents_jobs_xslx2_pdf(
         self,
         input: Xlsx2PdfRequest,
         *,
@@ -1604,7 +1668,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xslx2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1622,7 +1686,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_pptx2_pdf_async(
+    def flow_v1_documents_jobs_pptx2_pdf(
         self,
         input: Pptx2PdfRequest,
         *,
@@ -1642,7 +1706,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Pptx2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1660,7 +1724,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_any2_pdf_v2_async(
+    def flow_v1_documents_jobs_any2_pdf_v2(
         self,
         input: Any2PdfRequest,
         *,
@@ -1679,7 +1743,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Any2PdfV2"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1697,7 +1761,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_email2_pdf_async(
+    def flow_v1_documents_jobs_email2_pdf(
         self,
         input: Email2PdfRequest,
         *,
@@ -1716,7 +1780,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Email2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1734,7 +1798,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_doc2_docx_async(
+    def flow_v1_documents_jobs_doc2_docx(
         self,
         input: Doc2DocxRequest,
         *,
@@ -1754,7 +1818,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Doc2Docx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1772,7 +1836,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_xls2_xlsx_async(
+    def flow_v1_documents_jobs_xls2_xlsx(
         self,
         input: Xls2XlsxRequest,
         *,
@@ -1792,7 +1856,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xls2Xlsx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1810,7 +1874,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_ppt2_pptx_async(
+    def flow_v1_documents_jobs_ppt2_pptx(
         self,
         input: Ppt2PptxRequest,
         *,
@@ -1830,7 +1894,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Ppt2Pptx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1848,7 +1912,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_split_pdf_v2_async(
+    def flow_v1_documents_jobs_split_pdf_v2(
         self,
         input: FlowDocumentsJobsSplitPdfInput,
         type_: str,
@@ -1875,7 +1939,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1896,7 +1960,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_merge_any_to_pdf_v2_async(
+    def flow_v1_documents_jobs_merge_any_to_pdf_v2(
         self,
         input: MergeAny2PdfRequest,
         *,
@@ -1917,7 +1981,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/MergeAnyToPdfV2"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1935,7 +1999,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_extract_text_from_pdf_async(
+    def flow_v1_documents_jobs_extract_text_from_pdf(
         self,
         input: Pdf2TextRequest,
         *,
@@ -1956,7 +2020,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ExtractTextFromPdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1977,7 +2041,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_pdf2_image_v2_async(
+    def flow_v1_documents_jobs_pdf2_image_v2(
         self,
         input: Pdf2ImageRequest,
         *,
@@ -1998,7 +2062,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/Pdf2ImageV2"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2019,7 +2083,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_image2_pdf_async(
+    def flow_v1_documents_jobs_image2_pdf(
         self,
         input: Image2PdfRequest,
         *,
@@ -2037,7 +2101,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Image2Pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2055,7 +2119,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_fill_in_pdf_form_async(
+    def flow_v1_documents_jobs_fill_in_pdf_form(
         self,
         input: FillInPdfFormRequest,
         *,
@@ -2075,7 +2139,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/FillInPdfForm"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2096,7 +2160,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_get_pdf_form_async(
+    def flow_v1_documents_jobs_get_pdf_form(
         self,
         input: GetPdfFormRequest,
         *,
@@ -2116,7 +2180,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/GetPdfForm"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2137,7 +2201,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_protect_pdf_async(
+    def flow_v1_documents_jobs_protect_pdf(
         self,
         input: ProtectPdfRequest,
         *,
@@ -2157,7 +2221,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ProtectPdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2178,7 +2242,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_get_pdf_protection_info_async(
+    def flow_v1_documents_jobs_get_pdf_protection_info(
         self,
         input: PdfProtectionInfoRequest,
         *,
@@ -2199,7 +2263,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/GetPdfProtectionInfo"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2220,7 +2284,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_compress_pdf_async(
+    def flow_v1_documents_jobs_compress_pdf(
         self,
         input: CompressPdfRequest,
         *,
@@ -2240,7 +2304,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/CompressPdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2258,7 +2322,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_add_watermark_to_pdf_async(
+    def flow_v1_documents_jobs_add_watermark_to_pdf(
         self,
         input: FlowDocumentsJobsAddWatermarkToPdfInput,
         type_: str,
@@ -2286,7 +2350,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2307,7 +2371,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_merge_docx_async(
+    def flow_v1_documents_jobs_merge_docx(
         self,
         input: MergeDocxRequest,
         *,
@@ -2327,7 +2391,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeDocx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2348,7 +2412,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_parse_csv_async(
+    def flow_v1_documents_jobs_parse_csv(
         self,
         input: ParseCsvFlowRequest,
         *,
@@ -2367,7 +2431,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ParseCsv"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2388,7 +2452,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_csv2_xlsx_async(
+    def flow_v1_documents_jobs_csv2_xlsx(
         self,
         input: Csv2XlsxRequest,
         *,
@@ -2407,7 +2471,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Csv2Xlsx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2425,7 +2489,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_json2_xlsx_async(
+    def flow_v1_documents_jobs_json2_xlsx(
         self,
         input: Json2XlsxRequest,
         *,
@@ -2444,7 +2508,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Xlsx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2462,7 +2526,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_json2_csv_async(
+    def flow_v1_documents_jobs_json2_csv(
         self,
         input: Json2CsvRequest,
         *,
@@ -2481,7 +2545,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Csv"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2499,7 +2563,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_jobs_reg_exp_match_async(
+    def flow_v1_documents_jobs_reg_exp_match(
         self,
         input: RegExpMatchRequest,
         *,
@@ -2522,7 +2586,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/RegExpMatch"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2543,7 +2607,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_reg_exp_replace_async(
+    def flow_v1_documents_jobs_reg_exp_replace(
         self,
         input: RegExpReplaceRequest,
         *,
@@ -2566,7 +2630,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/RegExpReplace"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2587,7 +2651,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_reg_exp_test_async(
+    def flow_v1_documents_jobs_reg_exp_test(
         self,
         input: RegExpTestRequest,
         *,
@@ -2609,7 +2673,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/RegExpTest"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2630,7 +2694,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_create_archive_async(
+    def flow_v1_documents_jobs_create_archive(
         self,
         input: CreateArchiveRequest,
         *,
@@ -2649,7 +2713,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/CreateArchive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2670,7 +2734,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_extract_archive_async(
+    def flow_v1_documents_jobs_extract_archive(
         self,
         input: ExtractArchiveRequest,
         *,
@@ -2689,7 +2753,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/Documents/jobs/ExtractArchive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2710,7 +2774,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_documents_jobs_merge_xlsx_async(
+    def flow_v1_documents_jobs_merge_xlsx(
         self,
         input: MergeXlsxRequest,
         *,
@@ -2730,7 +2794,7 @@ class PlumsailClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeXlsx"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2751,7 +2815,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flow_v1_processes_flow_jobs_execute_process_async(
+    def flow_v1_processes_flow_jobs_execute_process(
         self,
         input: FlowProcessesFlowJobsExecuteProcessInput,
         process_id: str,
@@ -2781,7 +2845,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2799,7 +2863,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_processes_flow_jobs_execute_process_with_generated_data_async(
+    def flow_v1_processes_flow_jobs_execute_process_with_generated_data(
         self,
         input: ProcessJsonData,
         process_id: str,
@@ -2829,7 +2893,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2847,7 +2911,7 @@ class PlumsailClient(ConnectorClientBase):
 
         return response.content
 
-    async def flow_v1_documents_flow_schema_split_pdf_async(
+    def flow_v1_documents_flow_schema_split_pdf(
         self,
         type_: str,
         *,
@@ -2873,7 +2937,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2889,7 +2953,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_documents_flow_schema_add_watermark_to_pdf_async(
+    def flow_v1_documents_flow_schema_add_watermark_to_pdf(
         self,
         type_: str,
         *,
@@ -2915,7 +2979,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2931,7 +2995,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_processes_flow_schema_get_processes_async(
+    def flow_v1_processes_flow_schema_get_processes(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2949,7 +3013,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/flow/v1/ProcessesFlow/Schema/GetProcesses"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2965,7 +3029,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_documents_flow_schema_parse_csv_async(
+    def flow_v1_documents_flow_schema_parse_csv(
         self,
         headers_parameter: str,
         *,
@@ -2991,7 +3055,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3007,7 +3071,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_processes_flow_schema_get_json_data_async(
+    def flow_v1_processes_flow_schema_get_json_data(
         self,
         process_id: str,
         *,
@@ -3033,7 +3097,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3049,7 +3113,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_processes_flow_triggers_by_process_id_schema_get_async(
+    def flow_v1_processes_flow_triggers_by_process_id_schema_get(
         self,
         process_id: str,
         *,
@@ -3073,7 +3137,7 @@ class PlumsailClient(ConnectorClientBase):
             f"/schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3089,7 +3153,7 @@ class PlumsailClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def flow_v1_documents_flow_schema_reg_exp_match_async(
+    def flow_v1_documents_flow_schema_reg_exp_match(
         self,
         pattern: str,
         *,
@@ -3115,7 +3179,7 @@ class PlumsailClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,

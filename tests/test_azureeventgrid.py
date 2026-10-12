@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azureeventgrid import AzureeventgridClient
 from azure.connectors.azureeventgrid import (
-    AzureeventgridClient,
     EventRequest,
     EventSchema,
     EventTypesResponse,
@@ -26,9 +26,9 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: AzureeventgridClient, operation: str):
     """Invoke an Event Grid operation by name for shared error-handling tests."""
     if operation == "subscriptions_list":
-        return await client.subscriptions_list_async()
+        return await client.subscriptions_list()
     if operation == "topic_types_list":
-        return await client.topic_types_list_async()
+        return await client.topic_types_list()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -139,11 +139,11 @@ class TestAzureeventgridClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.subscriptions_list_async()
+            result = await client.subscriptions_list()
 
             assert result["value"][0]["subscriptionId"] == "sub-1"
             assert mock_send.call_args[0][0] == "GET"
@@ -161,11 +161,11 @@ class TestAzureeventgridClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.topic_types_list_async()
+            result = await client.topic_types_list()
 
             assert "value" in result
             request_url = mock_send.call_args[0][1]
@@ -183,11 +183,11 @@ class TestAzureeventgridClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.topic_types_list_async()
+            result = await client.topic_types_list()
 
             assert result is None
 
@@ -211,7 +211,7 @@ class TestAzureeventgridClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

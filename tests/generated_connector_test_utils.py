@@ -5,13 +5,18 @@
 from __future__ import annotations
 
 import dataclasses
+import importlib
 import inspect
+from collections.abc import Mapping
+from enum import Enum
 from types import ModuleType
-from typing import Any, get_args, get_origin, get_type_hints
+from typing import Any, Literal, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
+from azure.core.paging import ItemPaged
 
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import (
@@ -29,25 +34,60 @@ _REQUEST_CONTROL_PARAMETER_NAMES = {
 }
 
 
+def _get_generated_type_hints(method: Any, module: ModuleType) -> dict[str, Any]:
+    """Resolve annotations from shared root models and the client module."""
+    method_module = importlib.import_module(method.__module__)
+    return get_type_hints(
+        method,
+        globalns={**vars(module), **vars(method_module)},
+    )
+
+
 def get_generated_operations(client_type: type[Any]) -> set[str]:
-    """Return generated async operation names without their async suffix."""
+    """Return public operations declared by a generated client."""
     return {
-        name.removesuffix("_async")
-        for name in dir(client_type)
-        if name.endswith("_async")
-        and (
-            inspect.iscoroutinefunction(getattr(client_type, name))
-            or inspect.isasyncgenfunction(getattr(client_type, name))
-        )
+        name
+        for name, member in vars(client_type).items()
+        if not name.startswith("_")
+        and name != "close"
+        and callable(member)
     }
 
 
+def resolve_sync_generated_result(result: Any) -> Any:
+    """Resolve a generated result, consuming a synchronous pager."""
+    if isinstance(result, ItemPaged):
+        return list(result)
+
+    return result
+
+
 async def resolve_generated_result(result: Any) -> Any:
-    """Resolve a generated coroutine or collect a generated async iterator."""
-    if inspect.isasyncgen(result):
+    """Resolve an asynchronous generated result, consuming a pager."""
+    if isinstance(result, AsyncItemPaged):
         return [item async for item in result]
 
     return await result
+
+
+def invoke_sync_generated_operation(
+    client: Any,
+    operation: str,
+    module: ModuleType,
+    include_optional_parameters: bool = False,
+    request_controls: dict[str, Any] | None = None,
+) -> Any:
+    """Invoke a synchronous generated operation with representative arguments."""
+    method = getattr(client, operation)
+    type_hints = _get_generated_type_hints(method, module)
+    arguments = {
+        parameter.name: _representative_value(type_hints[parameter.name])
+        for parameter in inspect.signature(method).parameters.values()
+        if parameter.name not in _REQUEST_CONTROL_PARAMETER_NAMES
+        and (include_optional_parameters or parameter.default is inspect.Parameter.empty)
+    }
+    arguments.update(request_controls or {})
+    return resolve_sync_generated_result(method(**arguments))
 
 
 async def invoke_generated_operation(
@@ -57,9 +97,9 @@ async def invoke_generated_operation(
     include_optional_parameters: bool = False,
     request_controls: dict[str, Any] | None = None,
 ) -> Any:
-    """Invoke a generated operation with representative arguments."""
-    method = getattr(client, f"{operation}_async")
-    type_hints = get_type_hints(method, globalns=vars(module))
+    """Invoke an asynchronous generated operation with representative arguments."""
+    method = getattr(client, operation)
+    type_hints = _get_generated_type_hints(method, module)
     arguments = {
         parameter.name: _representative_value(type_hints[parameter.name])
         for parameter in inspect.signature(method).parameters.values()
@@ -98,7 +138,7 @@ class GeneratedConnectorContractTests:
 
     @pytest.mark.asyncio
     async def test_context_manager(self, mock_credential: Any) -> None:
-        """Test async context manager cleanup."""
+        """Test asynchronous context manager cleanup."""
         with patch.object(self.client_type, "close", new_callable=AsyncMock) as mock_close:
             async with self.client_type(
                 "https://example.azure.com/connections/test",
@@ -156,15 +196,19 @@ class GeneratedConnectorContractTests:
                 "https://example.azure.com/connections/test",
                 credential=mock_credential,
             )
-            generated_method = getattr(client, f"{operation}_async")
-            is_pageable = inspect.isasyncgenfunction(generated_method)
+            generated_method = getattr(client, operation)
+            return_type = _get_generated_type_hints(
+                generated_method,
+                self.connector_module,
+            )["return"]
+            is_pageable = get_origin(return_type) is AsyncItemPaged
             response_text = (
                 '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
             )
 
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text=response_text),
             ) as mock_send:
@@ -183,12 +227,8 @@ class GeneratedConnectorContractTests:
             body = mock_send.call_args.kwargs["body"]
             assert (body is not None) is expects_body, operation
             if expects_body:
-                assert to_wire(body), operation
+                assert to_wire(body) is not None, operation
 
-            return_type = get_type_hints(
-                getattr(client, f"{operation}_async"),
-                globalns=vars(self.connector_module),
-            )["return"]
             if return_type is type(None):
                 assert result is None, operation
             elif is_pageable:
@@ -209,7 +249,7 @@ class GeneratedConnectorContractTests:
 
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=400, text="bad request"),
             ):
@@ -242,6 +282,12 @@ def _representative_value(annotation: Any) -> Any:
     if origin is dict:
         return {"key": "value"}
 
+    if origin is Mapping:
+        return {"key": "value"}
+
+    if origin is Literal:
+        return get_args(annotation)[0]
+
     non_null_types = [
         item_type
         for item_type in get_args(annotation)
@@ -250,21 +296,40 @@ def _representative_value(annotation: Any) -> Any:
     if len(non_null_types) == 1:
         return _representative_value(non_null_types[0])
 
+    mapping_types = [
+        item_type
+        for item_type in non_null_types
+        if get_origin(item_type) is Mapping
+    ]
+    if mapping_types:
+        return _representative_value(mapping_types[0])
+
+    for item_type in non_null_types:
+        try:
+            return _representative_value(item_type)
+        except AssertionError:
+            continue
+
     if annotation is Any:
         return "value"
 
-    if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
-        instance = annotation()
-        model_fields = dataclasses.fields(instance)
-        if model_fields:
-            model_field = model_fields[0]
-            value = (
-                {"key": "value"}
-                if model_field.name == ADDITIONAL_PROPERTIES_FIELD
-                else "value"
-            )
-            setattr(instance, model_field.name, value)
+    if inspect.isclass(annotation) and issubclass(annotation, Enum):
+        return next(iter(annotation))
 
-        return instance
+    if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
+        return _representative_model(annotation)
 
     raise AssertionError(f"Unsupported generated parameter type '{annotation}'.")
+
+
+def _representative_model(model_type: type[Any]) -> Any:
+    """Construct a generated model with values for every required field."""
+    type_hints = get_type_hints(model_type)
+    arguments = {
+        model_field.name: _representative_value(type_hints[model_field.name])
+        for model_field in dataclasses.fields(model_type)
+        if model_field.init
+        and model_field.default is dataclasses.MISSING
+        and model_field.default_factory is dataclasses.MISSING
+    }
+    return model_type(**arguments)

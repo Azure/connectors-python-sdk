@@ -8,9 +8,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.infusionsoft import InfusionsoftClient
 from azure.connectors.infusionsoft import (
     CreateTaskRequest,
-    InfusionsoftClient,
     ListOrdersResponse,
     ListTasksResponse,
     OnNewTaskResponse,
@@ -26,11 +26,11 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: InfusionsoftClient, operation: str):
     """Invoke an Infusionsoft operation by name for shared tests."""
     if operation == "create_task":
-        return await client.create_task_async(input=CreateTaskRequest())
+        return await client.create_task(input=CreateTaskRequest())
     if operation == "update_task":
-        return await client.update_task_async(input=CreateTaskRequest(), id="1")
+        return await client.update_task(input=CreateTaskRequest(), id="1")
     if operation == "list_tasks":
-        return await client.list_tasks_async()
+        return await client.list_tasks()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -142,11 +142,11 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_task_async(input=CreateTaskRequest())
+            result = await client.create_task(input=CreateTaskRequest())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -165,11 +165,11 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_task_async(input=CreateTaskRequest(), id="5")
+            result = await client.update_task(input=CreateTaskRequest(), id="5")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "PUT"
@@ -188,11 +188,11 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_tasks_async()
+            result = await client.list_tasks()
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -211,11 +211,11 @@ class TestInfusionsoftClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_tasks_async()
+            result = await client.list_tasks()
 
             assert result is None
 
@@ -239,7 +239,7 @@ class TestInfusionsoftClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

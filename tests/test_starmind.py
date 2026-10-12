@@ -9,10 +9,10 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.starmind as starmind_module
 from azure.connectors.sdk import ConnectorException
+from azure.connectors.aio.starmind import StarmindClient
 from azure.connectors.starmind import (
     FindExpertsInput,
     PostQuestionDraftInput,
-    StarmindClient,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -93,7 +93,7 @@ class TestStarmindClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -115,11 +115,11 @@ class TestStarmindClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"experts": []}'),
         ) as mock_send:
-            result = await client.find_experts_async(
+            result = await client.find_experts(
                 input=FindExpertsInput(text_query="distributed systems"),
             )
 
@@ -138,11 +138,11 @@ class TestStarmindClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=201, text='{"id": 42}'),
         ) as mock_send:
-            await client.post_question_draft_async(
+            await client.post_question_draft(
                 input=PostQuestionDraftInput(
                     title="How does this work?",
                     description="Looking for an expert explanation.",
@@ -167,7 +167,7 @@ class TestStarmindClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

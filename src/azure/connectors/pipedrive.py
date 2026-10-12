@@ -10,15 +10,36 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "PipedriveClient",
+    "ActivityResponse",
+    "AddActivityRequest",
+    "AddDealRequest",
+    "DealResponse",
+    "DealResponseV2",
+    "ListActivityTypesResponse",
+    "ListCurrenciesResponse",
+    "ListDealsResponse",
+    "ListOrganizationsResponse",
+    "ListPersonsResponse",
+    "ListPipelinesResponse",
+    "ListStagesResponse",
+    "StageResponse",
+    "TrigNewActivityResponse",
+    "TrigNewDealResponse",
+    "UpdateDealStageRequest",
+    "UpdateDealStatusRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -422,7 +443,7 @@ class PipedriveClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -431,7 +452,7 @@ class PipedriveClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -451,8 +472,8 @@ class PipedriveClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -479,7 +500,7 @@ class PipedriveClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "pipedrive"
 
-    async def get_deal_async(
+    def get_deal(
         self,
         deal_id: int,
         *,
@@ -498,7 +519,7 @@ class PipedriveClient(ConnectorClientBase):
             f"/v1/deals/{quote(str(deal_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -519,7 +540,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_deal_status_async(
+    def update_deal_status(
         self,
         input: UpdateDealStatusRequest,
         deal_id: int,
@@ -540,7 +561,7 @@ class PipedriveClient(ConnectorClientBase):
             f"/update_status_deal/v1/deals/{quote(str(deal_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -561,7 +582,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_activity_async(
+    def add_activity(
         self,
         input: AddActivityRequest,
         *,
@@ -578,7 +599,7 @@ class PipedriveClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/activities"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -599,7 +620,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_stage_async(
+    def get_stage(
         self,
         stage_id: int,
         *,
@@ -618,7 +639,7 @@ class PipedriveClient(ConnectorClientBase):
             f"/v1/stages/{quote(str(stage_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -639,7 +660,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_deal_async(
+    def add_deal(
         self,
         input: AddDealRequest,
         *,
@@ -655,7 +676,7 @@ class PipedriveClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/connector-v2/v1/deals"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -676,7 +697,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_deal_stage_async(
+    def update_deal_stage(
         self,
         input: UpdateDealStageRequest,
         deal_id: int,
@@ -701,7 +722,7 @@ class PipedriveClient(ConnectorClientBase):
             f"/{quote(str(deal_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -722,7 +743,7 @@ class PipedriveClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_deals_async(
+    def list_deals(
         self,
         *,
         timeout: Optional[float] = None,
@@ -737,7 +758,7 @@ class PipedriveClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/deals"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

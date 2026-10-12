@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for async/await patterns, type safety, and API design.
+This repository contains the Python SDK for Azure Connectors. Code must follow Python best practices (PEP 8, PEP 484) and the team's conventions for synchronous and asynchronous APIs, type safety, and API design.
 
 ## Client Refresh and Review
 
@@ -13,6 +13,9 @@ This repository contains the Python SDK for Azure Connectors. Code must follow P
 - Capture known response data directly in semantic variables, without redundant `result` aliases or duplicated conditions. Check the actual returned shape after regeneration; an item list is not a response dictionary.
 - Preserve nullable-response guards such as `response and response.get(...)`; they are not duplicate conditions. Test non-pageable consumers with `None`, empty dictionaries, and populated responses separately. Do not simplify conditions by matching text prefixes.
 - Execute changed samples with empty and nonempty mocked results and assert their output, including absence of caught-and-printed errors. Pagination tests must exercise continuation requests, later-page items, and termination, including an empty initial page with a next link.
+- Generate clients as atomic pairs: synchronous clients and shared declarations in `azure.connectors.<connector>`, and asynchronous clients in `azure.connectors.aio.<connector>`.
+- Keep operation names and signatures aligned across modes without `_async` suffixes. Pageable operations return `ItemPaged` or `AsyncItemPaged`; long-running operation support remains deferred.
+- Import generated clients from their connector modules. Do not add generated-client barrel exports to package `__init__.py` files.
 
 ## Quick Reference: Coding Style Rules
 
@@ -397,31 +400,30 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 
 ### Steps
 
-1. **Create the connector module** in `src/azure/connectors/`:
-   - File name should match the connector API name (e.g., `office365.py`, `sharepointonline.py`)
+1. **Generate the connector pair**:
+    - Root: `src/azure/connectors/<connector>.py`
+    - Async: `src/azure/connectors/aio/<connector>.py`
 
-2. **Implement the client class** following existing patterns:
-   ```python
-   from azure.connectors.sdk import ConnectorClient
-   
-   class Office365Client(ConnectorClient):
-       """Client for Office 365 connector operations."""
-       
-       async def send_email(self, ...) -> EmailResponse:
-           ...
-   ```
+2. **Verify matching client classes** following existing patterns:
 
-3. **Export from `__init__.py`** — add the new client to `src/azure/connectors/__init__.py`
+    ```python
+    from azure.connectors.office365 import Office365Client, SendEmailInput
+
+    from azure.connectors.aio.office365 import Office365Client as AsyncOffice365Client
+    ```
+
+3. **Keep package initializers minimal** — do not add generated-client barrel exports
 
 4. **Update `README.md`** — add the connector to the "Validated Connectors" table with status (`✅ E2E Validated` or `🔄 SDK Generated`) and test count
 
-5. **Add unit tests** — create `test_<connector>.py` in `tests/` following the pattern of existing tests:
-   - Constructor tests
-   - Method tests with mocked responses
-   - Error handling tests
-   - Type serialization round-trips
+5. **Add unit tests** — create `test_<connector>.py` in `tests/` following existing paired tests:
+    - Sync and aio constructors and lifecycle
+    - Matching operation names and signatures
+    - Mocked success and error behavior in both modes
+    - Shared model identity and serialization round-trips
+    - `ItemPaged` and `AsyncItemPaged` behavior when applicable
 
-6. **Create sample usage file** — create `sample_connector_usage_<connector>.py` in `samples/sample_connector_usage/` following the pattern of existing samples (port from .NET if available)
+6. **Create paired samples** — add the sync file under `samples/sample_connector_usage/` and the aio file under `samples/sample_connector_usage/aio/`
 
 7. **Update `samples/sample_connector_usage/README.md`** — add the new sample to the samples table
 
@@ -440,9 +442,10 @@ When adding a new connector client to the SDK, use the **add-connector** skill (
 - [ ] Docstrings present on class and all public methods
 - [ ] Existing connector tests still pass (no regressions)
 - [ ] New connector tests cover: constructor, mocked success, mocked error, exception handling
-- [ ] Module exported in `__init__.py`
+- [ ] Root and aio modules expose matching unsuffixed operations
+- [ ] Models and trigger metadata are root-owned and shared with aio
 - [ ] README.md connector table updated
-- [ ] Sample file created and compiles without errors
+- [ ] Sync and aio sample files compile without errors
 - [ ] Samples README updated
 - [ ] CHANGELOG.md updated
 - [ ] Connection setup skill updated

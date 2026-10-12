@@ -1,9 +1,7 @@
 """Tallyfy connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.tallyfy import CreateRunInput, TallyfyClient
@@ -12,19 +10,19 @@ from azure.connectors.tallyfy import CreateRunInput, TallyfyClient
 CONNECTION_RUNTIME_URL = os.environ.get("TALLYFY_CONNECTION_URL", "")
 
 
-async def list_organizations() -> None:
+def list_organizations() -> None:
     """List organizations available to the current user."""
-    async with DefaultAzureCredential() as credential:
-        async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            organizations = await client.get_user_organizations_async()
+    with DefaultAzureCredential() as credential:
+        with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            organizations = client.get_user_organizations()
             print(f"Organizations: {organizations}")
 
 
-async def create_run() -> None:
+def create_run() -> None:
     """Create a run from a checklist."""
-    async with DefaultAzureCredential() as credential:
-        async with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            run = await client.create_run_async(
+    with DefaultAzureCredential() as credential:
+        with TallyfyClient(CONNECTION_RUNTIME_URL, credential) as client:
+            run = client.create_run(
                 input=CreateRunInput(
                     name="Quarterly review",
                     checklist_id="CHECKLIST_ID",
@@ -35,18 +33,18 @@ async def create_run() -> None:
             print(f"Created run: {run}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Tallyfy connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set TALLYFY_CONNECTION_URL to run this sample.")
         return
 
     try:
-        await list_organizations()
-        await create_run()
+        list_organizations()
+        create_run()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

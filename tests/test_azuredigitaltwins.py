@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azuredigitaltwins import AzuredigitaltwinsClient
 from azure.connectors.azuredigitaltwins import (
-    AzuredigitaltwinsClient,
     AddTwinInput,
     AddRelationshipInput,
     ListModelsResponse,
@@ -187,11 +187,11 @@ class TestWriteOperationSignatures:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text="{}"),
         ) as mock_send:
-            method = getattr(client, f"{operation}_async")
+            method = getattr(client, f"{operation}")
             await method(input=input_value, **operation_args)
 
             mock_send.assert_called_once_with(
@@ -226,11 +226,11 @@ class TestWriteOperationSignatures:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="Invalid update"),
         ):
-            method = getattr(client, f"{operation}_async")
+            method = getattr(client, f"{operation}")
             with pytest.raises(ConnectorException) as exc_info:
                 await method(input=input_value, **operation_args)
 
@@ -269,11 +269,11 @@ class TestListModelsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_models_async())
+            result = await resolve_generated_result(client.list_models())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -293,11 +293,11 @@ class TestListModelsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.list_models_async(
+            await resolve_generated_result(client.list_models(
                 dependencies_for="dtmi:example:Room;1",
                 include_model_definition="true"
             ))
@@ -318,12 +318,12 @@ class TestListModelsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await resolve_generated_result(client.list_models_async())
+                await resolve_generated_result(client.list_models())
 
             assert exc_info.value.status_code == 401
 
@@ -346,11 +346,11 @@ class TestGetModelByIdAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_model_by_id_async(
+            result = await client.get_model_by_id(
                 modelid="dtmi:example:Room;1"
             )
 
@@ -369,12 +369,12 @@ class TestGetModelByIdAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_model_by_id_async(
+                await client.get_model_by_id(
                     modelid="nonexistent"
                 )
 
@@ -396,11 +396,11 @@ class TestDeleteModelAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_model_async(
+            await client.delete_model(
                 modelid="dtmi:example:Room;1"
             )
 
@@ -427,11 +427,11 @@ class TestGetTwinByIdAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_twin_by_id_async(
+            result = await client.get_twin_by_id(
                 twinid="room1"
             )
 
@@ -450,12 +450,12 @@ class TestGetTwinByIdAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_twin_by_id_async(
+                await client.get_twin_by_id(
                     twinid="nonexistent"
                 )
 
@@ -480,12 +480,12 @@ class TestAddTwinAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = AddTwinInput(value='{"$dtId": "room1"}')
-            result = await client.add_twin_async(
+            result = await client.add_twin(
                 input=input_data,
                 twinid="room1"
             )
@@ -511,11 +511,11 @@ class TestDeleteTwinAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_twin_async(
+            await client.delete_twin(
                 twinid="room1"
             )
 
@@ -542,11 +542,11 @@ class TestGetComponentAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_component_async(
+            result = await client.get_component(
                 twinid="room1",
                 component_path="thermostat"
             )
@@ -575,11 +575,11 @@ class TestGetRelationshipByIdAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_relationship_by_id_async(
+            result = await client.get_relationship_by_id(
                 twinid="room1",
                 relationship_id="rel1"
             )
@@ -606,12 +606,12 @@ class TestAddRelationshipAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = AddRelationshipInput(value='{"$targetId": "floor1"}')
-            result = await client.add_relationship_async(
+            result = await client.add_relationship(
                 input=input_data,
                 twinid="room1",
                 relationship_id="rel1"
@@ -638,11 +638,11 @@ class TestDeleteRelationshipAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_relationship_async(
+            await client.delete_relationship(
                 twinid="room1",
                 relationship_id="rel1"
             )
@@ -670,11 +670,11 @@ class TestListRelationshipsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_relationships_async(
+            result = await resolve_generated_result(client.list_relationships(
                 twinid="room1"
             ))
 
@@ -700,11 +700,11 @@ class TestListIncomingRelationshipsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.list_incoming_relationships_async(
+            result = await resolve_generated_result(client.list_incoming_relationships(
                 twinid="room1"
             ))
 
@@ -731,14 +731,14 @@ class TestQueryTwinsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             query_input = QueryTwinsInput(
                 query="SELECT * FROM digitaltwins WHERE $dtId = 'room1'"
             )
-            result = await client.query_twins_async(
+            result = await client.query_twins(
                 input=query_input
             )
 
@@ -760,14 +760,14 @@ class TestQueryTwinsAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             query_input = QueryTwinsInput(query="INVALID")
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.query_twins_async(
+                await client.query_twins(
                     input=query_input
                 )
 
@@ -789,12 +789,12 @@ class TestSendTelemetryAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             telemetry = SendTelemetryInput(value='{"temperature": 72}')
-            await client.send_telemetry_async(
+            await client.send_telemetry(
                 input=telemetry,
                 twinid="room1"
             )
@@ -818,12 +818,12 @@ class TestSendComponentTelemetryAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             telemetry = SendComponentTelemetryInput(value='{"temperature": 72}')
-            await client.send_component_telemetry_async(
+            await client.send_component_telemetry(
                 input=telemetry,
                 twinid="room1",
                 component_path="thermostat"

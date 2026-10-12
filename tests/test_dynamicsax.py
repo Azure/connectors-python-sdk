@@ -6,6 +6,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.dynamicsax import DynamicsaxClient
 from azure.connectors.dynamicsax import (
     AxOnlineProcedureResult,
     BusinessEventSubscription,
@@ -13,7 +14,6 @@ from azure.connectors.dynamicsax import (
     BusinessEventsList,
     DataSet,
     DataSetsList,
-    DynamicsaxClient,
     ExecuteProcedureInput,
     GetItemResponse,
     Item,
@@ -79,7 +79,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 async def _invoke_operation(client: DynamicsaxClient, operation: str):
     """Invoke a Dynamics AX operation by name for shared parametrized tests."""
     return await resolve_generated_result(
-        getattr(client, f"{operation}_async")(**OPERATION_ARGS[operation])
+        getattr(client, f"{operation}")(**OPERATION_ARGS[operation])
     )
 
 
@@ -171,11 +171,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_data_sets_async()
+            result = await client.get_data_sets()
 
             assert result["value"][0]["name"] == "instance-1"
             assert mock_send.call_args[0][0] == "GET"
@@ -189,11 +189,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(dataset="ds", table="tbl"))
+            await resolve_generated_result(client.get_items(dataset="ds", table="tbl"))
 
             request_url = mock_send.call_args[0][1]
             assert "/datasets/ds/tables/tbl/items" in request_url
@@ -206,11 +206,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await resolve_generated_result(client.get_items_async(
+            await resolve_generated_result(client.get_items(
                 dataset="ds",
                 table="tbl",
                 filter="Name eq 'x'",
@@ -230,11 +230,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.post_item_async(input=item_input, dataset="ds", table="tbl")
+            result = await client.post_item(input=item_input, dataset="ds", table="tbl")
 
             assert result["id"] == "1"
             assert mock_send.call_args[0][0] == "POST"
@@ -249,11 +249,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.patch_item_async(
+            result = await client.patch_item(
                 input=item_input,
                 dataset="ds",
                 table="tbl",
@@ -272,11 +272,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_item_async(dataset="ds", table="tbl", id="1")
+            result = await client.delete_item(dataset="ds", table="tbl", id="1")
 
             assert result is None
             assert mock_send.call_args[0][0] == "DELETE"
@@ -289,11 +289,11 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_table_async(dataset="ds", table="tbl")
+            await client.get_table(dataset="ds", table="tbl")
 
             request_url = mock_send.call_args[0][1]
             assert "/$metadata.json/datasets/ds/tables/tbl" in request_url
@@ -312,7 +312,7 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -334,7 +334,7 @@ class TestDynamicsaxClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -359,7 +359,7 @@ class TestDynamicsaxClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

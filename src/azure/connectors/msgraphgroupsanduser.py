@@ -10,15 +10,26 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MsgraphgroupsanduserClient",
+    "GetGroupPropertiesResponse",
+    "GetMemberGroupsInput",
+    "GetMemberGroupsResponse",
+    "GetMemberLicenseDetailsResponse",
+    "ListDirectGroupMembersResponse",
+    "ListGroupsByDisplayNameSearchResponse",
+    "ListSubscribedSkusResponse",
+    "ListUsersResponse",
+]
 
 
 # Type Definitions
@@ -307,7 +318,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -316,7 +327,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -336,8 +347,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -364,7 +375,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "msgraphgroupsanduser"
 
-    async def list_users_async(
+    def list_users(
         self,
         *,
         timeout: Optional[float] = None,
@@ -379,7 +390,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/users"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -400,7 +411,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_groups_by_display_name_search_async(
+    def list_groups_by_display_name_search(
         self,
         search: Optional[str] = None,
         *,
@@ -425,7 +436,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -446,7 +457,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_subscribed_skus_async(
+    def list_subscribed_skus(
         self,
         *,
         timeout: Optional[float] = None,
@@ -461,7 +472,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/subscribedSkus"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -482,7 +493,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_direct_group_members_async(
+    def list_direct_group_members(
         self,
         group_id: str,
         filter: Optional[str] = None,
@@ -517,7 +528,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -538,7 +549,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_member_license_details_async(
+    def get_member_license_details(
         self,
         id: str,
         select: Optional[str] = None,
@@ -566,7 +577,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -587,7 +598,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_group_properties_async(
+    def get_group_properties(
         self,
         group_id: str,
         *,
@@ -606,7 +617,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -627,7 +638,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_member_groups_async(
+    def get_member_groups(
         self,
         input: GetMemberGroupsInput,
         member_id: str,
@@ -647,7 +658,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             f"/v1.0/users/{quote(str(member_id), safe='')}/getMemberGroups"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

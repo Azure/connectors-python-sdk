@@ -10,15 +10,28 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "ZohosignClient",
+    "GetDocumentResponse",
+    "GetFormDataResponse",
+    "GetTemplatesResponse",
+    "InvokeAPIInput",
+    "InvokeAPIResponse",
+    "SendSignRequestResponse",
+    "UpdateDocumentInput",
+    "UpdateDocumentResponse",
+    "ZohoSignTriggersInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -150,7 +163,7 @@ class ZohosignClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -159,7 +172,7 @@ class ZohosignClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -179,8 +192,8 @@ class ZohosignClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -207,7 +220,7 @@ class ZohosignClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "zohosign"
 
-    async def invoke_api_async(
+    def invoke_api(
         self,
         input: InvokeAPIInput,
         url: str,
@@ -234,7 +247,7 @@ class ZohosignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -255,7 +268,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def download_completion_certificate_async(
+    def download_completion_certificate(
         self,
         request_id: int,
         *,
@@ -276,7 +289,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/completioncertificate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -294,7 +307,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return response.content
 
-    async def download_document_async(
+    def download_document(
         self,
         request_id: int,
         *,
@@ -313,7 +326,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -331,7 +344,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return response.content
 
-    async def download_file_async(
+    def download_file(
         self,
         request_id: int,
         document_id: int,
@@ -355,7 +368,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/pdf"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -373,7 +386,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return response.content
 
-    async def get_form_data_async(
+    def get_form_data(
         self,
         request_id: int,
         *,
@@ -392,7 +405,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/fielddata"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -413,7 +426,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def recall_document_async(
+    def recall_document(
         self,
         request_id: int,
         *,
@@ -432,7 +445,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/recall"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -448,7 +461,7 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def remind_document_recipients_async(
+    def remind_document_recipients(
         self,
         request_id: int,
         *,
@@ -467,7 +480,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/remind"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -483,7 +496,7 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def delete_document_async(
+    def delete_document(
         self,
         request_id: int,
         *,
@@ -502,7 +515,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/delete"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -518,7 +531,7 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_document_async(
+    def get_document(
         self,
         request_id: int,
         *,
@@ -537,7 +550,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -558,7 +571,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_document_async(
+    def update_document(
         self,
         input: UpdateDocumentInput,
         request_id: str,
@@ -578,7 +591,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -599,7 +612,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_sign_request_async(
+    def send_sign_request(
         self,
         request_id: str,
         *,
@@ -618,7 +631,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/requests/{quote(str(request_id), safe='')}/submit"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -639,7 +652,7 @@ class ZohosignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_template_details_async(
+    def get_template_details(
         self,
         template_id: str,
         *,
@@ -658,7 +671,7 @@ class ZohosignClient(ConnectorClientBase):
             f"/templates/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -674,7 +687,7 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_templates_async(
+    def get_templates(
         self,
         *,
         timeout: Optional[float] = None,
@@ -689,7 +702,7 @@ class ZohosignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/templates"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

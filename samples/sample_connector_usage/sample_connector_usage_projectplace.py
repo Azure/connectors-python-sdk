@@ -17,11 +17,9 @@ Usage:
 
     python sample_connector_usage_projectplace.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.projectplace import (
@@ -36,23 +34,23 @@ from azure.connectors.projectplace import (
 CONNECTION_RUNTIME_URL = os.environ.get("PROJECTPLACE_CONNECTION_URL", "")
 
 
-async def example_1_list_boards() -> None:
+def example_1_list_boards() -> None:
     """Example 1: List the boards the user has access to."""
     print("\n=== Example 1: List Boards ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = await client.list_boards_async()
+    with DefaultAzureCredential() as credential:
+        with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            boards = client.list_boards()
             print(f"Boards: {boards}")
 
 
-async def example_2_create_card() -> None:
+def example_2_create_card() -> None:
     """Example 2: Create a card on a board."""
     print("\n=== Example 2: Create Card ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = await client.create_card_async(
+    with DefaultAzureCredential() as credential:
+        with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = client.create_card(
                 input=CreateCardInput(
                     column_id=123456,
                     title="SDK sample card",
@@ -63,20 +61,20 @@ async def example_2_create_card() -> None:
             print(f"Created card: {card}")
 
 
-async def example_3_move_card() -> None:
+def example_3_move_card() -> None:
     """Example 3: Move a card to another column."""
     print("\n=== Example 3: Move Card ===")
 
-    async with DefaultAzureCredential() as credential:
-        async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            card = await client.move_card_async(
+    with DefaultAzureCredential() as credential:
+        with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
+            card = client.move_card(
                 input=MoveCardInput(card_id=123456, column_id=654321),
                 board_id=789012,
             )
             print(f"Moved card: {card}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Projectplace connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: PROJECTPLACE_CONNECTION_URL environment variable not set.")
@@ -100,4 +98,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

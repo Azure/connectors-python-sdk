@@ -2,7 +2,6 @@
 
 """Unit tests for TrelloClient."""
 
-import inspect
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -11,84 +10,85 @@ from azure.core.credentials import AzureKeyCredential
 from azure.connectors.sdk import (
     ConnectorException,
 )
+from azure.connectors.aio.trello import TrelloClient
 from azure.connectors.trello import (
     Card,
     CommentPost,
     CreateBoard,
     CreateCard,
     CreateList,
-    TrelloClient,
     TRIGGER_OPERATIONS,
     UpdateBoard,
     UpdateCard,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import get_generated_operations
 
 
 async def _invoke_operation(client: TrelloClient, operation: str):
     """Invoke a Trello operation by name for shared tests."""
     if operation == "list_cards":
-        return await client.list_cards_async(board_id="board")
+        return await client.list_cards(board_id="board")
     if operation == "list_cards_simple":
-        return await client.list_cards_simple_async(board_id="board")
+        return await client.list_cards_simple(board_id="board")
     if operation == "get_card":
-        return await client.get_card_async(card_id="card", board_id="board")
+        return await client.get_card(card_id="card", board_id="board")
     if operation == "delete_card":
-        return await client.delete_card_async(card_id="card", board_id="board")
+        return await client.delete_card(card_id="card", board_id="board")
     if operation == "list_boards":
-        return await client.list_boards_async()
+        return await client.list_boards()
     if operation == "list_boards_simple":
-        return await client.list_boards_simple_async()
+        return await client.list_boards_simple()
     if operation == "get_board":
-        return await client.get_board_async(board_id="board")
+        return await client.get_board(board_id="board")
     if operation == "update_board":
-        return await client.update_board_async(input=UpdateBoard(), board_id="board")
+        return await client.update_board(input=UpdateBoard(), board_id="board")
     if operation == "list_lists":
-        return await client.list_lists_async(board_id="board")
+        return await client.list_lists(board_id="board")
     if operation == "list_lists_simple":
-        return await client.list_lists_simple_async(board_id="board")
+        return await client.list_lists_simple(board_id="board")
     if operation == "get_list":
-        return await client.get_list_async(list_id="list", board_id="board")
+        return await client.get_list(list_id="list", board_id="board")
     if operation == "update_list":
-        return await client.update_list_async(list_id="list", board_id="board")
+        return await client.update_list(list_id="list", board_id="board")
     if operation == "get_user_profile":
-        return await client.get_user_profile_async()
+        return await client.get_user_profile()
     if operation == "list_teams":
-        return await client.list_teams_async()
+        return await client.list_teams()
     if operation == "list_team_members":
-        return await client.list_team_members_async(team_id="team")
+        return await client.list_team_members(team_id="team")
     if operation == "list_board_members":
-        return await client.list_board_members_async(board_id="board")
+        return await client.list_board_members(board_id="board")
     if operation == "list_board_labels":
-        return await client.list_board_labels_async(board_id="board")
+        return await client.list_board_labels(board_id="board")
     if operation == "get_team_for_board":
-        return await client.get_team_for_board_async(board_id="board")
+        return await client.get_team_for_board(board_id="board")
     if operation == "list_card_members":
-        return await client.list_card_members_async(card_id="card", board_id="board")
+        return await client.list_card_members(card_id="card", board_id="board")
     if operation == "list_card_comments":
-        return await client.list_card_comments_async(card_id="card", board_id="board")
+        return await client.list_card_comments(card_id="card", board_id="board")
     if operation == "add_comment_to_card":
-        return await client.add_comment_to_card_async(
+        return await client.add_comment_to_card(
             input=CommentPost(),
             card_id="card",
             board_id="board",
         )
     if operation == "add_member_to_card":
-        return await client.add_member_to_card_async(
+        return await client.add_member_to_card(
             card_id="card",
             board_id="board",
             member_id="member",
         )
     if operation == "create_board":
-        return await client.create_board_async(input=CreateBoard())
+        return await client.create_board(input=CreateBoard())
     if operation == "create_list":
-        return await client.create_list_async(input=CreateList())
+        return await client.create_list(input=CreateList())
     if operation == "close_board":
-        return await client.close_board_async(board_id="board")
+        return await client.close_board(board_id="board")
     if operation == "create_card":
-        return await client.create_card_async(input=CreateCard(), board_id="board")
+        return await client.create_card(input=CreateCard(), board_id="board")
     if operation == "update_card":
-        return await client.update_card_async(
+        return await client.update_card(
             input=UpdateCard(),
             card_id="card",
             board_id="board",
@@ -219,13 +219,7 @@ class TestTrelloClientOperations:
 
     def test_all_generated_operations_are_covered(self):
         """Test the operation list matches every generated client method."""
-        generated_operations = {
-            name.removesuffix("_async")
-            for name, method in inspect.getmembers(TrelloClient, inspect.iscoroutinefunction)
-            if name.endswith("_async")
-        }
-
-        assert generated_operations == set(ALL_OPERATIONS)
+        assert get_generated_operations(TrelloClient) == set(ALL_OPERATIONS)
 
     @pytest.mark.asyncio
     async def test_list_cards_serializes_path_and_query(self, mock_credential):
@@ -238,11 +232,11 @@ class TestTrelloClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_cards_async(
+            result = await client.list_cards(
                 board_id="board/one",
                 actions="comment card",
                 limit="10",
@@ -266,11 +260,11 @@ class TestTrelloClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_card_async(input=request, board_id="board")
+            result = await client.create_card(input=request, board_id="board")
 
             assert result == {"id": "card"}
             assert mock_send.call_args[0][0] == "POST"
@@ -288,11 +282,11 @@ class TestTrelloClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_card_async(card_id="card", board_id="board")
+            result = await client.delete_card(card_id="card", board_id="board")
 
             assert result is None
             assert mock_send.call_args[0][0] == "DELETE"
@@ -314,7 +308,7 @@ class TestTrelloClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

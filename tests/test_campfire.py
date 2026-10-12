@@ -7,9 +7,9 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.campfire import CampfireClient
 from azure.connectors.campfire import (
     Account,
-    CampfireClient,
     Room,
     TRIGGER_OPERATIONS,
     Upload,
@@ -121,11 +121,11 @@ class TestCampfireClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_message_async(
+            result = await client.create_message(
                 room_id="R1", account="acct1", message="hello"
             )
 
@@ -147,11 +147,11 @@ class TestCampfireClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_user_async(user_id="5", account="acct1")
+            result = await client.get_user(user_id="5", account="acct1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -170,11 +170,11 @@ class TestCampfireClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_accounts_async(parent_operation="op1")
+            result = await client.list_accounts(parent_operation="op1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -193,11 +193,11 @@ class TestCampfireClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_rooms_async(account="acct1")
+            result = await client.list_rooms(account="acct1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -216,11 +216,11 @@ class TestCampfireClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_rooms_async(account="acct1")
+            result = await client.list_rooms(account="acct1")
 
             assert result is None
 
@@ -248,21 +248,21 @@ class TestCampfireClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "create_message":
-                    await client.create_message_async(
+                    await client.create_message(
                         room_id="R1", account="acct1", message="hello"
                     )
                 elif operation == "get_user":
-                    await client.get_user_async(user_id="5", account="acct1")
+                    await client.get_user(user_id="5", account="acct1")
                 elif operation == "list_accounts":
-                    await client.list_accounts_async()
+                    await client.list_accounts()
                 else:
-                    await client.list_rooms_async(account="acct1")
+                    await client.list_rooms(account="acct1")
 
             assert exc_info.value.status_code == 500
 

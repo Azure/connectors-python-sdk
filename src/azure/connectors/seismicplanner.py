@@ -10,15 +10,56 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "SeismicplannerClient",
+    "Association",
+    "AssociationReq",
+    "AsyncOperationResponse",
+    "Comment",
+    "CommentQueryResponse",
+    "ContentRef",
+    "CreateCommentModel",
+    "CreateProject",
+    "CreateRequest",
+    "CreateTask",
+    "CustomProperty",
+    "CustomPropertyDataDisplay",
+    "CustomPropertyValues",
+    "CustomPropertyValuesInput",
+    "CustomPropertyValuesValues",
+    "DeleteRequest",
+    "Follower",
+    "Meta",
+    "MetaQueryInfo",
+    "PlannerProject",
+    "PlannerProjectQueryResponse",
+    "PlannerRequest",
+    "PlannerRequestQueryResponse",
+    "PlannerSubTask",
+    "PlannerTask",
+    "PlannerTaskQueryResponse",
+    "PossibleValuesItem",
+    "ProblemDetails",
+    "ProjectAssociatedNodes",
+    "RequestFormCustomProperties",
+    "ScopeSettingsItemDefinition",
+    "StatusSchema",
+    "StatusSchemaQueryResponse",
+    "UpdateCommentModel",
+    "UpdateProject",
+    "UpdateRequest",
+    "UpdateTask",
+    "ValueSchemaPropertyDefinition",
+]
 
 
 # Type Definitions
@@ -1482,7 +1523,7 @@ class SeismicplannerClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1491,7 +1532,7 @@ class SeismicplannerClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1511,8 +1552,8 @@ class SeismicplannerClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1539,7 +1580,7 @@ class SeismicplannerClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "seismicplanner"
 
-    async def get_comments_async(
+    def get_comments(
         self,
         space_id: str,
         node_id: str,
@@ -1614,7 +1655,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1635,7 +1676,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_comment_async(
+    def create_comment(
         self,
         input: CreateCommentModel,
         space_id: str,
@@ -1663,7 +1704,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/comments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1684,7 +1725,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_comment_async(
+    def get_comment(
         self,
         space_id: str,
         node_id: str,
@@ -1713,7 +1754,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1734,7 +1775,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_comment_async(
+    def delete_comment(
         self,
         space_id: str,
         node_id: str,
@@ -1763,7 +1804,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1779,7 +1820,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def update_comment_async(
+    def update_comment(
         self,
         input: UpdateCommentModel,
         space_id: str,
@@ -1809,7 +1850,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(comment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1830,7 +1871,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_projects_async(
+    def get_projects(
         self,
         space_id: str,
         planned_end_date_from: Optional[str] = None,
@@ -2003,7 +2044,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2024,7 +2065,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_projects_async(
+    def delete_projects(
         self,
         space_id: str,
         ids: List[str],
@@ -2068,7 +2109,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2089,7 +2130,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_project_async(
+    def create_project(
         self,
         input: CreateProject,
         space_id: str,
@@ -2109,7 +2150,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/projects"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2130,7 +2171,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_project_async(
+    def get_project(
         self,
         space_id: str,
         project_id: str,
@@ -2170,7 +2211,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2191,7 +2232,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_project_async(
+    def delete_project(
         self,
         space_id: str,
         project_id: str,
@@ -2225,7 +2266,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2246,7 +2287,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_project_async(
+    def update_project(
         self,
         input: UpdateProject,
         space_id: str,
@@ -2272,7 +2313,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(project_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2293,7 +2334,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_requests_async(
+    def get_requests(
         self,
         space_id: str,
         planned_end_date_from: Optional[str] = None,
@@ -2578,7 +2619,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2599,7 +2640,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_requests_async(
+    def delete_requests(
         self,
         input: DeleteRequest,
         space_id: str,
@@ -2619,7 +2660,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2640,7 +2681,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_request_async(
+    def create_request(
         self,
         input: CreateRequest,
         space_id: str,
@@ -2660,7 +2701,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2681,7 +2722,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_request_async(
+    def get_request(
         self,
         space_id: str,
         request_id: str,
@@ -2706,7 +2747,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2727,7 +2768,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_request_async(
+    def delete_request(
         self,
         space_id: str,
         request_id: str,
@@ -2752,7 +2793,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2768,7 +2809,7 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def update_request_async(
+    def update_request(
         self,
         input: UpdateRequest,
         space_id: str,
@@ -2794,7 +2835,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(request_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2815,7 +2856,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_status_schemas_async(
+    def get_status_schemas(
         self,
         space_id: str,
         is_default: Optional[bool] = None,
@@ -2896,7 +2937,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2917,7 +2958,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_status_schema_async(
+    def get_status_schema(
         self,
         space_id: str,
         status_schema_id: str,
@@ -2944,7 +2985,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(status_schema_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2965,7 +3006,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tasks_async(
+    def get_tasks(
         self,
         space_id: str,
         planned_end_date_from: Optional[str] = None,
@@ -3252,7 +3293,7 @@ class SeismicplannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3273,7 +3314,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_async(
+    def create_task(
         self,
         input: CreateTask,
         space_id: str,
@@ -3293,7 +3334,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3314,7 +3355,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_async(
+    def get_task(
         self,
         space_id: str,
         task_id: str,
@@ -3339,7 +3380,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3360,7 +3401,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_task_async(
+    def delete_task(
         self,
         space_id: str,
         task_id: str,
@@ -3385,7 +3426,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3406,7 +3447,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_async(
+    def update_task(
         self,
         input: UpdateTask,
         space_id: str,
@@ -3432,7 +3473,7 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/{quote(str(task_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,

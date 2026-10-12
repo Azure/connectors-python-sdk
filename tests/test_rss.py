@@ -8,9 +8,9 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.rss import RssClient
 from azure.connectors.rss import (
     FeedItem,
-    RssClient,
     TRIGGER_OPERATIONS,
     TriggerBatchResponseFeedItem,
 )
@@ -23,7 +23,7 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: RssClient, operation: str):
     """Invoke an RSS operation by name for shared parameterized tests."""
     if operation == "list_feed_items":
-        return await client.list_feed_items_async(
+        return await client.list_feed_items(
             feed_url="https://contoso.example/feed.xml",
             since="2026-01-01T00:00:00Z",
             since_property="UpdatedOn",
@@ -123,11 +123,11 @@ class TestRssClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_feed_items_async(
+            result = await client.list_feed_items(
                 feed_url="https://contoso.example/feed.xml",
                 since="2026-01-01T00:00:00Z",
                 since_property="UpdatedOn",
@@ -161,7 +161,7 @@ class TestRssClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -183,7 +183,7 @@ class TestRssApiSurface:
         }
 
         assert actual_signatures == {
-            "list_feed_items_async": (
+            "list_feed_items": (
                 "self",
                 "feed_url",
                 "since",

@@ -9,7 +9,8 @@ import pytest
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.tallyfy as tallyfy_module
 from azure.connectors.sdk import ConnectorException
-from azure.connectors.tallyfy import CreateRunInput, CreateTaskInput, TallyfyClient
+from azure.connectors.aio.tallyfy import TallyfyClient
+from azure.connectors.tallyfy import CreateRunInput, CreateTaskInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
@@ -140,7 +141,7 @@ class TestTallyfyClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -162,11 +163,11 @@ class TestTallyfyClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=201, text='{"id": "run-1"}'),
         ) as mock_send:
-            result = await client.create_run_async(
+            result = await client.create_run(
                 input=CreateRunInput(name="Quarterly review", checklist_id="checklist-1"),
                 org="organization/one",
             )
@@ -187,11 +188,11 @@ class TestTallyfyClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=201, text='{"id": "task-1"}'),
         ) as mock_send:
-            await client.create_task_async(
+            await client.create_task(
                 input=CreateTaskInput(name="Review document", description="Check details"),
                 org="organization",
             )
@@ -216,7 +217,7 @@ class TestTallyfyClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

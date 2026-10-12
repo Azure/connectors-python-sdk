@@ -8,12 +8,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.freshservice import FreshserviceClient
 from azure.connectors.freshservice import (
     AddNoteRequest,
     AddNoteResponse,
     CreateTicketRequest,
     CreateUpdateTicketResponse,
-    FreshserviceClient,
     ListTicketResponse,
     ListUsersResponse,
     TicketResponse,
@@ -30,11 +30,11 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: FreshserviceClient, operation: str):
     """Invoke a Freshservice operation by name for shared tests."""
     if operation == "add_note":
-        return await client.add_note_async(input=AddNoteRequest(), ticket_id="1")
+        return await client.add_note(input=AddNoteRequest(), ticket_id="1")
     if operation == "create_ticket":
-        return await client.create_ticket_async(input=CreateTicketRequest())
+        return await client.create_ticket(input=CreateTicketRequest())
     if operation == "update_ticket":
-        return await client.update_ticket_async(input=UpdateTicketRequest(), ticket_id="1")
+        return await client.update_ticket(input=UpdateTicketRequest(), ticket_id="1")
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -146,11 +146,11 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_ticket_async(input=CreateTicketRequest())
+            result = await client.create_ticket(input=CreateTicketRequest())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -169,11 +169,11 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_ticket_async(input=UpdateTicketRequest(), ticket_id="5")
+            result = await client.update_ticket(input=UpdateTicketRequest(), ticket_id="5")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "PUT"
@@ -192,11 +192,11 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_note_async(input=AddNoteRequest(), ticket_id="7")
+            result = await client.add_note(input=AddNoteRequest(), ticket_id="7")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -215,11 +215,11 @@ class TestFreshserviceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_ticket_async(input=CreateTicketRequest())
+            result = await client.create_ticket(input=CreateTicketRequest())
 
             assert result is None
 
@@ -243,7 +243,7 @@ class TestFreshserviceClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

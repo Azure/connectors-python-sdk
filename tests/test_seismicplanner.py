@@ -8,10 +8,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 import azure.connectors.seismicplanner as seismicplanner_module
+from azure.connectors.aio.seismicplanner import SeismicplannerClient
 from azure.connectors.seismicplanner import (
     CustomPropertyDataDisplay,
     CustomPropertyValues,
-    SeismicplannerClient,
 )
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
@@ -73,11 +73,11 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"value": []}'),
             ) as transport:
-                await client.get_requests_async(space_id="space-id", ids=identifiers)
+                await client.get_requests(space_id="space-id", ids=identifiers)
 
             transport.assert_awaited_once()
             method, request_url = transport.await_args.args

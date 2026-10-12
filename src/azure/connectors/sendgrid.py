@@ -10,15 +10,33 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "SendgridClient",
+    "AddGlobalSuppressRequestAndResponse",
+    "Bounce",
+    "Bounces",
+    "EmailAttachment",
+    "EmailIsUnsubscribedResponse",
+    "EmailRequest",
+    "EmailResponse",
+    "GetGlobalSuppressEmptyResponse",
+    "GetGlobalSuppressResponse",
+    "ObjectEntity",
+    "Recipient",
+    "RecipientList",
+    "RecipientLists",
+    "Recipients",
+    "ScopeList",
+]
 
 
 # Type Definitions
@@ -234,7 +252,7 @@ class SendgridClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -243,7 +261,7 @@ class SendgridClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -263,8 +281,8 @@ class SendgridClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -291,7 +309,7 @@ class SendgridClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "sendgrid"
 
-    async def add_global_suppression_async(
+    def add_global_suppression(
         self,
         input: AddGlobalSuppressRequestAndResponse,
         *,
@@ -307,7 +325,7 @@ class SendgridClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/suppressions/global"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -328,7 +346,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_global_suppression_async(
+    def get_global_suppression(
         self,
         email: str,
         *,
@@ -347,7 +365,7 @@ class SendgridClient(ConnectorClientBase):
             f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -368,7 +386,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_global_suppression_async(
+    def delete_global_suppression(
         self,
         email: str,
         *,
@@ -387,7 +405,7 @@ class SendgridClient(ConnectorClientBase):
             f"/suppressions/global/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -403,7 +421,7 @@ class SendgridClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def add_recipient_to_list_async(
+    def add_recipient_to_list(
         self,
         list_id: str,
         recipient_id: str,
@@ -428,7 +446,7 @@ class SendgridClient(ConnectorClientBase):
             f"/{quote(str(recipient_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -449,7 +467,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_bounce_async(
+    def get_bounce(
         self,
         email: str,
         *,
@@ -468,7 +486,7 @@ class SendgridClient(ConnectorClientBase):
             f"/suppression/bounces/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -489,7 +507,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_bounce_async(
+    def delete_bounce(
         self,
         email: str,
         *,
@@ -508,7 +526,7 @@ class SendgridClient(ConnectorClientBase):
             f"/suppression/bounces/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -524,7 +542,7 @@ class SendgridClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def check_email_is_in_unsubscribes_list_async(
+    def check_email_is_in_unsubscribes_list(
         self,
         email: str,
         *,
@@ -543,7 +561,7 @@ class SendgridClient(ConnectorClientBase):
             f"/unsubscribes/{quote(str(email), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -564,7 +582,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_email_async(
+    def send_email(
         self,
         input: EmailRequest,
         *,
@@ -580,7 +598,7 @@ class SendgridClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v4/mail/send"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -601,7 +619,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_recipient_lists_async(
+    def list_recipient_lists(
         self,
         *,
         timeout: Optional[float] = None,
@@ -616,7 +634,7 @@ class SendgridClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/lists"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -637,7 +655,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_recipients_async(
+    def list_recipients(
         self,
         *,
         timeout: Optional[float] = None,
@@ -652,7 +670,7 @@ class SendgridClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/recipients"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

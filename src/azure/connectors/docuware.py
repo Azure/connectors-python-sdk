@@ -10,15 +10,35 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "DocuwareClient",
+    "GetDialogFieldsResponse",
+    "GetDialogsResponse",
+    "GetDocumentInformationResponse",
+    "GetFileCabinetFieldsResponse",
+    "GetFileCabinetsResponse",
+    "GetOrganizationResponse",
+    "GetStampFieldsResponse",
+    "GetStampsResponse",
+    "ListDocumentsInDocumentTrayResponse",
+    "PlaceAStampInput",
+    "PlaceAStampResponse",
+    "SearchForDocumentsInFileCabinetInput",
+    "SearchForDocumentsInFileCabinetResponse",
+    "TransferDocumentInput",
+    "TransferDocumentResponse",
+    "UpdateIndexFieldsInput",
+    "UpdateIndexFieldsResponse",
+]
 
 
 # Type Definitions
@@ -400,7 +420,7 @@ class DocuwareClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -409,7 +429,7 @@ class DocuwareClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -429,8 +449,8 @@ class DocuwareClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -457,7 +477,7 @@ class DocuwareClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docuware"
 
-    async def search_for_documents_in_file_cabinet_async(
+    def search_for_documents_in_file_cabinet(
         self,
         input: SearchForDocumentsInFileCabinetInput,
         file_cabinet: str,
@@ -485,7 +505,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -506,7 +526,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organization_async(
+    def get_organization(
         self,
         *,
         timeout: Optional[float] = None,
@@ -521,7 +541,7 @@ class DocuwareClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/Organization"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -542,7 +562,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_cabinets_async(
+    def get_file_cabinets(
         self,
         file_cabinet_type: str,
         *,
@@ -565,7 +585,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -586,7 +606,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_document_information_async(
+    def get_document_information(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -609,7 +629,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -630,7 +650,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_document_async(
+    def delete_document(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -653,7 +673,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(document_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -669,7 +689,7 @@ class DocuwareClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def download_file_async(
+    def download_file(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -705,7 +725,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -723,7 +743,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return response.content
 
-    async def download_document_async(
+    def download_document(
         self,
         file_cabinet_id: str,
         document_id: int,
@@ -755,7 +775,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -773,7 +793,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return response.content
 
-    async def update_index_fields_async(
+    def update_index_fields(
         self,
         input: UpdateIndexFieldsInput,
         file_cabinet_id: str,
@@ -798,7 +818,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -819,7 +839,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def transfer_document_async(
+    def transfer_document(
         self,
         input: TransferDocumentInput,
         destination_file_cabinet_id: str,
@@ -852,7 +872,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -873,7 +893,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def place_a_stamp_async(
+    def place_a_stamp(
         self,
         input: PlaceAStampInput,
         file_cabinet_id: str,
@@ -898,7 +918,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Annotation"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -919,7 +939,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dialogs_async(
+    def get_dialogs(
         self,
         file_cabinet: str,
         dialog_type: Optional[str] = None,
@@ -947,7 +967,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -968,7 +988,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_stamps_async(
+    def get_stamps(
         self,
         file_cabinet: str,
         *,
@@ -987,7 +1007,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Stamps"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1008,7 +1028,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_stamp_fields_async(
+    def get_stamp_fields(
         self,
         file_cabinet: str,
         stamp: str,
@@ -1032,7 +1052,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1053,7 +1073,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_file_cabinet_fields_async(
+    def get_file_cabinet_fields(
         self,
         file_cabinet: str,
         field_type: Optional[str] = None,
@@ -1081,7 +1101,7 @@ class DocuwareClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1102,7 +1122,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dialog_fields_async(
+    def get_dialog_fields(
         self,
         file_cabinet: str,
         dialog_id: str,
@@ -1126,7 +1146,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/Fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1147,7 +1167,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_documents_in_document_tray_async(
+    def list_documents_in_document_tray(
         self,
         document_tray: str,
         *,
@@ -1166,7 +1186,7 @@ class DocuwareClient(ConnectorClientBase):
             f"/DocumentTrays/{quote(str(document_tray), safe='')}/Search"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

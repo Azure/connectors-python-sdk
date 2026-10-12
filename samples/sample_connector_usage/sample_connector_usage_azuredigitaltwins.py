@@ -27,10 +27,8 @@ Available operations:
 - Query twins
 - Send telemetry
 """
-
-import asyncio
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.azuredigitaltwins import (
     AzuredigitaltwinsClient,
@@ -48,18 +46,18 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_models():
+def example_1_list_models():
     """Example 1: List all models in the instance."""
     print("\n=== Example 1: List Models ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuredigitaltwinsClient(
+        with AzuredigitaltwinsClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # List all models
-                models = [item async for item in client.list_models_async(
+                models = [item for item in client.list_models(
                     include_model_definition="true"
                 )]
 
@@ -76,19 +74,19 @@ async def example_1_list_models():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_twin():
+def example_2_get_twin():
     """Example 2: Get a specific digital twin."""
     print("\n=== Example 2: Get Twin ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         twin_id = "room1"  # Replace with your twin ID
 
-        async with AzuredigitaltwinsClient(
+        with AzuredigitaltwinsClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # Get a twin by ID
-                result = await client.get_twin_by_id_async(twinid=twin_id)
+                result = client.get_twin_by_id(twinid=twin_id)
 
                 if result:
                     print(f"Twin ID: {result.get('$dtId', 'Unknown')}")
@@ -108,13 +106,13 @@ async def example_2_get_twin():
                 print(f"Error: {ex}")
 
 
-async def example_3_query_twins():
+def example_3_query_twins():
     """Example 3: Query digital twins."""
     print("\n=== Example 3: Query Twins ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with AzuredigitaltwinsClient(
+        with AzuredigitaltwinsClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
@@ -122,7 +120,7 @@ async def example_3_query_twins():
                 query_input = QueryTwinsInput(
                     query="SELECT * FROM digitaltwins"
                 )
-                result = await client.query_twins_async(input=query_input)
+                result = client.query_twins(input=query_input)
 
                 if result and result.get("value"):
                     print(f"Query results: {result['value']}")
@@ -139,19 +137,19 @@ async def example_3_query_twins():
                 print(f"Error: {ex}")
 
 
-async def example_4_list_relationships():
+def example_4_list_relationships():
     """Example 4: List relationships for a twin."""
     print("\n=== Example 4: List Relationships ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         twin_id = "room1"  # Replace with your twin ID
 
-        async with AzuredigitaltwinsClient(
+        with AzuredigitaltwinsClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
                 # List outgoing relationships
-                outgoing = [item async for item in client.list_relationships_async(twinid=twin_id)]
+                outgoing = [item for item in client.list_relationships(twinid=twin_id)]
 
                 if outgoing:
                     print(f"Outgoing relationships from {twin_id}:")
@@ -162,7 +160,7 @@ async def example_4_list_relationships():
                     print(f"No outgoing relationships from {twin_id}")
 
                 # List incoming relationships
-                incoming = [item async for item in client.list_incoming_relationships_async(
+                incoming = [item for item in client.list_incoming_relationships(
                     twinid=twin_id
                 )]
 
@@ -180,14 +178,14 @@ async def example_4_list_relationships():
                 print(f"Error: {ex}")
 
 
-async def example_5_send_telemetry():
+def example_5_send_telemetry():
     """Example 5: Send telemetry from a twin."""
     print("\n=== Example 5: Send Telemetry ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
         twin_id = "room1"  # Replace with your twin ID
 
-        async with AzuredigitaltwinsClient(
+        with AzuredigitaltwinsClient(
             CONNECTION_RUNTIME_URL, credential
         ) as client:
             try:
@@ -195,7 +193,7 @@ async def example_5_send_telemetry():
                 telemetry = SendTelemetryInput(
                     value='{"temperature": 72.5, "humidity": 45}'
                 )
-                await client.send_telemetry_async(
+                client.send_telemetry(
                     input=telemetry,
                     twinid=twin_id
                 )
@@ -208,7 +206,7 @@ async def example_5_send_telemetry():
                 print(f"Error: {ex}")
 
 
-async def example_6_dataclass_usage():
+def example_6_dataclass_usage():
     """Example 6: Working with Azure Digital Twins data types."""
     print("\n=== Example 6: Data Types ===")
 
@@ -239,28 +237,28 @@ async def example_6_dataclass_usage():
     print(f"Query: {query.query}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: AZUREDIGITALTWINS_CONNECTION_URL environment variable "
               "not set.")
         print("Set it to your connection runtime URL from Azure Portal.")
         print("\nRunning data type examples without connection...\n")
-        await example_6_dataclass_usage()
+        example_6_dataclass_usage()
         return
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_models()
-    await example_2_get_twin()
-    await example_3_query_twins()
-    await example_4_list_relationships()
+    example_1_list_models()
+    example_2_get_twin()
+    example_3_query_twins()
+    example_4_list_relationships()
     # Uncomment to send telemetry (requires existing twin)
     # await example_5_send_telemetry()
-    await example_6_dataclass_usage()
+    example_6_dataclass_usage()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

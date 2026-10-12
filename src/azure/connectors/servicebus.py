@@ -10,15 +10,27 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "ServicebusClient",
+    "CreateTopicSubscriptionInput",
+    "ObjectEntity",
+    "SendMessagesInput",
+    "ServiceBusEntity",
+    "ServiceBusMessage",
+    "Subscription",
+    "SubscriptionCorrelationFilter",
+    "SubscriptionFilter",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -228,7 +240,7 @@ class ServicebusClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -237,7 +249,7 @@ class ServicebusClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -257,8 +269,8 @@ class ServicebusClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -285,7 +297,7 @@ class ServicebusClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "servicebus"
 
-    async def send_message_async(
+    def send_message(
         self,
         input: ServiceBusMessage,
         entity_name: str,
@@ -314,7 +326,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -330,7 +342,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def send_messages_async(
+    def send_messages(
         self,
         input: SendMessagesInput,
         entity_name: str,
@@ -361,7 +373,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -377,7 +389,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def complete_message_in_queue_async(
+    def complete_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
@@ -418,7 +430,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -434,7 +446,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def abandon_message_in_queue_async(
+    def abandon_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
@@ -475,7 +487,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -491,7 +503,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_deferred_message_from_queue_async(
+    def get_deferred_message_from_queue(
         self,
         queue_name: str,
         sequence_number: int,
@@ -532,7 +544,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -553,7 +565,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def defer_message_in_queue_async(
+    def defer_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
@@ -594,7 +606,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -610,7 +622,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def dead_letter_message_in_queue_async(
+    def dead_letter_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
@@ -657,7 +669,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -673,7 +685,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def renew_lock_on_message_in_queue_async(
+    def renew_lock_on_message_in_queue(
         self,
         queue_name: str,
         lock_token: str,
@@ -708,7 +720,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -724,7 +736,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_messages_from_queue_with_peek_lock_async(
+    def get_messages_from_queue_with_peek_lock(
         self,
         queue_name: str,
         max_message_count: Optional[int] = None,
@@ -768,7 +780,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -789,7 +801,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def close_session_in_queue_async(
+    def close_session_in_queue(
         self,
         queue_name: str,
         session_id: str,
@@ -812,7 +824,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/close"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -828,7 +840,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def renew_lock_on_session_in_queue_async(
+    def renew_lock_on_session_in_queue(
         self,
         queue_name: str,
         session_id: str,
@@ -851,7 +863,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/renewlock"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -867,7 +879,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def complete_message_in_topic_async(
+    def complete_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -911,7 +923,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -927,7 +939,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def abandon_message_in_topic_async(
+    def abandon_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -971,7 +983,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -987,7 +999,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_deferred_message_from_topic_async(
+    def get_deferred_message_from_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1031,7 +1043,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1052,7 +1064,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def defer_message_in_topic_async(
+    def defer_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1096,7 +1108,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1112,7 +1124,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def dead_letter_message_in_topic_async(
+    def dead_letter_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1162,7 +1174,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1178,7 +1190,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def renew_lock_on_message_in_topic_async(
+    def renew_lock_on_message_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1216,7 +1228,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1232,7 +1244,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def create_topic_subscription_async(
+    def create_topic_subscription(
         self,
         input: CreateTopicSubscriptionInput,
         topic_name: str,
@@ -1264,7 +1276,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1285,7 +1297,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_topic_subscription_async(
+    def delete_topic_subscription(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1307,7 +1319,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/{quote(str(subscription_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1323,7 +1335,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_messages_from_topic_with_peek_lock_async(
+    def get_messages_from_topic_with_peek_lock(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1371,7 +1383,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1392,7 +1404,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def close_session_in_topic_async(
+    def close_session_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1418,7 +1430,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/close"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1434,7 +1446,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def renew_lock_on_session_in_topic_async(
+    def renew_lock_on_session_in_topic(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1460,7 +1472,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/renewlock"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1476,7 +1488,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_entities_async(
+    def get_entities(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1491,7 +1503,7 @@ class ServicebusClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/entities"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1512,7 +1524,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_system_properties_async(
+    def get_system_properties(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1527,7 +1539,7 @@ class ServicebusClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/systemproperties"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1548,7 +1560,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_queues_async(
+    def get_queues(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1563,7 +1575,7 @@ class ServicebusClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/queues"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1584,7 +1596,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_session_options_async(
+    def get_session_options(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1600,7 +1612,7 @@ class ServicebusClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/sessionoptions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1621,7 +1633,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_topics_async(
+    def get_topics(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1636,7 +1648,7 @@ class ServicebusClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/topics"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1657,7 +1669,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subscriptions_async(
+    def get_subscriptions(
         self,
         topic_name: str,
         *,
@@ -1679,7 +1691,7 @@ class ServicebusClient(ConnectorClientBase):
             f"/subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1700,7 +1712,7 @@ class ServicebusClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subscription_filter_async(
+    def get_subscription_filter(
         self,
         subscription_filter_type: str,
         *,
@@ -1723,7 +1735,7 @@ class ServicebusClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

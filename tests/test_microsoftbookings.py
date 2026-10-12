@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.microsoftbookings import MicrosoftbookingsClient
 from azure.connectors.microsoftbookings import (
-    MicrosoftbookingsClient,
     CreateAppointmentInput,
     UpdateAppointmentInput,
     CancelAppointmentInput,
@@ -170,11 +170,11 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_bookings_business_user_as_admin_async()
+            result = await client.list_bookings_business_user_as_admin()
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -195,11 +195,11 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_bookings_business_user_as_admin_async()
+            result = await client.list_bookings_business_user_as_admin()
             assert result is None
 
     @pytest.mark.asyncio
@@ -217,12 +217,12 @@ class TestListBookingsBusinessUserAsAdminAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_bookings_business_user_as_admin_async()
+                await client.list_bookings_business_user_as_admin()
 
             assert exc_info.value.status_code == 401
 

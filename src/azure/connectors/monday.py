@@ -10,15 +10,83 @@ from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "MondayClient",
+    "CreateBoardInput",
+    "CreateBoardResponse",
+    "CreateColumnInput",
+    "CreateColumnResponse",
+    "CreateGroupInput",
+    "CreateGroupResponse",
+    "CreateItemInput",
+    "CreateItemResponse",
+    "CreateNotificationInput",
+    "CreateNotificationResponse",
+    "CreateSubitemInput",
+    "CreateSubitemResponse",
+    "CreateUpdateInput",
+    "CreateUpdateResponse",
+    "CreateWorkspaceInput",
+    "CreateWorkspaceResponse",
+    "DuplicateBoardInput",
+    "DuplicateBoardResponse",
+    "DynamicGetColumnNamesForUpdateWebhook",
+    "DynamicGetColumnNamesForWebhook",
+    "DynamicGetGetItemsSchema",
+    "DynamicGetSubitemColumnNamesForWebhook",
+    "DynamicResponseGetListSchema",
+    "DynamicResponseGetListSchemaGet",
+    "DynamicResponseGetSingleColumnSchema",
+    "FieldBoard",
+    "FieldColumnsToUpdateSingleColumn",
+    "FieldWorkspace",
+    "GetColumnNamesSchemaForColumnChangesWebhookResponse",
+    "GetColumnNamesSchemaForItemNameChangeWebhookResponse",
+    "GetColumnNamesSchemaForSubitemNameChangeWebhookResponse",
+    "GetColumnNamesSchemaForUpdateWebhookResponse",
+    "GetColumnNamesSchemaForWebhookResponse",
+    "GetColumnNamesSchemaResponse",
+    "GetSchemaForGetItemsActionResponse",
+    "GetSingleColumnSchemaResponse",
+    "GetSubitemColumnNamesForGetSubitems",
+    "GetSubitemColumnNamesResponse",
+    "GetSubitemSchemaResponse",
+    "GetTagsResponse",
+    "GetUsersResponse",
+    "GetWorkspacesResponse",
+    "MoveItemToGroupInput",
+    "MoveItemToGroupResponse",
+    "UpdateItemColumnInput",
+    "UpdateItemColumnResponse",
+    "UpdateMultipleItemColumnsInput",
+    "UpdateMultipleItemColumnsResponse",
+    "WebhookAnyColumnChangesInput",
+    "WebhookAnyColumnChangesResponse",
+    "WebhookChangeNameInput",
+    "WebhookChangeNameResponse",
+    "WebhookChangeSubitemNameInput",
+    "WebhookChangeSubitemNameResponse",
+    "WebhookColumnChangesInput",
+    "WebhookColumnChangesResponse",
+    "WebhookCreateItemInput",
+    "WebhookCreateItemResponse",
+    "WebhookCreateSubitemInput",
+    "WebhookCreateSubitemResponse",
+    "WebhookCreateUpdateInput",
+    "WebhookCreateUpdateResponse",
+    "WebhookSubitemColumnChangesInput",
+    "WebhookSubitemColumnChangesResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -994,7 +1062,7 @@ class MondayClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1003,7 +1071,7 @@ class MondayClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1023,8 +1091,8 @@ class MondayClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1051,7 +1119,7 @@ class MondayClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "monday"
 
-    async def create_item_async(
+    def create_item(
         self,
         input: CreateItemInput,
         *,
@@ -1070,7 +1138,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateItem"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1091,7 +1159,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def duplicate_board_async(
+    def duplicate_board(
         self,
         input: DuplicateBoardInput,
         *,
@@ -1110,7 +1178,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/DuplicateBoard"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1131,7 +1199,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_board_async(
+    def create_board(
         self,
         input: CreateBoardInput,
         *,
@@ -1150,7 +1218,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateBoard"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1171,7 +1239,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_column_async(
+    def create_column(
         self,
         input: CreateColumnInput,
         *,
@@ -1190,7 +1258,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateColumn"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1211,7 +1279,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_group_async(
+    def create_group(
         self,
         input: CreateGroupInput,
         *,
@@ -1230,7 +1298,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateGroup"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1251,7 +1319,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_item_column_async(
+    def update_item_column(
         self,
         input: UpdateItemColumnInput,
         *,
@@ -1271,7 +1339,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/UpdateItemColumn"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1292,7 +1360,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_multiple_item_columns_async(
+    def update_multiple_item_columns(
         self,
         input: UpdateMultipleItemColumnsInput,
         *,
@@ -1312,7 +1380,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/UpdateMultipleItemColumns"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1333,7 +1401,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def move_item_to_group_async(
+    def move_item_to_group(
         self,
         input: MoveItemToGroupInput,
         *,
@@ -1352,7 +1420,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/MoveItemToGroup"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1373,7 +1441,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_notification_async(
+    def create_notification(
         self,
         input: CreateNotificationInput,
         *,
@@ -1393,7 +1461,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateNotification"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1414,7 +1482,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_subitem_async(
+    def create_subitem(
         self,
         input: CreateSubitemInput,
         *,
@@ -1433,7 +1501,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateSubitem"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1454,7 +1522,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitems_async(
+    def get_subitems(
         self,
         workspace_id: str,
         board_id: str,
@@ -1487,7 +1555,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1508,7 +1576,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_update_async(
+    def create_update(
         self,
         input: CreateUpdateInput,
         *,
@@ -1527,7 +1595,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateUpdate"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1548,7 +1616,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_by_id_async(
+    def get_item_by_id(
         self,
         item_id: str,
         workspace_id: str,
@@ -1581,7 +1649,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1602,7 +1670,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_workspace_async(
+    def create_workspace(
         self,
         input: CreateWorkspaceInput,
         *,
@@ -1622,7 +1690,7 @@ class MondayClient(ConnectorClientBase):
             f"/executePowerAutomateAction/CreateWorkspaceV2"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1643,7 +1711,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_items_async(
+    def get_items(
         self,
         workspace_id: str,
         board_id: str,
@@ -1751,7 +1819,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1772,7 +1840,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    def get_tags(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1787,7 +1855,7 @@ class MondayClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/getData/getTagsV2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1808,7 +1876,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_users_async(
+    def get_users(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1824,7 +1892,7 @@ class MondayClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/getData/getUsersV2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1845,7 +1913,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_workspaces_async(
+    def get_workspaces(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1860,7 +1928,7 @@ class MondayClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/getData/getWorkspacesV2"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1881,7 +1949,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_boards_async(
+    def get_boards(
         self,
         workspace_id: Optional[str] = None,
         *,
@@ -1905,7 +1973,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1926,7 +1994,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_groups_for_get_items_async(
+    def get_groups_for_get_items(
         self,
         board_id: str,
         *,
@@ -1952,7 +2020,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1973,7 +2041,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_columns_for_item_filtering_async(
+    def get_columns_for_item_filtering(
         self,
         board_id: str,
         *,
@@ -1999,7 +2067,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2020,7 +2088,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_filter_operator_async(
+    def get_column_filter_operator(
         self,
         board_id: str,
         column_id: Optional[str] = None,
@@ -2052,7 +2120,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2073,7 +2141,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_async(
+    def get_column_names_schema(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2099,7 +2167,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2120,7 +2188,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_single_column_schema_async(
+    def get_single_column_schema(
         self,
         board_id: Optional[str] = None,
         column_id: Optional[str] = None,
@@ -2152,7 +2220,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2173,7 +2241,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_webhook_async(
+    def get_column_names_schema_for_webhook(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2201,7 +2269,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2222,7 +2290,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_schema_for_get_items_action_async(
+    def get_schema_for_get_items_action(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2249,7 +2317,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2270,7 +2338,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_update_webhook_async(
+    def get_column_names_schema_for_update_webhook(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2298,7 +2366,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2319,7 +2387,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitem_column_names_async(
+    def get_subitem_column_names(
         self,
         parent_board_id: str,
         *,
@@ -2344,7 +2412,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2365,7 +2433,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_subitem_schema_async(
+    def get_subitem_schema(
         self,
         parent_board_id: str,
         *,
@@ -2390,7 +2458,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2411,7 +2479,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_item_name_change_webhook_async(
+    def get_column_names_schema_for_item_name_change_webhook(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2439,7 +2507,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2460,7 +2528,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_subitem_name_change_webhook_async(
+    def get_column_names_schema_for_subitem_name_change_webhook(
         self,
         parent_board_id: str,
         *,
@@ -2487,7 +2555,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2508,7 +2576,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_column_names_schema_for_column_changes_webhook_async(
+    def get_column_names_schema_for_column_changes_webhook(
         self,
         board_id: Optional[str] = None,
         *,
@@ -2536,7 +2604,7 @@ class MondayClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

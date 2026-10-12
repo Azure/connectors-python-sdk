@@ -19,11 +19,9 @@ Usage:
 
     python sample_connector_usage_zendesk.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.zendesk import (
     Item,
@@ -38,15 +36,15 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_get_tables():
+def example_1_get_tables():
     """Example 1: List the available Zendesk tables (object types)."""
     print("\n=== Example 1: Get Tables ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables_async()
+                result = client.get_tables()
 
                 tables = (result or {}).get("value", []) if isinstance(result, dict) else []
                 print(f"Found {len(tables)} table(s).")
@@ -59,15 +57,15 @@ async def example_1_get_tables():
                 print(f"Error: {ex}")
 
 
-async def example_2_get_items():
+def example_2_get_items():
     """Example 2: Retrieve items from a Zendesk table."""
     print("\n=== Example 2: Get Items ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = [item async for item in client.get_items_async(
+                items = [item for item in client.get_items(
                     table="tickets",
                     top=10,
                 )]
@@ -80,13 +78,13 @@ async def example_2_get_items():
                 print(f"Error: {ex}")
 
 
-async def example_3_create_item():
+def example_3_create_item():
     """Example 3: Create a new item in a Zendesk table."""
     print("\n=== Example 3: Create Item ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 new_item = Item(
                     dynamic_properties={
@@ -95,7 +93,7 @@ async def example_3_create_item():
                     },
                 )
 
-                result = await client.post_item_async(input=new_item, table="tickets")
+                result = client.post_item(input=new_item, table="tickets")
                 print(f"Created item: {result}")
 
             except ConnectorException as ex:
@@ -104,15 +102,15 @@ async def example_3_create_item():
                 print(f"Error: {ex}")
 
 
-async def example_4_search_articles():
+def example_4_search_articles():
     """Example 4: Search Zendesk Help Center articles."""
     print("\n=== Example 4: Search Articles ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.search_articles_async(
+                result = client.search_articles(
                     query="password reset",
                     locale="en-us",
                 )
@@ -126,7 +124,7 @@ async def example_4_search_articles():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: ZENDESK_CONNECTION_URL environment variable not set.")
@@ -135,13 +133,13 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_get_tables()
-    await example_2_get_items()
-    await example_3_create_item()
-    await example_4_search_articles()
+    example_1_get_tables()
+    example_2_get_items()
+    example_3_create_item()
+    example_4_search_articles()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -1,9 +1,7 @@
 """Twitter connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.twitter import TwitterClient
@@ -12,40 +10,40 @@ from azure.connectors.twitter import TwitterClient
 CONNECTION_RUNTIME_URL = os.environ.get("TWITTER_CONNECTION_URL", "")
 
 
-async def list_user_timeline() -> None:
+def list_user_timeline() -> None:
     """List recent posts from a user's timeline."""
-    async with DefaultAzureCredential() as credential:
-        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            timeline = await client.user_timeline_async(
+    with DefaultAzureCredential() as credential:
+        with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            timeline = client.user_timeline(
                 user_name="Azure",
                 max_results=10,
             )
             print(f"Timeline: {timeline}")
 
 
-async def search_posts() -> None:
+def search_posts() -> None:
     """Search recent posts."""
-    async with DefaultAzureCredential() as credential:
-        async with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
-            results = await client.search_tweet_async(
+    with DefaultAzureCredential() as credential:
+        with TwitterClient(CONNECTION_RUNTIME_URL, credential) as client:
+            results = client.search_tweet(
                 search_query="Azure Logic Apps",
                 max_results=10,
             )
             print(f"Search results: {results}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Twitter connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set TWITTER_CONNECTION_URL to run this sample.")
         return
 
     try:
-        await list_user_timeline()
-        await search_posts()
+        list_user_timeline()
+        search_posts()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

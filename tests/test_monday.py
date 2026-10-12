@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.monday import MondayClient
 from azure.connectors.monday import (
     CreateBoardInput,
     CreateColumnInput,
@@ -22,7 +23,6 @@ from azure.connectors.monday import (
     GetTagsResponse,
     GetUsersResponse,
     GetWorkspacesResponse,
-    MondayClient,
     MoveItemToGroupInput,
     UpdateItemColumnInput,
     UpdateMultipleItemColumnsInput,
@@ -38,79 +38,79 @@ from tests.generated_connector_test_utils import get_generated_operations
 async def _invoke_operation(client: MondayClient, operation: str):
     """Invoke a Monday operation by name for shared tests."""
     if operation == "create_item":
-        return await client.create_item_async(input=CreateItemInput())
+        return await client.create_item(input=CreateItemInput())
     if operation == "duplicate_board":
-        return await client.duplicate_board_async(input=DuplicateBoardInput())
+        return await client.duplicate_board(input=DuplicateBoardInput())
     if operation == "create_board":
-        return await client.create_board_async(input=CreateBoardInput())
+        return await client.create_board(input=CreateBoardInput())
     if operation == "create_column":
-        return await client.create_column_async(input=CreateColumnInput())
+        return await client.create_column(input=CreateColumnInput())
     if operation == "create_group":
-        return await client.create_group_async(input=CreateGroupInput())
+        return await client.create_group(input=CreateGroupInput())
     if operation == "update_item_column":
-        return await client.update_item_column_async(input=UpdateItemColumnInput())
+        return await client.update_item_column(input=UpdateItemColumnInput())
     if operation == "update_multiple_item_columns":
-        return await client.update_multiple_item_columns_async(
+        return await client.update_multiple_item_columns(
             input=UpdateMultipleItemColumnsInput()
         )
     if operation == "move_item_to_group":
-        return await client.move_item_to_group_async(input=MoveItemToGroupInput())
+        return await client.move_item_to_group(input=MoveItemToGroupInput())
     if operation == "create_notification":
-        return await client.create_notification_async(input=CreateNotificationInput())
+        return await client.create_notification(input=CreateNotificationInput())
     if operation == "create_subitem":
-        return await client.create_subitem_async(input=CreateSubitemInput())
+        return await client.create_subitem(input=CreateSubitemInput())
     if operation == "create_update":
-        return await client.create_update_async(input=CreateUpdateInput())
+        return await client.create_update(input=CreateUpdateInput())
     if operation == "create_workspace":
-        return await client.create_workspace_async(input=CreateWorkspaceInput())
+        return await client.create_workspace(input=CreateWorkspaceInput())
     if operation == "get_subitems":
-        return await client.get_subitems_async(
+        return await client.get_subitems(
             workspace_id="1", board_id="2", item_id="3"
         )
     if operation == "get_item_by_id":
-        return await client.get_item_by_id_async(
+        return await client.get_item_by_id(
             item_id="1", workspace_id="2", board_id="3"
         )
     if operation == "get_items":
-        return await client.get_items_async(
+        return await client.get_items(
             workspace_id="1", board_id="2", group_id="3"
         )
     if operation == "get_tags":
-        return await client.get_tags_async()
+        return await client.get_tags()
     if operation == "get_users":
-        return await client.get_users_async()
+        return await client.get_users()
     if operation == "get_workspaces":
-        return await client.get_workspaces_async()
+        return await client.get_workspaces()
     if operation == "get_boards":
-        return await client.get_boards_async()
+        return await client.get_boards()
     if operation == "get_groups_for_get_items":
-        return await client.get_groups_for_get_items_async(board_id="1")
+        return await client.get_groups_for_get_items(board_id="1")
     if operation == "get_columns_for_item_filtering":
-        return await client.get_columns_for_item_filtering_async(board_id="1")
+        return await client.get_columns_for_item_filtering(board_id="1")
     if operation == "get_column_filter_operator":
-        return await client.get_column_filter_operator_async(board_id="1")
+        return await client.get_column_filter_operator(board_id="1")
     if operation == "get_column_names_schema":
-        return await client.get_column_names_schema_async()
+        return await client.get_column_names_schema()
     if operation == "get_single_column_schema":
-        return await client.get_single_column_schema_async()
+        return await client.get_single_column_schema()
     if operation == "get_column_names_schema_for_webhook":
-        return await client.get_column_names_schema_for_webhook_async()
+        return await client.get_column_names_schema_for_webhook()
     if operation == "get_schema_for_get_items_action":
-        return await client.get_schema_for_get_items_action_async()
+        return await client.get_schema_for_get_items_action()
     if operation == "get_column_names_schema_for_update_webhook":
-        return await client.get_column_names_schema_for_update_webhook_async()
+        return await client.get_column_names_schema_for_update_webhook()
     if operation == "get_column_names_schema_for_item_name_change_webhook":
-        return await client.get_column_names_schema_for_item_name_change_webhook_async()
+        return await client.get_column_names_schema_for_item_name_change_webhook()
     if operation == "get_column_names_schema_for_subitem_name_change_webhook":
-        return await client.get_column_names_schema_for_subitem_name_change_webhook_async(
+        return await client.get_column_names_schema_for_subitem_name_change_webhook(
             parent_board_id="1"
         )
     if operation == "get_column_names_schema_for_column_changes_webhook":
-        return await client.get_column_names_schema_for_column_changes_webhook_async()
+        return await client.get_column_names_schema_for_column_changes_webhook()
     if operation == "get_subitem_column_names":
-        return await client.get_subitem_column_names_async(parent_board_id="1")
+        return await client.get_subitem_column_names(parent_board_id="1")
     if operation == "get_subitem_schema":
-        return await client.get_subitem_schema_async(parent_board_id="1")
+        return await client.get_subitem_schema(parent_board_id="1")
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -255,11 +255,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_item_async(input=CreateItemInput())
+            result = await client.create_item(input=CreateItemInput())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -278,11 +278,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_item_column_async(input=UpdateItemColumnInput())
+            result = await client.update_item_column(input=UpdateItemColumnInput())
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -301,11 +301,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_tags_async()
+            result = await client.get_tags()
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -323,11 +323,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_boards_async(workspace_id="42")
+            await client.get_boards(workspace_id="42")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -345,11 +345,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_subitems_async(workspace_id="1", board_id="2", item_id="3")
+            await client.get_subitems(workspace_id="1", board_id="2", item_id="3")
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -367,11 +367,11 @@ class TestMondayClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_item_async(input=CreateItemInput())
+            result = await client.create_item(input=CreateItemInput())
 
             assert result is None
 
@@ -395,7 +395,7 @@ class TestMondayClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

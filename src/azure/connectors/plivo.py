@@ -10,15 +10,24 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "PlivoClient",
+    "Call",
+    "GetMessageResponse",
+    "ListMessagesResponse",
+    "MakeCallResponse",
+    "SMS",
+    "SendSMSResponse",
+]
 
 
 # Type Definitions
@@ -140,7 +149,7 @@ class PlivoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -149,7 +158,7 @@ class PlivoClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -169,8 +178,8 @@ class PlivoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -197,7 +206,7 @@ class PlivoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "plivo"
 
-    async def make_call_async(
+    def make_call(
         self,
         input: Call,
         auth_id: str,
@@ -217,7 +226,7 @@ class PlivoClient(ConnectorClientBase):
             f"/v1/Account/{quote(str(auth_id), safe='')}/Call/"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -238,7 +247,7 @@ class PlivoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_messages_async(
+    def list_messages(
         self,
         auth_id: str,
         *,
@@ -258,7 +267,7 @@ class PlivoClient(ConnectorClientBase):
             f"/v1/Account/{quote(str(auth_id), safe='')}/Message/"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -279,7 +288,7 @@ class PlivoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_sms_async(
+    def send_sms(
         self,
         input: SMS,
         auth_id: str,
@@ -299,7 +308,7 @@ class PlivoClient(ConnectorClientBase):
             f"/v1/Account/{quote(str(auth_id), safe='')}/Message/"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -320,7 +329,7 @@ class PlivoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_async(
+    def get_message(
         self,
         auth_id: str,
         message_uuid: str,
@@ -345,7 +354,7 @@ class PlivoClient(ConnectorClientBase):
             f"/{quote(str(message_uuid), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

@@ -10,15 +10,63 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "PowerbiClient",
+    "Alert",
+    "Columns",
+    "CreateGoalRequest",
+    "CreateGoalResponse",
+    "CreateScorecardRequest",
+    "CreatedScorecard",
+    "Datasets",
+    "DynamicPowerBiButtonClickedTriggerResult",
+    "EffectiveIdentity",
+    "EvaluatedAlert",
+    "ExecuteDatasetQueriesJsonInput",
+    "ExecuteDatasetQueriesJsonResponse",
+    "ExportFilter",
+    "ExportPayloadPaginatedReport",
+    "ExportPayloadPowerBIReport",
+    "ExportReportPage",
+    "ExportReportSettings",
+    "FetchedGoal",
+    "FetchedGoals",
+    "GetGoalCheckinResponse",
+    "GetGoalCheckinsResponse",
+    "GoalChanged",
+    "GoalNotes",
+    "GoalRefreshIssue",
+    "GoalRefreshIssues",
+    "GoalStatusChanged",
+    "GoalValueChanged",
+    "GoalValueCheckinNoteInput",
+    "GoalValueCheckinRequest",
+    "GoalValueCheckinUpdateRequest",
+    "GoalValueOrNoteUpserted",
+    "GoalsAssigned",
+    "Groups",
+    "IdentityBlob",
+    "ListedScorecard",
+    "ListedScorecards",
+    "PageBookmark",
+    "Payload",
+    "PowerBiButtonClickedOutputs",
+    "QueryExecutionResults",
+    "QuerySpecification",
+    "Reports",
+    "Tables",
+    "UpdateGoalRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -852,7 +900,7 @@ class PowerbiClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -861,7 +909,7 @@ class PowerbiClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -881,8 +929,8 @@ class PowerbiClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -909,7 +957,7 @@ class PowerbiClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "powerbi"
 
-    async def get_scorecards_async(
+    def get_scorecards(
         self,
         groupid: str,
         *,
@@ -936,7 +984,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -957,7 +1005,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_scorecard_async(
+    def create_scorecard(
         self,
         input: CreateScorecardRequest,
         groupid: str,
@@ -985,7 +1033,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1006,7 +1054,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_multiple_goals_async(
+    def get_multiple_goals(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1036,7 +1084,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1057,7 +1105,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_goal_async(
+    def create_goal(
         self,
         input: CreateGoalRequest,
         groupid: str,
@@ -1087,7 +1135,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1108,7 +1156,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_goal_async(
+    def get_goal(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1139,7 +1187,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1160,7 +1208,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_goal_async(
+    def update_goal(
         self,
         input: UpdateGoalRequest,
         groupid: str,
@@ -1191,7 +1239,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1207,7 +1255,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def execute_dataset_query_async(
+    def execute_dataset_query(
         self,
         input: QuerySpecification,
         groupid: str,
@@ -1238,7 +1286,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1259,7 +1307,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_dataset_queries_json_async(
+    def execute_dataset_queries_json(
         self,
         input: ExecuteDatasetQueriesJsonInput,
         groupid: str,
@@ -1291,7 +1339,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1312,7 +1360,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_rows_async(
+    def add_rows(
         self,
         input: Payload,
         groupid: str,
@@ -1346,7 +1394,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1362,7 +1410,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def goal_value_checkin_note_async(
+    def goal_value_checkin_note(
         self,
         input: GoalValueCheckinNoteInput,
         groupid: str,
@@ -1396,7 +1444,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1412,7 +1460,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def goal_value_checkin_async(
+    def goal_value_checkin(
         self,
         input: GoalValueCheckinRequest,
         groupid: str,
@@ -1444,7 +1492,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1460,7 +1508,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_goal_checkins_async(
+    def get_goal_checkins(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1492,7 +1540,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1513,7 +1561,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_goal_checkin_async(
+    def update_goal_checkin(
         self,
         input: GoalValueCheckinUpdateRequest,
         groupid: str,
@@ -1546,7 +1594,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1562,7 +1610,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_goal_checkin_async(
+    def get_goal_checkin(
         self,
         groupid: str,
         scorecard_id: str,
@@ -1595,7 +1643,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1616,7 +1664,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def refresh_dataset_async(
+    def refresh_dataset(
         self,
         groupid: str,
         datasetid: str,
@@ -1646,7 +1694,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1662,7 +1710,7 @@ class PowerbiClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def initiate_export_to_file_for_pbi_reports_async(
+    def initiate_export_to_file_for_pbi_reports(
         self,
         input: ExportPayloadPowerBIReport,
         groupid: str,
@@ -1689,7 +1737,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/ExportTo"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1707,7 +1755,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return response.content
 
-    async def initiate_export_to_file_for_paginated_reports_async(
+    def initiate_export_to_file_for_paginated_reports(
         self,
         input: ExportPayloadPaginatedReport,
         groupid: str,
@@ -1734,7 +1782,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/ExportToPaginatedReports"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1752,7 +1800,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return response.content
 
-    async def list_groups_async(
+    def list_groups(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1771,7 +1819,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1792,7 +1840,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_alerts_async(
+    def get_alerts(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1811,7 +1859,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1832,7 +1880,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_datasets_async(
+    def list_datasets(
         self,
         groupid: str,
         *,
@@ -1855,7 +1903,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1876,7 +1924,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_tables_async(
+    def list_tables(
         self,
         groupid: str,
         datasetid: str,
@@ -1906,7 +1954,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1927,7 +1975,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_reports_in_group_async(
+    def get_reports_in_group(
         self,
         groupid: str,
         *,
@@ -1946,7 +1994,7 @@ class PowerbiClient(ConnectorClientBase):
             f"/v1.0/myorg/groups/{quote(str(groupid), safe='')}/reports"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1967,7 +2015,7 @@ class PowerbiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_columns_async(
+    def get_columns(
         self,
         groupid: str,
         datasetid: str,
@@ -2000,7 +2048,7 @@ class PowerbiClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

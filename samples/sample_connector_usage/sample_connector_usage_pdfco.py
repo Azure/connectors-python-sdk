@@ -20,11 +20,9 @@ Usage:
 
     python sample_connector_usage_pdfco.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.pdfco import (
@@ -38,19 +36,19 @@ from azure.connectors.pdfco import (
 CONNECTION_RUNTIME_URL = os.environ.get("PDFCO_CONNECTION_URL", "")
 
 
-async def example_1_html_to_pdf():
+def example_1_html_to_pdf():
     """Example 1: Convert an HTML snippet to a PDF."""
     print("\n=== Example 1: HTML to PDF ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = HtmlToPdfInput(
                     html="<h1>Hello from PDF.co</h1>",
                 )
 
-                result = await client.html_to_pdf_async(input=request)
+                result = client.html_to_pdf(input=request)
 
                 print(f"HTML to PDF result: {result}")
 
@@ -60,19 +58,19 @@ async def example_1_html_to_pdf():
                 print(f"Error: {ex}")
 
 
-async def example_2_url_to_pdf():
+def example_2_url_to_pdf():
     """Example 2: Create a PDF from a public URL."""
     print("\n=== Example 2: URL to PDF ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with PdfcoClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 request = UrlToPdfInput(
                     url="https://example.com",
                 )
 
-                result = await client.url_to_pdf_async(input=request)
+                result = client.url_to_pdf(input=request)
 
                 print(f"URL to PDF result: {result}")
 
@@ -82,7 +80,7 @@ async def example_2_url_to_pdf():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: PDFCO_CONNECTION_URL environment variable not set.")
@@ -91,11 +89,11 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_html_to_pdf()
-    await example_2_url_to_pdf()
+    example_1_html_to_pdf()
+    example_2_url_to_pdf()
 
     print("\n=== All examples completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

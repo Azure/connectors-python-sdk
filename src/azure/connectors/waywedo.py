@@ -10,15 +10,42 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "WaywedoClient",
+    "ChecklistComment",
+    "ChecklistCreateWebHookInput",
+    "ChecklistInstance",
+    "ChecklistInstancesInput",
+    "ChecklistStep",
+    "ChecklistStepCompletedWebHookInput",
+    "ChecklistStepsCompleteInput",
+    "ChecklistStepsCompleteResponse",
+    "CollaboratorsAddInput",
+    "CollaboratorsAddResponse",
+    "CommentAddInput",
+    "CompletedStep",
+    "FinishChecklistWebHookInput",
+    "GenerateAcceptancePDFWebHookInput",
+    "GetAllChecklistInstancesResponse",
+    "InviteSupervisorWebHookInput",
+    "NewCommentWebHookInput",
+    "Procedure",
+    "ProcedureAcceptance",
+    "User",
+    "UsersInput",
+    "UsersPostResponse",
+    "WebhookRegistered",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -525,7 +552,7 @@ class WaywedoClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -534,7 +561,7 @@ class WaywedoClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -554,8 +581,8 @@ class WaywedoClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -582,7 +609,7 @@ class WaywedoClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "waywedo"
 
-    async def comment_add_async(
+    def comment_add(
         self,
         input: CommentAddInput,
         *,
@@ -600,7 +627,7 @@ class WaywedoClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/v1/ChecklistInstanceComments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -621,7 +648,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_async(
+    def checklist_instances(
         self,
         input: ChecklistInstancesInput,
         *,
@@ -637,7 +664,7 @@ class WaywedoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/ChecklistInstances"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -658,7 +685,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_get_async(
+    def checklist_instances_get(
         self,
         instance_id: str,
         *,
@@ -677,7 +704,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/v1/ChecklistInstances/{quote(str(instance_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -698,7 +725,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_instances_activity_async(
+    def checklist_instances_activity(
         self,
         instance_id: str,
         *,
@@ -720,7 +747,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/Activity"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -741,7 +768,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_steps_async(
+    def find_steps(
         self,
         instance_id: str,
         query: Optional[str] = None,
@@ -769,7 +796,7 @@ class WaywedoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -790,7 +817,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_steps_get_async(
+    def checklist_steps_get(
         self,
         instance_id: str,
         step_id: str,
@@ -814,7 +841,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/{quote(str(step_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -835,7 +862,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def checklist_steps_complete_async(
+    def checklist_steps_complete(
         self,
         input: ChecklistStepsCompleteInput,
         instance_id: str,
@@ -861,7 +888,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/Complete"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -882,7 +909,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def collaborators_add_async(
+    def collaborators_add(
         self,
         input: CollaboratorsAddInput,
         *,
@@ -898,7 +925,7 @@ class WaywedoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/Collaborators"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -919,7 +946,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_checklist_async(
+    def find_checklist(
         self,
         query: Optional[str] = None,
         *,
@@ -944,7 +971,7 @@ class WaywedoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -965,7 +992,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def procedures_get_async(
+    def procedures_get(
         self,
         procedure_id: int,
         *,
@@ -984,7 +1011,7 @@ class WaywedoClient(ConnectorClientBase):
             f"/v1/Procedures/{quote(str(procedure_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1005,7 +1032,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_checklist_instances_async(
+    def find_checklist_instances(
         self,
         procedure_id: int,
         query: Optional[str] = None,
@@ -1036,7 +1063,7 @@ class WaywedoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1057,7 +1084,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def find_user_async(
+    def find_user(
         self,
         query: Optional[str] = None,
         *,
@@ -1081,7 +1108,7 @@ class WaywedoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1102,7 +1129,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def users_async(
+    def users(
         self,
         input: UsersInput,
         *,
@@ -1118,7 +1145,7 @@ class WaywedoClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/Users"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1139,7 +1166,7 @@ class WaywedoClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_checklist_instances_async(
+    def get_all_checklist_instances(
         self,
         limit: Optional[int] = None,
         offset: Optional[int] = None,
@@ -1175,7 +1202,7 @@ class WaywedoClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

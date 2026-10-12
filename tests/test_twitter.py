@@ -11,7 +11,8 @@ import azure.connectors.twitter as twitter_module
 from azure.connectors.sdk import (
     ConnectorException,
 )
-from azure.connectors.twitter import TRIGGER_OPERATIONS, TwitterClient
+from azure.connectors.aio.twitter import TwitterClient
+from azure.connectors.twitter import TRIGGER_OPERATIONS
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
@@ -140,7 +141,7 @@ class TestTwitterClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -163,11 +164,11 @@ class TestTwitterClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=response,
         ) as mock_send:
-            result = await client.user_timeline_async(user_name="Ada Lovelace", max_results="5")
+            result = await client.user_timeline(user_name="Ada Lovelace", max_results="5")
 
         method, url = mock_send.call_args.args[:2]
         assert method == "GET"
@@ -185,11 +186,11 @@ class TestTwitterClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=response,
         ) as mock_send:
-            result = await client.tweet_async(input=b"payload", tweet_text="Hello")
+            result = await client.tweet(input=b"payload", tweet_text="Hello")
 
         method, url = mock_send.call_args.args[:2]
         assert method == "POST"
@@ -207,11 +208,11 @@ class TestTwitterClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=204, text=""),
         ):
-            result = await client.home_timeline_async()
+            result = await client.home_timeline()
 
         assert result is None
 
@@ -236,7 +237,7 @@ class TestTwitterClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

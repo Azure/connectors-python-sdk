@@ -1,0 +1,41 @@
+"""Elfsquad Data connector SDK sample."""
+
+import asyncio
+import os
+
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors import ConnectorException
+from azure.connectors.aio.elfsquaddata import ElfsquaddataClient
+
+
+CONNECTION_RUNTIME_URL = os.environ.get("ELFSQUADDATA_CONNECTION_URL", "")
+ENTITY_NAME = os.environ.get("ELFSQUADDATA_ENTITY_NAME", "")
+
+
+async def main() -> None:
+    """List entities from an Elfsquad Data entity set."""
+    if not CONNECTION_RUNTIME_URL or not ENTITY_NAME:
+        print(
+            "Set ELFSQUADDATA_CONNECTION_URL and ELFSQUADDATA_ENTITY_NAME "
+            "to run this sample."
+        )
+        return
+
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with ElfsquaddataClient(
+                CONNECTION_RUNTIME_URL,
+                credential,
+            ) as client:
+                entities = [item async for item in client.get_entities(
+                    entity_name=ENTITY_NAME,
+                    top=10,
+                )]
+                print(f"Entities: {entities}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

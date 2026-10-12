@@ -6,19 +6,80 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "SqlClient",
+    "BlobDataSetsMetadata",
+    "DataSet",
+    "DataSetParameter",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DataWithSensitivityLabelInfo",
+    "Database",
+    "DatabasesList",
+    "DynamicTree",
+    "DynamicTreeOpenBrowse",
+    "DynamicTreeSettings",
+    "DynamicValues",
+    "ExecutePassThroughNativeQueryResponse",
+    "ExecuteProcedureInput",
+    "ExecuteProcedureResponse",
+    "GetItemResponse",
+    "GetItemsResponse",
+    "GetTablesResponse",
+    "Item",
+    "ItemsList",
+    "NoNaturalKeyColumnConnectorMetadata",
+    "ODataServersList",
+    "ObjectEntity",
+    "PQMetadata",
+    "PQMetadataValue",
+    "PQRows",
+    "PassThroughNativeQuery",
+    "PassThroughNativeQueryBody",
+    "PassThroughNativeQueryMetadata",
+    "PassThroughNativeQueryResult",
+    "PassThroughPQBody",
+    "PassThroughPQResult",
+    "PatchItemInput",
+    "PatchItemResponse",
+    "PostItemInput",
+    "PostItemResponse",
+    "Procedure",
+    "ProcedureMetadata",
+    "ProcedureResult",
+    "ProceduresList",
+    "SensitivityLabelMetadata",
+    "Server",
+    "SqlItem",
+    "SqlItemsList",
+    "SqlPassThroughNativeQueryBody",
+    "SqlPassThroughNativeQueryResult",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableCountRestrictionsMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TablesList",
+    "TabularDataSetsMetadata",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -997,7 +1058,7 @@ class SqlClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1006,7 +1067,7 @@ class SqlClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1026,8 +1087,8 @@ class SqlClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1093,7 +1154,7 @@ class SqlClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def delete_item_async(
+    def delete_item(
         self,
         server: str,
         database: str,
@@ -1124,7 +1185,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1140,7 +1201,7 @@ class SqlClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def execute_pass_through_native_query_async(
+    def execute_pass_through_native_query(
         self,
         input: SqlPassThroughNativeQueryBody,
         server: str,
@@ -1168,7 +1229,7 @@ class SqlClient(ConnectorClientBase):
             f"/sql"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1189,7 +1250,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def execute_procedure_async(
+    def execute_procedure(
         self,
         input: ExecuteProcedureInput,
         server: str,
@@ -1218,7 +1279,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1239,7 +1300,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_item_async(
+    def get_item(
         self,
         server: str,
         database: str,
@@ -1270,7 +1331,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1291,7 +1352,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_items_async(
+    def get_items(
         self,
         server: str,
         database: str,
@@ -1310,14 +1371,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get rows
 
         This operation gets rows from a table.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1379,11 +1440,16 @@ class SqlClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1398,21 +1464,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_tables(
         self,
         server: str,
         database: str,
@@ -1453,7 +1527,7 @@ class SqlClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1474,7 +1548,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def patch_item_async(
+    def patch_item(
         self,
         input: PatchItemInput,
         server: str,
@@ -1506,7 +1580,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1527,7 +1601,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def post_item_async(
+    def post_item(
         self,
         input: PostItemInput,
         server: str,
@@ -1557,7 +1631,7 @@ class SqlClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1578,7 +1652,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_servers_async(
+    def get_servers(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1593,7 +1667,7 @@ class SqlClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/servers"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1614,7 +1688,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_databases_async(
+    def get_databases(
         self,
         server: str,
         *,
@@ -1637,7 +1711,7 @@ class SqlClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1658,7 +1732,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_delete_item_async(
+    def get_tables_for_delete_item(
         self,
         server: str,
         database: str,
@@ -1667,14 +1741,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForDeleteItem
 
         GetTablesForDeleteItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1687,11 +1761,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/deleteitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1706,21 +1785,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_pass_through_native_query_metadata_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_pass_through_native_query_metadata(
         self,
         input: SqlPassThroughNativeQueryBody,
         server: str,
@@ -1749,7 +1836,7 @@ class SqlClient(ConnectorClientBase):
             f"/sql"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1770,7 +1857,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_procedures_v2_async(
+    def get_procedures_v2(
         self,
         server: str,
         database: str,
@@ -1796,7 +1883,7 @@ class SqlClient(ConnectorClientBase):
             f"/procedures"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1817,7 +1904,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_procedure_v2_async(
+    def get_procedure_v2(
         self,
         server: str,
         database: str,
@@ -1846,7 +1933,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1867,7 +1954,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_get_item_async(
+    def get_tables_for_get_item(
         self,
         server: str,
         database: str,
@@ -1876,14 +1963,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForGetItem
 
         GetTablesForGetItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1896,11 +1983,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1915,21 +2007,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_table_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_table(
         self,
         server: str,
         database: str,
@@ -1973,7 +2073,7 @@ class SqlClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1994,7 +2094,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_get_on_new_items_async(
+    def get_tables_for_get_on_new_items(
         self,
         server: str,
         database: str,
@@ -2003,14 +2103,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForOnItemCreated
 
         GetTablesForOnItemCreated
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2023,11 +2123,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonnewitems"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2042,21 +2147,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_for_get_on_updated_items_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_tables_for_get_on_updated_items(
         self,
         server: str,
         database: str,
@@ -2065,14 +2178,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForOnItemUpdated
 
         GetTablesForOnItemUpdated
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2085,11 +2198,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/getonupdateditems"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2104,21 +2222,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_tables_for_patch_item_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_tables_for_patch_item(
         self,
         server: str,
         database: str,
@@ -2127,14 +2253,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForPatchItem
 
         GetTablesForPatchItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2147,11 +2273,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/patchitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2166,21 +2297,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_table_for_patch_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_table_for_patch(
         self,
         server: str,
         database: str,
@@ -2210,7 +2349,7 @@ class SqlClient(ConnectorClientBase):
             f"/forPatchItem"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2231,7 +2370,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tables_for_post_item_async(
+    def get_tables_for_post_item(
         self,
         server: str,
         database: str,
@@ -2240,14 +2379,14 @@ class SqlClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTablesForPostItem
 
         GetTablesForPostItem
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2260,11 +2399,16 @@ class SqlClient(ConnectorClientBase):
             f"/tablesfor"
             f"/postitem"
         )
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2279,21 +2423,29 @@ class SqlClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def get_procedure_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def get_procedure(
         self,
         procedure: str,
         *,
@@ -2316,7 +2468,7 @@ class SqlClient(ConnectorClientBase):
             f"/{quote(quote(str(procedure), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2337,7 +2489,7 @@ class SqlClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_procedures_async(
+    def get_procedures(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2354,7 +2506,7 @@ class SqlClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/default/procedures"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

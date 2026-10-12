@@ -1,0 +1,31 @@
+"""Ticketmaster connector SDK sample."""
+
+import asyncio
+import os
+
+from azure.identity.aio import DefaultAzureCredential
+
+from azure.connectors import ConnectorException
+from azure.connectors.aio.ticketmaster import TicketmasterClient
+
+
+CONNECTION_RUNTIME_URL = os.environ.get("TICKETMASTER_CONNECTION_URL", "")
+
+
+async def main() -> None:
+    """List Ticketmaster attractions."""
+    if not CONNECTION_RUNTIME_URL:
+        print("Set TICKETMASTER_CONNECTION_URL to run this sample.")
+        return
+
+    async with DefaultAzureCredential() as credential:
+        try:
+            async with TicketmasterClient(CONNECTION_RUNTIME_URL, credential) as client:
+                attractions = await client.attractions_get()
+                print(f"Attractions: {attractions}")
+        except ConnectorException as ex:
+            print(f"Connector error: {ex}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

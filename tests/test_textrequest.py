@@ -8,6 +8,7 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.textrequest as textrequest_module
+from azure.connectors.aio.textrequest import TextrequestClient
 from azure.connectors.textrequest import (
     CreateContactInput,
     CreateDashboardInput,
@@ -16,7 +17,6 @@ from azure.connectors.textrequest import (
     GetContactByPhoneNumberResponse,
     SendMessageByPhoneNumberInput,
     SendMessageByPhoneNumberResponse,
-    TextrequestClient,
     UpdateDashboardsNameInput,
     UpdateGroupInput,
     TRIGGER_OPERATIONS,
@@ -232,7 +232,7 @@ class TestTextrequestClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -255,10 +255,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_messages_by_contact_phone_async(
+            result = await client.get_messages_by_contact_phone(
                 dashboard_id="7", phone_number="+15551112222", page="1", page_size="20"
             )
 
@@ -277,10 +277,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"message_id": "m1"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.send_message_by_phone_number_async(
+            result = await client.send_message_by_phone_number(
                 input=payload, dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -296,10 +296,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.archive_conversation_async(
+            result = await client.archive_conversation(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -314,10 +314,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.unarchive_conversation_async(
+            result = await client.unarchive_conversation(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -332,10 +332,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contact_by_phone_number_async(
+            result = await client.get_contact_by_phone_number(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -350,10 +350,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.delete_contact_async(
+            result = await client.delete_contact(
                 dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -369,10 +369,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"phone_number": "+15551112222"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_contact_async(
+            result = await client.create_contact(
                 input=payload, dashboard_id="7", phone_number="+15551112222"
             )
 
@@ -388,10 +388,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contacts_async(
+            result = await client.get_contacts(
                 dashboard_id="7", page="1", page_size="20", is_resolved="true"
             )
 
@@ -409,10 +409,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_group_by_id_async(dashboard_id="7", group_id="3")
+            result = await client.get_group_by_id(dashboard_id="7", group_id="3")
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards/7/groups/3" in mock_send.call_args[0][1]
@@ -426,10 +426,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_group_async(
+            result = await client.update_group(
                 input=payload, dashboard_id="7", group_id="3"
             )
 
@@ -446,10 +446,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 3}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_group_async(input=payload, dashboard_id="7")
+            result = await client.create_group(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/groups" in mock_send.call_args[0][1]
@@ -463,10 +463,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='[]')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_custom_fields_async(dashboard_id="7")
+            result = await client.get_custom_fields(dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards/7/fields" in mock_send.call_args[0][1]
@@ -479,10 +479,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"ok": true}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.mark_payment_paid_async(dashboard_id="7", payment_id="9")
+            result = await client.mark_payment_paid(dashboard_id="7", payment_id="9")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/payments/9/mark_as_paid" in mock_send.call_args[0][1]
@@ -496,10 +496,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 9}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_payment_async(input=payload, dashboard_id="7")
+            result = await client.create_payment(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "POST"
             assert "/dashboards/7/payments" in mock_send.call_args[0][1]
@@ -513,10 +513,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"items": []}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_dashboards_async(page="1", page_size="20")
+            result = await client.get_dashboards(page="1", page_size="20")
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
@@ -532,10 +532,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 1}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_dashboard_async(input=payload)
+            result = await client.create_dashboard(input=payload)
 
             assert mock_send.call_args[0][0] == "POST"
             assert mock_send.call_args[0][1].endswith("/dashboards")
@@ -550,10 +550,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text='{"id": 7}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.update_dashboards_name_async(input=payload, dashboard_id="7")
+            result = await client.update_dashboards_name(input=payload, dashboard_id="7")
 
             assert mock_send.call_args[0][0] == "PUT"
             assert mock_send.call_args[0][1].endswith("/dashboards/7")
@@ -567,10 +567,10 @@ class TestTextrequestClientOperations:
         mock_response = MockResponse(status=200, text="")
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_dashboards_async()
+            result = await client.get_dashboards()
 
             assert result is None
 
@@ -621,80 +621,80 @@ class TestTextrequestClientErrorHandling:
         mock_response = MockResponse(status=500, text='{"error":"server failure"}')
 
         with patch.object(
-            client._http_client, "send_async", new_callable=AsyncMock,
+            client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "get_messages_by_contact_phone":
-                    await client.get_messages_by_contact_phone_async(
+                    await client.get_messages_by_contact_phone(
                         dashboard_id="7", phone_number="p", page="1", page_size="20"
                     )
                 elif operation == "send_message_by_phone_number":
-                    await client.send_message_by_phone_number_async(
+                    await client.send_message_by_phone_number(
                         input=SendMessageByPhoneNumberInput(), dashboard_id="7", phone_number="p"
                     )
                 elif operation == "archive_conversation":
-                    await client.archive_conversation_async(dashboard_id="7", phone_number="p")
+                    await client.archive_conversation(dashboard_id="7", phone_number="p")
                 elif operation == "unarchive_conversation":
-                    await client.unarchive_conversation_async(dashboard_id="7", phone_number="p")
+                    await client.unarchive_conversation(dashboard_id="7", phone_number="p")
                 elif operation == "get_contact_by_phone_number":
-                    await client.get_contact_by_phone_number_async(
+                    await client.get_contact_by_phone_number(
                         dashboard_id="7", phone_number="p"
                     )
                 elif operation == "delete_contact":
-                    await client.delete_contact_async(dashboard_id="7", phone_number="p")
+                    await client.delete_contact(dashboard_id="7", phone_number="p")
                 elif operation == "create_contact":
-                    await client.create_contact_async(
+                    await client.create_contact(
                         input=CreateContactInput(), dashboard_id="7", phone_number="p"
                     )
                 elif operation == "get_contacts":
-                    await client.get_contacts_async(
+                    await client.get_contacts(
                         dashboard_id="7", page="1", page_size="20"
                     )
                 elif operation == "bulk_update_contacts":
-                    await client.bulk_update_contacts_async(input=[], dashboard_id="7")
+                    await client.bulk_update_contacts(input=[], dashboard_id="7")
                 elif operation == "get_group_by_id":
-                    await client.get_group_by_id_async(dashboard_id="7", group_id="3")
+                    await client.get_group_by_id(dashboard_id="7", group_id="3")
                 elif operation == "delete_group":
-                    await client.delete_group_async(dashboard_id="7", group_id="3")
+                    await client.delete_group(dashboard_id="7", group_id="3")
                 elif operation == "update_group":
-                    await client.update_group_async(
+                    await client.update_group(
                         input=UpdateGroupInput(), dashboard_id="7", group_id="3"
                     )
                 elif operation == "get_groups":
-                    await client.get_groups_async(dashboard_id="7", page="1", page_size="20")
+                    await client.get_groups(dashboard_id="7", page="1", page_size="20")
                 elif operation == "create_group":
-                    await client.create_group_async(input=CreateGroupInput(), dashboard_id="7")
+                    await client.create_group(input=CreateGroupInput(), dashboard_id="7")
                 elif operation == "get_tags":
-                    await client.get_tags_async(dashboard_id="7", page="1", page_size="20")
+                    await client.get_tags(dashboard_id="7", page="1", page_size="20")
                 elif operation == "get_custom_fields":
-                    await client.get_custom_fields_async(dashboard_id="7")
+                    await client.get_custom_fields(dashboard_id="7")
                 elif operation == "get_payment":
-                    await client.get_payment_async(dashboard_id="7", payment_id="9")
+                    await client.get_payment(dashboard_id="7", payment_id="9")
                 elif operation == "mark_payment_paid":
-                    await client.mark_payment_paid_async(dashboard_id="7", payment_id="9")
+                    await client.mark_payment_paid(dashboard_id="7", payment_id="9")
                 elif operation == "send_payment_reminder":
-                    await client.send_payment_reminder_async(dashboard_id="7", payment_id="9")
+                    await client.send_payment_reminder(dashboard_id="7", payment_id="9")
                 elif operation == "cancel_payment":
-                    await client.cancel_payment_async(dashboard_id="7", payment_id="9")
+                    await client.cancel_payment(dashboard_id="7", payment_id="9")
                 elif operation == "get_payments":
-                    await client.get_payments_async(dashboard_id="7", page="1", page_size="20")
+                    await client.get_payments(dashboard_id="7", page="1", page_size="20")
                 elif operation == "create_payment":
-                    await client.create_payment_async(input=CreatePaymentInput(), dashboard_id="7")
+                    await client.create_payment(input=CreatePaymentInput(), dashboard_id="7")
                 elif operation == "get_dashboard":
-                    await client.get_dashboard_async(dashboard_id="7")
+                    await client.get_dashboard(dashboard_id="7")
                 elif operation == "delete_dashboard":
-                    await client.delete_dashboard_async(dashboard_id="7")
+                    await client.delete_dashboard(dashboard_id="7")
                 elif operation == "update_dashboards_name":
-                    await client.update_dashboards_name_async(
+                    await client.update_dashboards_name(
                         input=UpdateDashboardsNameInput(), dashboard_id="7"
                     )
                 elif operation == "get_conversations":
-                    await client.get_conversations_async(dashboard_id="7")
+                    await client.get_conversations(dashboard_id="7")
                 elif operation == "get_dashboards":
-                    await client.get_dashboards_async()
+                    await client.get_dashboards()
                 else:
-                    await client.create_dashboard_async(input=CreateDashboardInput())
+                    await client.create_dashboard(input=CreateDashboardInput())
 
             assert exc_info.value.status_code == 500
 

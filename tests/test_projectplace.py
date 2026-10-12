@@ -7,10 +7,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.projectplace import ProjectplaceClient
 from azure.connectors.projectplace import (
     CreateCardInput,
     MoveCardInput,
-    ProjectplaceClient,
     TRIGGER_OPERATIONS,
 )
 from azure.connectors.sdk import (
@@ -119,11 +119,11 @@ class TestProjectplaceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_card_async(input=CreateCardInput(), board_id="42")
+            result = await client.create_card(input=CreateCardInput(), board_id="42")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -142,11 +142,11 @@ class TestProjectplaceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.move_card_async(input=MoveCardInput(), board_id="7")
+            result = await client.move_card(input=MoveCardInput(), board_id="7")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -165,11 +165,11 @@ class TestProjectplaceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_boards_async()
+            result = await client.list_boards()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -187,11 +187,11 @@ class TestProjectplaceClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_card_async(input=CreateCardInput(), board_id="1")
+            result = await client.create_card(input=CreateCardInput(), board_id="1")
 
             assert result is None
 
@@ -214,17 +214,17 @@ class TestProjectplaceClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "create_card":
-                    await client.create_card_async(input=CreateCardInput(), board_id="1")
+                    await client.create_card(input=CreateCardInput(), board_id="1")
                 elif operation == "move_card":
-                    await client.move_card_async(input=MoveCardInput(), board_id="1")
+                    await client.move_card(input=MoveCardInput(), board_id="1")
                 else:
-                    await client.list_boards_async()
+                    await client.list_boards()
 
             assert exc_info.value.status_code == 500
 

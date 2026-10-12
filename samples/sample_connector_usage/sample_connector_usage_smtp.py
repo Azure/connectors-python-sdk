@@ -19,11 +19,9 @@ Usage:
 
     python sample_connector_usage_smtp.py
 """
-
-import asyncio
 import base64
 import os
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.smtp import (
     SmtpClient,
@@ -39,7 +37,7 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_send_basic_email():
+def example_1_send_basic_email():
     """Example 1: Send a basic email."""
     print("\n=== Example 1: Send Basic Email ===")
 
@@ -52,9 +50,9 @@ async def example_1_send_basic_email():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 email = Email(
                     from_=sender,
@@ -63,7 +61,7 @@ async def example_1_send_basic_email():
                     body="Hello! This is a test email sent via the Azure Connectors SDK for Python.",
                 )
 
-                await client.send_email_async(input=email)
+                client.send_email(input=email)
 
                 print("Email sent successfully:")
                 print(f"  From: {sender}")
@@ -76,7 +74,7 @@ async def example_1_send_basic_email():
                 print(f"Error: {ex}")
 
 
-async def example_2_send_email_with_cc_bcc():
+def example_2_send_email_with_cc_bcc():
     """Example 2: Send an email with CC and BCC recipients."""
     print("\n=== Example 2: Send Email with CC/BCC ===")
 
@@ -93,9 +91,9 @@ async def example_2_send_email_with_cc_bcc():
         print("  $env:TEST_SMTP_BCC = 'bcc@example.com'  (optional)")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 email = Email(
                     from_=sender,
@@ -106,7 +104,7 @@ async def example_2_send_email_with_cc_bcc():
                     body="This email demonstrates CC and BCC functionality.",
                 )
 
-                await client.send_email_async(input=email)
+                client.send_email(input=email)
 
                 print("Email sent successfully:")
                 print(f"  From: {sender}")
@@ -122,7 +120,7 @@ async def example_2_send_email_with_cc_bcc():
                 print(f"Error: {ex}")
 
 
-async def example_3_send_html_email():
+def example_3_send_html_email():
     """Example 3: Send an HTML-formatted email."""
     print("\n=== Example 3: Send HTML Email ===")
 
@@ -135,9 +133,9 @@ async def example_3_send_html_email():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 html_body = """
                 <html>
@@ -169,7 +167,7 @@ async def example_3_send_html_email():
                     body=html_body.strip(),
                 )
 
-                await client.send_email_async(input=email)
+                client.send_email(input=email)
 
                 print("HTML email sent successfully:")
                 print(f"  From: {sender}")
@@ -182,7 +180,7 @@ async def example_3_send_html_email():
                 print(f"Error: {ex}")
 
 
-async def example_4_send_email_with_attachment():
+def example_4_send_email_with_attachment():
     """Example 4: Send an email with an attachment."""
     print("\n=== Example 4: Send Email with Attachment ===")
 
@@ -195,9 +193,9 @@ async def example_4_send_email_with_attachment():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Create a sample text file content
                 file_content = "This is a sample attachment created by Azure Connectors SDK."
@@ -217,7 +215,7 @@ async def example_4_send_email_with_attachment():
                     attachments=[attachment],
                 )
 
-                await client.send_email_async(input=email)
+                client.send_email(input=email)
 
                 print("Email with attachment sent successfully:")
                 print(f"  From: {sender}")
@@ -230,7 +228,7 @@ async def example_4_send_email_with_attachment():
                 print(f"Error: {ex}")
 
 
-async def example_5_send_email_with_options():
+def example_5_send_email_with_options():
     """Example 5: Send an email with importance and receipts."""
     print("\n=== Example 5: Send Email with Options ===")
 
@@ -243,9 +241,9 @@ async def example_5_send_email_with_options():
         print("  $env:TEST_SMTP_TO = 'recipient@example.com'")
         return
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with SmtpClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 email = Email(
                     from_=sender,
@@ -257,7 +255,7 @@ async def example_5_send_email_with_options():
                     delivery_receipt=sender,
                 )
 
-                await client.send_email_async(input=email)
+                client.send_email(input=email)
 
                 print("Email with options sent successfully:")
                 print(f"  From: {sender}")
@@ -272,7 +270,7 @@ async def example_5_send_email_with_options():
                 print(f"Error: {ex}")
 
 
-async def main():
+def main():
     """Run all examples."""
     print("SMTP Connector SDK - Sample Usage")
     print("=" * 60)
@@ -283,15 +281,15 @@ async def main():
         print("Format: https://[region].azure-apihub.net/apim/smtp/[connection-id]")
         return
 
-    await example_1_send_basic_email()
-    await example_2_send_email_with_cc_bcc()
-    await example_3_send_html_email()
-    await example_4_send_email_with_attachment()
-    await example_5_send_email_with_options()
+    example_1_send_basic_email()
+    example_2_send_email_with_cc_bcc()
+    example_3_send_html_email()
+    example_4_send_email_with_attachment()
+    example_5_send_email_with_options()
 
     print("\n" + "=" * 60)
     print("Sample completed!")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

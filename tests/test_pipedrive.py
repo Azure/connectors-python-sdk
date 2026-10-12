@@ -6,10 +6,10 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.pipedrive import PipedriveClient
 from azure.connectors.pipedrive import (
     AddActivityRequest,
     AddDealRequest,
-    PipedriveClient,
     UpdateDealStageRequest,
     UpdateDealStatusRequest,
     TRIGGER_OPERATIONS,
@@ -23,25 +23,25 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: PipedriveClient, operation: str):
     """Invoke a Pipedrive operation by name for shared tests."""
     if operation == "get_deal":
-        return await client.get_deal_async(deal_id="1")
+        return await client.get_deal(deal_id="1")
     if operation == "update_deal_status":
-        return await client.update_deal_status_async(
+        return await client.update_deal_status(
             input=UpdateDealStatusRequest(),
             deal_id="1",
         )
     if operation == "add_activity":
-        return await client.add_activity_async(input=AddActivityRequest())
+        return await client.add_activity(input=AddActivityRequest())
     if operation == "get_stage":
-        return await client.get_stage_async(stage_id="1")
+        return await client.get_stage(stage_id="1")
     if operation == "add_deal":
-        return await client.add_deal_async(input=AddDealRequest())
+        return await client.add_deal(input=AddDealRequest())
     if operation == "update_deal_stage":
-        return await client.update_deal_stage_async(
+        return await client.update_deal_stage(
             input=UpdateDealStageRequest(),
             deal_id="1",
         )
     if operation == "list_deals":
-        return await client.list_deals_async()
+        return await client.list_deals()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -146,11 +146,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_deal_async(deal_id="42")
+            result = await client.get_deal(deal_id="42")
 
             assert result["data"]["id"] == 42
             assert mock_send.call_args[0][0] == "GET"
@@ -168,11 +168,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_deal_status_async(input=body, deal_id="42")
+            await client.update_deal_status(input=body, deal_id="42")
 
             assert mock_send.call_args[0][0] == "PUT"
             assert "/update_status_deal/v1/deals/42" in mock_send.call_args[0][1]
@@ -190,11 +190,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_activity_async(input=body)
+            result = await client.add_activity(input=body)
 
             assert result["data"]["id"] == 7
             assert mock_send.call_args[0][0] == "POST"
@@ -212,11 +212,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_stage_async(stage_id="3")
+            result = await client.get_stage(stage_id="3")
 
             assert result["data"]["id"] == 3
             assert mock_send.call_args[0][0] == "GET"
@@ -234,11 +234,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_deal_async(input=body)
+            result = await client.add_deal(input=body)
 
             assert result["data"]["id"] == 99
             assert mock_send.call_args[0][0] == "POST"
@@ -257,11 +257,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_deal_stage_async(input=body, deal_id="42")
+            await client.update_deal_stage(input=body, deal_id="42")
 
             assert mock_send.call_args[0][0] == "PUT"
             assert "/connector-v2/update_stage_deal/v1/deals/42" in mock_send.call_args[0][1]
@@ -278,11 +278,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_deals_async()
+            result = await client.list_deals()
 
             assert result["data"][0]["id"] == 1
             assert mock_send.call_args[0][0] == "GET"
@@ -299,11 +299,11 @@ class TestPipedriveClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_deals_async()
+            result = await client.list_deals()
 
             assert result is None
 
@@ -338,7 +338,7 @@ class TestPipedriveClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):

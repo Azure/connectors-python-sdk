@@ -10,15 +10,126 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "TallyfyClient",
+    "AccessToken",
+    "AccountInput",
+    "AccountsInput",
+    "AddTagInput",
+    "Address",
+    "AlertIssues",
+    "Asset",
+    "AssetSubject",
+    "BillInput",
+    "Branding",
+    "BrandingInput",
+    "Capture",
+    "CaptureInput",
+    "CheckUrlInput",
+    "Checklist",
+    "ChecklistInput",
+    "Client",
+    "Comment",
+    "CommentOn",
+    "CommentTaskInput",
+    "CommentTaskResponse",
+    "CompletedOneOffTaskInput",
+    "CompletedOneOffTaskResponse",
+    "CompletedProcessTask",
+    "CompletedProcessTaskInput",
+    "CompletedProcessTaskResponse",
+    "CreateChecklistInput",
+    "CreateCommentInput",
+    "CreateGroupInput",
+    "CreateGuestsTasksComment",
+    "CreateRoleInput",
+    "CreateRunInput",
+    "CreateRunResponse",
+    "CreateStandaloneTaskInput",
+    "CreateStepInput",
+    "CreateTagInput",
+    "CreateTaskInput",
+    "CreateTaskResponse",
+    "Date",
+    "DueDateInput",
+    "EditStepTypeInput",
+    "EditStepTypeResponse",
+    "EditTaskDeadlineInput",
+    "EditTaskDeadlineResponse",
+    "Error",
+    "File",
+    "GenericObject",
+    "GetOrganizationUsersResponse",
+    "GetUserOrganizationsResponse",
+    "GetUserTasksResponse",
+    "Group",
+    "IntegrationS3Input",
+    "InviteInput",
+    "InviteUserToOrganizationInput",
+    "InviteUserToOrganizationResponse",
+    "LoginInput",
+    "Message",
+    "Organization",
+    "OrganizationInput",
+    "OrganizationSettings",
+    "OwnerInput",
+    "Pagination",
+    "Passwordreset",
+    "Passwordreseterro",
+    "PowerbuilderInput",
+    "Preference",
+    "PreferenceInput",
+    "PrerunData",
+    "RegisterInput",
+    "RemoveAssigneeResponse",
+    "RemoveGuestResponse",
+    "ReopenOneOffTaskResponse",
+    "ReopenProcessTaskResponse",
+    "RequestDate",
+    "ResetPasswordInput",
+    "Role",
+    "Run",
+    "RunAlerts",
+    "RunCollaborators",
+    "RunMetaInput",
+    "RunRatingsInput",
+    "RunView",
+    "RunViewInput",
+    "Section",
+    "SectionCreateInput",
+    "SectionInput",
+    "StandaloneTask",
+    "Step",
+    "StepCondition",
+    "StepConditionTerm",
+    "StepDeadline",
+    "StepMeta",
+    "StepOwner",
+    "SubcriptionInput",
+    "Tag",
+    "TaskGuest",
+    "TaskMeta",
+    "TaskMetaInput",
+    "TaskObject",
+    "TasksList",
+    "TasksListMeta",
+    "Thread",
+    "ThreadInput",
+    "ThreadResolveInput",
+    "UpdateGuestsTasksInput",
+    "UpdateStandaloneTaskInput",
+    "UpdateTaskInput",
+    "User",
+]
 
 
 # Type Definitions
@@ -1476,7 +1587,7 @@ class TallyfyClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1485,7 +1596,7 @@ class TallyfyClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1505,8 +1616,8 @@ class TallyfyClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1533,7 +1644,7 @@ class TallyfyClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "tallyfy"
 
-    async def get_user_tasks_async(
+    def get_user_tasks(
         self,
         org: str,
         user_id: int,
@@ -1596,7 +1707,7 @@ class TallyfyClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1617,7 +1728,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def invite_user_to_organization_async(
+    def invite_user_to_organization(
         self,
         input: InviteUserToOrganizationInput,
         org: str,
@@ -1637,7 +1748,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/organizations/{quote(str(org), safe='')}/users/invite"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1658,7 +1769,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_run_async(
+    def create_run(
         self,
         input: CreateRunInput,
         org: str,
@@ -1678,7 +1789,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/organizations/{quote(str(org), safe='')}/runs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1699,7 +1810,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def completed_one_off_task_async(
+    def completed_one_off_task(
         self,
         input: CompletedOneOffTaskInput,
         org: str,
@@ -1719,7 +1830,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/organizations/{quote(str(org), safe='')}/completed-tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1740,7 +1851,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reopen_one_off_task_async(
+    def reopen_one_off_task(
         self,
         org: str,
         task: str,
@@ -1763,7 +1874,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/{quote(str(task), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1784,7 +1895,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def completed_process_task_async(
+    def completed_process_task(
         self,
         input: CompletedProcessTaskInput,
         org: str,
@@ -1809,7 +1920,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/completed-tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1830,7 +1941,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reopen_process_task_async(
+    def reopen_process_task(
         self,
         org: str,
         run: str,
@@ -1856,7 +1967,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/{quote(str(task), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1877,7 +1988,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def comment_task_async(
+    def comment_task(
         self,
         input: CommentTaskInput,
         org: str,
@@ -1902,7 +2013,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/comment"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1923,7 +2034,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_async(
+    def create_task(
         self,
         input: CreateTaskInput,
         org: str,
@@ -1947,7 +2058,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/tasks"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1968,7 +2079,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_task_deadline_async(
+    def edit_task_deadline(
         self,
         input: EditTaskDeadlineInput,
         org: str,
@@ -1995,7 +2106,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/edit-deadline"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2016,7 +2127,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_guest_async(
+    def remove_guest(
         self,
         org: str,
         task: str,
@@ -2044,7 +2155,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/{quote(str(guest), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2065,7 +2176,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_assignee_async(
+    def remove_assignee(
         self,
         org: str,
         task: str,
@@ -2093,7 +2204,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/{quote(str(member), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2114,7 +2225,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def edit_step_type_async(
+    def edit_step_type(
         self,
         input: EditStepTypeInput,
         org: str,
@@ -2144,7 +2255,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/edit-step-type"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2165,7 +2276,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_user_organizations_async(
+    def get_user_organizations(
         self,
         *,
         timeout: Optional[float] = None,
@@ -2180,7 +2291,7 @@ class TallyfyClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/me/organizations"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2201,7 +2312,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organization_users_async(
+    def get_organization_users(
         self,
         org: str,
         *,
@@ -2220,7 +2331,7 @@ class TallyfyClient(ConnectorClientBase):
             f"/organizations/{quote(str(org), safe='')}/users"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

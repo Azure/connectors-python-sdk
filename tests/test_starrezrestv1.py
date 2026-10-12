@@ -8,7 +8,8 @@ import pytest
 
 import azure.connectors.starrezrestv1 as starrezrestv1_module
 from azure.connectors.sdk.serialization import to_wire
-from azure.connectors.starrezrestv1 import SelectBookingInput, Starrezrestv1Client
+from azure.connectors.aio.starrezrestv1 import Starrezrestv1Client
+from azure.connectors.starrezrestv1 import SelectBookingInput
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
@@ -71,11 +72,11 @@ async def test_select_booking_sends_filter_and_deserializes_response(
 
     with patch.object(
         client._http_client,
-        "send_async",
+        "send",
         new_callable=AsyncMock,
         return_value=MockResponse(status=200, text='{"bookings": []}'),
     ) as mock_send:
-        result = await client.select_booking_async(input=request)
+        result = await client.select_booking(input=request)
 
     mock_send.assert_awaited_once_with(
         "POST",

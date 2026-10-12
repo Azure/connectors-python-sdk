@@ -5,7 +5,8 @@
 from typing import get_type_hints
 
 import azure.connectors.orderful as orderful_module
-from azure.connectors.orderful import OrderfulClient, TRIGGER_OPERATIONS
+from azure.connectors.aio.orderful import OrderfulClient
+from azure.connectors.orderful import TRIGGER_OPERATIONS
 from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 
 
@@ -32,6 +33,6 @@ def test_trigger_operations() -> None:
 
 def test_transaction_id_uses_integer_annotation() -> None:
     """Test transaction identifiers preserve the Swagger integer type."""
-    type_hints = get_type_hints(OrderfulClient.get_transaction_by_id_async)
+    type_hints = get_type_hints(OrderfulClient.get_transaction_by_id)
 
     assert type_hints["transaction_id"] is int

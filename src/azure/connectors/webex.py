@@ -10,15 +10,47 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "WebexClient",
+    "CreateSpaceInput",
+    "CreateSpaceMemberInput",
+    "CreateSpaceMemberResponse",
+    "CreateSpaceResponse",
+    "CreateTeamMemberInput",
+    "CreateTeamMemberResponse",
+    "GetMessageDetailsResponse",
+    "GetMessagesResponse",
+    "GetMyOwnDetailsResponse",
+    "GetPeopleResponse",
+    "GetSpaceDetailResponse",
+    "GetSpacesResponse",
+    "MembershipsCreatedInput",
+    "MembershipsCreatedResponse",
+    "MembershipsDeletedInput",
+    "MembershipsDeletedResponse",
+    "MembershipsUpdatedInput",
+    "MembershipsUpdatedResponse",
+    "MessagesCreatedInput",
+    "MessagesCreatedResponse",
+    "MessagesDeletedInput",
+    "MessagesDeletedResponse",
+    "SendMessageInput",
+    "SendMessageResponse",
+    "SpaceCreatedInput",
+    "SpaceCreatedResponse",
+    "SpaceUpdatedInput",
+    "SpaceUpdatedResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -807,7 +839,7 @@ class WebexClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -816,7 +848,7 @@ class WebexClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -836,8 +868,8 @@ class WebexClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -864,7 +896,7 @@ class WebexClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "webex"
 
-    async def create_space_member_async(
+    def create_space_member(
         self,
         input: CreateSpaceMemberInput,
         *,
@@ -880,7 +912,7 @@ class WebexClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/memberships"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -901,7 +933,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_messages_async(
+    def get_messages(
         self,
         room_id: str,
         mentioned_people: Optional[str] = None,
@@ -948,7 +980,7 @@ class WebexClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -969,7 +1001,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_message_async(
+    def send_message(
         self,
         input: SendMessageInput,
         *,
@@ -985,7 +1017,7 @@ class WebexClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/messages"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1006,7 +1038,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_message_details_async(
+    def get_message_details(
         self,
         message_id: str,
         *,
@@ -1025,7 +1057,7 @@ class WebexClient(ConnectorClientBase):
             f"/v1/messages/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1046,7 +1078,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_people_async(
+    def get_people(
         self,
         id: Optional[str] = None,
         email: Optional[str] = None,
@@ -1076,7 +1108,7 @@ class WebexClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1097,7 +1129,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_my_own_details_async(
+    def get_my_own_details(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1112,7 +1144,7 @@ class WebexClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/people/me"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1133,7 +1165,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_spaces_async(
+    def get_spaces(
         self,
         max: Optional[int] = None,
         type_: Optional[str] = None,
@@ -1169,7 +1201,7 @@ class WebexClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1190,7 +1222,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_space_async(
+    def create_space(
         self,
         input: CreateSpaceInput,
         *,
@@ -1206,7 +1238,7 @@ class WebexClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/rooms"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1227,7 +1259,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_space_detail_async(
+    def get_space_detail(
         self,
         room_id: str,
         *,
@@ -1246,7 +1278,7 @@ class WebexClient(ConnectorClientBase):
             f"/v1/rooms/{quote(str(room_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1267,7 +1299,7 @@ class WebexClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_team_member_async(
+    def create_team_member(
         self,
         input: CreateTeamMemberInput,
         *,
@@ -1283,7 +1315,7 @@ class WebexClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1/team/memberships"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

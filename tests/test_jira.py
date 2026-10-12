@@ -9,7 +9,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.jira import JiraClient, CreateIssueInput, EditIssueInput
+from azure.connectors.aio.jira import JiraClient
+from azure.connectors.jira import CreateIssueInput, EditIssueInput
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -119,11 +120,11 @@ class TestListResourcesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_resources_async()
+            result = await client.list_resources()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -146,12 +147,12 @@ class TestListResourcesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_resources_async()
+                await client.list_resources()
 
 
 class TestListIssuesAsync:
@@ -159,10 +160,10 @@ class TestListIssuesAsync:
 
     def test_fields_are_an_optional_string(self):
         """Test the live fields parameter is exposed without an implicit all-fields default."""
-        fields = inspect.signature(JiraClient.list_issues_async).parameters["fields"]
+        fields = inspect.signature(JiraClient.list_issues).parameters["fields"]
 
         assert fields.default is None
-        assert get_type_hints(JiraClient.list_issues_async)["fields"] == Optional[str]
+        assert get_type_hints(JiraClient.list_issues)["fields"] == Optional[str]
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -179,14 +180,14 @@ class TestListIssuesAsync:
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"issues": []}'),
             ) as transport:
                 arguments = {"jql": "project = DEMO"}
                 if fields is not None:
                     arguments["fields"] = fields
-                await client.list_issues_async(**arguments)
+                await client.list_issues(**arguments)
 
             transport.assert_awaited_once()
             method, request_url = transport.await_args.args
@@ -206,11 +207,11 @@ class TestListIssuesAsync:
         ) as client:
             with patch.object(
                 client._http_client,
-                "send_async",
+                "send",
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"issues": []}'),
             ) as transport:
-                await client.list_issues_async(next_page_token="page/2")
+                await client.list_issues(next_page_token="page/2")
 
             request_url = transport.await_args.args[1]
             assert "nextPageToken=page%2F2" in request_url
@@ -230,11 +231,11 @@ class TestListIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_issues_async(
+            result = await client.list_issues(
                 jql="created >= -3650d",
                 fields="summary,status",
             )
@@ -263,12 +264,12 @@ class TestListIssuesAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_issues_async()
+                await client.list_issues()
 
 
 class TestCreateIssueAsync:
@@ -291,11 +292,11 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_issue_async(
+            result = await client.create_issue(
                 input=payload,
                 project_key="PROJ",
                 issue_type_ids="10001",
@@ -327,12 +328,12 @@ class TestCreateIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.create_issue_async(
+                await client.create_issue(
                     input=payload,
                     project_key="PROJ",
                     issue_type_ids="10001",
@@ -356,11 +357,11 @@ class TestGetIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_issue_async(issue_key="PROJ-1")
+            result = await client.get_issue(issue_key="PROJ-1")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -384,11 +385,11 @@ class TestDeleteProjectAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.delete_project_async(project_id_or_key="PROJ")
+            await client.delete_project(project_id_or_key="PROJ")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -406,12 +407,12 @@ class TestDeleteProjectAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.delete_project_async(project_id_or_key="PROJ")
+                await client.delete_project(project_id_or_key="PROJ")
 
 
 class TestEditIssueAsync:
@@ -429,11 +430,11 @@ class TestEditIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.edit_issue_async(
+            result = await client.edit_issue(
                 input=payload,
                 issue_id_or_key="PROJ-1",
             )
@@ -458,12 +459,12 @@ class TestEditIssueAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.edit_issue_async(
+                await client.edit_issue(
                     input=payload,
                     issue_id_or_key="PROJ-1",
                 )

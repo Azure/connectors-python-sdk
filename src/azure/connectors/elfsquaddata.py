@@ -6,19 +6,33 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ElfsquaddataClient",
+    "CreateTriggerInput",
+    "GetEntitiesResponse",
+    "GetEntityByIdResponse",
+    "InvokeFunctionInput",
+    "InvokeFunctionResponse",
+    "PostEntityByIdInput",
+    "PostEntityByIdResponse",
+    "PutEntityByIdInput",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -135,7 +149,7 @@ class ElfsquaddataClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -144,7 +158,7 @@ class ElfsquaddataClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -164,8 +178,8 @@ class ElfsquaddataClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -231,7 +245,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def get_entities_async(
+    def get_entities(
         self,
         entity_name: str,
         top: Optional[int] = None,
@@ -246,14 +260,14 @@ class ElfsquaddataClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get entities
 
         Get entities
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -297,11 +311,16 @@ class ElfsquaddataClient(ConnectorClientBase):
             query_params.append(f"$count={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -316,21 +335,29 @@ class ElfsquaddataClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def post_entity_by_id_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def post_entity_by_id(
         self,
         input: PostEntityByIdInput,
         entity_name: str,
@@ -350,7 +377,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/data/1/{quote(str(entity_name), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -371,7 +398,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_entity_by_id_async(
+    def get_entity_by_id(
         self,
         entity_name: str,
         id: str,
@@ -393,7 +420,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/{quote(str(entity_name), safe='')}({quote(str(id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -414,7 +441,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_entity_by_id_async(
+    def delete_entity_by_id(
         self,
         entity_name: str,
         id: str,
@@ -436,7 +463,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/{quote(str(entity_name), safe='')}({quote(str(id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -452,7 +479,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def put_entity_by_id_async(
+    def put_entity_by_id(
         self,
         input: PutEntityByIdInput,
         entity_name: str,
@@ -475,7 +502,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/{quote(str(entity_name), safe='')}({quote(str(id), safe='')})"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -491,7 +518,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def invoke_function_async(
+    def invoke_function(
         self,
         input: InvokeFunctionInput,
         function_path: str,
@@ -511,7 +538,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/{quote(str(function_path), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -532,7 +559,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_triggers_async(
+    def get_triggers(
         self,
         *,
         timeout: Optional[float] = None,
@@ -545,7 +572,7 @@ class ElfsquaddataClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/data/1/$triggers"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -561,7 +588,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_schemas_async(
+    def get_schemas(
         self,
         *,
         timeout: Optional[float] = None,
@@ -574,7 +601,7 @@ class ElfsquaddataClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/data/1"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -590,7 +617,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_schema_async(
+    def get_schema(
         self,
         entity_name: str,
         *,
@@ -607,7 +634,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/data/1/{quote(str(entity_name), safe='')}/$schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -623,7 +650,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_functions_async(
+    def get_functions(
         self,
         *,
         timeout: Optional[float] = None,
@@ -636,7 +663,7 @@ class ElfsquaddataClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/data/1/$functions"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -652,7 +679,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_function_definition_async(
+    def get_function_definition(
         self,
         function_path: str,
         *,
@@ -669,7 +696,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/data/1/$functions/$schema/{quote(str(function_path), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -685,7 +712,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_trigger_schema_async(
+    def get_trigger_schema(
         self,
         trigger_name: str,
         *,
@@ -702,7 +729,7 @@ class ElfsquaddataClient(ConnectorClientBase):
             f"/data/1/$triggers/{quote(str(trigger_name), safe='')}/$schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

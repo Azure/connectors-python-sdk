@@ -5,8 +5,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.azurequeues import AzurequeuesClient
 from azure.connectors.azurequeues import (
-    AzurequeuesClient,
     Messages,
     QueueArray,
     PutMessageInput,
@@ -125,11 +125,11 @@ class TestDeleteMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_message_async(
+            await client.delete_message(
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue",
                 message_id="msg-123",
@@ -152,7 +152,7 @@ class TestDeleteMessage:
         )
 
         with pytest.raises(TypeError):
-            await client.delete_message_async(
+            await client.delete_message(
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue",
                 message_id="msg-123"
@@ -170,12 +170,12 @@ class TestDeleteMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_message_async(
+                await client.delete_message(
                     storage_account_name="mystorageaccount",
                     queue_name="myqueue",
                     message_id="nonexistent",
@@ -203,11 +203,11 @@ class TestGetMessages:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_messages_async(
+            result = await client.get_messages(
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue"
             )
@@ -230,11 +230,11 @@ class TestGetMessages:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_messages_async(
+            await client.get_messages(
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue",
                 numofmessages="10",
@@ -258,12 +258,12 @@ class TestGetMessages:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_messages_async(
+                await client.get_messages(
                     storage_account_name="mystorageaccount",
                     queue_name="nonexistent"
                 )
@@ -289,11 +289,11 @@ class TestListQueues:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_queues_async(
+            result = await client.list_queues(
                 storage_account_name="mystorageaccount"
             )
 
@@ -315,11 +315,11 @@ class TestListQueues:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_queues_async(
+            result = await client.list_queues(
                 storage_account_name="mystorageaccount"
             )
             assert result is None
@@ -336,12 +336,12 @@ class TestListQueues:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_queues_async(
+                await client.list_queues(
                     storage_account_name="nonexistent"
                 )
 
@@ -375,11 +375,11 @@ class TestPutMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.put_message_async(
+            await client.put_message(
                 input=message_input,
                 storage_account_name="mystorageaccount",
                 queue_name="myqueue"
@@ -407,12 +407,12 @@ class TestPutMessage:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.put_message_async(
+                await client.put_message(
                     input=message_input,
                     storage_account_name="mystorageaccount",
                     queue_name="myqueue"
@@ -439,11 +439,11 @@ class TestPutQueue:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.put_queue_async(
+            result = await client.put_queue(
                 storage_account_name="mystorageaccount",
                 queue_name="newqueue"
             )
@@ -467,12 +467,12 @@ class TestPutQueue:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.put_queue_async(
+                await client.put_queue(
                     storage_account_name="mystorageaccount",
                     queue_name="existingqueue"
                 )
@@ -585,12 +585,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_queues_async(storage_account_name="account1")
-            await client.list_queues_async(storage_account_name="account2")
+            await client.list_queues(storage_account_name="account1")
+            await client.list_queues(storage_account_name="account2")
 
             assert mock_send.call_count == 2
 
@@ -606,11 +606,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_messages_async(
+            await client.get_messages(
                 storage_account_name="mystorageaccount",
                 queue_name="my-queue-name"
             )

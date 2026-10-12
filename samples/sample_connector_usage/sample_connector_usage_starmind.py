@@ -1,9 +1,7 @@
 """Starmind connector SDK sample."""
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 
 from azure.connectors import ConnectorException
 from azure.connectors.starmind import FindExpertsInput, StarmindClient
@@ -12,39 +10,39 @@ from azure.connectors.starmind import FindExpertsInput, StarmindClient
 CONNECTION_RUNTIME_URL = os.environ.get("STARMIND_CONNECTION_URL", "")
 
 
-async def find_questions() -> None:
+def find_questions() -> None:
     """Find questions matching a query."""
-    async with DefaultAzureCredential() as credential:
-        async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-            questions = await client.find_questions_async(
+    with DefaultAzureCredential() as credential:
+        with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
+            questions = client.find_questions(
                 query="distributed systems",
                 limit=10,
             )
             print(f"Questions: {questions}")
 
 
-async def find_experts() -> None:
+def find_experts() -> None:
     """Find experts for a topic."""
-    async with DefaultAzureCredential() as credential:
-        async with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
-            experts = await client.find_experts_async(
+    with DefaultAzureCredential() as credential:
+        with StarmindClient(CONNECTION_RUNTIME_URL, credential) as client:
+            experts = client.find_experts(
                 input=FindExpertsInput(text_query="distributed systems"),
             )
             print(f"Experts: {experts}")
 
 
-async def main() -> None:
+def main() -> None:
     """Run Starmind connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Set STARMIND_CONNECTION_URL to run this sample.")
         return
 
     try:
-        await find_questions()
-        await find_experts()
+        find_questions()
+        find_experts()
     except ConnectorException as ex:
         print(f"Connector error: {ex}")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

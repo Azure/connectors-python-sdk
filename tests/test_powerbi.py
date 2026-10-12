@@ -7,7 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
-from azure.connectors.powerbi import PowerbiClient, UpdateGoalRequest, QuerySpecification
+from azure.connectors.aio.powerbi import PowerbiClient
+from azure.connectors.powerbi import UpdateGoalRequest, QuerySpecification
 from azure.connectors.sdk import (
     ConnectorException,
 )
@@ -115,11 +116,11 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_groups_async()
+            result = await client.list_groups()
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -141,11 +142,11 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_groups_async()
+            result = await client.list_groups()
             assert result is None
 
     @pytest.mark.asyncio
@@ -160,12 +161,12 @@ class TestListGroupsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_groups_async()
+                await client.list_groups()
 
 
 class TestListDatasetsAsync:
@@ -183,11 +184,11 @@ class TestListDatasetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_datasets_async(groupid="group-123")
+            result = await client.list_datasets(groupid="group-123")
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
@@ -208,12 +209,12 @@ class TestListDatasetsAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_datasets_async(groupid="missing-group")
+                await client.list_datasets(groupid="missing-group")
 
 
 class TestExecuteDatasetQueryAsync:
@@ -232,11 +233,11 @@ class TestExecuteDatasetQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.execute_dataset_query_async(
+            result = await client.execute_dataset_query(
                 input=query,
                 groupid="group-123",
                 datasetid="dataset-456",
@@ -265,12 +266,12 @@ class TestExecuteDatasetQueryAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.execute_dataset_query_async(
+                await client.execute_dataset_query(
                     input=query,
                     groupid="group-123",
                     datasetid="dataset-456",
@@ -292,11 +293,11 @@ class TestRefreshDatasetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.refresh_dataset_async(
+            result = await client.refresh_dataset(
                 groupid="group-123",
                 datasetid="dataset-456",
             )
@@ -320,12 +321,12 @@ class TestRefreshDatasetAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.refresh_dataset_async(
+                await client.refresh_dataset(
                     groupid="group-123",
                     datasetid="dataset-456",
                 )
@@ -346,11 +347,11 @@ class TestUpdateGoalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.update_goal_async(
+            await client.update_goal(
                 input=payload,
                 groupid="group-1",
                 scorecard_id="sc-1",
@@ -376,12 +377,12 @@ class TestUpdateGoalAsync:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.update_goal_async(
+                await client.update_goal(
                     input=payload,
                     groupid="group-1",
                     scorecard_id="sc-1",

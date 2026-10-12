@@ -10,15 +10,89 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "OutlookClient",
+    "ApprovalEmailResponse",
+    "ApprovalEmailSubscription",
+    "ApprovalMessage",
+    "Attendee",
+    "BatchResponseClientReceiveMessage",
+    "BlobDataSetsMetadata",
+    "CalendarEventBackend",
+    "CalendarEventClient",
+    "CalendarEventClientReceive",
+    "CalendarEventClientReceiveStringEnums",
+    "CalendarEventClientWithActionType",
+    "CalendarEventHtmlClient",
+    "CalendarEventList",
+    "CalendarEventListClientReceive",
+    "CalendarEventListWithActionType",
+    "ClientReceiveFileAttachment",
+    "ClientReceiveMessage",
+    "ClientReceiveMessageStringEnums",
+    "ClientSendAttachment",
+    "ClientSendHtmlMessage",
+    "ClientSendMessage",
+    "ClientSubscription",
+    "Contact",
+    "ContactResponse",
+    "DataSet",
+    "DataSetsList",
+    "DataSetsMetadata",
+    "DirectForwardMessage",
+    "EmailAddress",
+    "EntityListResponseCalendarEventBackend",
+    "EntityListResponseCalendarEventClientReceiveStringEnums",
+    "EntityListResponseContactResponse",
+    "EntityListResponseFilePickerFile",
+    "EntityListResponseTable",
+    "FilePickerFile",
+    "GeoCoordinates",
+    "InternetMessageHeader",
+    "ItemBody",
+    "Location",
+    "MessageWithOptions",
+    "ObjectEntity",
+    "OptionsEmailSubscription",
+    "OutlookReceiveAttachment",
+    "OutlookReceiveMessage",
+    "PaginatedListResponseCalendarEventClientReceiveStringEnums",
+    "PassThroughNativeQuery",
+    "PatternedRecurrence",
+    "PhysicalAddress",
+    "Procedure",
+    "Recipient",
+    "RecurrencePattern",
+    "RecurrenceRange",
+    "ReplyHtmlMessage",
+    "ReplyMessage",
+    "ResponseStatus",
+    "ResponseToEventInvite",
+    "SubscriptionEvent",
+    "SubscriptionPayloadEntityOutlookReceiveMessage",
+    "SubscriptionPayloadEntitySubscriptionEvent",
+    "SubscriptionPayloadOutlookReceiveMessage",
+    "SubscriptionPayloadSubscriptionEvent",
+    "SubscriptionResponse",
+    "Table",
+    "TableCapabilitiesMetadata",
+    "TableFilterRestrictionsMetadata",
+    "TableMetadata",
+    "TableSelectRestrictionsMetadata",
+    "TableSortRestrictionsMetadata",
+    "TabularDataSetsMetadata",
+    "TriggerBatchResponseClientReceiveMessage",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -2688,7 +2762,7 @@ class OutlookClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -2697,7 +2771,7 @@ class OutlookClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -2717,8 +2791,8 @@ class OutlookClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -2745,7 +2819,7 @@ class OutlookClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "outlook"
 
-    async def get_email_async(
+    def get_email(
         self,
         message_id: str,
         include_attachments: Optional[bool] = None,
@@ -2779,7 +2853,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2800,7 +2874,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_email_async(
+    def delete_email(
         self,
         message_id: str,
         *,
@@ -2819,7 +2893,7 @@ class OutlookClient(ConnectorClientBase):
             f"/Mail/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2835,7 +2909,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def move_async(
+    def move(
         self,
         message_id: str,
         folder_path: str,
@@ -2862,7 +2936,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2883,7 +2957,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def flag_async(
+    def flag(
         self,
         message_id: str,
         *,
@@ -2902,7 +2976,7 @@ class OutlookClient(ConnectorClientBase):
             f"/Mail/Flag/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2918,7 +2992,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def mark_as_read_async(
+    def mark_as_read(
         self,
         message_id: str,
         *,
@@ -2937,7 +3011,7 @@ class OutlookClient(ConnectorClientBase):
             f"/Mail/MarkAsRead/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2953,7 +3027,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_attachment_async(
+    def get_attachment(
         self,
         message_id: str,
         attachment_id: str,
@@ -2976,7 +3050,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(str(attachment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2994,7 +3068,7 @@ class OutlookClient(ConnectorClientBase):
 
         return response.content
 
-    async def send_mail_with_options_async(
+    def send_mail_with_options(
         self,
         input: OptionsEmailSubscription,
         *,
@@ -3016,7 +3090,7 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3037,7 +3111,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_approval_mail_async(
+    def send_approval_mail(
         self,
         input: ApprovalEmailSubscription,
         *,
@@ -3058,7 +3132,7 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/approvalmail/$subscriptions"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3079,7 +3153,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_get_tables_async(
+    def calendar_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
@@ -3096,7 +3170,7 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/calendars/tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3117,7 +3191,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_delete_item_async(
+    def calendar_delete_item(
         self,
         table: str,
         id: str,
@@ -3142,7 +3216,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3158,7 +3232,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def contact_get_tables_async(
+    def contact_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
@@ -3175,7 +3249,7 @@ class OutlookClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/datasets/contacts/tables"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3196,7 +3270,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_get_items_async(
+    def contact_get_items(
         self,
         table: str,
         filter: Optional[str] = None,
@@ -3246,7 +3320,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3267,7 +3341,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_post_item_async(
+    def contact_post_item(
         self,
         input: Contact,
         table: str,
@@ -3291,7 +3365,7 @@ class OutlookClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3312,7 +3386,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_get_item_async(
+    def contact_get_item(
         self,
         table: str,
         id: str,
@@ -3337,7 +3411,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3358,7 +3432,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def contact_delete_item_async(
+    def contact_delete_item(
         self,
         table: str,
         id: str,
@@ -3383,7 +3457,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3399,7 +3473,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def contact_patch_item_async(
+    def contact_patch_item(
         self,
         input: Contact,
         table: str,
@@ -3425,7 +3499,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3446,7 +3520,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def respond_to_event_async(
+    def respond_to_event(
         self,
         input: ResponseToEventInvite,
         event_id: str,
@@ -3473,7 +3547,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(str(response), safe='')}"
         )
 
-        http_response = await self.http_client.send_async(
+        http_response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3489,7 +3563,7 @@ class OutlookClient(ConnectorClientBase):
                 http_response.text,
             )
 
-    async def forward_email_async(
+    def forward_email(
         self,
         input: DirectForwardMessage,
         message_id: str,
@@ -3515,7 +3589,7 @@ class OutlookClient(ConnectorClientBase):
             f"/forward"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3531,7 +3605,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def calendar_get_item_async(
+    def calendar_get_item(
         self,
         table: str,
         id: str,
@@ -3557,7 +3631,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3578,7 +3652,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_get_items_async(
+    def calendar_get_items(
         self,
         table: str,
         filter: Optional[str] = None,
@@ -3629,7 +3703,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3650,7 +3724,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_patch_item_async(
+    def calendar_patch_item(
         self,
         input: CalendarEventHtmlClient,
         table: str,
@@ -3677,7 +3751,7 @@ class OutlookClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3698,7 +3772,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def calendar_post_item_async(
+    def calendar_post_item(
         self,
         input: CalendarEventHtmlClient,
         table: str,
@@ -3723,7 +3797,7 @@ class OutlookClient(ConnectorClientBase):
             f"/items"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3744,7 +3818,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_emails_async(
+    def get_emails(
         self,
         folder_path: Optional[str] = None,
         to: Optional[str] = None,
@@ -3835,7 +3909,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3856,7 +3930,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_events_calendar_view_async(
+    def get_events_calendar_view(
         self,
         calendar_id: str,
         start_date_time_offset: str,
@@ -3923,7 +3997,7 @@ class OutlookClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3944,7 +4018,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def reply_to_async(
+    def reply_to(
         self,
         input: ReplyHtmlMessage,
         message_id: str,
@@ -3964,7 +4038,7 @@ class OutlookClient(ConnectorClientBase):
             f"/v3/Mail/ReplyTo/{quote(str(message_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3980,7 +4054,7 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def send_email_async(
+    def send_email(
         self,
         input: ClientSendHtmlMessage,
         *,
@@ -3996,7 +4070,7 @@ class OutlookClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/Mail"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

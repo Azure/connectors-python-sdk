@@ -6,19 +6,71 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "ArmClient",
+    "AliasPathType",
+    "AliasType",
+    "BasicDependency",
+    "DebugSetting",
+    "Dependency",
+    "Deployment",
+    "DeploymentExportResult",
+    "DeploymentExtended",
+    "DeploymentListResult",
+    "DeploymentOperation",
+    "DeploymentOperationProperties",
+    "DeploymentOperationsListResult",
+    "DeploymentProperties",
+    "DeploymentPropertiesExtended",
+    "DeploymentValidateResult",
+    "ExportTemplateRequest",
+    "GenericResource",
+    "HttpMessage",
+    "Identity",
+    "Location",
+    "LocationListResult",
+    "ObjectWithoutType",
+    "ParametersLink",
+    "Plan",
+    "Provider",
+    "ProviderListResult",
+    "ProviderResourceType",
+    "ProviderResourcesInvokeInput",
+    "ProviderResourcesInvokeResponse",
+    "ResourceGroup",
+    "ResourceGroupExportResult",
+    "ResourceGroupListResult",
+    "ResourceGroupProperties",
+    "ResourceListResult",
+    "ResourceManagementErrorWithDetails",
+    "ResourcesInvokeInput",
+    "ResourcesInvokeResponse",
+    "Sku",
+    "Subscription",
+    "SubscriptionListResult",
+    "SubscriptionPolicies",
+    "TagCount",
+    "TagDetails",
+    "TagValue",
+    "TagsListResult",
+    "TargetResource",
+    "TemplateLink",
+]
 
 
 # Type Definitions
@@ -895,7 +947,7 @@ class ArmClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -904,7 +956,7 @@ class ArmClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -924,8 +976,8 @@ class ArmClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -991,7 +1043,7 @@ class ArmClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def subscriptions_list_locations_async(
+    def subscriptions_list_locations(
         self,
         subscription_id: str,
         *,
@@ -1014,7 +1066,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1035,7 +1087,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def subscriptions_get_async(
+    def subscriptions_get(
         self,
         subscription_id: str,
         *,
@@ -1058,7 +1110,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1079,32 +1131,37 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def subscriptions_list_async(
+    def subscriptions_list(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List subscriptions
 
         Gets a list of all the subscriptions to which the principal has access.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1119,21 +1176,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def deployments_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def deployments_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1171,7 +1236,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1192,7 +1257,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_create_or_update_async(
+    def deployments_create_or_update(
         self,
         input: Deployment,
         subscription_id: str,
@@ -1232,7 +1297,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1253,7 +1318,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_delete_async(
+    def deployments_delete(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1286,7 +1351,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1302,7 +1367,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def deployments_cancel_async(
+    def deployments_cancel(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1336,7 +1401,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1352,7 +1417,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def deployments_validate_async(
+    def deployments_validate(
         self,
         input: Deployment,
         subscription_id: str,
@@ -1388,7 +1453,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1409,7 +1474,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_export_template_async(
+    def deployments_export_template(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1442,7 +1507,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1463,7 +1528,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployments_list_async(
+    def deployments_list(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1474,15 +1539,15 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List template deployments
 
         Lists all the resource group template deployments. This operation is
         useful to know what has been provisioned thus far.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1508,11 +1573,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1527,21 +1597,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def deployment_operations_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def deployment_operations_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1575,7 +1653,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1596,7 +1674,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def deployment_operations_list_async(
+    def deployment_operations_list(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1607,15 +1685,15 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists template deployment operations
 
         Lists all the template deployment operations. This is useful for
         troubleshooting failed template deployments.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1636,11 +1714,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1655,21 +1738,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def providers_unregister_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def providers_unregister(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -1699,7 +1790,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1720,7 +1811,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def providers_register_async(
+    def providers_register(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -1749,7 +1840,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1770,7 +1861,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def providers_list_async(
+    def providers_list(
         self,
         subscription_id: str,
         top: Optional[int] = None,
@@ -1780,14 +1871,14 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resource providers
 
         Lists the resource providers available for the subscription.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1807,11 +1898,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$expand={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1826,21 +1922,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def providers_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def providers_get(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -1873,7 +1977,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1894,7 +1998,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_list_resources_async(
+    def resource_groups_list_resources(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -1906,14 +2010,14 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resources by resource group
 
         Lists all the resources under a resource group.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1942,11 +2046,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1961,21 +2070,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resource_groups_get_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def resource_groups_get(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2002,7 +2119,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2023,7 +2140,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_create_or_update_async(
+    def resource_groups_create_or_update(
         self,
         input: ResourceGroup,
         subscription_id: str,
@@ -2052,7 +2169,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2073,7 +2190,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_delete_async(
+    def resource_groups_delete(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2100,7 +2217,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2116,7 +2233,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def resource_groups_patch_async(
+    def resource_groups_patch(
         self,
         input: ResourceGroup,
         subscription_id: str,
@@ -2145,7 +2262,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2166,7 +2283,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_export_template_async(
+    def resource_groups_export_template(
         self,
         input: ExportTemplateRequest,
         subscription_id: str,
@@ -2197,7 +2314,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2218,7 +2335,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resource_groups_list_async(
+    def resource_groups_list(
         self,
         subscription_id: str,
         filter: Optional[str] = None,
@@ -2228,15 +2345,15 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resource groups
 
         Lists all the resource groups within the subscription. The results are
         paginated at 1,000+ records.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2258,11 +2375,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2277,21 +2399,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resources_list_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def resources_list(
         self,
         subscription_id: str,
         filter: Optional[str] = None,
@@ -2302,15 +2432,15 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List resources by subscription
 
         Reads all of the resources under a particular subscription. The results
         are paginated at 1,000+ records.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2335,11 +2465,16 @@ class ArmClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2354,21 +2489,29 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def resources_get_by_id_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def resources_get_by_id(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2404,7 +2547,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2425,7 +2568,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resources_create_or_update_by_id_async(
+    def resources_create_or_update_by_id(
         self,
         input: GenericResource,
         subscription_id: str,
@@ -2463,7 +2606,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2484,7 +2627,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resources_delete_by_id_async(
+    def resources_delete_by_id(
         self,
         subscription_id: str,
         resource_group_name: str,
@@ -2520,7 +2663,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2536,7 +2679,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def resources_invoke_async(
+    def resources_invoke(
         self,
         input: ResourcesInvokeInput,
         subscription_id: str,
@@ -2575,7 +2718,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2596,7 +2739,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def provider_resources_get_by_id_async(
+    def provider_resources_get_by_id(
         self,
         subscription_id: str,
         resource_provider_namespace: str,
@@ -2629,7 +2772,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2650,7 +2793,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def provider_resources_invoke_async(
+    def provider_resources_invoke(
         self,
         input: ProviderResourcesInvokeInput,
         subscription_id: str,
@@ -2684,7 +2827,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2705,7 +2848,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_create_or_update_value_async(
+    def tags_create_or_update_value(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2735,7 +2878,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2756,7 +2899,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_delete_value_async(
+    def tags_delete_value(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2786,7 +2929,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2802,7 +2945,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def tags_create_or_update_async(
+    def tags_create_or_update(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2829,7 +2972,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2850,7 +2993,7 @@ class ArmClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def tags_delete_async(
+    def tags_delete(
         self,
         subscription_id: str,
         tag_name: str,
@@ -2877,7 +3020,7 @@ class ArmClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2893,7 +3036,7 @@ class ArmClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def tags_list_async(
+    def tags_list(
         self,
         subscription_id: str,
         *,
@@ -2901,14 +3044,14 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List subscription resource tags
 
         Lists all the subscription resource tags.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2918,11 +3061,16 @@ class ArmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -2937,16 +3085,24 @@ class ArmClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)

@@ -8,12 +8,12 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.googlecalendar import GooglecalendarClient
 from azure.connectors.googlecalendar import (
     CalendarEventChangedList,
     CalendarEventList,
     CalendarList,
     CalendarListEntry,
-    GooglecalendarClient,
     ObjectEntity,
     PatchEvent,
     RequestEvent,
@@ -30,31 +30,31 @@ from tests.conftest import MockResponse
 async def _invoke_operation(client: GooglecalendarClient, operation: str):
     """Invoke a Google Calendar operation by name for shared tests."""
     if operation == "list_calendars":
-        return await client.list_calendars_async(min_access_role="reader")
+        return await client.list_calendars(min_access_role="reader")
     if operation == "list_events":
-        return await client.list_events_async(
+        return await client.list_events(
             calendar_id="cal123",
             time_min="2026-01-01T00:00:00Z",
             time_max="2026-01-31T23:59:59Z",
             q="planning",
         )
     if operation == "create_event":
-        return await client.create_event_async(
+        return await client.create_event(
             input=RequestEvent(),
             calendar_id="cal123",
         )
     if operation == "get_event":
-        return await client.get_event_async(calendar_id="cal123", event_id="evt123")
+        return await client.get_event(calendar_id="cal123", event_id="evt123")
     if operation == "delete_event":
-        return await client.delete_event_async(calendar_id="cal123", event_id="evt123")
+        return await client.delete_event(calendar_id="cal123", event_id="evt123")
     if operation == "update_event":
-        return await client.update_event_async(
+        return await client.update_event(
             input=PatchEvent(),
             calendar_id="cal123",
             event_id="evt123",
         )
     if operation == "list_writable_calendars":
-        return await client.list_writable_calendars_async()
+        return await client.list_writable_calendars()
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -163,11 +163,11 @@ class TestGooglecalendarClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_calendars_async(min_access_role="reader")
+            result = await client.list_calendars(min_access_role="reader")
 
             assert len(result["items"]) == 1
             call_args = mock_send.call_args
@@ -186,11 +186,11 @@ class TestGooglecalendarClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_events_async(
+            result = await client.list_events(
                 calendar_id="cal123",
                 time_min="2026-01-01T00:00:00Z",
                 time_max="2026-01-31T23:59:59Z",
@@ -215,11 +215,11 @@ class TestGooglecalendarClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_event_async(
+            result = await client.create_event(
                 input=RequestEvent(summary="Standup"),
                 calendar_id="cal123",
             )
@@ -240,11 +240,11 @@ class TestGooglecalendarClientMethods:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.list_writable_calendars_async()
+            await client.list_writable_calendars()
 
             call_args = mock_send.call_args
             assert "/users/me/calendarList/1" in call_args[0][1]
@@ -281,7 +281,7 @@ class TestGooglecalendarClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
@@ -297,13 +297,13 @@ class TestGooglecalendarApiSurface:
     def test_callable_method_signatures(self):
         """Test the client exposes exactly the generated callable methods."""
         expected_signatures = {
-            "create_event_async": ("self", "input", "calendar_id"),
-            "delete_event_async": ("self", "calendar_id", "event_id"),
-            "get_event_async": ("self", "calendar_id", "event_id"),
-            "list_calendars_async": ("self", "min_access_role"),
-            "list_events_async": ("self", "calendar_id", "time_min", "time_max", "q"),
-            "list_writable_calendars_async": ("self",),
-            "update_event_async": ("self", "input", "calendar_id", "event_id"),
+            "create_event": ("self", "input", "calendar_id"),
+            "delete_event": ("self", "calendar_id", "event_id"),
+            "get_event": ("self", "calendar_id", "event_id"),
+            "list_calendars": ("self", "min_access_role"),
+            "list_events": ("self", "calendar_id", "time_min", "time_max", "q"),
+            "list_writable_calendars": ("self",),
+            "update_event": ("self", "input", "calendar_id", "event_id"),
         }
         request_control_parameters = (
             "timeout",

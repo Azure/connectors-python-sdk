@@ -21,11 +21,9 @@ Usage:
 
     python sample_connector_usage_googletasks.py
 """
-
-import asyncio
 import os
 
-from azure.identity.aio import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.googletasks import (
     GoogletasksClient,
@@ -42,14 +40,14 @@ CONNECTION_RUNTIME_URL = os.environ.get(
 )
 
 
-async def example_1_list_task_lists():
+def example_1_list_task_lists():
     """Example 1: List task lists."""
     print("\n=== Example 1: List Task Lists ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_task_lists_async()
+        with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
+            result = client.list_task_lists()
             items = result.get("items", []) if result else []
 
             print(f"Found {len(items)} task list(s).")
@@ -57,15 +55,15 @@ async def example_1_list_task_lists():
                 print(f"  - {task_list.get('title', 'N/A')} ({task_list.get('id', 'N/A')})")
 
 
-async def example_2_create_task_list_and_task():
+def example_2_create_task_list_and_task():
     """Example 2: Create a task list and task."""
     print("\n=== Example 2: Create Task List and Task ===")
 
-    async with DefaultAzureCredential() as credential:
+    with DefaultAzureCredential() as credential:
 
-        async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
+        with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                list_result = await client.create_task_list_async(
+                list_result = client.create_task_list(
                     input=TaskListCreate(title="SDK Sample List"),
                 )
                 task_list_id = list_result.get("id") if list_result else None
@@ -74,7 +72,7 @@ async def example_2_create_task_list_and_task():
                     print("Task list creation returned no id.")
                     return
 
-                task_result = await client.create_task_async(
+                task_result = client.create_task(
                     input=TaskCreate(
                         title="Follow up sample",
                         notes="Created by azure-connectors sample.",
@@ -98,7 +96,7 @@ def example_3_list_triggers():
         print(f"{operation_id}: required parameters: {parameters}")
 
 
-async def main():
+def main():
     """Run all Google Tasks connector examples."""
     if not CONNECTION_RUNTIME_URL:
         print("Error: GOOGLETASKS_CONNECTION_URL environment variable is not set.")
@@ -107,12 +105,12 @@ async def main():
 
     print(f"Using connection URL: {CONNECTION_RUNTIME_URL[:50]}...")
 
-    await example_1_list_task_lists()
-    await example_2_create_task_list_and_task()
+    example_1_list_task_lists()
+    example_2_create_task_list_and_task()
     example_3_list_triggers()
 
     print("\n=== Google Tasks sample completed ===")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

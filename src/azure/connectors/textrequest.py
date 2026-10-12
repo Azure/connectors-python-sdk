@@ -10,15 +10,50 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "TextrequestClient",
+    "BulkUpdateContactsInput",
+    "CancelPaymentResponse",
+    "CreateContactInput",
+    "CreateContactResponse",
+    "CreateDashboardInput",
+    "CreateDashboardResponse",
+    "CreateGroupInput",
+    "CreateGroupResponse",
+    "CreatePaymentInput",
+    "CreatePaymentResponse",
+    "GetContactByPhoneNumberResponse",
+    "GetContactsResponse",
+    "GetConversationsResponse",
+    "GetDashboardResponse",
+    "GetDashboardsResponse",
+    "GetGroupByIdResponse",
+    "GetGroupsResponse",
+    "GetMessagesByContactPhoneResponse",
+    "GetPaymentResponse",
+    "GetPaymentsResponse",
+    "GetTagsResponse",
+    "MarkPaymentPaidResponse",
+    "SendMessageByPhoneNumberInput",
+    "SendMessageByPhoneNumberResponse",
+    "SendPaymentReminderResponse",
+    "TextingWebhookInput",
+    "TextingWebhookResponse",
+    "UpdateDashboardsNameInput",
+    "UpdateDashboardsNameResponse",
+    "UpdateGroupInput",
+    "UpdateGroupResponse",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -863,7 +898,7 @@ class TextrequestClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -872,7 +907,7 @@ class TextrequestClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -892,8 +927,8 @@ class TextrequestClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -920,7 +955,7 @@ class TextrequestClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "textrequest"
 
-    async def get_messages_by_contact_phone_async(
+    def get_messages_by_contact_phone(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -957,7 +992,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -978,7 +1013,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_message_by_phone_number_async(
+    def send_message_by_phone_number(
         self,
         input: SendMessageByPhoneNumberInput,
         dashboard_id: int,
@@ -1004,7 +1039,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/messages"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1025,7 +1060,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def archive_conversation_async(
+    def archive_conversation(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1057,7 +1092,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/archive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1078,7 +1113,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def unarchive_conversation_async(
+    def unarchive_conversation(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1106,7 +1141,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/unarchive"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1127,7 +1162,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_contact_by_phone_number_async(
+    def get_contact_by_phone_number(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1150,7 +1185,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1171,7 +1206,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_contact_async(
+    def delete_contact(
         self,
         dashboard_id: int,
         phone_number: str,
@@ -1194,7 +1229,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1215,7 +1250,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_contact_async(
+    def create_contact(
         self,
         input: CreateContactInput,
         dashboard_id: int,
@@ -1240,7 +1275,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(phone_number), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1261,7 +1296,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_contacts_async(
+    def get_contacts(
         self,
         dashboard_id: int,
         page: int,
@@ -1427,7 +1462,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1448,7 +1483,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def bulk_update_contacts_async(
+    def bulk_update_contacts(
         self,
         input: BulkUpdateContactsInput,
         dashboard_id: int,
@@ -1470,7 +1505,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}/contacts"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1491,7 +1526,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_group_by_id_async(
+    def get_group_by_id(
         self,
         dashboard_id: int,
         group_id: int,
@@ -1514,7 +1549,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1535,7 +1570,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_group_async(
+    def delete_group(
         self,
         dashboard_id: int,
         group_id: int,
@@ -1560,7 +1595,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1581,7 +1616,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_group_async(
+    def update_group(
         self,
         input: UpdateGroupInput,
         dashboard_id: int,
@@ -1606,7 +1641,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(group_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1627,7 +1662,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_groups_async(
+    def get_groups(
         self,
         dashboard_id: int,
         page: int,
@@ -1659,7 +1694,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1680,7 +1715,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_group_async(
+    def create_group(
         self,
         input: CreateGroupInput,
         dashboard_id: int,
@@ -1700,7 +1735,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}/groups"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1721,7 +1756,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tags_async(
+    def get_tags(
         self,
         dashboard_id: int,
         page: int,
@@ -1754,7 +1789,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1775,7 +1810,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_custom_fields_async(
+    def get_custom_fields(
         self,
         dashboard_id: int,
         *,
@@ -1795,7 +1830,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1816,7 +1851,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_payment_async(
+    def get_payment(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1839,7 +1874,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/{quote(str(payment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1860,7 +1895,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def mark_payment_paid_async(
+    def mark_payment_paid(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1889,7 +1924,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/mark_as_paid"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1910,7 +1945,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_payment_reminder_async(
+    def send_payment_reminder(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1936,7 +1971,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/resend"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1957,7 +1992,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def cancel_payment_async(
+    def cancel_payment(
         self,
         dashboard_id: int,
         payment_id: int,
@@ -1983,7 +2018,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/cancel"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2004,7 +2039,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_payments_async(
+    def get_payments(
         self,
         dashboard_id: int,
         page: int,
@@ -2061,7 +2096,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2082,7 +2117,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_payment_async(
+    def create_payment(
         self,
         input: CreatePaymentInput,
         dashboard_id: int,
@@ -2103,7 +2138,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}/payments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2124,7 +2159,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dashboard_async(
+    def get_dashboard(
         self,
         dashboard_id: int,
         *,
@@ -2143,7 +2178,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2164,7 +2199,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_dashboard_async(
+    def delete_dashboard(
         self,
         dashboard_id: int,
         *,
@@ -2183,7 +2218,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2204,7 +2239,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_dashboards_name_async(
+    def update_dashboards_name(
         self,
         input: UpdateDashboardsNameInput,
         dashboard_id: int,
@@ -2227,7 +2262,7 @@ class TextrequestClient(ConnectorClientBase):
             f"/dashboards/{quote(str(dashboard_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2248,7 +2283,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_conversations_async(
+    def get_conversations(
         self,
         dashboard_id: int,
         tags: Optional[str] = None,
@@ -2307,7 +2342,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2328,7 +2363,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dashboards_async(
+    def get_dashboards(
         self,
         page: Optional[int] = None,
         page_size: Optional[int] = None,
@@ -2358,7 +2393,7 @@ class TextrequestClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2379,7 +2414,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_dashboard_async(
+    def create_dashboard(
         self,
         input: CreateDashboardInput,
         *,
@@ -2400,7 +2435,7 @@ class TextrequestClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/dashboards"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
+from azure.connectors.aio.teams import TeamsClient
 from azure.connectors.teams import (
     CallEventWebhookResponseSchema,
-    TeamsClient,
     NewMeeting,
     CreateChannelInput,
     CreateTagInput,
@@ -154,12 +154,12 @@ class TestTeamsMeetingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = NewMeeting()
-            result = await client.create_teams_meeting_async(input_data, "calendar123")
+            result = await client.create_teams_meeting(input_data, "calendar123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -178,13 +178,13 @@ class TestTeamsMeetingOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             input_data = NewMeeting()
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_teams_meeting_async(input_data, "calendar123")
+                await client.create_teams_meeting(input_data, "calendar123")
 
             assert exc_info.value.status_code == 400
 
@@ -207,11 +207,11 @@ class TestTeamsListOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_teams_async()
+            result = await client.get_all_teams()
 
             assert "value" in result
             assert len(result["value"]) == 1
@@ -228,11 +228,11 @@ class TestTeamsListOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_teams_async()
+            result = await client.get_all_teams()
 
             assert result is None
 
@@ -251,11 +251,11 @@ class TestTeamsListOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_associated_teams_async()
+            result = await client.get_all_associated_teams()
 
             assert "value" in result
 
@@ -274,12 +274,12 @@ class TestTeamsListOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_associated_teams_async()
+                await client.get_all_associated_teams()
 
             assert exc_info.value.status_code == 401
 
@@ -302,11 +302,11 @@ class TestUserOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.at_mention_user_async("user123")
+            result = await client.at_mention_user("user123")
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -325,12 +325,12 @@ class TestUserOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.at_mention_user_async("nonexistent")
+                await client.at_mention_user("nonexistent")
 
             assert exc_info.value.status_code == 404
 
@@ -353,12 +353,12 @@ class TestChatOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = NewChat()
-            result = await client.create_chat_async(input_data)
+            result = await client.create_chat(input_data)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -377,12 +377,12 @@ class TestChatOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_chat_async(NewChat())
+                await client.create_chat(NewChat())
 
             assert exc_info.value.status_code == 400
 
@@ -405,7 +405,7 @@ class TestTeamCreationOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
@@ -414,7 +414,7 @@ class TestTeamCreationOperations:
                 description="A new team",
                 visibility="Private"
             )
-            result = await client.create_a_team_async(input_data)
+            result = await client.create_a_team(input_data)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -433,12 +433,12 @@ class TestTeamCreationOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_a_team_async(CreateATeamInput())
+                await client.create_a_team(CreateATeamInput())
 
             assert exc_info.value.status_code == 403
 
@@ -461,8 +461,8 @@ class TestGeneratedContractSurface:
 
     def test_channel_and_chat_operations_are_generated(self):
         """Test current channel and chat operations are callable."""
-        assert hasattr(TeamsClient, "update_channel_properties_async")
-        assert hasattr(TeamsClient, "remove_member_from_chat_async")
+        assert hasattr(TeamsClient, "update_channel_properties")
+        assert hasattr(TeamsClient, "remove_member_from_chat")
 
 
 class TestHttpRequestOperations:
@@ -483,12 +483,12 @@ class TestHttpRequestOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = b'{"method":"GET","uri":"/teams"}'
-            result = await client.http_request_async(input_data)
+            result = await client.http_request(input_data)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -509,12 +509,12 @@ class TestHttpRequestOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.http_request_async(b'{"method":"GET","uri":"/teams"}')
+                await client.http_request(b'{"method":"GET","uri":"/teams"}')
 
             assert exc_info.value.status_code == 500
 
@@ -534,12 +534,12 @@ class TestWebhookOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
             input_data = DynamicUserMessageWithOptionsSubscriptionRequest()
-            await client.subscribe_user_message_with_options_async(input_data)
+            await client.subscribe_user_message_with_options(input_data)
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
@@ -557,12 +557,12 @@ class TestWebhookOperations:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.subscribe_user_message_with_options_async(
+                await client.subscribe_user_message_with_options(
                     DynamicUserMessageWithOptionsSubscriptionRequest()
                 )
 
@@ -667,12 +667,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result1 = await client.get_all_teams_async()
-            result2 = await client.get_all_teams_async()
+            result1 = await client.get_all_teams()
+            result2 = await client.get_all_teams()
 
             assert result1 is not None
             assert result2 is not None
@@ -689,12 +689,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(Exception):
-                await client.get_all_teams_async()
+                await client.get_all_teams()
 
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self, mock_credential):
@@ -729,12 +729,12 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_teams_async()
+                await client.get_all_teams()
 
             assert exc_info.value.status_code == 500
 
@@ -750,11 +750,11 @@ class TestEdgeCases:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_teams_async()
+                await client.get_all_teams()
 
             assert exc_info.value.status_code == 404

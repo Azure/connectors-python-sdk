@@ -10,7 +10,7 @@ import pytest
 from azure.core.pipeline.transport import AsyncHttpTransport
 
 from azure.connectors.sdk.exceptions import ConnectorException
-from azure.connectors.sdk.http_client import ConnectorHttpClient, ConnectorResponse
+from azure.connectors.sdk.aio.http_client import ConnectorHttpClient, ConnectorResponse
 from azure.connectors.sdk.response import ConnectorResponseSnapshot
 
 
@@ -134,7 +134,7 @@ class TestConnectorHttpClient:
         mock_credential.close.assert_not_awaited()
 
     @pytest.mark.asyncio
-    async def test_send_async_serializes_dataclass_body(self, mock_credential) -> None:
+    async def test_send_serializes_dataclass_body(self, mock_credential) -> None:
         """Serialize dataclasses as JSON and omit None fields."""
         client = ConnectorHttpClient(mock_credential)
         body = TestDataClass(name="test", value=42)
@@ -145,7 +145,7 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=create_snapshot(),
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/items",
                 body=body,
@@ -156,7 +156,7 @@ class TestConnectorHttpClient:
         assert call.args[3]["Content-Type"] == "application/json"
 
     @pytest.mark.asyncio
-    async def test_send_async_preserves_wire_names_and_extensions(
+    async def test_send_preserves_wire_names_and_extensions(
         self,
         mock_credential,
     ) -> None:
@@ -175,7 +175,7 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=create_snapshot(),
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/items",
                 body=body,
@@ -189,7 +189,7 @@ class TestConnectorHttpClient:
         }
 
     @pytest.mark.asyncio
-    async def test_send_async_serializes_dict_and_none_bodies(
+    async def test_send_serializes_dict_and_none_bodies(
         self,
         mock_credential,
     ) -> None:
@@ -202,12 +202,12 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=create_snapshot(),
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/items",
                 body={"key": "value"},
             )
-            await client.send_async(
+            await client.send(
                 "GET",
                 "https://api.example.com/items",
                 body=None,
@@ -224,7 +224,7 @@ class TestConnectorHttpClient:
             ("application/pdf", "application/pdf"),
         ],
     )
-    async def test_send_async_sends_binary_body_verbatim(
+    async def test_send_sends_binary_body_verbatim(
         self,
         mock_credential,
         content_type: str | None,
@@ -240,7 +240,7 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=create_snapshot(),
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "POST",
                 "https://api.example.com/upload",
                 body=body,
@@ -252,7 +252,7 @@ class TestConnectorHttpClient:
         assert call.args[4] == body
 
     @pytest.mark.asyncio
-    async def test_send_async_filters_protected_headers(self, mock_credential) -> None:
+    async def test_send_filters_protected_headers(self, mock_credential) -> None:
         """Prevent callers from replacing authentication and request identity."""
         client = ConnectorHttpClient(mock_credential)
 
@@ -262,7 +262,7 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=create_snapshot(),
         ) as mock_send:
-            await client.send_async(
+            await client.send(
                 "GET",
                 "https://api.example.com/items",
                 headers={
@@ -279,7 +279,7 @@ class TestConnectorHttpClient:
         }
 
     @pytest.mark.asyncio
-    async def test_send_async_forwards_controls_and_invokes_hook(
+    async def test_send_forwards_controls_and_invokes_hook(
         self,
         mock_credential,
     ) -> None:
@@ -294,7 +294,7 @@ class TestConnectorHttpClient:
             new_callable=AsyncMock,
             return_value=response,
         ) as mock_send:
-            result = await client.send_async(
+            result = await client.send(
                 "GET",
                 "https://api.example.com/items",
                 timeout=5.0,
@@ -313,9 +313,9 @@ class TestConnectorHttpClient:
     @pytest.mark.parametrize(
         "method_name, expected_method, arguments",
         [
-            ("get_async", "GET", ("https://api.example.com/item",)),
+            ("get", "GET", ("https://api.example.com/item",)),
             (
-                "post_async",
+                "post",
                 "POST",
                 ("https://api.example.com/item", {"name": "item"}),
             ),
@@ -330,22 +330,22 @@ class TestConnectorHttpClient:
     ) -> None:
         """Deserialize successful GET and POST helper responses."""
         client = ConnectorHttpClient(mock_credential)
-        client.send_async = AsyncMock(
+        client.send = AsyncMock(
             return_value=create_snapshot(text='{"name": "item"}')
         )
 
         result = await getattr(client, method_name)(*arguments)
 
         assert result == {"name": "item"}
-        assert client.send_async.await_args.args[0] == expected_method
+        assert client.send.await_args.args[0] == expected_method
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "method_name, expected_method, arguments",
         [
-            ("get_async", "GET", ("https://api.example.com/item",)),
+            ("get", "GET", ("https://api.example.com/item",)),
             (
-                "post_async",
+                "post",
                 "POST",
                 ("https://api.example.com/item", {"name": "item"}),
             ),
@@ -360,7 +360,7 @@ class TestConnectorHttpClient:
     ) -> None:
         """Raise ConnectorException for non-success helper responses."""
         client = ConnectorHttpClient(mock_credential)
-        client.send_async = AsyncMock(
+        client.send = AsyncMock(
             return_value=create_snapshot(status=404, text="missing")
         )
 
@@ -372,7 +372,7 @@ class TestConnectorHttpClient:
         assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
-    @pytest.mark.parametrize("method_name", ["get_async", "post_async"])
+    @pytest.mark.parametrize("method_name", ["get", "post"])
     async def test_json_helpers_return_none_for_empty_body(
         self,
         mock_credential,
@@ -380,10 +380,10 @@ class TestConnectorHttpClient:
     ) -> None:
         """Return None for a successful response without content."""
         client = ConnectorHttpClient(mock_credential)
-        client.send_async = AsyncMock(return_value=create_snapshot(text=""))
+        client.send = AsyncMock(return_value=create_snapshot(text=""))
         arguments = (
             ("https://api.example.com/item", {})
-            if method_name == "post_async"
+            if method_name == "post"
             else ("https://api.example.com/item",)
         )
 

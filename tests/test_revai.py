@@ -8,7 +8,8 @@ import pytest
 
 from azure.core.credentials import AzureKeyCredential
 import azure.connectors.revai as revai_module
-from azure.connectors.revai import AlignmentInput, RevaiClient, TranscriptionInput
+from azure.connectors.aio.revai import RevaiClient
+from azure.connectors.revai import AlignmentInput, TranscriptionInput
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
@@ -140,7 +141,7 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"ok": true}'),
         ) as mock_send:
@@ -163,11 +164,11 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"id": "job-1"}'),
         ) as mock_send:
-            result = await client.transcription_async(
+            result = await client.transcription(
                 input=TranscriptionInput(
                     source_config={"url": "https://example.com/audio.wav"},
                     metadata="sample",
@@ -190,11 +191,11 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"id": "alignment-1"}'),
         ) as mock_send:
-            await client.alignment_async(
+            await client.alignment(
                 input=AlignmentInput(
                     source_config={"url": "https://example.com/audio.wav"},
                     transcript_text="Hello world",
@@ -215,11 +216,11 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=204, text=""),
         ):
-            result = await client.account_get_async()
+            result = await client.account_get()
 
         assert result is None
 
@@ -238,7 +239,7 @@ class TestRevaiClient:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):

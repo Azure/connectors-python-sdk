@@ -7,8 +7,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.mailchimp import MailchimpClient
 from azure.connectors.mailchimp import (
-    MailchimpClient,
     NewCampaignRequest,
     NewListRequest,
     NewMemberInListRequest,
@@ -122,11 +122,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_campaigns_async()
+            result = await client.get_campaigns()
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -144,11 +144,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.sendcampaign_async(campaign_id="c1")
+            result = await client.sendcampaign(campaign_id="c1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -166,11 +166,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_lists_async(count="10", offset="0")
+            result = await client.get_lists(count="10", offset="0")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -190,11 +190,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.newlist_async(input=NewListRequest(name="Test"))
+            result = await client.newlist(input=NewListRequest(name="Test"))
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -213,11 +213,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_members_async(
+            result = await client.add_members(
                 input=NewMembersInListRequest(),
                 list_id="L1",
             )
@@ -239,11 +239,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_list_members_async(list_id="L1")
+            result = await client.get_list_members(list_id="L1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
@@ -261,11 +261,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.addmember_async(
+            result = await client.addmember(
                 input=NewMemberInListRequest(),
                 list_id="L1",
             )
@@ -287,11 +287,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.newcampaign_async(input=NewCampaignRequest())
+            result = await client.newcampaign(input=NewCampaignRequest())
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -310,11 +310,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.removemember_async(list_id="L1")
+            result = await client.removemember(list_id="L1")
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "DELETE"
@@ -333,11 +333,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.updatemember_async(
+            result = await client.updatemember(
                 input=UpdateMemberInListRequest(),
                 list_id="L1",
             )
@@ -360,11 +360,11 @@ class TestMailchimpClientOperations:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_campaigns_async()
+            result = await client.get_campaigns()
 
             assert result is None
 
@@ -398,35 +398,35 @@ class TestMailchimpClientErrorHandling:
 
         with patch.object(
             client._http_client,
-            "send_async",
+            "send",
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "get_campaigns":
-                    await client.get_campaigns_async()
+                    await client.get_campaigns()
                 elif operation == "sendcampaign":
-                    await client.sendcampaign_async(campaign_id="c1")
+                    await client.sendcampaign(campaign_id="c1")
                 elif operation == "get_lists":
-                    await client.get_lists_async()
+                    await client.get_lists()
                 elif operation == "newlist":
-                    await client.newlist_async(input=NewListRequest())
+                    await client.newlist(input=NewListRequest())
                 elif operation == "add_members":
-                    await client.add_members_async(
+                    await client.add_members(
                         input=NewMembersInListRequest(), list_id="L1"
                     )
                 elif operation == "get_list_members":
-                    await client.get_list_members_async(list_id="L1")
+                    await client.get_list_members(list_id="L1")
                 elif operation == "addmember":
-                    await client.addmember_async(
+                    await client.addmember(
                         input=NewMemberInListRequest(), list_id="L1"
                     )
                 elif operation == "newcampaign":
-                    await client.newcampaign_async(input=NewCampaignRequest())
+                    await client.newcampaign(input=NewCampaignRequest())
                 elif operation == "removemember":
-                    await client.removemember_async(list_id="L1")
+                    await client.removemember(list_id="L1")
                 else:
-                    await client.updatemember_async(
+                    await client.updatemember(
                         input=UpdateMemberInListRequest(), list_id="L1"
                     )
 

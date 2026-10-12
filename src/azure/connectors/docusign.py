@@ -10,15 +10,134 @@ from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "DocusignClient",
+    "AccountCustomFields",
+    "Activity",
+    "ActivityListResponseEnvelope",
+    "AddDocumentsResponse",
+    "AddDocumentsToEnvelopeInput",
+    "AddRecipientTabsResponse",
+    "AddRecipientToEnvelopeRequest",
+    "AddRemindersResponse",
+    "AddVerificationToRecipientResponse",
+    "AdditionalRecipientData",
+    "AdditionalRecipientParamsSchema",
+    "AdditionalURL",
+    "AdditionalURLForSenderView",
+    "AnchorTabSchema",
+    "ApiError",
+    "ApplyTemplatesToDocumentsInput",
+    "AuditResponse",
+    "BuildNumberResponse",
+    "BuildNumberSchema",
+    "BulkSendListGuid",
+    "CombinedEmailBodyAndCustomFields",
+    "CompositeTemplateSchema",
+    "CompositeTemplatesResponse",
+    "CreateBulkSendListInput",
+    "CreateEnvelopeResponse",
+    "CreateHookEnvelopeInput",
+    "CreateHookEnvelopeResponse",
+    "CreateOrgHookEnvelopeInput",
+    "CreateOrgHookEnvelopeResponse",
+    "DeclineReasonWithoutType",
+    "DocGenFormField",
+    "DocGenFormFieldsResponse",
+    "DocumentRecord",
+    "DocumentRecordListResponseEnvelope",
+    "DocumentType",
+    "DocumentTypesResponse",
+    "DynamicRecipients",
+    "DynamicSigners",
+    "DynamicSigningUrlFields",
+    "EmailSummary",
+    "EmailSummaryResponse",
+    "EmbeddedSenderResponse",
+    "EmbeddedSigningResponse",
+    "Envelope",
+    "EnvelopeCustomFieldResponse",
+    "EnvelopeDocument",
+    "EnvelopeDocumentField",
+    "EnvelopeIDsResponse",
+    "EnvelopeIds",
+    "EnvelopeResendResponse",
+    "EnvelopeTemplate",
+    "EnvelopeVoidResponse",
+    "FilteredEnvelopeListResponse",
+    "FilteredEnvelopes",
+    "FilteredSalesCopilotEnvelopeListResponse",
+    "Folder",
+    "FolderItem",
+    "FontName",
+    "FontNamesResponse",
+    "GetDocGenTemplateTabsResponse",
+    "GetDocumentsResponse",
+    "GetDynamicRecipientsResponse",
+    "GetDynamicSignersResponse",
+    "GetLoginAccountsResponse",
+    "GetOrganizationsResponse",
+    "GetWorkFlowIdsResponse",
+    "KeySales",
+    "KeySalesResponse",
+    "ListDocumentsResponse",
+    "ListEnvelopeDocumentFieldsResponse",
+    "ListEnvelopesResponse",
+    "ListFoldersResponse",
+    "ListRecipientsResponse",
+    "ListSigningGroupResponse",
+    "ListTabsResponse",
+    "ListTemplateDocumentsResponse",
+    "ListTemplatesResponse",
+    "LoginAccount",
+    "MaestroInputVariables",
+    "OnEnvelopeStatusChangesResponse",
+    "Organization",
+    "RecipientTab",
+    "RecipientTabsResponse",
+    "RecipientType",
+    "RecipientTypesResponse",
+    "SalesCopilotFilteredEnvelopes",
+    "SendDraftEnvelopeResponse",
+    "SignatureType",
+    "SignatureTypesResponse",
+    "Signer",
+    "SignerRequest",
+    "SigningGroup",
+    "StaticResponseForAnchorTabSchemaResponse",
+    "StaticResponseForBuildNumberSchemaResponse",
+    "StaticResponseForCompositeTemplatesResponse",
+    "StaticResponseForEmbeddedSenderSchemaResponse",
+    "StaticResponseForEmbeddedSigningSchemaResponse",
+    "StaticResponseForRecipientTypeSchemaResponse",
+    "StaticResponseForVerificationTypeSchemaResponse",
+    "Tab",
+    "TabType",
+    "TabTypesResponse",
+    "TriggerMaestroFlowResponse",
+    "UpdateDocgenFormFieldsInput",
+    "UpdateEnvelopeCustomFieldResponse",
+    "UpdateEnvelopePrefillTabsInput",
+    "UpdateRecipientTabsValuesInput",
+    "WebhookEnvelopeResponse",
+    "WebhookOrganizationResponse",
+    "WebhookRequest",
+    "WorkflowDefPayloadSchema",
+    "WorkflowDefinition",
+    "WorkflowDefinitionResponse",
+    "WorkflowDefinitionsResponse",
+    "WorkflowId",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -1818,7 +1937,7 @@ class DocusignClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -1827,7 +1946,7 @@ class DocusignClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -1847,8 +1966,8 @@ class DocusignClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -1875,7 +1994,7 @@ class DocusignClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "docusign"
 
-    async def get_docgen_form_fields_async(
+    def get_docgen_form_fields(
         self,
         account_id: str,
         envelope_id: str,
@@ -1899,7 +2018,7 @@ class DocusignClient(ConnectorClientBase):
             f"/docGenFormFields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1920,7 +2039,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_docgen_form_fields_async(
+    def update_docgen_form_fields(
         self,
         input: UpdateDocgenFormFieldsInput,
         account_id: str,
@@ -1953,7 +2072,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1969,7 +2088,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_doc_gen_template_tabs_async(
+    def get_doc_gen_template_tabs(
         self,
         account_id: str,
         template_id: str,
@@ -1994,7 +2113,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2015,7 +2134,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def void_envelope_async(
+    def void_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -2047,7 +2166,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2068,7 +2187,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def resend_envelope_async(
+    def resend_envelope(
         self,
         envelope_id: str,
         *,
@@ -2093,7 +2212,7 @@ class DocusignClient(ConnectorClientBase):
             f"/resendEnvelope"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2114,7 +2233,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_reminders_async(
+    def add_reminders(
         self,
         account_id: str,
         envelope_id: str,
@@ -2162,7 +2281,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2183,7 +2302,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_document_tabs_async(
+    def get_envelope_document_tabs(
         self,
         account_id: str,
         envelope_id: str,
@@ -2210,7 +2329,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2231,7 +2350,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_envelope_prefill_tabs_async(
+    def update_envelope_prefill_tabs(
         self,
         input: UpdateEnvelopePrefillTabsInput,
         account_id: str,
@@ -2259,7 +2378,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2275,7 +2394,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_template_document_tabs_async(
+    def get_template_document_tabs(
         self,
         account_id: str,
         template_id: str,
@@ -2302,7 +2421,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2323,7 +2442,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_document_fields_async(
+    def get_envelope_document_fields(
         self,
         account_id: str,
         envelope_id: str,
@@ -2350,7 +2469,7 @@ class DocusignClient(ConnectorClientBase):
             f"/fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2371,7 +2490,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def composite_templates_async(
+    def composite_templates(
         self,
         input: CompositeTemplateSchema,
         account_id: str,
@@ -2419,7 +2538,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2440,7 +2559,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def search_list_envelopes_async(
+    def search_list_envelopes(
         self,
         account_id: str,
         recipient_name: Optional[str] = None,
@@ -2548,7 +2667,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2569,7 +2688,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_envelope_from_template_no_recipients_async(
+    def create_envelope_from_template_no_recipients(
         self,
         account_id: str,
         template_id: str,
@@ -2604,7 +2723,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2625,7 +2744,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_envelope_async(
+    def send_envelope(
         self,
         input: DynamicSigners,
         account_id: str,
@@ -2671,7 +2790,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2692,7 +2811,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_envelope_with_recipient_fields_async(
+    def send_envelope_with_recipient_fields(
         self,
         input: DynamicRecipients,
         account_id: str,
@@ -2735,7 +2854,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2756,7 +2875,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def send_draft_envelope_async(
+    def send_draft_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -2779,7 +2898,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(envelope_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2800,7 +2919,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_custom_field_async(
+    def get_envelope_custom_field(
         self,
         account_id: str,
         envelope_id: str,
@@ -2832,7 +2951,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2853,7 +2972,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_envelope_custom_field_async(
+    def update_envelope_custom_field(
         self,
         account_id: str,
         envelope_id: str,
@@ -2900,7 +3019,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -2921,7 +3040,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_sender_url_async(
+    def generate_embedded_sender_url(
         self,
         input: AdditionalURLForSenderView,
         account_id: str,
@@ -2960,7 +3079,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -2981,7 +3100,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_recipient_status_async(
+    def get_recipient_status(
         self,
         account_id: str,
         envelope_id: str,
@@ -3005,7 +3124,7 @@ class DocusignClient(ConnectorClientBase):
             f"/recipients"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3026,7 +3145,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def remove_recipient_from_envelope_async(
+    def remove_recipient_from_envelope(
         self,
         account_id: str,
         envelope_id: str,
@@ -3063,7 +3182,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3084,7 +3203,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_recipient_fields_async(
+    def get_recipient_fields(
         self,
         account_id: str,
         envelope_id: str,
@@ -3135,7 +3254,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3156,7 +3275,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_audit_events_async(
+    def get_audit_events(
         self,
         account_id: str,
         envelope_id: str,
@@ -3180,7 +3299,7 @@ class DocusignClient(ConnectorClientBase):
             f"/audit_events"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3201,7 +3320,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_verification_to_recipient_async(
+    def add_verification_to_recipient(
         self,
         input: AdditionalRecipientData,
         account_id: str,
@@ -3245,7 +3364,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3266,7 +3385,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_envelope_recipient_async(
+    def update_envelope_recipient(
         self,
         input: AdditionalRecipientParamsSchema,
         account_id: str,
@@ -3377,7 +3496,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3398,7 +3517,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def apply_templates_to_documents_async(
+    def apply_templates_to_documents(
         self,
         input: ApplyTemplatesToDocumentsInput,
         account_id: str,
@@ -3437,7 +3556,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3453,7 +3572,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def create_bulk_send_list_async(
+    def create_bulk_send_list(
         self,
         input: CreateBulkSendListInput,
         account_id: str,
@@ -3481,7 +3600,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3502,7 +3621,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def bulk_send_async(
+    def bulk_send(
         self,
         account_id: str,
         bulk_send_list_id: str,
@@ -3534,7 +3653,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3555,7 +3674,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_login_accounts_async(
+    def get_login_accounts(
         self,
         *,
         timeout: Optional[float] = None,
@@ -3570,7 +3689,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/oauth/userinfo"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3591,7 +3710,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_templates_async(
+    def get_envelope_templates(
         self,
         account_id: str,
         *,
@@ -3610,7 +3729,7 @@ class DocusignClient(ConnectorClientBase):
             f"/accounts/{quote(str(account_id), safe='')}/templates"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3631,7 +3750,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_documents_to_envelope_async(
+    def add_documents_to_envelope(
         self,
         input: AddDocumentsToEnvelopeInput,
         account_id: str,
@@ -3656,7 +3775,7 @@ class DocusignClient(ConnectorClientBase):
             f"/documents"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3677,7 +3796,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_template_documents_async(
+    def list_template_documents(
         self,
         account_id: str,
         template_id: str,
@@ -3701,7 +3820,7 @@ class DocusignClient(ConnectorClientBase):
             f"/documents"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3722,7 +3841,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_envelope_documents_async(
+    def list_envelope_documents(
         self,
         account_id: str,
         envelope_id: str,
@@ -3746,7 +3865,7 @@ class DocusignClient(ConnectorClientBase):
             f"/envelopeDocuments"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3767,7 +3886,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_envelope_document_info_async(
+    def get_envelope_document_info(
         self,
         account_id: str,
         envelope_id: str,
@@ -3799,7 +3918,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3820,7 +3939,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_tab_info_async(
+    def get_tab_info(
         self,
         account_id: str,
         envelope_id: str,
@@ -3855,7 +3974,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -3876,7 +3995,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_recipient_tabs_async(
+    def add_recipient_tabs(
         self,
         input: AnchorTabSchema,
         account_id: str,
@@ -3912,7 +4031,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3933,7 +4052,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_recipient_tabs_values_async(
+    def update_recipient_tabs_values(
         self,
         input: UpdateRecipientTabsValuesInput,
         account_id: str,
@@ -3961,7 +4080,7 @@ class DocusignClient(ConnectorClientBase):
             f"/tabs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -3977,7 +4096,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_envelope_recipient_tabs_async(
+    def get_envelope_recipient_tabs(
         self,
         account_id: str,
         envelope_id: str,
@@ -4004,7 +4123,7 @@ class DocusignClient(ConnectorClientBase):
             f"/recipientTabs"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4025,7 +4144,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def trigger_maestro_flow_async(
+    def trigger_maestro_flow(
         self,
         input: MaestroInputVariables,
         account_id: str,
@@ -4058,7 +4177,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4079,7 +4198,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def build_number_async(
+    def build_number(
         self,
         input: BuildNumberSchema,
         *,
@@ -4096,7 +4215,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/build_number"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PUT", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4117,7 +4236,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def add_recipient_to_envelope_async(
+    def add_recipient_to_envelope(
         self,
         input: AdditionalRecipientParamsSchema,
         account_id: str,
@@ -4235,7 +4354,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4256,7 +4375,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_blank_envelope_async(
+    def create_blank_envelope(
         self,
         input: CombinedEmailBodyAndCustomFields,
         account_id: str,
@@ -4287,7 +4406,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4308,7 +4427,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def generate_embedded_signing_url_async(
+    def generate_embedded_signing_url(
         self,
         input: DynamicSigningUrlFields,
         account_id: str,
@@ -4352,7 +4471,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -4373,7 +4492,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_documents_async(
+    def get_documents(
         self,
         account_id: str,
         envelope_id: str,
@@ -4409,7 +4528,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4430,7 +4549,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_organizations_async(
+    def get_organizations(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4451,7 +4570,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4472,7 +4591,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_account_custom_fields_async(
+    def get_account_custom_fields(
         self,
         account_id: str,
         *,
@@ -4493,7 +4612,7 @@ class DocusignClient(ConnectorClientBase):
             f"/account_custom_fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4509,7 +4628,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def get_folder_list_async(
+    def get_folder_list(
         self,
         account_id: str,
         *,
@@ -4528,7 +4647,7 @@ class DocusignClient(ConnectorClientBase):
             f"/accounts/{quote(str(account_id), safe='')}/folders"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4549,7 +4668,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_folder_envelope_list_async(
+    def get_folder_envelope_list(
         self,
         account_id: str,
         folder_id: str,
@@ -4572,7 +4691,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(folder_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4593,7 +4712,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_recipient_types_async(
+    def static_response_for_recipient_types(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4608,7 +4727,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/recipient_types"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4629,7 +4748,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_signature_types_async(
+    def static_response_for_signature_types(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4644,7 +4763,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/signature_types"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4665,7 +4784,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_signing_groups_async(
+    def get_signing_groups(
         self,
         account_id: str,
         *,
@@ -4684,7 +4803,7 @@ class DocusignClient(ConnectorClientBase):
             f"/accounts/{quote(str(account_id), safe='')}/signing_groups"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4705,7 +4824,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_tab_types_async(
+    def static_response_for_tab_types(
         self,
         *,
         timeout: Optional[float] = None,
@@ -4720,7 +4839,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/tab_types"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4741,7 +4860,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_maestro_workflow_definitions_async(
+    def get_maestro_workflow_definitions(
         self,
         account_id: str,
         *,
@@ -4760,7 +4879,7 @@ class DocusignClient(ConnectorClientBase):
             f"/accounts/{quote(str(account_id), safe='')}/maestro-workflows"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4781,7 +4900,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_all_workflow_i_ds_async(
+    def get_all_workflow_i_ds(
         self,
         account_id: str,
         *,
@@ -4802,7 +4921,7 @@ class DocusignClient(ConnectorClientBase):
             f"/all_identity_verification"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4823,7 +4942,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_maestro_workflow_definition_async(
+    def get_maestro_workflow_definition(
         self,
         account_id: str,
         workflow_id: str,
@@ -4846,7 +4965,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(workflow_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4867,7 +4986,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dynamic_signers_async(
+    def get_dynamic_signers(
         self,
         account_id: str,
         template_id: str,
@@ -4892,7 +5011,7 @@ class DocusignClient(ConnectorClientBase):
             f"/recipients"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4913,7 +5032,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_dynamic_recipients_async(
+    def get_dynamic_recipients(
         self,
         account_id: str,
         template_id: str,
@@ -4937,7 +5056,7 @@ class DocusignClient(ConnectorClientBase):
             f"/{quote(str(template_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -4958,7 +5077,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_recipient_type_schema_async(
+    def static_response_for_recipient_type_schema(
         self,
         recipient_type: str,
         signature_type: Optional[str] = None,
@@ -4987,7 +5106,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5008,7 +5127,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_verification_type_schema_async(
+    def static_response_for_verification_type_schema(
         self,
         verification_type: str,
         *,
@@ -5031,7 +5150,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5052,7 +5171,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_embedded_sender_schema_async(
+    def static_response_for_embedded_sender_schema(
         self,
         return_url: str,
         *,
@@ -5075,7 +5194,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5096,7 +5215,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_embedded_signing_schema_async(
+    def static_response_for_embedded_signing_schema(
         self,
         return_url: str,
         is_in_person_signer: str,
@@ -5126,7 +5245,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5147,7 +5266,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_build_number_schema_async(
+    def static_response_for_build_number_schema(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5162,7 +5281,7 @@ class DocusignClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/build_number_schema"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5183,7 +5302,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_custom_fields_async(
+    def get_custom_fields(
         self,
         account_id: str,
         *,
@@ -5202,7 +5321,7 @@ class DocusignClient(ConnectorClientBase):
             f"/accounts/{quote(str(account_id), safe='')}/custom_fields"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5218,7 +5337,7 @@ class DocusignClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def static_response_for_anchor_tab_schema_async(
+    def static_response_for_anchor_tab_schema(
         self,
         tab_type: str,
         *,
@@ -5241,7 +5360,7 @@ class DocusignClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -5262,7 +5381,7 @@ class DocusignClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def static_response_for_composite_templates_async(
+    def static_response_for_composite_templates(
         self,
         *,
         timeout: Optional[float] = None,
@@ -5279,7 +5398,7 @@ class DocusignClient(ConnectorClientBase):
             f"{self._connection_runtime_url}/composite_templates_schema"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,

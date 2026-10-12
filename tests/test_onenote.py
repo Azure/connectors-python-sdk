@@ -6,8 +6,8 @@ import pytest
 from unittest.mock import AsyncMock, patch
 
 from azure.core.credentials import AzureKeyCredential
+from azure.connectors.aio.onenote import OnenoteClient
 from azure.connectors.onenote import (
-    OnenoteClient,
     CreateSectionInNotebookResponse,
     CreatePageInSectionInput,
     Page,
@@ -150,11 +150,11 @@ class TestGetNotebooksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_notebooks_async()
+            result = await client.get_notebooks()
 
             mock_send.assert_called_once()
             assert result is not None
@@ -172,11 +172,11 @@ class TestGetNotebooksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_notebooks_async()
+            result = await client.get_notebooks()
             assert result is None
 
     @pytest.mark.asyncio
@@ -191,12 +191,12 @@ class TestGetNotebooksAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_notebooks_async()
+                await client.get_notebooks()
 
 
 class TestGetSectionsInNotebookAsync:
@@ -217,11 +217,11 @@ class TestGetSectionsInNotebookAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_sections_in_notebook_async(notebook_key="nb-123")
+            result = await client.get_sections_in_notebook(notebook_key="nb-123")
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -240,12 +240,12 @@ class TestGetSectionsInNotebookAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_sections_in_notebook_async(notebook_key="invalid")
+                await client.get_sections_in_notebook(notebook_key="invalid")
 
 
 class TestCreateSectionInNotebookAsync:
@@ -268,11 +268,11 @@ class TestCreateSectionInNotebookAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_section_in_notebook_async(
+            result = await client.create_section_in_notebook(
                 input=section_request,
                 notebook_key="nb-123"
             )
@@ -297,11 +297,11 @@ class TestCreateSectionInNotebookAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.create_section_in_notebook_async(
+            result = await client.create_section_in_notebook(
                 input=section_request,
                 notebook_key="nb-123"
             )
@@ -326,11 +326,11 @@ class TestGetPagesInSectionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await resolve_generated_result(client.get_pages_in_section_async(
+            result = await resolve_generated_result(client.get_pages_in_section(
                 notebook_key="nb-123",
                 section_id="sec-123"
             ))
@@ -354,12 +354,12 @@ class TestGetPagesInSectionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await resolve_generated_result(client.get_pages_in_section_async(
+                await resolve_generated_result(client.get_pages_in_section(
                     notebook_key="nb-123",
                     section_id="sec-123"
                 ))
@@ -385,11 +385,11 @@ class TestCreatePageInSectionAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_page_in_section_async(
+            result = await client.create_page_in_section(
                 input=page_input,
                 notebook_key="nb-123",
                 section_id="sec-123"
@@ -421,11 +421,11 @@ class TestCreatePageInQuickNotesAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.create_page_in_quick_notes_async(input=page_input)
+            result = await client.create_page_in_quick_notes(input=page_input)
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -446,12 +446,12 @@ class TestCreatePageInQuickNotesAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.create_page_in_quick_notes_async(input=page_input)
+                await client.create_page_in_quick_notes(input=page_input)
 
 
 class TestDeletePageAsync:
@@ -469,11 +469,11 @@ class TestDeletePageAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.delete_page_async(
+            await client.delete_page(
                 notebook_key="nb-123",
                 section_id="sec-123",
                 page_id="page-123"
@@ -506,11 +506,11 @@ class TestGetPageContentAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_page_content_async(
+            result = await client.get_page_content(
                 notebook_key="nb-123",
                 section_id="sec-123",
                 page_id="page-123"
@@ -534,12 +534,12 @@ class TestGetPageContentAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_page_content_async(
+                await client.get_page_content(
                     notebook_key="nb-123",
                     section_id="sec-123",
                     page_id="invalid"
@@ -568,11 +568,11 @@ class TestUpdatePageContentAsync:
 
         with patch.object(
             client._http_client,
-            'send_async',
+            'send',
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.update_page_content_async(
+            result = await client.update_page_content(
                 input=update_request,
                 notebook_key="nb-123",
                 section_id="sec-123",

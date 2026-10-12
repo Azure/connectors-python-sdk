@@ -9,9 +9,11 @@ import inspect
 from pathlib import Path
 from types import ModuleType
 from typing import Any, get_type_hints
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+from azure.core.credentials import AzureKeyCredential
+from azure.core.paging import ItemPaged
 
 import azure.connectors as connectors_package
 from azure.connectors.sdk import ConnectorClientBase, ConnectorException
@@ -19,7 +21,7 @@ from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
-    invoke_generated_operation,
+    invoke_sync_generated_operation,
 )
 
 
@@ -47,10 +49,8 @@ def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)
-@pytest.mark.asyncio
-async def test_all_generated_operations_succeed_with_request_controls(
+def test_all_generated_operations_succeed_with_request_controls(
     module_name: str,
-    mock_credential: Any,
 ) -> None:
     """Exercise every generated operation's successful request contract."""
     connector_module = importlib.import_module(f"azure.connectors.{module_name}")
@@ -59,22 +59,28 @@ async def test_all_generated_operations_succeed_with_request_controls(
     for operation in sorted(get_generated_operations(client_type)):
         client = client_type(
             "https://example.azure.com/connections/test",
-            credential=mock_credential,
+            credential=AzureKeyCredential("test-key"),
         )
-        generated_method = getattr(client, f"{operation}_async")
-        is_pageable = inspect.isasyncgenfunction(generated_method)
+        generated_method = getattr(client, operation)
+        return_type = get_type_hints(
+            generated_method,
+            globalns=vars(connector_module),
+        )["return"]
+        is_pageable = getattr(return_type, "__origin__", None) is ItemPaged
         response_text = (
-            '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
+            '{"value": [{"ok": true}]}'
+            if is_pageable
+            else '{"ok": true}'
         )
         response_hook = MagicMock()
 
         with patch.object(
             client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
+            "send",
+            new_callable=MagicMock,
             return_value=MockResponse(status=200, text=response_text),
         ) as mock_send:
-            result = await invoke_generated_operation(
+            result = invoke_sync_generated_operation(
                 client,
                 operation,
                 connector_module,
@@ -102,12 +108,8 @@ async def test_all_generated_operations_succeed_with_request_controls(
 
             body = call.kwargs["body"]
             if body is not None:
-                assert to_wire(body), operation
+                assert to_wire(body) is not None, operation
 
-        return_type = get_type_hints(
-            generated_method,
-            globalns=vars(connector_module),
-        )["return"]
         if return_type is type(None):
             assert result is None, operation
         elif is_pageable:
@@ -119,10 +121,8 @@ async def test_all_generated_operations_succeed_with_request_controls(
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)
-@pytest.mark.asyncio
-async def test_all_generated_operations_reject_error_responses(
+def test_all_generated_operations_reject_error_responses(
     module_name: str,
-    mock_credential: Any,
 ) -> None:
     """Verify every generated operation raises for a non-success response."""
     connector_module = importlib.import_module(f"azure.connectors.{module_name}")
@@ -131,17 +131,17 @@ async def test_all_generated_operations_reject_error_responses(
     for operation in sorted(get_generated_operations(client_type)):
         client = client_type(
             "https://example.azure.com/connections/test",
-            credential=mock_credential,
+            credential=AzureKeyCredential("test-key"),
         )
 
         with patch.object(
             client._http_client,
-            "send_async",
-            new_callable=AsyncMock,
+            "send",
+            new_callable=MagicMock,
             return_value=MockResponse(status=400, text="bad request"),
         ):
             with pytest.raises(ConnectorException):
-                await invoke_generated_operation(
+                invoke_sync_generated_operation(
                     client,
                     operation,
                     connector_module,

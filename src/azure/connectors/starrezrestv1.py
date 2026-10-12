@@ -10,15 +10,62 @@ from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
 )
+
+__all__ = [
+    "Starrezrestv1Client",
+    "CreateBookingInput",
+    "CreateBookingResponse",
+    "CreateEntryApplicationInput",
+    "CreateEntryApplicationResponse",
+    "CreateEntryEnrollmentInput",
+    "CreateEntryEnrollmentResponse",
+    "CreateEntryInput",
+    "CreateEntryResponse",
+    "CreateRoomSpaceInput",
+    "CreateRoomSpaceMaintenanceInput",
+    "CreateRoomSpaceMaintenanceResponse",
+    "CreateRoomSpaceResponse",
+    "CreateTransactionInput",
+    "CreateTransactionResponse",
+    "DeleteResponse",
+    "SelectBookingInput",
+    "SelectEntryAddressInput",
+    "SelectEntryApplicationInput",
+    "SelectEntryCustomFieldInput",
+    "SelectEntryDetailInput",
+    "SelectEntryEnrollmentInput",
+    "SelectEntryInput",
+    "SelectRoomLocationInput",
+    "SelectRoomSpaceInput",
+    "SelectRoomSpaceMaintenanceInput",
+    "SelectTermInput",
+    "SelectTermSessionInput",
+    "SelectTransactionInput",
+    "UpdateBookingInput",
+    "UpdateBookingResponse",
+    "UpdateEntryAddressInput",
+    "UpdateEntryAddressResponse",
+    "UpdateEntryApplicationInput",
+    "UpdateEntryApplicationResponse",
+    "UpdateEntryCustomFieldInput",
+    "UpdateEntryCustomFieldResponse",
+    "UpdateEntryDetailInput",
+    "UpdateEntryDetailResponse",
+    "UpdateEntryEnrollmentInput",
+    "UpdateEntryEnrollmentResponse",
+    "UpdateEntryInput",
+    "UpdateEntryResponse",
+    "UpdateRoomSpaceMaintenanceInput",
+    "UpdateRoomSpaceMaintenanceResponse",
+]
 
 
 # Type Definitions
@@ -9529,7 +9576,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -9538,7 +9585,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -9558,8 +9605,8 @@ class Starrezrestv1Client(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -9586,7 +9633,7 @@ class Starrezrestv1Client(ConnectorClientBase):
     def connector_name(self) -> str:
         return "starrezrestv1"
 
-    async def select_entry_async(
+    def select_entry(
         self,
         input: SelectEntryInput,
         *,
@@ -9602,7 +9649,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/entry.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9623,7 +9670,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_entry_async(
+    def create_entry(
         self,
         input: CreateEntryInput,
         *,
@@ -9639,7 +9686,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/create/entry.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9660,7 +9707,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_async(
+    def update_entry(
         self,
         input: UpdateEntryInput,
         entry_id: int,
@@ -9680,7 +9727,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/update/entry.json/{quote(str(entry_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9701,7 +9748,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def delete_async(
+    def delete(
         self,
         table_name: str,
         row_id: int,
@@ -9723,7 +9770,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(row_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -9744,7 +9791,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_custom_field_async(
+    def select_entry_custom_field(
         self,
         input: SelectEntryCustomFieldInput,
         *,
@@ -9762,7 +9809,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/EntryCustomField.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9783,7 +9830,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_custom_field_async(
+    def update_entry_custom_field(
         self,
         input: UpdateEntryCustomFieldInput,
         entry_custom_field_id: int,
@@ -9805,7 +9852,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(entry_custom_field_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9826,7 +9873,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_term_async(
+    def select_term(
         self,
         input: SelectTermInput,
         *,
@@ -9842,7 +9889,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/Term.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9863,7 +9910,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_address_async(
+    def select_entry_address(
         self,
         input: SelectEntryAddressInput,
         *,
@@ -9881,7 +9928,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/EntryAddress.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9902,7 +9949,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_address_async(
+    def update_entry_address(
         self,
         input: UpdateEntryAddressInput,
         entry_address_id: int,
@@ -9924,7 +9971,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(entry_address_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9945,7 +9992,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_application_async(
+    def select_entry_application(
         self,
         input: SelectEntryApplicationInput,
         *,
@@ -9963,7 +10010,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/EntryApplication.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -9984,7 +10031,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_entry_application_async(
+    def create_entry_application(
         self,
         input: CreateEntryApplicationInput,
         *,
@@ -10002,7 +10049,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/create/entryapplication.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10023,7 +10070,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_application_async(
+    def update_entry_application(
         self,
         input: UpdateEntryApplicationInput,
         entry_application_id: int,
@@ -10045,7 +10092,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(entry_application_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10066,7 +10113,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_term_session_async(
+    def select_term_session(
         self,
         input: SelectTermSessionInput,
         *,
@@ -10082,7 +10129,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/TermSession.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10103,7 +10150,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_detail_async(
+    def select_entry_detail(
         self,
         input: SelectEntryDetailInput,
         *,
@@ -10119,7 +10166,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/EntryDetail.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10140,7 +10187,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_detail_async(
+    def update_entry_detail(
         self,
         input: UpdateEntryDetailInput,
         entry_detail_id: int,
@@ -10160,7 +10207,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/update/entrydetail.json/{quote(str(entry_detail_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10181,7 +10228,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_enrollment_async(
+    def select_entry_enrollment(
         self,
         input: SelectEntryEnrollmentInput,
         *,
@@ -10199,7 +10246,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/EntryEnrollment.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10220,7 +10267,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_entry_enrollment_async(
+    def create_entry_enrollment(
         self,
         input: CreateEntryEnrollmentInput,
         *,
@@ -10238,7 +10285,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/create/entryenrollment.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10259,7 +10306,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_entry_enrollment_async(
+    def update_entry_enrollment(
         self,
         input: UpdateEntryEnrollmentInput,
         entry_enrollment_id: int,
@@ -10281,7 +10328,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(entry_enrollment_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10302,7 +10349,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_booking_async(
+    def select_booking(
         self,
         input: SelectBookingInput,
         *,
@@ -10318,7 +10365,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/Booking.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10339,7 +10386,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_booking_async(
+    def create_booking(
         self,
         input: CreateBookingInput,
         *,
@@ -10355,7 +10402,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/create/booking.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10376,7 +10423,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_booking_async(
+    def update_booking(
         self,
         input: UpdateBookingInput,
         booking_id: int,
@@ -10396,7 +10443,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/update/booking.json/{quote(str(booking_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10417,7 +10464,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_space_async(
+    def select_room_space(
         self,
         input: SelectRoomSpaceInput,
         *,
@@ -10433,7 +10480,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/RoomSpace.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10454,7 +10501,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_room_space_async(
+    def create_room_space(
         self,
         input: CreateRoomSpaceInput,
         *,
@@ -10470,7 +10517,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/create/roomspace.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10491,7 +10538,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_location_async(
+    def select_room_location(
         self,
         input: SelectRoomLocationInput,
         *,
@@ -10509,7 +10556,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/RoomLocation.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10530,7 +10577,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_transaction_async(
+    def select_transaction(
         self,
         input: SelectTransactionInput,
         *,
@@ -10546,7 +10593,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/select/Transaction.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10567,7 +10614,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_transaction_async(
+    def create_transaction(
         self,
         input: CreateTransactionInput,
         *,
@@ -10583,7 +10630,7 @@ class Starrezrestv1Client(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/create/transaction.json"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10604,7 +10651,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_space_maintenance_async(
+    def select_room_space_maintenance(
         self,
         input: SelectRoomSpaceMaintenanceInput,
         *,
@@ -10622,7 +10669,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/select/RoomSpaceMaintenance.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10643,7 +10690,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_room_space_maintenance_async(
+    def create_room_space_maintenance(
         self,
         input: CreateRoomSpaceMaintenanceInput,
         *,
@@ -10661,7 +10708,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"{self._connection_runtime_url}/create/roomspacemaintenance.json"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -10682,7 +10729,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_room_space_maintenance_async(
+    def update_room_space_maintenance(
         self,
         input: UpdateRoomSpaceMaintenanceInput,
         room_space_maintenance_id: int,
@@ -10704,7 +10751,7 @@ class Starrezrestv1Client(ConnectorClientBase):
             f"/{quote(str(room_space_maintenance_id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,

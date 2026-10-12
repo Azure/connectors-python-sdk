@@ -6,19 +6,43 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, AsyncIterator, Dict, List, Any, Mapping
+from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
 
-from azure.core.credentials import AzureKeyCredential
-from azure.core.credentials_async import AsyncTokenCredential
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.paging import ItemPaged
+from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.pipeline.transport import HttpTransport
 
 from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
+
+__all__ = [
+    "PlannerClient",
+    "AppliedCategories",
+    "AssignUsersInput",
+    "CreateBucketInput",
+    "CreateBucketResponse",
+    "CreateTaskRequest",
+    "ErrorResponse",
+    "GetPlanDetailsResponse",
+    "GetTaskDetailsResponse",
+    "GetTaskResponse",
+    "GetTaskResponseV2",
+    "GetTaskResponseV3",
+    "ListBucketsResponse",
+    "ListGroupsResponse",
+    "ListMyPlansResponse",
+    "ListTasksResponse",
+    "UnassignUsersInput",
+    "UpdateTaskDetailsRequest",
+    "UpdateTaskRequest",
+    "TRIGGER_OPERATIONS",
+]
 
 
 # Type Definitions
@@ -550,7 +574,7 @@ class PlannerClient(ConnectorClientBase):
     def __init__(
         self,
         connection_runtime_url: str,
-        credential: AsyncTokenCredential | AzureKeyCredential,
+        credential: TokenCredential | AzureKeyCredential,
         *,
         max_retry_attempts: int = 3,
         timeout_seconds: float = 30.0,
@@ -559,7 +583,7 @@ class PlannerClient(ConnectorClientBase):
         maximum_retry_delay_seconds: float = 120.0,
         retry_jitter_factor: float = 0.1,
         retry_unsafe_http_methods: bool = False,
-        transport: Optional[AsyncHttpTransport] = None,
+        transport: Optional[HttpTransport] = None,
         **kwargs: Any,
     ):
         """
@@ -579,8 +603,8 @@ class PlannerClient(ConnectorClientBase):
             retry_jitter_factor: The jitter fraction applied to retry delays.
             retry_unsafe_http_methods: Whether unsafe HTTP methods may be
                 retried.
-            transport: Optional Azure Core async HTTP transport closed by
-                the client through its asynchronous lifecycle.
+            transport: Optional Azure Core HTTP transport closed by
+                the client through its synchronous lifecycle.
             **kwargs: Optional Azure Core pipeline policy settings.
         """
         if not connection_runtime_url:
@@ -646,7 +670,7 @@ class PlannerClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    async def delete_task_async(
+    def delete_task(
         self,
         id: str,
         *,
@@ -665,7 +689,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "DELETE", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -681,7 +705,7 @@ class PlannerClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def unassign_users_async(
+    def unassign_users(
         self,
         input: UnassignUsersInput,
         id: str,
@@ -701,7 +725,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/unassignusers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -722,7 +746,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def assign_users_async(
+    def assign_users(
         self,
         input: AssignUsersInput,
         id: str,
@@ -742,7 +766,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/assignusers"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -763,7 +787,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_group_plans_async(
+    def list_group_plans(
         self,
         group_id: str,
         *,
@@ -782,7 +806,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/groups/{quote(str(group_id), safe='')}/planner/plans"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -803,7 +827,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_plan_details_async(
+    def get_plan_details(
         self,
         id: str,
         *,
@@ -822,7 +846,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/plans/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -843,7 +867,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_bucket_async(
+    def create_bucket(
         self,
         input: CreateBucketInput,
         *,
@@ -859,7 +883,7 @@ class PlannerClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/v1.0/planner/buckets"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -880,7 +904,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def create_task_async(
+    def create_task(
         self,
         input: CreateTaskRequest,
         *,
@@ -896,7 +920,7 @@ class PlannerClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v2/beta/planner/tasks"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "POST", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -917,7 +941,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_async(
+    def get_task(
         self,
         id: str,
         *,
@@ -936,7 +960,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -957,7 +981,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def get_task_details_async(
+    def get_task_details(
         self,
         id: str,
         *,
@@ -976,7 +1000,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -997,7 +1021,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_buckets_async(
+    def list_buckets(
         self,
         id: str,
         group_id: str,
@@ -1024,7 +1048,7 @@ class PlannerClient(ConnectorClientBase):
         if query_params:
             request_url += '?' + '&'.join(query_params)
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
@@ -1045,28 +1069,33 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_my_tasks_async(
+    def list_my_tasks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List my tasks
 
         List the tasks assigned to me.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1081,21 +1110,29 @@ class PlannerClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def list_tasks_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_tasks(
         self,
         id: str,
         group_id: str,
@@ -1104,14 +1141,14 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncIterator[dict[str, Any]]:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List tasks
 
         List the tasks in a plan.
 
-        Yields items from every response page and automatically follows the
-        connector continuation URL.
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1124,11 +1161,16 @@ class PlannerClient(ConnectorClientBase):
         query_params.append(f"groupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
         request_body = None
 
-        while True:
-            response = await self.http_client.send_async(
-                "GET", request_url, body=request_body,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
                 timeout=timeout,
                 headers=headers,
                 client_request_id=client_request_id,
@@ -1143,21 +1185,29 @@ class PlannerClient(ConnectorClientBase):
                     response.text,
                 )
 
-            if not response.text:
-                return
+            return response, request_url
 
-            page = json.loads(response.text)
-            for item in page.get("value", []):
-                yield item
-
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
             next_link = page.get("@odata.nextLink")
-            if not next_link:
-                return
+            continuation_token = (
+                self._resolve_pagination_url(next_link, request_url)
+                if next_link
+                else None
+            )
 
-            request_url = self._resolve_pagination_url(next_link, request_url)
-            request_body = None
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
 
-    async def update_task_async(
+            return continuation_token, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def update_task(
         self,
         input: UpdateTaskRequest,
         id: str,
@@ -1177,7 +1227,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v2/v1.0/planner/tasks/{quote(str(id), safe='')}"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1198,7 +1248,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def update_task_details_async(
+    def update_task_details(
         self,
         input: UpdateTaskDetailsRequest,
         id: str,
@@ -1218,7 +1268,7 @@ class PlannerClient(ConnectorClientBase):
             f"/v1.0/planner/tasks/{quote(str(id), safe='')}/details"
         )
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "PATCH", request_url, body=input,
             timeout=timeout,
             headers=headers,
@@ -1239,7 +1289,7 @@ class PlannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_groups_async(
+    def list_groups(
         self,
         *,
         timeout: Optional[float] = None,
@@ -1254,7 +1304,7 @@ class PlannerClient(ConnectorClientBase):
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/memberOf"
 
-        response = await self.http_client.send_async(
+        response = self.http_client.send(
             "GET", request_url, body=None,
             timeout=timeout,
             headers=headers,
