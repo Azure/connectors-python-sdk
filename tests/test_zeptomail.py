@@ -2,7 +2,7 @@
 
 """Contract tests for ZeptomailClient."""
 
-from typing import Any, Dict, List, Optional, get_type_hints
+from typing import Any, Dict, List, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import azure.connectors.zeptomail as zeptomail_module
@@ -81,7 +81,7 @@ async def test_send_template_mail_preserves_mixed_values(
 
 def test_reply_to_uses_corrected_model_in_both_requests() -> None:
     """Test the corrected public type preserves both reply-to annotations."""
-    expected_type = Optional[List[ReplyToAddress]]
+    expected_type = Optional[List[ReplyToAddress | Mapping[str, Any]]]
 
     assert get_type_hints(SendMailInput)["reply_to"] == expected_type
     assert get_type_hints(SendTemplateMailInput)["reply_to"] == expected_type

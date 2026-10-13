@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -379,7 +379,12 @@ class CertifyPolicyResponse:
     Response for Get Certify Policy for a document
     """
 
-    certify: Optional[CertifyPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    certify: Optional[
+        CertifyPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     lock_form_fields: bool
     """
     True if forms fields are to be locked in the PDF after the last digital
@@ -416,8 +421,18 @@ class DocumentDetailsResponse:
     """The date and time when the document was uploaded."""
     modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time when the document was last modified."""
-    certify: Optional[DocumentCertifyResponse] = dataclass_field(default=None, kw_only=True)
-    template: Optional[DocumentTemplateResponse] = dataclass_field(default=None, kw_only=True)
+    certify: Optional[
+        DocumentCertifyResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    template: Optional[
+        DocumentTemplateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -453,20 +468,25 @@ class UploadDocumentLibraryResponse:
     lock_form_fields: bool
     """True if locking of form fields with the last signature is enabled."""
     certify: Optional[
-        UploadDocumentLibraryCertifyResponse
+        UploadDocumentLibraryCertifyResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     template: Optional[
-        UploadDocumentLibraryTemplateResponse
+        UploadDocumentLibraryTemplateResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Package name"""
-    metadata: Optional[UploadDocumentMetaInfoDetail] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[
+        UploadDocumentMetaInfoDetail | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -510,10 +530,20 @@ class UploadDocument:
     """The date and time when the document was last modified."""
     lock_form_fields: bool
     """True if locking of form fields with the last signature is enabled."""
-    certify: Optional[CertifyPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    certify: Optional[
+        CertifyPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     document_size: int
     """Uploaded document size in bytes"""
-    metadata: Optional[UploadDocumentMetaInfoDetail] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[
+        UploadDocumentMetaInfoDetail | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     package_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The document package name"""
 
@@ -525,26 +555,26 @@ class EnterpriseAccessResponse:
     """
 
     authentication: Optional[
-        EnterpriseAuthenticationResponse
+        EnterpriseAuthenticationResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     authentication_signing: Optional[
-        EnterpriseAuthenticationSigningResponse
+        EnterpriseAuthenticationSigningResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     access_duration: Optional[
-        PermissionAccessDurationResponse
+        PermissionAccessDurationResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
 
 
-FieldsAutoAssignFieldInput = List["AssignFieldRequest"]
+FieldsAutoAssignFieldInput = List["AssignFieldRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -564,46 +594,86 @@ class FieldsResponse:
     """
 
     signature: Optional[
-        List[DigitalSignatureFieldResponse]
+        List[DigitalSignatureFieldResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """A list of all digital signatures in the document."""
     hand_signature: Optional[
-        List[HandSignatureFieldResponse]
+        List[HandSignatureFieldResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     electronic_signature: Optional[
-        List[ElectronicSignatureFieldResponse]
+        List[ElectronicSignatureFieldResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    initials: Optional[List[InitialFieldResponse]] = dataclass_field(default=None, kw_only=True)
+    initials: Optional[
+        List[InitialFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     in_person_signature: Optional[
         List[Dict[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    text: Optional[List[TextFieldResponse]] = dataclass_field(default=None, kw_only=True)
-    radio: Optional[List[RadioFieldResponse]] = dataclass_field(default=None, kw_only=True)
-    checkbox: Optional[List[CheckboxFieldResponse]] = dataclass_field(default=None, kw_only=True)
-    dropdown: Optional[List[DropdownFieldResponse]] = dataclass_field(default=None, kw_only=True)
-    listbox: Optional[List[ListBoxFieldResponse]] = dataclass_field(default=None, kw_only=True)
-    qrcode: Optional[List[QrCodeResponse]] = dataclass_field(default=None, kw_only=True)
-    attachment: Optional[
-        List[AttachmentFieldResponse]
+    text: Optional[
+        List[TextFieldResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    comment: Optional[List[CommentFieldResponse]] = dataclass_field(default=None, kw_only=True)
+    radio: Optional[
+        List[RadioFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    checkbox: Optional[
+        List[CheckboxFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    dropdown: Optional[
+        List[DropdownFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    listbox: Optional[
+        List[ListBoxFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    qrcode: Optional[
+        List[QrCodeResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    attachment: Optional[
+        List[AttachmentFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    comment: Optional[
+        List[CommentFieldResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     unique_identifier: Optional[
-        List[UniqueIdentifierFieldResponse]
+        List[UniqueIdentifierFieldResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -678,7 +748,12 @@ class GetPackagesResponse:
     """True, if the document is not read by the recipient yet."""
     next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the next signer if the document is in shared state."""
-    next_signer_email: Optional[List[NextSignerEmail]] = dataclass_field(default=None, kw_only=True)
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     An object containing next signers username and email address. In case of
     group signer it will have a list of email addresses of all the group
@@ -689,12 +764,17 @@ class GetPackagesResponse:
     modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was last modified."""
     access_duration: Optional[
-        RecipientAccessDurationDetails
+        RecipientAccessDurationDetails | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    decline: Optional[RecipientDeclineDetails] = dataclass_field(default=None, kw_only=True)
+    decline: Optional[
+        RecipientDeclineDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     size: int
     """Size of the document in bytes."""
 
@@ -707,7 +787,7 @@ class GetPackageDetailsResponse:
 
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the document package."""
-    owner: Optional[DocumentOwner] = dataclass_field(default=None, kw_only=True)
+    owner: Optional[DocumentOwner | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     read_only: bool
     """
     True if the applied template is read only. User will not be able to make
@@ -718,7 +798,12 @@ class GetPackageDetailsResponse:
     Document status for the current logged in user. Possible values are
     \"DRAFT\", \"INPROGRESS\", \"PENDING\", \"DECLINED\", or \"COMPLETED\".
     """
-    documents: Optional[List[DocumentDetails]] = dataclass_field(default=None, kw_only=True)
+    documents: Optional[
+        List[DocumentDetails | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -772,12 +857,17 @@ class TemplateResponse:
     enterprise: bool
     """True, if user belong to an enterprise."""
     documents: Optional[
-        List[TemplateDocumentResponse]
+        List[TemplateDocumentResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    smart_form: Optional[TemplateSmartFormResponse] = dataclass_field(default=None, kw_only=True)
+    smart_form: Optional[
+        TemplateSmartFormResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -809,7 +899,12 @@ class BulkSignStatusResponse:
     """
 
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
-    packages: Optional[List[BulkSignPackagesStatus]] = dataclass_field(default=None, kw_only=True)
+    packages: Optional[
+        List[BulkSignPackagesStatus | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -828,7 +923,12 @@ class SignDocumentResponse:
     """
     transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This parameter is used while RAS signing"""
-    verification: Optional[VerificationResponse] = dataclass_field(default=None, kw_only=True)
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     authentication_access_token: Optional[str] = dataclass_field(default=None, kw_only=True)
     """It will contain the OIDC id_token when user is authenticated via OIDC"""
 
@@ -857,9 +957,14 @@ class EnterpriseTemplateResponse:
     """Description of the template"""
     created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the template was created"""
-    roles: Optional[List[EnterpriseTemplateRole]] = dataclass_field(default=None, kw_only=True)
+    roles: Optional[
+        List[EnterpriseTemplateRole | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     documents: Optional[
-        List[TemplateDocumentResponse]
+        List[TemplateDocumentResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -908,7 +1013,12 @@ class WorkflowDetailsResponse:
     gatekeeper: bool
     next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the next signer if the document is in shared state."""
-    next_signer_email: Optional[List[NextSignerEmail]] = dataclass_field(default=None, kw_only=True)
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     An object containing next signers username and email address. In case of
     group signer it will have a list of email addresses of all the group
@@ -918,15 +1028,25 @@ class WorkflowDetailsResponse:
     """Date and time when the document was uploaded."""
     modified_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time when the document was last modified."""
-    workflow: Optional[WorkflowResponse] = dataclass_field(default=None, kw_only=True)
+    workflow: Optional[
+        WorkflowResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     documents: Optional[
-        List[WorkflowDocumentsResponse]
+        List[WorkflowDocumentsResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """List of documents that are uploaded in the package."""
-    users: Optional[List[WorkflowUserResponse]] = dataclass_field(default=None, kw_only=True)
+    users: Optional[
+        List[WorkflowUserResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Recipients list for the workflow."""
 
 
@@ -951,15 +1071,25 @@ class WorkflowHistoryResponse:
     """
     next_signer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the next recipient."""
-    next_signer_email: Optional[List[NextSignerEmail]] = dataclass_field(default=None, kw_only=True)
-    """Object having name and email address of the next recipient."""
-    documents: Optional[
-        List[WorkflowDocumentsResponse]
+    next_signer_email: Optional[
+        List[NextSignerEmail | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    actions: Optional[List[DocumentLogsActions]] = dataclass_field(default=None, kw_only=True)
+    """Object having name and email address of the next recipient."""
+    documents: Optional[
+        List[WorkflowDocumentsResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    actions: Optional[
+        List[DocumentLogsActions | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -977,7 +1107,12 @@ class ReminderResponse:
     The number of days after which the first reminder would be sent to workflow
     user.
     """
-    repeat: Optional[ReminderRepeat] = dataclass_field(default=None, kw_only=True)
+    repeat: Optional[
+        ReminderRepeat | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1007,7 +1142,12 @@ class WorkflowRecipient:
     """
     group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Group name of the recipient if recipient is a group."""
-    group_members: Optional[List[GroupMemberResponse]] = dataclass_field(default=None, kw_only=True)
+    group_members: Optional[
+        List[GroupMemberResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     A list of email addresses of the group members if recipient is a group.
     """
@@ -1057,8 +1197,18 @@ class WorkflowRecipient:
     """Gest user"""
     email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """email language code"""
-    electronic_seal: Optional[ElectronicSealRecipient] = dataclass_field(default=None, kw_only=True)
-    gatekeepers: Optional[WorkflowGatekeeperResponse] = dataclass_field(default=None, kw_only=True)
+    electronic_seal: Optional[
+        ElectronicSealRecipient | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    gatekeepers: Optional[
+        WorkflowGatekeeperResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1081,12 +1231,17 @@ class WorkflowPermissionResponse:
     add_attachment: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if attachments and merging of PDF documents is allowed."""
     legal_notice: Optional[
-        PermissionLegalNoticeResponse
+        PermissionLegalNoticeResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    attachment: Optional[AttachmentPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    attachment: Optional[
+        AttachmentPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1105,7 +1260,7 @@ class StartWorkflowResponse:
     """Array of document IDs which were part of the package before sharing."""
 
 
-WorkflowWorkflowAddGroupInput = List["WorflowGroupRequest"]
+WorkflowWorkflowAddGroupInput = List["WorflowGroupRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -1114,13 +1269,23 @@ class CollaboratorGroupResponse:
     Response for Add Groups to Workflow
     """
 
-    permission: Optional[WorkflowPermissionResponse] = dataclass_field(default=None, kw_only=True)
-    reminder: Optional[ReminderResponse] = dataclass_field(default=None, kw_only=True)
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     signing_order: int
     """Signing order"""
 
 
-WorkflowWorkflowAddPlaceholderInput = List["PlaceholderRequest"]
+WorkflowWorkflowAddPlaceholderInput = List["PlaceholderRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -1129,13 +1294,23 @@ class CollaboratorPlaceholderResponse:
     Response for Add Placeholder to Workflow
     """
 
-    permission: Optional[WorkflowPermissionResponse] = dataclass_field(default=None, kw_only=True)
-    reminder: Optional[ReminderResponse] = dataclass_field(default=None, kw_only=True)
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     signing_order: int
     """Signing order"""
 
 
-WorkflowWorkflowAddUserInput = List["WorflowUserRequest"]
+WorkflowWorkflowAddUserInput = List["WorflowUserRequest | Mapping[str, Any]"]
 
 
 @dataclass
@@ -1152,8 +1327,18 @@ class CollaboratorResponse:
     """Is guest user"""
     email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email language code"""
-    permission: Optional[WorkflowPermissionResponse] = dataclass_field(default=None, kw_only=True)
-    reminder: Optional[ReminderResponse] = dataclass_field(default=None, kw_only=True)
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1182,8 +1367,8 @@ class WorkSpaceResponse:
     """Id of shared space"""
     name: str
     """Name of shared space"""
-    owner: WorkSpaceOwner
-    members: List[WorkSpaceMembers]
+    owner: WorkSpaceOwner | Mapping[str, Any]
+    members: List[WorkSpaceMembers | Mapping[str, Any]]
     """Members of shared space"""
 
 
@@ -1285,7 +1470,7 @@ class PermissionLegalNoticeResponse:
     enabled: bool
     """True, if legal notice is enabled and configured for the recipient."""
     allowed_notices: Optional[
-        List[LegalNoticeResponse]
+        List[LegalNoticeResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1295,7 +1480,7 @@ class PermissionLegalNoticeResponse:
     select one for the recipient.
     """
     default_notice: Optional[
-        List[LegalNoticeResponse]
+        List[LegalNoticeResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1322,15 +1507,20 @@ class AccessResponse:
     Definition: AccessResponse
     """
 
-    authentication: Optional[AuthenticationResponse] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        AuthenticationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     authentication_signing: Optional[
-        AuthenticationSigningResponse
+        AuthenticationSigningResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     access_duration: Optional[
-        PermissionAccessDurationResponse
+        PermissionAccessDurationResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1345,9 +1535,24 @@ class AuthenticationResponse:
 
     enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AccessSecurityPasswordResponse] = dataclass_field(default=None, kw_only=True)
-    sms_otp: Optional[AccessSecuritySmsOtpResponse] = dataclass_field(default=None, kw_only=True)
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    password: Optional[
+        AccessSecurityPasswordResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        AccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1400,12 +1605,17 @@ class AuthenticationSigningResponse:
     enabled: bool
     """True, if authentication is enabled for the package."""
     sms_otp: Optional[
-        AuthenticationSigningSmsOtpResponse
+        AuthenticationSigningSmsOtpResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1434,13 +1644,13 @@ class PermissionAccessDurationResponse:
     enabled: bool
     """True, if access duration security is enabled for the package."""
     duration_by_date: Optional[
-        AccessDurationByDateResponse
+        AccessDurationByDateResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     duration_by_days: Optional[
-        AccessDurationByDaysResponse
+        AccessDurationByDaysResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1456,7 +1666,12 @@ class AccessDurationByDateResponse:
     enabled: bool
     """True if access security is enabled for a duration by date and time."""
     accessible: bool
-    duration: Optional[DurationByDateResponse] = dataclass_field(default=None, kw_only=True)
+    duration: Optional[
+        DurationByDateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1485,7 +1700,12 @@ class AccessDurationByDaysResponse:
     enabled: bool
     """True, if access security is enabled for a duration by number of days."""
     accessible: bool
-    duration: Optional[DurationByDaysResponse] = dataclass_field(default=None, kw_only=True)
+    duration: Optional[
+        DurationByDaysResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1531,14 +1751,14 @@ class AccessUpdateRequest:
     True, if the access security or authentications are to be applied on all
     the recipients in the workflow.
     """
-    authentication: AccessAuthentication
+    authentication: AccessAuthentication | Mapping[str, Any]
     authentication_signing: Optional[
-        SigningAuthentication
+        SigningAuthentication | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    access_duration: PermissionAccessDuration
+    access_duration: PermissionAccessDuration | Mapping[str, Any]
 
 
 @dataclass
@@ -1549,9 +1769,24 @@ class AccessAuthentication:
 
     enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AuthenticationPassword] = dataclass_field(default=None, kw_only=True)
-    sms_otp: Optional[AuthenticationSmsOtp] = dataclass_field(default=None, kw_only=True)
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    password: Optional[
+        AuthenticationPassword | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        AuthenticationSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1593,8 +1828,18 @@ class SigningAuthentication:
 
     enabled: bool
     """True, if authentication is enabled for the package."""
-    sms_otp: Optional[AuthenticationSigningSmsOtp] = dataclass_field(default=None, kw_only=True)
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    sms_otp: Optional[
+        AuthenticationSigningSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1618,8 +1863,18 @@ class PermissionAccessDuration:
 
     enabled: bool
     """True, if access duration security is enabled for the package."""
-    duration_by_date: Optional[AccessDurationByDate] = dataclass_field(default=None, kw_only=True)
-    duration_by_days: Optional[AccessDurationByDays] = dataclass_field(default=None, kw_only=True)
+    duration_by_date: Optional[
+        AccessDurationByDate | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    duration_by_days: Optional[
+        AccessDurationByDays | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1630,7 +1885,12 @@ class AccessDurationByDate:
 
     enabled: bool
     """True if access security is enabled for a duration by date and time."""
-    duration: Optional[DurationByDate] = dataclass_field(default=None, kw_only=True)
+    duration: Optional[
+        DurationByDate | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1658,7 +1918,12 @@ class AccessDurationByDays:
 
     enabled: bool
     """True, if access security is enabled for a duration by number of days."""
-    duration: Optional[DurationByDays] = dataclass_field(default=None, kw_only=True)
+    duration: Optional[
+        DurationByDays | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1687,16 +1952,21 @@ class QrCodeRequest:
     Name of the provided field that is to be added. If not provided, system
     will assign an unique auto generated name to the field.
     """
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
     data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = dataclass_field(default=None, kw_only=True)
-    color: Optional[QrCodeColor] = dataclass_field(default=None, kw_only=True)
-    logo: Optional[QrCodeLogo] = dataclass_field(default=None, kw_only=True)
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1799,8 +2069,18 @@ class SignatureFieldAuthentication:
 
     enabled: bool
     """True, if authentication is enabled for the field.  False otherwise."""
-    otp: Optional[SignatureFieldAuthenticationOtp] = dataclass_field(default=None, kw_only=True)
-    totp: Optional[SignatureFieldAuthenticationTotp] = dataclass_field(default=None, kw_only=True)
+    otp: Optional[
+        SignatureFieldAuthenticationOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        SignatureFieldAuthenticationTotp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1842,16 +2122,21 @@ class UpdateQrCodeRequest:
     """Updated name of the field if renaming is intended."""
     page_no: int
     """Page number for which field is need to be updated"""
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
     data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = dataclass_field(default=None, kw_only=True)
-    color: Optional[QrCodeColor] = dataclass_field(default=None, kw_only=True)
-    logo: Optional[QrCodeLogo] = dataclass_field(default=None, kw_only=True)
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1861,7 +2146,12 @@ class FieldValidationValue:
     """
 
     required: bool
-    rules: Optional[List[FieldValidationValueRule]] = dataclass_field(default=None, kw_only=True)
+    rules: Optional[
+        List[FieldValidationValueRule | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1897,7 +2187,7 @@ class PostProcessResponse:
     is completed.
     """
     recipients: Optional[
-        List[PostProcessRecipientResponse]
+        List[PostProcessRecipientResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -2008,7 +2298,12 @@ class UpdateCertifyPolicyRequest:
     Definition: UpdateCertifyPolicyRequest
     """
 
-    certify: Optional[CertifyPolicyRequest] = dataclass_field(default=None, kw_only=True)
+    certify: Optional[
+        CertifyPolicyRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     lock_form_fields: bool
     """
     True if form fields are to be locked after the last signature on the
@@ -2116,7 +2411,7 @@ class WorkflowGatekeeperResponse:
     """
 
     emails: Optional[
-        List[WorkflowGatekeeperUserResponse]
+        List[WorkflowGatekeeperUserResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -2141,14 +2436,24 @@ class EnterpriseAuthenticationResponse:
 
     enabled: bool
     """True, if authentication is enabled for the package."""
-    password: Optional[AccessSecurityPasswordResponse] = dataclass_field(default=None, kw_only=True)
-    sms_otp: Optional[
-        EnterpriseAccessSecuritySmsOtpResponse
+    password: Optional[
+        AccessSecurityPasswordResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    sms_otp: Optional[
+        EnterpriseAccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2177,12 +2482,17 @@ class EnterpriseAuthenticationSigningResponse:
     enabled: bool
     """True, if authentication is enabled for the package."""
     sms_otp: Optional[
-        EnterpriseAuthenticationSigningSmsOtpResponse
+        EnterpriseAuthenticationSigningSmsOtpResponse | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    totp: Optional[TotpPermissionResponse] = dataclass_field(default=None, kw_only=True)
+    totp: Optional[
+        TotpPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2312,8 +2622,18 @@ class ServicePlanAutoDeleteDocument:
     """True, If auto deletion of the unused documents is enabled."""
     duration: int
     """Total number of unused days.             """
-    notify: Optional[NotifyUnUsedDeleteDocument] = dataclass_field(default=None, kw_only=True)
-    email_document: Optional[EmailDeletedDocument] = dataclass_field(default=None, kw_only=True)
+    notify: Optional[
+        NotifyUnUsedDeleteDocument | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    email_document: Optional[
+        EmailDeletedDocument | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2353,45 +2673,60 @@ class ServicePlanSigningServer:
     """Key location of the signing server, possible values are SERVER, LOCAL"""
     order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Signing server order"""
-    signing_profile: Optional[ServicePlanProfile] = dataclass_field(default=None, kw_only=True)
-    electronic_seal: Optional[SigningServerCapacity] = dataclass_field(default=None, kw_only=True)
+    signing_profile: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     advanced_electronic_seal: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     qualified_electronic_seal: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     advanced_electronic_signature: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     high_trust_advanced_signature: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     qualified_electronic_signature: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     signature_appearances: Optional[
-        SigningServerSignatureAppearance
+        SigningServerSignatureAppearance | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    csp: Optional[SigningServerCsp] = dataclass_field(default=None, kw_only=True)
+    csp: Optional[
+        SigningServerCsp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2414,7 +2749,12 @@ class SigningServerCapacity:
 
     enabled: bool
     """True, If to add the Signing Capacities."""
-    capacities: Optional[List[ServicePlanCapacity]] = dataclass_field(default=None, kw_only=True)
+    capacities: Optional[
+        List[ServicePlanCapacity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Total number of Signing Capacities added are signing server."""
 
 
@@ -2465,7 +2805,12 @@ class SigningServerCsp:
 
     enabled: bool
     """True, If to add Push Certificates to CSP."""
-    virtual_profile: Optional[ServicePlanProfile] = dataclass_field(default=None, kw_only=True)
+    virtual_profile: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     auto_delete_certificates: bool
     """
     True, If Automatically delete certificates and users from CSP when user is
@@ -2480,20 +2825,25 @@ class ServicePlanElectronicSealServer:
     """
 
     electronic_seal_profile: Optional[
-        ServicePlanProfile
+        ServicePlanProfile | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    electronic_seal: Optional[SigningServerCapacity] = dataclass_field(default=None, kw_only=True)
+    electronic_seal: Optional[
+        SigningServerCapacity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     advanced_electronic_seal: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     qualified_electronic_seal: Optional[
-        SigningServerCapacity
+        SigningServerCapacity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -2506,9 +2856,19 @@ class ServicePlanAuthenticationProfile:
     Definition: ServicePlanAuthenticationProfile
     """
 
-    allowed: Optional[List[ServicePlanProfile]] = dataclass_field(default=None, kw_only=True)
+    allowed: Optional[
+        List[ServicePlanProfile | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Allowed authentication profile in service plan"""
-    default: Optional[ServicePlanProfile] = dataclass_field(default=None, kw_only=True)
+    default: Optional[
+        ServicePlanProfile | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2539,8 +2899,18 @@ class ServicePlanOneTimePassword:
     Definition: ServicePlanOneTimePassword
     """
 
-    email_otp: Optional[ServicePlanEmailOtp] = dataclass_field(default=None, kw_only=True)
-    sms_otp: Optional[ServicePlanSmsOtp] = dataclass_field(default=None, kw_only=True)
+    email_otp: Optional[
+        ServicePlanEmailOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    sms_otp: Optional[
+        ServicePlanSmsOtp | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     otp_length: int
     """Character count of OTP to be generated for authentication."""
     otp_expiry: int
@@ -2613,7 +2983,12 @@ class ServicePlanAutoDeleteUser:
     """True, If auto deletion of the inactive users is enabled."""
     inactive_days: int
     """Total number of inactive days.             """
-    notify: Optional[NotifyInactiveDeleteUser] = dataclass_field(default=None, kw_only=True)
+    notify: Optional[
+        NotifyInactiveDeleteUser | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -2674,7 +3049,7 @@ class PostProcessUpdateRequest:
     """True, if post processing is turned on for the package."""
     contacts: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     recipients: Optional[
-        List[PostProcessRecipientRequest]
+        List[PostProcessRecipientRequest | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -2794,7 +3169,12 @@ class WorkflowResponse:
     the end users to make any changes to this workflow in draft state and this
     workflow is to be shared as it is.
     """
-    post_process: Optional[PostProcessResponse] = dataclass_field(default=None, kw_only=True)
+    post_process: Optional[
+        PostProcessResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     comments: bool
     """Comments"""
 
@@ -2832,8 +3212,18 @@ class WorkflowDocumentsResponse:
     """The date and time on which the document was last modified."""
     form_fields: bool
     """True, if document has form fields."""
-    template: Optional[DocumentsTemplateResponse] = dataclass_field(default=None, kw_only=True)
-    certify: Optional[CertifyResponse] = dataclass_field(default=None, kw_only=True)
+    template: Optional[
+        DocumentsTemplateResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    certify: Optional[
+        CertifyResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     lock_form_fields: bool
     """
     True, if document is set to lock the form fields with the last digital
@@ -2909,7 +3299,12 @@ class WorkflowUserResponse:
     """Email address of the user who is delegator to this recipient."""
     gatekeeper: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who is gatekeeper to this recipient."""
-    gatekeepers: Optional[WorkflowGatekeeperResponse] = dataclass_field(default=None, kw_only=True)
+    gatekeepers: Optional[
+        WorkflowGatekeeperResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     role: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Role of the recipient i.e., \"SIGNER\", \"REVIEWER\",
@@ -2937,9 +3332,24 @@ class WorkflowUserResponse:
     """
     placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Placeholder text if the recipient is a placeholder."""
-    permission: Optional[WorkflowPermissionResponse] = dataclass_field(default=None, kw_only=True)
-    authentications: Optional[AccessResponse] = dataclass_field(default=None, kw_only=True)
-    reminder: Optional[ReminderResponse] = dataclass_field(default=None, kw_only=True)
+    permission: Optional[
+        WorkflowPermissionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    authentications: Optional[
+        AccessResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    reminder: Optional[
+        ReminderResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     signing_order: int
     """
     Order in which the workflow will be signed by the recipients. This signing
@@ -2954,7 +3364,12 @@ class WorkflowUserResponse:
     """Gest user"""
     email_language_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email language code"""
-    electronic_seal: Optional[ElectronicSealRecipient] = dataclass_field(default=None, kw_only=True)
+    electronic_seal: Optional[
+        ElectronicSealRecipient | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3076,7 +3491,12 @@ class RecipientDeclineDetails:
     """Define reason of document decline"""
     auto_decline: bool
     """Indication of document is manually/auto declined """
-    declined_by: Optional[DeclineByDetails] = dataclass_field(default=None, kw_only=True)
+    declined_by: Optional[
+        DeclineByDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3280,7 +3700,12 @@ class BulkSignRequest:
     Name of certification profile/signing capacity using which the document is
     to be signed
     """
-    authentication: Optional[BulkSignAuthentication] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        BulkSignAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     transaction_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """re-initiated signing process transaction id"""
 
@@ -3347,7 +3772,7 @@ class BulkSignPackagesStatus:
     error: Optional[str] = dataclass_field(default=None, kw_only=True)
     percentage: int
     documents: Optional[
-        List[BulkSignActionDocumentModel]
+        List[BulkSignActionDocumentModel | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3362,7 +3787,12 @@ class BulkSignActionDocumentModel:
     """
 
     id: int
-    fields: Optional[List[BulkSignActionFieldModel]] = dataclass_field(default=None, kw_only=True)
+    fields: Optional[
+        List[BulkSignActionFieldModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3441,7 +3871,12 @@ class SignDocumentRequest:
     """
     signing_server: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of signing server using which the document is to be signed."""
-    authentication: Optional[Authentication] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        Authentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3525,7 +3960,12 @@ class AutoPlaceFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    dimensions: Optional[FieldDimension] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Provide note in the case of Mandatory Attachment"""
     radio_group_name: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -3554,8 +3994,13 @@ class AutoPlaceFieldRequest:
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[FieldValidationValue] = dataclass_field(default=None, kw_only=True)
-    font: Optional[Font] = dataclass_field(default=None, kw_only=True)
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[Font | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     multiline: bool
     """
     This belongs to Text Area field type and If set to true, text area field
@@ -3596,25 +4041,40 @@ class FormFillingRequest:
     Signing, Initials, In-persons, Reviewing, Submit actions the value is
     false.
     """
-    text: Optional[List[TextFormFillingRequest]] = dataclass_field(default=None, kw_only=True)
+    text: Optional[
+        List[TextFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of textboxes data to save"""
-    radio: Optional[List[RadioFormFillingRequest]] = dataclass_field(default=None, kw_only=True)
+    radio: Optional[
+        List[RadioFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of radios value to save"""
     checkbox: Optional[
-        List[CheckBoxFormFillingRequest]
+        List[CheckBoxFormFillingRequest | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """It has the list of checkboxes value to save"""
     dropdown: Optional[
-        List[DropDownFormFillingRequest]
+        List[DropDownFormFillingRequest | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """It has the list of dropdowns value to save"""
-    listbox: Optional[List[ListBoxFormFillingRequest]] = dataclass_field(default=None, kw_only=True)
+    listbox: Optional[
+        List[ListBoxFormFillingRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """It has the list of listboxes value to save"""
 
 
@@ -3695,7 +4155,7 @@ class InitialFieldRequest:
     Name of the field that is to be added. If not provided, system will assign
     an unique auto generated name to the field.
     """
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -3725,7 +4185,7 @@ class UpdateInitialFieldRequest:
     """Updated name of the field if renaming is intended."""
     page_no: int
     """Page number on which the field is to be created."""
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -3748,7 +4208,7 @@ class InPersonFieldRequest:
     String identifier for the inperson field, it can be Customer, Jack, CEO
     etc.
     """
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be added, possible values are
@@ -3761,7 +4221,7 @@ class InPersonFieldRequest:
     \"ELECTRONIC_SIGNATURE\"
     """
     authentication_signing: Optional[
-        SignatureFieldAuthentication
+        SignatureFieldAuthentication | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3785,7 +4245,12 @@ class UpdateInPersonFieldRequest:
     String identifier for the in-person field, it can be Customer, Jack, CEO
     etc.
     """
-    dimensions: Optional[FieldDimension] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be updated, possible values are
@@ -3798,7 +4263,7 @@ class UpdateInPersonFieldRequest:
     \"ELECTRONIC_SIGNATURE\"
     """
     authentication_signing: Optional[
-        SignatureFieldAuthentication
+        SignatureFieldAuthentication | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3828,14 +4293,19 @@ class DigitalSignatureFieldRequest:
     \"ADVANCED_ELECTRONIC_SIGNATURE\", \"HIGH_TRUST_ADVANCED\",
     \"QUALIFIED_ELECTRONIC_SIGNATURE\"
     """
-    dimensions: Optional[FieldDimension] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be added, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
     authentication_signing: Optional[
-        SignatureFieldAuthentication
+        SignatureFieldAuthentication | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3862,14 +4332,19 @@ class UpdateDigitalSignatureFieldRequest:
     """Updated name of the field if renaming of the field is intended."""
     page_no: int
     """Page number on which the field is to be created."""
-    dimensions: Optional[FieldDimension] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Visibility of the field that is to be updated, possible values are
     \"VISIBLE\" and \"INVISIBLE\"
     """
     authentication_signing: Optional[
-        SignatureFieldAuthentication
+        SignatureFieldAuthentication | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3893,7 +4368,7 @@ class CheckBoxFieldRequest:
     """
     value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
     validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
@@ -3915,7 +4390,7 @@ class UpdateCheckBoxFieldRequest:
     """Page number on which the field is to be created."""
     value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the field. Possible values are \"true\" or \"false\""""
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
     validation_rule: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     One or more rules for validation of the fields possible values are
@@ -3971,9 +4446,14 @@ class TextBoxFieldRequest:
     """
     field_type: FieldType
     validation_rule: ValidationRule
-    validation: Optional[FieldValidationValue] = dataclass_field(default=None, kw_only=True)
-    font: Font
-    dimensions: FieldDimension
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Font | Mapping[str, Any]
+    dimensions: FieldDimension | Mapping[str, Any]
     multiline: bool
     """If set to true, text area field would be created"""
 
@@ -4003,8 +4483,13 @@ class UpdateTextBoxFieldRequest:
     """
     field_type: FieldType
     validation_rule: ValidationRule
-    font: Optional[Font] = dataclass_field(default=None, kw_only=True)
-    dimensions: Optional[FieldDimension] = dataclass_field(default=None, kw_only=True)
+    font: Optional[Font | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimension | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     placeholder: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Developers can provide a their own placeholder texts. These placeholders
@@ -4020,7 +4505,12 @@ class UpdateTextBoxFieldRequest:
     <li>mmm-yyyy</li> <li>mmmm-yy</li> <li>mmmm-yyyy</li> <li>mmmm d, yyyy</li>
     <li>dd/mm/yy</li> <li>ddmmmyyyy</li></ul>
     """
-    validation: Optional[FieldValidationValue] = dataclass_field(default=None, kw_only=True)
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4042,7 +4532,7 @@ class RadioBoxFieldRequest:
     """Value of the field. Possible values are \"true\" or \"false\""""
     validation_rule: ValidationRule
     radio_group_name: str
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 @dataclass
@@ -4062,7 +4552,7 @@ class UpdateRadioBoxFieldRequest:
     validation_rule: ValidationRule
     radio_group_name: str
     """The group name to which the field belongs."""
-    dimensions: FieldDimension
+    dimensions: FieldDimension | Mapping[str, Any]
 
 
 ContactSortBy = Literal["CREATEDON", "NAME", "EMAIL"]
@@ -4138,7 +4628,7 @@ class WorkflowPermissionsUpdateRequest:
     True, if the permissions are to be applied on all the recipients in the
     workflow.
     """
-    permissions: WorkflowPermission
+    permissions: WorkflowPermission | Mapping[str, Any]
 
 
 @dataclass
@@ -4162,8 +4652,18 @@ class WorkflowPermission:
     It defines whether recipient is allowed to add attachments in the PDF
     document.
     """
-    legal_notice: Optional[PermissionLegalNotice] = dataclass_field(default=None, kw_only=True)
-    attachment: Optional[AttachmentPermissionRequest] = dataclass_field(default=None, kw_only=True)
+    legal_notice: Optional[
+        PermissionLegalNotice | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    attachment: Optional[
+        AttachmentPermissionRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4209,7 +4709,7 @@ class DocumentLogsActions:
     belong to an enterprise, then this element is not present.
     """
     information: Optional[
-        DocumentLogsActionsInformation
+        DocumentLogsActionsInformation | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -4313,7 +4813,12 @@ class UpdateReminderRequest:
     Required, in case of enabled property will true. The number of days after
     which the first reminder would be sent to workflow user.
     """
-    repeat: Optional[RepeatRequest] = dataclass_field(default=None, kw_only=True)
+    repeat: Optional[
+        RepeatRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4417,7 +4922,12 @@ class UpdateWorkSpaceRequest:
 
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of shared space"""
-    members: Optional[List[WorkSpaceMembers]] = dataclass_field(default=None, kw_only=True)
+    members: Optional[
+        List[WorkSpaceMembers | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Members of shared space"""
 
 
@@ -4475,8 +4985,18 @@ class DigitalSignatureFieldResponse:
     """Date time on which the field is added"""
     processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
-    verification: Optional[VerificationResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     nid: Optional[str] = dataclass_field(default=None, kw_only=True)
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
@@ -4484,7 +5004,12 @@ class DigitalSignatureFieldResponse:
     values are \"VISIBLE\" and \"INVISIBLE\".
     """
     level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
-    authentication: Optional[FieldAuthentication] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4493,8 +5018,8 @@ class FieldDimenssionResponse:
     Definition: FieldDimenssionResponse
     """
 
-    field: Optional[FieldResponse] = dataclass_field(default=None, kw_only=True)
-    page: Optional[PageResponse] = dataclass_field(default=None, kw_only=True)
+    field: Optional[FieldResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    page: Optional[PageResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -4535,8 +5060,18 @@ class FieldAuthentication:
     """
     True, if authentications are enabled for the electronic signature fields.
     """
-    sms_otp: Optional[AccessSecuritySmsOtpResponse] = dataclass_field(default=None, kw_only=True)
-    totp: Optional[AccessSecurityTOTPResponse] = dataclass_field(default=None, kw_only=True)
+    sms_otp: Optional[
+        AccessSecuritySmsOtpResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    totp: Optional[
+        AccessSecurityTOTPResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4591,7 +5126,12 @@ class HandSignatureFieldResponse:
     """
     processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     nid: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
@@ -4634,7 +5174,12 @@ class ElectronicSignatureFieldResponse:
     """
     processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     signature_sub_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The signature sub-type can be a WITNESS signature. If witness signatures
@@ -4642,8 +5187,18 @@ class ElectronicSignatureFieldResponse:
     certificate shared by all the users in the service plan. Possible values
     are WITNESS or NONE.
     """
-    authentication: Optional[FieldAuthentication] = dataclass_field(default=None, kw_only=True)
-    verification: Optional[VerificationResponse] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     nid: Optional[str] = dataclass_field(default=None, kw_only=True)
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
@@ -4683,7 +5238,12 @@ class InitialFieldResponse:
     """
     processed_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address of the user who processed the field."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     embedded: bool
     """True, if field is part of the PDF document."""
 
@@ -4738,8 +5298,18 @@ class InPersonFieldResponse:
     signed with a common certificate shared by all the users in the service
     plan. Possible values are WITNESS or NONE.
     """
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
-    verification: Optional[VerificationResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    verification: Optional[
+        VerificationResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     display: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Returns the visibility value of the inperson field, possible values are
@@ -4747,7 +5317,12 @@ class InPersonFieldResponse:
     """
     level_of_assurance: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """In Person selected level of assurances"""
-    authentication: Optional[FieldAuthentication] = dataclass_field(default=None, kw_only=True)
+    authentication: Optional[
+        FieldAuthentication | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4797,12 +5372,17 @@ class TextFieldResponse:
     One or more rules for validation of the fields, possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    validation: Optional[FieldValidationValue] = dataclass_field(default=None, kw_only=True)
+    validation: Optional[
+        FieldValidationValue | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     visible: bool
     """True, if the field is not hidden in the PDF document."""
     multiline: bool
     """True, if the field is multi line in the PDF document."""
-    font: Optional[FontResponse] = dataclass_field(default=None, kw_only=True)
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     max_length: int
     """Maximum content length allowed to be filled in the field."""
     format_type: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -4835,7 +5415,12 @@ class TextFieldResponse:
     Text alignment for the form field. Possible values are \"RIGHT\", \"LEFT\",
     \"CENTER\" or \"JUSTIFY\"
     """
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -4881,7 +5466,12 @@ class RadioFieldResponse:
     """True, if the field is selected"""
     visible: bool
     """True if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
     border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -4933,7 +5523,12 @@ class CheckboxFieldResponse:
     One or more rules for validation of the fields possible values are
     \"MANDATORY\" or \"OPTIONAL\".
     """
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
     border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -4980,8 +5575,13 @@ class DropdownFieldResponse:
     """Choices available for the dropdown to choose a value from."""
     visible: bool
     """True, if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
-    font: Optional[FontResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
     border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -5026,8 +5626,13 @@ class ListBoxFieldResponse:
     """Choices available for the dropdown to choose a value from."""
     visible: bool
     """True, if the field is not hidden in the PDF document."""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
-    font: Optional[FontResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Color of the text in the form fields."""
     border_color: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -5074,16 +5679,26 @@ class QrCodeResponse:
     """Page number of the document on which the field exists."""
     value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """QrCode generated base64 will be provided inly in draft mode"""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     data: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The plain text data to be encoded in the QR code. Default is URL generated
     to access the related document. e.g.
     {base_url}/document/{document_unique_id}
     """
-    options: Optional[QrCodeOptions] = dataclass_field(default=None, kw_only=True)
-    color: Optional[QrCodeColor] = dataclass_field(default=None, kw_only=True)
-    logo: Optional[QrCodeLogo] = dataclass_field(default=None, kw_only=True)
+    options: Optional[
+        QrCodeOptions | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    color: Optional[QrCodeColor | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    logo: Optional[QrCodeLogo | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -5123,7 +5738,12 @@ class AttachmentFieldResponse:
     note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachmet note Only in case of \"MANDATORY\" attachment rule"""
     validation_rule: ValidationRule
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -5141,13 +5761,18 @@ class CommentFieldResponse:
     private: bool
     """Private"""
     recipients: Optional[
-        List[CommentFieldRecipientResponse]
+        List[CommentFieldRecipientResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """Recipients"""
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -5162,8 +5787,13 @@ class UniqueIdentifierFieldResponse:
     """Value of the field."""
     page_no: int
     """Page number of the document on which the field exists."""
-    font: Optional[FontResponse] = dataclass_field(default=None, kw_only=True)
-    dimensions: Optional[FieldDimenssionResponse] = dataclass_field(default=None, kw_only=True)
+    font: Optional[FontResponse | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    dimensions: Optional[
+        FieldDimenssionResponse | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -5274,7 +5904,7 @@ class SigninghubClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -5341,6 +5971,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -5525,7 +6158,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def checkbox_add_check_box(
         self,
-        input: CheckBoxFieldRequest,
+        input: CheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5586,7 +6219,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def checkbox_update_check_box(
         self,
-        input: UpdateCheckBoxFieldRequest,
+        input: UpdateCheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5760,6 +6393,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5915,7 +6551,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def documents_rename_document(
         self,
-        input: RenameDocumentRequest,
+        input: RenameDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -5962,7 +6598,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def documents_update_certify_policy(
         self,
-        input: UpdateCertifyPolicyRequest,
+        input: UpdateCertifyPolicyRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6169,7 +6805,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def enterprise_documents_update_enterprise_workflow_access(
         self,
-        input: AccessUpdateRequest,
+        input: AccessUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -6278,7 +6914,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def list_fields_auto_place(
         self,
-        input: AutoPlaceFieldRequest,
+        input: AutoPlaceFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6371,7 +7007,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def fields_delete_document_field(
         self,
-        input: DeleteDocumentFieldRequest,
+        input: DeleteDocumentFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6404,6 +7040,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6419,7 +7058,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def fields_fill_form_fields(
         self,
-        input: FormFillingRequest,
+        input: FormFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6516,7 +7155,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def folder_move_package(
         self,
-        input: MoveToRequest,
+        input: MoveToRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6558,7 +7197,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def initials_add_initial(
         self,
-        input: InitialFieldRequest,
+        input: InitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6615,7 +7254,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def initials_fill(
         self,
-        input: InitialFillingRequest,
+        input: InitialFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6663,7 +7302,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def initials_update_initial(
         self,
-        input: UpdateInitialFieldRequest,
+        input: UpdateInitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6718,7 +7357,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def in_person_add_in_person(
         self,
-        input: InPersonFieldRequest,
+        input: InPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6784,7 +7423,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def in_person_update_in_person(
         self,
-        input: UpdateInPersonFieldRequest,
+        input: UpdateInPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -6840,7 +7479,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_add_package(
         self,
-        input: AddDocumentPackageRequest,
+        input: AddDocumentPackageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6883,7 +7522,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6925,7 +7564,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -6996,6 +7635,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -7136,7 +7778,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_gatekeeper_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -7182,7 +7824,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_gatekeeper_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -7468,7 +8110,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def package_rename_package(
         self,
-        input: RenameDocumentPackageRequest,
+        input: RenameDocumentPackageRequest | Mapping[str, Any],
         package_id_bulk_action: int,
         *,
         timeout: Optional[float] = None,
@@ -7557,7 +8199,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def qr_add_qr_code(
         self,
-        input: QrCodeRequest,
+        input: QrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7606,7 +8248,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def qr_update_qr_code(
         self,
-        input: UpdateQrCodeRequest,
+        input: UpdateQrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7655,7 +8297,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def radio_add_radio_box(
         self,
-        input: RadioBoxFieldRequest,
+        input: RadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7716,7 +8358,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def radio_update_radio_box(
         self,
-        input: UpdateRadioBoxFieldRequest,
+        input: UpdateRadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7857,7 +8499,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def signature_add_signature(
         self,
-        input: DigitalSignatureFieldRequest,
+        input: DigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7915,7 +8557,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def signature_update_signature(
         self,
-        input: UpdateDigitalSignatureFieldRequest,
+        input: UpdateDigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -7971,7 +8613,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def signing_bulk_sign_documents(
         self,
-        input: BulkSignRequest,
+        input: BulkSignRequest | Mapping[str, Any],
         package_id_bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -8048,7 +8690,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def signing_bulk_sign_status(
         self,
-        input: BulkSignStatusRequest,
+        input: BulkSignStatusRequest | Mapping[str, Any],
         bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -8106,7 +8748,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def signing_sign_document(
         self,
-        input: SignDocumentRequest,
+        input: SignDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -8287,7 +8929,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def text_box_add_text_box(
         self,
-        input: TextBoxFieldRequest,
+        input: TextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -8344,7 +8986,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def text_box_update_text_box(
         self,
-        input: UpdateTextBoxFieldRequest,
+        input: UpdateTextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -8399,7 +9041,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_apply_template(
         self,
-        input: ApplyTemplateRequest,
+        input: ApplyTemplateRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -8803,7 +9445,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_permission_update_workflow_permissions(
         self,
-        input: WorkflowPermissionsUpdateRequest,
+        input: WorkflowPermissionsUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -8882,6 +9524,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -8963,7 +9608,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_update_workflow(
         self,
-        input: WorkflowDetailUpdateRequest,
+        input: WorkflowDetailUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -9008,7 +9653,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_update_workflow_post_process(
         self,
-        input: PostProcessUpdateRequest,
+        input: PostProcessUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -9054,7 +9699,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_update_workflow_reminder(
         self,
-        input: UpdateReminderRequest,
+        input: UpdateReminderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -9371,6 +10016,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -9386,7 +10034,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_workflow_update_placeholder(
         self,
-        input: WorkflowPlaceholderUpdateRequest,
+        input: WorkflowPlaceholderUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -9440,7 +10088,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_workflow_user_update(
         self,
-        input: WorkflowUserUpdateRequest,
+        input: WorkflowUserUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -9495,7 +10143,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def workflow_workflow_user_update_order(
         self,
-        input: WorkflowUserReorderRequest,
+        input: WorkflowUserReorderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -9571,6 +10219,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -9628,7 +10279,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def work_space_update_shared_space(
         self,
-        input: UpdateWorkSpaceRequest,
+        input: UpdateWorkSpaceRequest | Mapping[str, Any],
         id: int,
         *,
         timeout: Optional[float] = None,

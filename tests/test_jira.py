@@ -187,7 +187,7 @@ class TestListIssuesAsync:
                 arguments = {"jql": "project = DEMO"}
                 if fields is not None:
                     arguments["fields"] = fields
-                await client.list_issues(**arguments)
+                await resolve_generated_result(client.list_issues(**arguments))
 
             transport.assert_awaited_once()
             method, request_url = transport.await_args.args
@@ -200,7 +200,7 @@ class TestListIssuesAsync:
 
     @pytest.mark.asyncio
     async def test_named_continuation_token_keeps_its_query_binding(self, mock_credential):
-        """Test callers can retain token binding by using the existing named parameter."""
+        """Test callers can resume paging with an Azure Core continuation URL."""
         async with JiraClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -211,7 +211,14 @@ class TestListIssuesAsync:
                 new_callable=AsyncMock,
                 return_value=MockResponse(status=200, text='{"issues": []}'),
             ) as transport:
-                await client.list_issues(next_page_token="page/2")
+                continuation_url = (
+                    "https://example.azure.com/connections/test/2/search"
+                    "?nextPageToken=page%2F2"
+                )
+                pages = client.list_issues().by_page(
+                    continuation_token=continuation_url
+                )
+                await anext(pages)
 
             request_url = transport.await_args.args[1]
             assert "nextPageToken=page%2F2" in request_url
@@ -235,9 +242,11 @@ class TestListIssuesAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_issues(
-                jql="created >= -3650d",
-                fields="summary,status",
+            result = await resolve_generated_result(
+                client.list_issues(
+                    jql="created >= -3650d",
+                    fields="summary,status",
+                )
             )
 
             mock_send.assert_called_once()
@@ -247,8 +256,7 @@ class TestListIssuesAsync:
             assert "jql=created%20%3E%3D%20-3650d" in path
             assert "fields=summary%2Cstatus" in path
             assert "fields=%2Aall" not in path
-            assert result is not None
-            assert "issues" in result
+            assert result == [{"key": "PROJ-1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -269,7 +277,7 @@ class TestListIssuesAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_issues()
+                await resolve_generated_result(client.list_issues())
 
 
 class TestCreateIssueAsync:

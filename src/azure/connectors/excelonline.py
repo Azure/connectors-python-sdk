@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -64,13 +64,13 @@ class TableMetadata:
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
-    referenced_entities: Optional[ObjectEntity] = dataclass_field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "referencedEntities"},
@@ -89,7 +89,12 @@ class ItemsList:
     Response for List rows present in a table
     """
 
-    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Items"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -105,7 +110,7 @@ class Item:
     Response for Get a row
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
@@ -118,7 +123,12 @@ class GetAllWorksheetsResponse:
     Response for Get worksheets
     """
 
-    value: Optional[List[WorksheetMetadata]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[WorksheetMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -171,8 +181,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
-    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -259,17 +279,23 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
@@ -367,7 +393,12 @@ class TablesList:
     Definition: TablesList
     """
 
-    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Tables"""
 
 
@@ -389,7 +420,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
@@ -516,7 +547,7 @@ class ExcelonlineClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -550,7 +581,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
     def create_table(
         self,
-        input: TableToCreate,
+        input: TableToCreate | Mapping[str, Any],
         drive: str,
         file: str,
         *,
@@ -880,6 +911,9 @@ class ExcelonlineClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -890,7 +924,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
     def patch_item(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         drive: str,
         file: str,
         table: str,
@@ -1032,7 +1066,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
     def create_worksheet(
         self,
-        input: CreateWorksheetInput,
+        input: CreateWorksheetInput | Mapping[str, Any],
         drive: str,
         file: str,
         *,
@@ -1158,7 +1192,7 @@ class ExcelonlineClient(ConnectorClientBase):
 
     def add_row(
         self,
-        input: Item,
+        input: Item | Mapping[str, Any],
         drive: str,
         file: str,
         table: str,

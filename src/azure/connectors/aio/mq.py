@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -121,7 +121,7 @@ class MqClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -155,7 +155,7 @@ class MqClient(ConnectorClientBase):
 
     async def delete(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -192,7 +192,7 @@ class MqClient(ConnectorClientBase):
 
     def list_delete_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -250,7 +250,7 @@ class MqClient(ConnectorClientBase):
 
     async def read(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -287,7 +287,7 @@ class MqClient(ConnectorClientBase):
 
     def list_read_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -345,7 +345,7 @@ class MqClient(ConnectorClientBase):
 
     async def receive(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -382,7 +382,7 @@ class MqClient(ConnectorClientBase):
 
     def list_receive_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -440,7 +440,7 @@ class MqClient(ConnectorClientBase):
 
     async def send(
         self,
-        input: SendValidDataOptions,
+        input: SendValidDataOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

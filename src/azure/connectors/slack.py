@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -52,7 +52,7 @@ class CreateChannelResponse:
     Response for Create a channel
     """
 
-    channel: Optional[Channel] = dataclass_field(default=None, kw_only=True)
+    channel: Optional[Channel | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -61,7 +61,7 @@ class JoinChannelResponse:
     Response for Join a public channel
     """
 
-    channel: Optional[Channel] = dataclass_field(default=None, kw_only=True)
+    channel: Optional[Channel | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     warning: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Whether the user is already in the channel or not."""
 
@@ -72,7 +72,12 @@ class ListChannelsResponse:
     Response for List public channels (Pagination support)
     """
 
-    value: Optional[List[Channel]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Channel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     next_link: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -226,7 +231,7 @@ class SlackClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -464,7 +469,7 @@ class SlackClient(ConnectorClientBase):
 
     def post_message(
         self,
-        input: PostMessageRequest,
+        input: PostMessageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

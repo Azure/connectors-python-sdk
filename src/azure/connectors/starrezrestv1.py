@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -11622,7 +11622,7 @@ class Starrezrestv1Client(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -11656,7 +11656,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry(
         self,
-        input: SelectEntryInput,
+        input: SelectEntryInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -11714,7 +11714,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_entry(
         self,
-        input: CreateEntryInput,
+        input: CreateEntryInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -11751,7 +11751,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry(
         self,
-        input: UpdateEntryInput,
+        input: UpdateEntryInput | Mapping[str, Any],
         entry_id: int,
         *,
         timeout: Optional[float] = None,
@@ -11835,7 +11835,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry_custom_field(
         self,
-        input: SelectEntryCustomFieldInput,
+        input: SelectEntryCustomFieldInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -11895,7 +11895,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry_custom_field(
         self,
-        input: UpdateEntryCustomFieldInput,
+        input: UpdateEntryCustomFieldInput | Mapping[str, Any],
         entry_custom_field_id: int,
         *,
         timeout: Optional[float] = None,
@@ -11938,7 +11938,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_term(
         self,
-        input: SelectTermInput,
+        input: SelectTermInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -11996,7 +11996,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry_address(
         self,
-        input: SelectEntryAddressInput,
+        input: SelectEntryAddressInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12056,7 +12056,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry_address(
         self,
-        input: UpdateEntryAddressInput,
+        input: UpdateEntryAddressInput | Mapping[str, Any],
         entry_address_id: int,
         *,
         timeout: Optional[float] = None,
@@ -12099,7 +12099,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry_application(
         self,
-        input: SelectEntryApplicationInput,
+        input: SelectEntryApplicationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12159,7 +12159,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_entry_application(
         self,
-        input: CreateEntryApplicationInput,
+        input: CreateEntryApplicationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12198,7 +12198,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry_application(
         self,
-        input: UpdateEntryApplicationInput,
+        input: UpdateEntryApplicationInput | Mapping[str, Any],
         entry_application_id: int,
         *,
         timeout: Optional[float] = None,
@@ -12241,7 +12241,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_term_session(
         self,
-        input: SelectTermSessionInput,
+        input: SelectTermSessionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12299,7 +12299,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry_detail(
         self,
-        input: SelectEntryDetailInput,
+        input: SelectEntryDetailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12357,7 +12357,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry_detail(
         self,
-        input: UpdateEntryDetailInput,
+        input: UpdateEntryDetailInput | Mapping[str, Any],
         entry_detail_id: int,
         *,
         timeout: Optional[float] = None,
@@ -12398,7 +12398,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_entry_enrollment(
         self,
-        input: SelectEntryEnrollmentInput,
+        input: SelectEntryEnrollmentInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12458,7 +12458,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_entry_enrollment(
         self,
-        input: CreateEntryEnrollmentInput,
+        input: CreateEntryEnrollmentInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12497,7 +12497,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_entry_enrollment(
         self,
-        input: UpdateEntryEnrollmentInput,
+        input: UpdateEntryEnrollmentInput | Mapping[str, Any],
         entry_enrollment_id: int,
         *,
         timeout: Optional[float] = None,
@@ -12540,7 +12540,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_booking(
         self,
-        input: SelectBookingInput,
+        input: SelectBookingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12598,7 +12598,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_booking(
         self,
-        input: CreateBookingInput,
+        input: CreateBookingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12635,7 +12635,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_booking(
         self,
-        input: UpdateBookingInput,
+        input: UpdateBookingInput | Mapping[str, Any],
         booking_id: int,
         *,
         timeout: Optional[float] = None,
@@ -12676,7 +12676,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_room_space(
         self,
-        input: SelectRoomSpaceInput,
+        input: SelectRoomSpaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12734,7 +12734,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_room_space(
         self,
-        input: CreateRoomSpaceInput,
+        input: CreateRoomSpaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12771,7 +12771,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_room_location(
         self,
-        input: SelectRoomLocationInput,
+        input: SelectRoomLocationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12831,7 +12831,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_transaction(
         self,
-        input: SelectTransactionInput,
+        input: SelectTransactionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12889,7 +12889,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_transaction(
         self,
-        input: CreateTransactionInput,
+        input: CreateTransactionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12926,7 +12926,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def list_select_room_space_maintenance(
         self,
-        input: SelectRoomSpaceMaintenanceInput,
+        input: SelectRoomSpaceMaintenanceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -12986,7 +12986,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def create_room_space_maintenance(
         self,
-        input: CreateRoomSpaceMaintenanceInput,
+        input: CreateRoomSpaceMaintenanceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -13025,7 +13025,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
     def update_room_space_maintenance(
         self,
-        input: UpdateRoomSpaceMaintenanceInput,
+        input: UpdateRoomSpaceMaintenanceInput | Mapping[str, Any],
         room_space_maintenance_id: int,
         *,
         timeout: Optional[float] = None,

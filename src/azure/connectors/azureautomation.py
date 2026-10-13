@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -63,7 +63,12 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The subscriptions."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -79,7 +84,12 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource groups."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -243,7 +253,7 @@ class AzureautomationClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -387,7 +397,7 @@ class AzureautomationClient(ConnectorClientBase):
 
     def create_job(
         self,
-        input: CreateJobInput,
+        input: CreateJobInput | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         automation_account: str,

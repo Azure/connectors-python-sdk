@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -151,7 +151,7 @@ class WaywedoClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -185,7 +185,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def comment_add(
         self,
-        input: CommentAddInput,
+        input: CommentAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -224,7 +224,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def checklist_instances(
         self,
-        input: ChecklistInstancesInput,
+        input: ChecklistInstancesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -480,7 +480,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def checklist_steps_complete(
         self,
-        input: ChecklistStepsCompleteInput,
+        input: ChecklistStepsCompleteInput | Mapping[str, Any],
         instance_id: str,
         step_id: str,
         *,
@@ -527,7 +527,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def collaborators_add(
         self,
-        input: CollaboratorsAddInput,
+        input: CollaboratorsAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -810,7 +810,7 @@ class WaywedoClient(ConnectorClientBase):
 
     async def users(
         self,
-        input: UsersInput,
+        input: UsersInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

@@ -309,7 +309,7 @@ class TestDeleteDocumentAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text="Not Found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client,
@@ -323,7 +323,7 @@ class TestDeleteDocumentAsync:
                     document_id="doc-1",
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDownloadFileAsync:

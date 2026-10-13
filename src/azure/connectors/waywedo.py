@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -458,7 +458,12 @@ class GetAllChecklistInstancesResponse:
     Response for Get All Checklist Instances
     """
 
-    results: Optional[List[ChecklistInstance]] = dataclass_field(default=None, kw_only=True)
+    results: Optional[
+        List[ChecklistInstance | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of checklist instances."""
     total: Optional[int] = dataclass_field(
         default=None,
@@ -498,7 +503,7 @@ class CompletedStep:
     """The email address of the user that completed the checklist step."""
     due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the checklist step was due."""
-    step: Optional[ChecklistStep] = dataclass_field(default=None, kw_only=True)
+    step: Optional[ChecklistStep | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     decision_choices: Optional[List[str]] = dataclass_field(
         default=None,
         kw_only=True,
@@ -615,7 +620,7 @@ class WaywedoClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -649,7 +654,7 @@ class WaywedoClient(ConnectorClientBase):
 
     def comment_add(
         self,
-        input: CommentAddInput,
+        input: CommentAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -688,7 +693,7 @@ class WaywedoClient(ConnectorClientBase):
 
     def checklist_instances(
         self,
-        input: ChecklistInstancesInput,
+        input: ChecklistInstancesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -944,7 +949,7 @@ class WaywedoClient(ConnectorClientBase):
 
     def checklist_steps_complete(
         self,
-        input: ChecklistStepsCompleteInput,
+        input: ChecklistStepsCompleteInput | Mapping[str, Any],
         instance_id: str,
         step_id: str,
         *,
@@ -991,7 +996,7 @@ class WaywedoClient(ConnectorClientBase):
 
     def collaborators_add(
         self,
-        input: CollaboratorsAddInput,
+        input: CollaboratorsAddInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1274,7 +1279,7 @@ class WaywedoClient(ConnectorClientBase):
 
     def users(
         self,
-        input: UsersInput,
+        input: UsersInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

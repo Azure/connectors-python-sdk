@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -87,7 +87,12 @@ class ListMailboxResponse:
     Response for List Booking Businesses where user is an admin
     """
 
-    mailboxes: Optional[List[MailboxEntity]] = dataclass_field(default=None, kw_only=True)
+    mailboxes: Optional[
+        List[MailboxEntity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """All mailbox entities."""
 
 
@@ -152,7 +157,9 @@ class AppointmentData:
         metadata={"wire_name": "CustomerNotes"},
     )
     """Customer Notes for 1:1 booking."""
-    custom_question_answers: Optional[List[CustomQuestion]] = dataclass_field(
+    custom_question_answers: Optional[
+        List[CustomQuestion | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CustomQuestionAnswers"},
@@ -170,7 +177,7 @@ class AppointmentData:
         metadata={"wire_name": "CustomerTimeZone"},
     )
     """Customer Time Zone for 1:1 booking."""
-    customers: Optional[List[CustomerData]] = dataclass_field(
+    customers: Optional[List[CustomerData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Customers"},
@@ -245,7 +252,7 @@ class AppointmentData:
         metadata={"wire_name": "ServiceNotes"},
     )
     """Service level notes for the staff and admin."""
-    staff_members: Optional[List[StaffMemberData]] = dataclass_field(
+    staff_members: Optional[List[StaffMemberData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "StaffMembers"},
@@ -313,7 +320,7 @@ class CustomerData:
         metadata={"wire_name": "TimeZone"},
     )
     """Timezone of the customer in the group booking."""
-    answers: Optional[List[CustomQuestion]] = dataclass_field(
+    answers: Optional[List[CustomQuestion | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Answers"},
@@ -463,7 +470,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname

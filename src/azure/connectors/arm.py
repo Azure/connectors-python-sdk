@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -81,7 +81,12 @@ class LocationListResult:
     Response for Lists the subscription locations
     """
 
-    value: Optional[List[Location]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Location | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The locations."""
 
 
@@ -116,7 +121,7 @@ class Subscription:
     """The subscription display name."""
     state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = dataclass_field(
+    subscription_policies: Optional[SubscriptionPolicies | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "subscriptionPolicies"},
@@ -139,7 +144,12 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The subscriptions."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -159,7 +169,12 @@ class DeploymentExtended:
     """The ID of the deployment."""
     name: str
     """The name of the deployment."""
-    properties: Optional[DeploymentPropertiesExtended] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[
+        DeploymentPropertiesExtended | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -169,12 +184,17 @@ class DeploymentValidateResult:
     """
 
     error: Optional[
-        ResourceManagementErrorWithDetails
+        ResourceManagementErrorWithDetails | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    properties: Optional[DeploymentPropertiesExtended] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[
+        DeploymentPropertiesExtended | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -193,7 +213,12 @@ class DeploymentListResult:
     Response for List template deployments
     """
 
-    value: Optional[List[DeploymentExtended]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DeploymentExtended | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of deployments."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -218,7 +243,7 @@ class DeploymentOperation:
     )
     """Deployment operation id."""
     properties: Optional[
-        DeploymentOperationProperties
+        DeploymentOperationProperties | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -231,7 +256,12 @@ class DeploymentOperationsListResult:
     Response for Lists template deployment operations
     """
 
-    value: Optional[List[DeploymentOperation]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DeploymentOperation | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of deployments."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -257,7 +287,9 @@ class Provider:
         metadata={"wire_name": "registrationState"},
     )
     """The registration state of the provider."""
-    resource_types: Optional[List[ProviderResourceType]] = dataclass_field(
+    resource_types: Optional[
+        List[ProviderResourceType | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "resourceTypes"},
@@ -271,7 +303,12 @@ class ProviderListResult:
     Response for List resource providers
     """
 
-    value: Optional[List[Provider]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Provider | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource providers."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -287,7 +324,12 @@ class ResourceListResult:
     Response for List resources by resource group
     """
 
-    value: Optional[List[GenericResource]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GenericResource | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resources."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -323,7 +365,12 @@ class ResourceGroup:
     """Id of the resource that manages this resource group."""
     tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The tags attached to the resource group."""
-    properties: Optional[ResourceGroupProperties] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[
+        ResourceGroupProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -335,7 +382,7 @@ class ResourceGroupExportResult:
     template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content."""
     error: Optional[
-        ResourceManagementErrorWithDetails
+        ResourceManagementErrorWithDetails | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -348,7 +395,12 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource groups."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -378,7 +430,7 @@ class GenericResource:
     """Resource location"""
     tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """Resource tags"""
-    plan: Optional[Plan] = dataclass_field(default=None, kw_only=True)
+    plan: Optional[Plan | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     kind: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The kind of the resource."""
     managed_by: Optional[str] = dataclass_field(
@@ -387,8 +439,8 @@ class GenericResource:
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource."""
-    sku: Optional[Sku] = dataclass_field(default=None, kw_only=True)
-    identity: Optional[Identity] = dataclass_field(default=None, kw_only=True)
+    sku: Optional[Sku | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    identity: Optional[Identity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The resource properties."""
 
@@ -459,7 +511,7 @@ class TagValue:
         metadata={"wire_name": "tagValue"},
     )
     """The tag value."""
-    count: Optional[TagCount] = dataclass_field(default=None, kw_only=True)
+    count: Optional[TagCount | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -476,8 +528,13 @@ class TagDetails:
         metadata={"wire_name": "tagName"},
     )
     """The tag name."""
-    count: Optional[TagCount] = dataclass_field(default=None, kw_only=True)
-    values: Optional[List[TagValue]] = dataclass_field(default=None, kw_only=True)
+    count: Optional[TagCount | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    values: Optional[
+        List[TagValue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of tag values."""
 
 
@@ -487,7 +544,12 @@ class TagsListResult:
     Response for List subscription resource tags
     """
 
-    value: Optional[List[TagDetails]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TagDetails | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of tags."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -601,7 +663,7 @@ class DeploymentProperties:
     The template content. It can be a JObject or a well formed JSON string. Use
     only one of Template or TemplateLink.
     """
-    template_link: Optional[TemplateLink] = dataclass_field(
+    template_link: Optional[TemplateLink | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "templateLink"},
@@ -611,14 +673,14 @@ class DeploymentProperties:
     Deployment parameters. It can be a JObject or a well formed JSON string.
     Use only one of Parameters or ParametersLink.
     """
-    parameters_link: Optional[ParametersLink] = dataclass_field(
+    parameters_link: Optional[ParametersLink | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
     mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = dataclass_field(
+    debug_setting: Optional[DebugSetting | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "debugSetting"},
@@ -645,7 +707,12 @@ class Deployment:
     Definition: Deployment
     """
 
-    properties: Optional[DeploymentProperties] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[
+        DeploymentProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -688,7 +755,12 @@ class AliasType:
 
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The alias name."""
-    paths: Optional[List[AliasPathType]] = dataclass_field(default=None, kw_only=True)
+    paths: Optional[
+        List[AliasPathType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The paths for an alias."""
 
 
@@ -708,7 +780,12 @@ class ProviderResourceType:
     """
     The collection of locations where this resource type can be created in.
     """
-    aliases: Optional[List[AliasType]] = dataclass_field(default=None, kw_only=True)
+    aliases: Optional[
+        List[AliasType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The aliases that are supported by this resource type."""
     api_versions: Optional[List[str]] = dataclass_field(
         default=None,
@@ -748,7 +825,7 @@ class Dependency:
     Definition: Dependency
     """
 
-    depends_on: Optional[List[BasicDependency]] = dataclass_field(
+    depends_on: Optional[List[BasicDependency | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dependsOn"},
@@ -792,27 +869,37 @@ class DeploymentPropertiesExtended:
     """The timestamp of the template deployment."""
     outputs: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Key/value pairs that represent deploymentoutput."""
-    providers: Optional[List[Provider]] = dataclass_field(default=None, kw_only=True)
+    providers: Optional[
+        List[Provider | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource providers needed for the deployment."""
-    dependencies: Optional[List[Dependency]] = dataclass_field(default=None, kw_only=True)
+    dependencies: Optional[
+        List[Dependency | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of deployment dependencies."""
     template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content. Use only one of Template or TemplateLink."""
-    template_link: Optional[TemplateLink] = dataclass_field(
+    template_link: Optional[TemplateLink | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "templateLink"},
     )
     parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Deployment parameters. Use only one of Parameters or ParametersLink."""
-    parameters_link: Optional[ParametersLink] = dataclass_field(
+    parameters_link: Optional[ParametersLink | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
     mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = dataclass_field(
+    debug_setting: Optional[DebugSetting | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "debugSetting"},
@@ -998,13 +1085,18 @@ class DeploymentOperationProperties:
         metadata={"wire_name": "statusMessage"},
     )
     """Operation status message."""
-    target_resource: Optional[TargetResource] = dataclass_field(
+    target_resource: Optional[TargetResource | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "targetResource"},
     )
-    request: Optional[HttpMessage] = dataclass_field(default=None, kw_only=True)
-    response: Optional[HttpMessage] = dataclass_field(default=None, kw_only=True)
+    request: Optional[HttpMessage | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    response: Optional[
+        HttpMessage | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1092,7 +1184,7 @@ class ArmClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1361,7 +1453,7 @@ class ArmClient(ConnectorClientBase):
 
     def deployments_create_or_update(
         self,
-        input: Deployment,
+        input: Deployment | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
@@ -1461,6 +1553,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1521,7 +1616,7 @@ class ArmClient(ConnectorClientBase):
 
     def deployments_validate(
         self,
-        input: Deployment,
+        input: Deployment | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
@@ -2244,7 +2339,7 @@ class ArmClient(ConnectorClientBase):
 
     def resource_groups_create_or_update(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2327,6 +2422,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2337,7 +2435,7 @@ class ArmClient(ConnectorClientBase):
 
     def resource_groups_patch(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2387,7 +2485,7 @@ class ArmClient(ConnectorClientBase):
 
     def resource_groups_export_template(
         self,
-        input: ExportTemplateRequest,
+        input: ExportTemplateRequest | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -2672,7 +2770,7 @@ class ArmClient(ConnectorClientBase):
 
     def resources_create_or_update_by_id(
         self,
-        input: GenericResource,
+        input: GenericResource | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -2773,6 +2871,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2783,7 +2884,7 @@ class ArmClient(ConnectorClientBase):
 
     def resources_invoke(
         self,
-        input: ResourcesInvokeInput,
+        input: ResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -2897,7 +2998,7 @@ class ArmClient(ConnectorClientBase):
 
     def provider_resources_invoke(
         self,
-        input: ProviderResourcesInvokeInput,
+        input: ProviderResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_provider_namespace: str,
         short_resource_id: str,
@@ -3039,6 +3140,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3129,6 +3233,9 @@ class ArmClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(

@@ -5175,7 +5175,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def html_to_pdf(
         self,
-        input: HtmlToPdfInput,
+        input: HtmlToPdfInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5216,7 +5216,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def url_to_pdf(
         self,
-        input: UrlToPdfInput,
+        input: UrlToPdfInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5255,7 +5255,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_filler(
         self,
-        input: PdfFillerInput,
+        input: PdfFillerInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5295,7 +5295,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def merge_pdf_simplified(
         self,
-        input: MergePdfSimplifiedInput,
+        input: MergePdfSimplifiedInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5334,7 +5334,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def merge_pdf(
         self,
-        input: MergePdfInput,
+        input: MergePdfInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5375,7 +5375,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def split_pdf(
         self,
-        input: SplitPdfInput,
+        input: SplitPdfInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5415,7 +5415,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def split_pdf2(
         self,
-        input: SplitPdf2Input,
+        input: SplitPdf2Input | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5455,7 +5455,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_search_text(
         self,
-        input: PDFSearchTextInput,
+        input: PDFSearchTextInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5495,7 +5495,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def document_parser(
         self,
-        input: DocumentParserInput,
+        input: DocumentParserInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5537,7 +5537,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def job_check(
         self,
-        input: JobCheckInput,
+        input: JobCheckInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5577,7 +5577,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def barcode_generator(
         self,
-        input: BarcodeGeneratorInput,
+        input: BarcodeGeneratorInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5618,7 +5618,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def barcode_reader(
         self,
-        input: BarcodeReaderInput,
+        input: BarcodeReaderInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5661,7 +5661,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_info_reader(
         self,
-        input: PDFInfoReaderInput,
+        input: PDFInfoReaderInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5701,7 +5701,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_forms_info_reader(
         self,
-        input: PDFFormsInfoReaderInput,
+        input: PDFFormsInfoReaderInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5741,7 +5741,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_find_table(
         self,
-        input: PDFFindTableInput,
+        input: PDFFindTableInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5782,7 +5782,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def search_and_replace(
         self,
-        input: SearchAndReplaceInput,
+        input: SearchAndReplaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5824,7 +5824,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def search_and_replace_with_image(
         self,
-        input: SearchAndReplaceWithImageInput,
+        input: SearchAndReplaceWithImageInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5867,7 +5867,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def search_and_delete_text(
         self,
-        input: SearchAndDeleteTextInput,
+        input: SearchAndDeleteTextInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5907,7 +5907,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_searchable(
         self,
-        input: PDFSearchableInput,
+        input: PDFSearchableInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5947,7 +5947,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_unsearchable(
         self,
-        input: PDFUnSearchableInput,
+        input: PDFUnSearchableInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5987,7 +5987,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_csv(
         self,
-        input: PDFToCSVInput,
+        input: PDFToCSVInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6027,7 +6027,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_json(
         self,
-        input: PDFToJSONInput,
+        input: PDFToJSONInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6067,7 +6067,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_json_meta(
         self,
-        input: PDFToJSONMetaInput,
+        input: PDFToJSONMetaInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6110,7 +6110,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_text(
         self,
-        input: PDFToTextInput,
+        input: PDFToTextInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6150,7 +6150,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_text_simple(
         self,
-        input: PDFToTextSimpleInput,
+        input: PDFToTextSimpleInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6192,7 +6192,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_xls(
         self,
-        input: PDFToXLSInput,
+        input: PDFToXLSInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6232,7 +6232,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_xlsx(
         self,
-        input: PDFToXLSXInput,
+        input: PDFToXLSXInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6272,7 +6272,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_xml(
         self,
-        input: PDFToXMLInput,
+        input: PDFToXMLInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6312,7 +6312,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_jpg(
         self,
-        input: PDFToJPGInput,
+        input: PDFToJPGInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6352,7 +6352,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_png(
         self,
-        input: PDFToPNGInput,
+        input: PDFToPNGInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6392,7 +6392,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_webp(
         self,
-        input: PDFToWEBPInput,
+        input: PDFToWEBPInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6432,7 +6432,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_to_tiff(
         self,
-        input: PDFToTIFFInput,
+        input: PDFToTIFFInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6473,7 +6473,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_from_csv(
         self,
-        input: PDFFromCSVInput,
+        input: PDFFromCSVInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6513,7 +6513,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_from_doc(
         self,
-        input: PDFFromDocInput,
+        input: PDFFromDocInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6553,7 +6553,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_from_images(
         self,
-        input: PDFFromImagesInput,
+        input: PDFFromImagesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6595,7 +6595,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_from_email(
         self,
-        input: PDFFromEmailInput,
+        input: PDFFromEmailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6638,7 +6638,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_add_security(
         self,
-        input: PDFAddSecurityInput,
+        input: PDFAddSecurityInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6678,7 +6678,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_security_remove(
         self,
-        input: PDFSecurityRemoveInput,
+        input: PDFSecurityRemoveInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6718,7 +6718,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_from_xls_xlsx(
         self,
-        input: PDFFromXLSXLSXInput,
+        input: PDFFromXLSXLSXInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6757,7 +6757,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def xls_to_csv(
         self,
-        input: XLStoCSVInput,
+        input: XLStoCSVInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6797,7 +6797,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def xls_to_json(
         self,
-        input: XLStoJSONInput,
+        input: XLStoJSONInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6836,7 +6836,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def xls_to_html(
         self,
-        input: XLStoHTMLInput,
+        input: XLStoHTMLInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6875,7 +6875,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def xls_to_txt(
         self,
-        input: XLStoTXTInput,
+        input: XLStoTXTInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6914,7 +6914,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def xls_to_xml(
         self,
-        input: XLStoXMLInput,
+        input: XLStoXMLInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6953,7 +6953,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_rotate_pages(
         self,
-        input: PDFRotatePagesInput,
+        input: PDFRotatePagesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6992,7 +6992,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_auto_rotate_pages(
         self,
-        input: PDFAutoRotatePagesInput,
+        input: PDFAutoRotatePagesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7032,7 +7032,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_delete_pages(
         self,
-        input: PDFDeletePagesInput,
+        input: PDFDeletePagesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7073,7 +7073,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_compress(
         self,
-        input: PDFCompressInput,
+        input: PDFCompressInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7112,7 +7112,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_classifier(
         self,
-        input: PDFClassifierInput,
+        input: PDFClassifierInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7154,7 +7154,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def email_send(
         self,
-        input: EmailSendInput,
+        input: EmailSendInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7193,7 +7193,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def email_decode(
         self,
-        input: EmailDecodeInput,
+        input: EmailDecodeInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7233,7 +7233,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def email_attachment_extraction(
         self,
-        input: EmailAttachmentExtractionInput,
+        input: EmailAttachmentExtractionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7275,7 +7275,7 @@ class PdfcoClient(ConnectorClientBase):
 
     def pdf_attachment_extraction(
         self,
-        input: PDFAttachmentExtractionInput,
+        input: PDFAttachmentExtractionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

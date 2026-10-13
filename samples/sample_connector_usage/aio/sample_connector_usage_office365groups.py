@@ -99,10 +99,9 @@ async def example_3_list_owned_groups():
 
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = await client.list_owned_groups()
+                groups = [group async for group in client.list_owned_groups()]
 
-                if items:
-                    groups = result["value"]
+                if groups:
                     print(f"You own or belong to {len(groups)} groups:")
                     for group in groups[:5]:
                         print(f"  - {group.get('displayName', 'N/A')}")

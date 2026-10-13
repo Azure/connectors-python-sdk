@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -219,7 +219,7 @@ class ShiftsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -382,7 +382,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def create_time_off(
         self,
-        input: CreateTimeOffRequest,
+        input: CreateTimeOffRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -501,6 +501,9 @@ class ShiftsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -599,7 +602,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def create_shift(
         self,
-        input: CreateShiftRequest,
+        input: CreateShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -718,6 +721,9 @@ class ShiftsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -816,7 +822,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def create_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -903,7 +909,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def update_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         open_shift_id: str,
         *,
@@ -980,6 +986,9 @@ class ShiftsClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1331,7 +1340,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def time_off_request_approve(
         self,
-        input: TimeOffRequestApproveInput,
+        input: TimeOffRequestApproveInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -1379,7 +1388,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def time_off_request_decline(
         self,
-        input: TimeOffRequestDeclineInput,
+        input: TimeOffRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -1559,7 +1568,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def offer_shift_request_approve(
         self,
-        input: OfferShiftRequestApproveInput,
+        input: OfferShiftRequestApproveInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -1608,7 +1617,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def offer_shift_request_decline(
         self,
-        input: OfferShiftRequestDeclineInput,
+        input: OfferShiftRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -1788,7 +1797,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def swap_shifts_change_request_approve(
         self,
-        input: SwapShiftsChangeRequestApproveInput,
+        input: SwapShiftsChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -1836,7 +1845,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def swap_shifts_change_request_decline(
         self,
-        input: SwapShiftsChangeRequestDeclineInput,
+        input: SwapShiftsChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -2016,7 +2025,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def open_shift_change_request_approve(
         self,
-        input: OpenShiftChangeRequestApproveInput,
+        input: OpenShiftChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,
@@ -2064,7 +2073,7 @@ class ShiftsClient(ConnectorClientBase):
 
     async def open_shift_change_request_decline(
         self,
-        input: OpenShiftChangeRequestDeclineInput,
+        input: OpenShiftChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,

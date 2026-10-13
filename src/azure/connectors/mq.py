@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -147,7 +147,12 @@ class ItemsList:
     Response for Delete messages
     """
 
-    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -186,7 +191,7 @@ class ProcedureMetadata:
 
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     title: Optional[str] = dataclass_field(default=None, kw_only=True)
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -423,7 +428,7 @@ class SendValidDataOptionsArray:
     Definition: SendValidDataOptionsArray
     """
 
-    messages: List[SendValidDataOptions]
+    messages: List[SendValidDataOptions | Mapping[str, Any]]
 
 
 # Client Class
@@ -498,7 +503,7 @@ class MqClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -532,7 +537,7 @@ class MqClient(ConnectorClientBase):
 
     def delete(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -569,7 +574,7 @@ class MqClient(ConnectorClientBase):
 
     def list_delete_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -627,7 +632,7 @@ class MqClient(ConnectorClientBase):
 
     def read(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -664,7 +669,7 @@ class MqClient(ConnectorClientBase):
 
     def list_read_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -722,7 +727,7 @@ class MqClient(ConnectorClientBase):
 
     def receive(
         self,
-        input: SingleGetValidOptions,
+        input: SingleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -759,7 +764,7 @@ class MqClient(ConnectorClientBase):
 
     def list_receive_all(
         self,
-        input: MultipleGetValidOptions,
+        input: MultipleGetValidOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -817,7 +822,7 @@ class MqClient(ConnectorClientBase):
 
     def send(
         self,
-        input: SendValidDataOptions,
+        input: SendValidDataOptions | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

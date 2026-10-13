@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -193,7 +193,7 @@ class PowerbiClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -296,7 +296,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def create_scorecard(
         self,
-        input: CreateScorecardRequest,
+        input: CreateScorecardRequest | Mapping[str, Any],
         groupid: str,
         *,
         timeout: Optional[float] = None,
@@ -417,7 +417,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def create_goal(
         self,
-        input: CreateGoalRequest,
+        input: CreateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         *,
@@ -520,7 +520,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def update_goal(
         self,
-        input: UpdateGoalRequest,
+        input: UpdateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -567,7 +567,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def list_execute_dataset_query(
         self,
-        input: QuerySpecification,
+        input: QuerySpecification | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -640,7 +640,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def execute_dataset_queries_json(
         self,
-        input: ExecuteDatasetQueriesJsonInput,
+        input: ExecuteDatasetQueriesJsonInput | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -693,7 +693,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def add_rows(
         self,
-        input: Payload,
+        input: Payload | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         tablename: str,
@@ -793,7 +793,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def goal_value_checkin(
         self,
-        input: GoalValueCheckinRequest,
+        input: GoalValueCheckinRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -915,7 +915,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def update_goal_checkin(
         self,
-        input: GoalValueCheckinUpdateRequest,
+        input: GoalValueCheckinUpdateRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1064,7 +1064,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def initiate_export_to_file_for_pbi_reports(
         self,
-        input: ExportPayloadPowerBIReport,
+        input: ExportPayloadPowerBIReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,
@@ -1109,7 +1109,7 @@ class PowerbiClient(ConnectorClientBase):
 
     async def initiate_export_to_file_for_paginated_reports(
         self,
-        input: ExportPayloadPaginatedReport,
+        input: ExportPayloadPaginatedReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -51,7 +51,12 @@ class MyTrendingDocumentsResponse:
     Response for Get my trending documents
     """
 
-    value: Optional[List[GraphTrending]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphTrending | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """value"""
 
 
@@ -61,7 +66,12 @@ class LinklessEntityListResponseListPerson:
     Response for Get relevant people
     """
 
-    value: Optional[List[Person]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Person | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Value"""
 
 
@@ -109,7 +119,12 @@ class TrendingDocumentsResponse:
     Response for Get trending documents
     """
 
-    value: Optional[List[GraphTrending]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphTrending | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """value"""
 
 
@@ -132,7 +147,12 @@ class DirectReportsResponse:
     Response for Get direct reports
     """
 
-    value: Optional[List[GraphUser]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphUser | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Value"""
 
 
@@ -301,7 +321,12 @@ class EntityListResponseIReadOnlyListUser:
     Response for Search for users
     """
 
-    value: Optional[List[User]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[User | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Value"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -355,12 +380,14 @@ class GraphTrending:
     """Unique identifier of the relationship"""
     weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Value indicating how much the document is currently trending"""
-    resource_visualization: Optional[ResourceVisualization] = dataclass_field(
+    resource_visualization: Optional[ResourceVisualization | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "resourceVisualization"},
     )
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = dataclass_field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
@@ -556,13 +583,20 @@ class Person:
         metadata={"wire_name": "imAddress"},
     )
     """The person's VOIP SIP address"""
-    scored_email_addresses: Optional[List[ScoredEmailAddress]] = dataclass_field(
+    scored_email_addresses: Optional[
+        List[ScoredEmailAddress | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "scoredEmailAddresses"},
     )
     """Collection of the person's email addresses with a relevance score"""
-    phones: Optional[List[Phone]] = dataclass_field(default=None, kw_only=True)
+    phones: Optional[
+        List[Phone | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The person's phone numbers"""
 
 
@@ -831,7 +865,7 @@ class Office365usersClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -865,7 +899,7 @@ class Office365usersClient(ConnectorClientBase):
 
     def update_my_profile(
         self,
-        input: GraphUserUpdateable,
+        input: GraphUserUpdateable | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

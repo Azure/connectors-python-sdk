@@ -72,7 +72,12 @@ class FindExpertsResponse:
     List of experts matching the search query. May be empty if no experts are
     found.
     """
-    label_matches: Optional[List[ConceptLabelMatch]] = dataclass_field(default=None, kw_only=True)
+    label_matches: Optional[
+        List[ConceptLabelMatch | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The matched labels for the expert search query. May be empty if no labels
     match.
@@ -91,7 +96,12 @@ class FindQuestionsResponse:
         metadata={"wire_name": "_links"},
     )
     """_links"""
-    items: Optional[List[Question]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[Question | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Paginated results of the question search."""
     total: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of questions matching the request."""
@@ -104,7 +114,12 @@ class GraphQLUserResponse:
     """
 
     data: Dict[str, Any]
-    errors: Optional[List[GraphQLError]] = dataclass_field(default=None, kw_only=True)
+    errors: Optional[
+        List[GraphQLError | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Optional array of GraphQL errors; only present if errors occurred"""
 
 
@@ -275,15 +290,40 @@ class QuestionComplete:
     """The question language"""
     source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """source"""
-    concepts: Optional[List[ConceptLabelMatch]] = dataclass_field(default=None, kw_only=True)
+    concepts: Optional[
+        List[ConceptLabelMatch | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The assigned question concepts"""
-    knowledge_space: Optional[KnowledgeSpace] = dataclass_field(default=None, kw_only=True)
+    knowledge_space: Optional[
+        KnowledgeSpace | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The assigned question knowledge space"""
-    solutions: Optional[List[Solution]] = dataclass_field(default=None, kw_only=True)
+    solutions: Optional[
+        List[Solution | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question solutions"""
-    attachments: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question attachments"""
-    comments: Optional[List[Comment]] = dataclass_field(default=None, kw_only=True)
+    comments: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The question comments"""
 
 
@@ -367,7 +407,7 @@ class Comment:
     """
     upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of upvotes the comment has received."""
-    user: Optional[UserLegacy] = dataclass_field(default=None, kw_only=True)
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -381,9 +421,19 @@ class Solution:
     Timestamp indicating whether the solution has been accepted by the question
     poser (yyyy-MM-ddTHH:mm:ss.fffZ)
     """
-    attachments: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The solution attachments"""
-    comments: Optional[List[Comment]] = dataclass_field(default=None, kw_only=True)
+    comments: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The solution comments"""
     content_updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
@@ -422,7 +472,7 @@ class Solution:
     rating_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of ratings for the solution."""
     solution_authority_approval: Optional[
-        SolutionAuthorityApproval
+        SolutionAuthorityApproval | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -435,9 +485,14 @@ class Solution:
     """
     upvote_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of upvotes the solution has received."""
-    user: Optional[UserLegacy] = dataclass_field(default=None, kw_only=True)
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The user who created the solution"""
-    validated: Optional[SolutionValidation] = dataclass_field(default=None, kw_only=True)
+    validated: Optional[
+        SolutionValidation | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     validity_period: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Validity period until the solution is considered expired"""
 
@@ -460,7 +515,7 @@ class SolutionValidation:
         metadata={"wire_name": "validityPeriod"},
     )
     """The validity period until the solution is considered expired"""
-    user: Optional[UserLegacy] = dataclass_field(default=None, kw_only=True)
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The user who validated the solution"""
 
 
@@ -476,7 +531,7 @@ class SolutionAuthorityApproval:
     """ID of the solution authority"""
     solution_authority_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the solution authority"""
-    user: Optional[UserLegacy] = dataclass_field(default=None, kw_only=True)
+    user: Optional[UserLegacy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -675,7 +730,7 @@ class StarmindClient(ConnectorClientBase):
 
     def find_experts(
         self,
-        input: FindExpertsInput,
+        input: FindExpertsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -826,7 +881,7 @@ class StarmindClient(ConnectorClientBase):
 
     def post_question_draft(
         self,
-        input: PostQuestionDraftInput,
+        input: PostQuestionDraftInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

@@ -32,7 +32,10 @@ async def list_messages() -> None:
     """List messages for an account."""
     async with DefaultAzureCredential() as credential:
         async with PlivoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            messages = await client.list_messages(auth_id="PLIVO_AUTH_ID")
+            messages = [
+                message
+                async for message in client.list_messages(auth_id="PLIVO_AUTH_ID")
+            ]
             print(f"Messages: {messages}")
 
 

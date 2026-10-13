@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -183,7 +183,7 @@ class GithubClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -217,7 +217,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_issue(
         self,
-        input: IssueBasicDetailsModel,
+        input: IssueBasicDetailsModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -443,7 +443,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_update_repository_secret(
         self,
-        input: CreateRepositorySecretRequest,
+        input: CreateRepositorySecretRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         secret_name: str,
@@ -487,7 +487,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_repository_using_template(
         self,
-        input: CreateRepositoryUsingTemplateRequest,
+        input: CreateRepositoryUsingTemplateRequest | Mapping[str, Any],
         template_owner: str,
         template_repository: str,
         *,
@@ -574,7 +574,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_reference(
         self,
-        input: CreateReferenceRequest,
+        input: CreateReferenceRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -672,7 +672,7 @@ class GithubClient(ConnectorClientBase):
 
     async def merge_pull_request(
         self,
-        input: PullRequestMergeRequest,
+        input: PullRequestMergeRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -766,7 +766,7 @@ class GithubClient(ConnectorClientBase):
 
     async def update_pull_request(
         self,
-        input: PullRequestUpdateRequest,
+        input: PullRequestUpdateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -886,7 +886,7 @@ class GithubClient(ConnectorClientBase):
 
     async def request_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -930,7 +930,7 @@ class GithubClient(ConnectorClientBase):
 
     async def remove_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -964,6 +964,9 @@ class GithubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -974,7 +977,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_pull_request(
         self,
-        input: PullRequestCreateRequest,
+        input: PullRequestCreateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1133,7 +1136,7 @@ class GithubClient(ConnectorClientBase):
 
     async def create_repository_dispatch_event(
         self,
-        input: RepositoryDispatchEvent,
+        input: RepositoryDispatchEvent | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1316,6 +1319,9 @@ class GithubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1356,6 +1362,9 @@ class GithubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1413,7 +1422,7 @@ class GithubClient(ConnectorClientBase):
 
     async def update_issue_num(
         self,
-        input: IssueUpdateModel,
+        input: IssueUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         issue_number: int,
@@ -1460,7 +1469,7 @@ class GithubClient(ConnectorClientBase):
 
     async def update_milestone(
         self,
-        input: MilestoneUpdateModel,
+        input: MilestoneUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         milestone_number: int,
@@ -1543,7 +1552,7 @@ class GithubClient(ConnectorClientBase):
 
     async def search_github_with_query(
         self,
-        input: GraphQlQuery,
+        input: GraphQlQuery | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2434,7 +2443,7 @@ class GithubClient(ConnectorClientBase):
 
     async def invoke_mcp_server(
         self,
-        input: QueryRequest,
+        input: QueryRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

@@ -139,7 +139,7 @@ class OrderfulClient(ConnectorClientBase):
 
     async def create_transaction(
         self,
-        input: CreateTransactionInput,
+        input: CreateTransactionInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

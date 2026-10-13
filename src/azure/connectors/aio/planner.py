@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -141,7 +141,7 @@ class PlannerClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -200,6 +200,9 @@ class PlannerClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -210,7 +213,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def unassign_users(
         self,
-        input: UnassignUsersInput,
+        input: UnassignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -251,7 +254,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def assign_users(
         self,
-        input: AssignUsersInput,
+        input: AssignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -393,7 +396,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def create_bucket(
         self,
-        input: CreateBucketInput,
+        input: CreateBucketInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -430,7 +433,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def create_task(
         self,
-        input: CreateTaskRequest,
+        input: CreateTaskRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -754,7 +757,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def update_task(
         self,
-        input: UpdateTaskRequest,
+        input: UpdateTaskRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -795,7 +798,7 @@ class PlannerClient(ConnectorClientBase):
 
     async def update_task_details(
         self,
-        input: UpdateTaskDetailsRequest,
+        input: UpdateTaskDetailsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,

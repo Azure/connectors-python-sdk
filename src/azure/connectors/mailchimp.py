@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -72,7 +72,12 @@ class GetCampaignsResponse:
     Response for List campaigns
     """
 
-    campaigns: Optional[List[CampaignResponseModel]] = dataclass_field(default=None, kw_only=True)
+    campaigns: Optional[
+        List[CampaignResponseModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a campaign"""
 
 
@@ -82,7 +87,12 @@ class GetListsResponseModel:
     Response for Get all the lists
     """
 
-    lists: Optional[List[CreateNewListResponseModel]] = dataclass_field(default=None, kw_only=True)
+    lists: Optional[
+        List[CreateNewListResponseModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a list"""
     total_items: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of items matching the query regardless of pagination"""
@@ -98,14 +108,14 @@ class CreateNewListResponseModel:
     """A string that uniquely identifies this list"""
     name: str
     """The name of the list"""
-    contact: Contact
+    contact: Contact | Mapping[str, Any]
     permission_reminder: str
     """The permission reminder for the list"""
     use_archive_bar: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether campaigns for this list use the Archive Bar in archives by default
     """
-    campaign_defaults: CampaignDefaults
+    campaign_defaults: CampaignDefaults | Mapping[str, Any]
     notify_on_subscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send subscribe notifications to"""
     notify_on_unsubscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -131,8 +141,8 @@ class CreateNewListResponseModel:
     """Whether this list is public or private"""
     modules: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Any list-specific modules installed for this list"""
-    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
-    links: Optional[List[Link]] = dataclass_field(
+    stats: Optional[Stats | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[List[Link | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "_links"},
@@ -165,7 +175,12 @@ class GetAllMembersResponseModel:
     Response for Show list members
     """
 
-    members: Optional[List[MemberResponseModel]] = dataclass_field(default=None, kw_only=True)
+    members: Optional[
+        List[MemberResponseModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific list member"""
     list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
@@ -194,8 +209,13 @@ class MemberResponseModel:
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
-    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
+    merge_fields: Optional[
+        FirstAndLastName | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    stats: Optional[Stats | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     ip_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """IP address the subscriber signed up from"""
     timestamp_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -214,11 +234,11 @@ class MemberResponseModel:
     """VIP status for subscriber"""
     email_client: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list member's email client"""
-    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
-    last_note: Optional[LastNote] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Location | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    last_note: Optional[LastNote | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    links: Optional[List[Link]] = dataclass_field(
+    links: Optional[List[Link | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "_links"},
@@ -232,7 +252,12 @@ class GetMembersResponseModel:
     Response for When a Member has been added to a list
     """
 
-    members: Optional[List[AddUserResponseModel]] = dataclass_field(default=None, kw_only=True)
+    members: Optional[
+        List[AddUserResponseModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific list member"""
     list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
@@ -272,17 +297,47 @@ class CampaignResponseModel:
     How the campaign's content is put together ('template', 'drag_and_drop',
     'html', 'url')
     """
-    recipient: Optional[List[Recipient]] = dataclass_field(default=None, kw_only=True)
+    recipient: Optional[
+        List[Recipient | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List settings for the campaign"""
-    settings: Optional[Settings] = dataclass_field(default=None, kw_only=True)
-    variate_settings: Optional[VariateSettings] = dataclass_field(default=None, kw_only=True)
-    tracking: Optional[Tracking] = dataclass_field(default=None, kw_only=True)
-    rss_opts: Optional[RSSOpts] = dataclass_field(default=None, kw_only=True)
-    ab_split_opts: Optional[ABSplitOpts] = dataclass_field(default=None, kw_only=True)
-    social_card: Optional[SocialCard] = dataclass_field(default=None, kw_only=True)
-    report_summary: Optional[ReportSummary] = dataclass_field(default=None, kw_only=True)
-    delivery_status: Optional[DeliveryStatus] = dataclass_field(default=None, kw_only=True)
-    links: Optional[List[Link]] = dataclass_field(
+    settings: Optional[Settings | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    variate_settings: Optional[
+        VariateSettings | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    tracking: Optional[Tracking | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RSSOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    ab_split_opts: Optional[
+        ABSplitOpts | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    social_card: Optional[
+        SocialCard | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    report_summary: Optional[
+        ReportSummary | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    delivery_status: Optional[
+        DeliveryStatus | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    links: Optional[List[Link | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "_links"},
@@ -298,7 +353,12 @@ class Recipient:
 
     list_id: str
     """The unique list id"""
-    segment_opts: Optional[SegmentOpts] = dataclass_field(default=None, kw_only=True)
+    segment_opts: Optional[
+        SegmentOpts | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -381,9 +441,14 @@ class Tracking:
     """The custom slug for Google Analytics tracking (max of 50 bytes)"""
     clicktale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The custom slug for ClickTale tracking (max of 50 bytes)"""
-    salesforce: Optional[Salesforce] = dataclass_field(default=None, kw_only=True)
-    highrise: Optional[Highrise] = dataclass_field(default=None, kw_only=True)
-    capsule: Optional[Capsule] = dataclass_field(default=None, kw_only=True)
+    salesforce: Optional[
+        Salesforce | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    highrise: Optional[Highrise | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    capsule: Optional[Capsule | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -401,7 +466,7 @@ class RSSOpts:
     Whether to add CSS to images in the RSS feed to constrain their width in
     campaigns
     """
-    schedule: Optional[Schedule] = dataclass_field(default=None, kw_only=True)
+    schedule: Optional[Schedule | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -485,7 +550,12 @@ class Schedule:
     The hour to send the campaign in local time. Acceptable hours are 0-23. For
     example, '4' would be 4am in your account's default time zone
     """
-    daily_send: Optional[DailySend] = dataclass_field(default=None, kw_only=True)
+    daily_send: Optional[
+        DailySend | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     weekly_send_day: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The day of the week to send a weekly RSS Campaign"""
     monthly_send_date: Optional[float] = dataclass_field(default=None, kw_only=True)
@@ -699,12 +769,22 @@ class NewCampaignRequest:
     campaigns have been deprecated and variate campaigns should be used
     instead. Possible Values: regular, plaintext, absplit, rss, variate
     """
-    recipients: Recipient
-    settings: Settings
-    variate_settings: Optional[VariateSettings] = dataclass_field(default=None, kw_only=True)
-    tracking: Optional[Tracking] = dataclass_field(default=None, kw_only=True)
-    rss_opts: Optional[RSSOpts] = dataclass_field(default=None, kw_only=True)
-    social_card: Optional[SocialCard] = dataclass_field(default=None, kw_only=True)
+    recipients: Recipient | Mapping[str, Any]
+    settings: Settings | Mapping[str, Any]
+    variate_settings: Optional[
+        VariateSettings | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    tracking: Optional[Tracking | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RSSOpts | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    social_card: Optional[
+        SocialCard | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -715,14 +795,14 @@ class NewListRequest:
 
     name: str
     """The name of the list"""
-    contact: Contact
+    contact: Contact | Mapping[str, Any]
     permission_reminder: str
     """Text to remind people how they signed up to this list"""
     use_archive_bar: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether campaigns for this list use the Archive Bar in archives by default
     """
-    campaign_defaults: CampaignDefaults
+    campaign_defaults: CampaignDefaults | Mapping[str, Any]
     notify_on_subscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send subscribe notifications to"""
     notify_on_unsubscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -850,7 +930,7 @@ class NewMembersInListRequest:
     Definition: NewMembersInListRequest
     """
 
-    members: List[NewMemberInListRequest]
+    members: List[NewMemberInListRequest | Mapping[str, Any]]
     """
     An array of objects, each representing an email address and the
     subscription status for a specific list. Up to 500 members may be added or
@@ -876,12 +956,17 @@ class NewMemberInListRequest:
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
+    merge_fields: Optional[
+        FirstAndLastName | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
     vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Location | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     email_address: str
     """Email address for a subscriber"""
 
@@ -960,12 +1045,17 @@ class UpdateMemberInListRequest:
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
+    merge_fields: Optional[
+        FirstAndLastName | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
     vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Location | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -989,8 +1079,8 @@ class AddUserResponseModel:
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: FirstAndLastName
-    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
+    merge_fields: FirstAndLastName | Mapping[str, Any]
+    stats: Optional[Stats | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     ip_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """IP address the subscriber signed up from"""
     timestamp_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -1009,11 +1099,11 @@ class AddUserResponseModel:
     """VIP status for subscriber"""
     email_client: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list member's email client"""
-    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
-    last_note: Optional[LastNote] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Location | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    last_note: Optional[LastNote | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    links: Optional[List[Link]] = dataclass_field(
+    links: Optional[List[Link | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "_links"},
@@ -1093,7 +1183,7 @@ class MailchimpClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1270,7 +1360,7 @@ class MailchimpClient(ConnectorClientBase):
 
     def newlist(
         self,
-        input: NewListRequest,
+        input: NewListRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1307,7 +1397,7 @@ class MailchimpClient(ConnectorClientBase):
 
     def add_members(
         self,
-        input: NewMembersInListRequest,
+        input: NewMembersInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         skip_merge_validation: Optional[bool] = None,
@@ -1418,7 +1508,7 @@ class MailchimpClient(ConnectorClientBase):
 
     def addmember(
         self,
-        input: NewMemberInListRequest,
+        input: NewMemberInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1459,7 +1549,7 @@ class MailchimpClient(ConnectorClientBase):
 
     def newcampaign(
         self,
-        input: NewCampaignRequest,
+        input: NewCampaignRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1525,6 +1615,9 @@ class MailchimpClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1535,7 +1628,7 @@ class MailchimpClient(ConnectorClientBase):
 
     def updatemember(
         self,
-        input: UpdateMemberInListRequest,
+        input: UpdateMemberInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         timeout: Optional[float] = None,

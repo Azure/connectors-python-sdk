@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -225,7 +225,7 @@ class ListIncomingRelationshipsResponse:
     Response for List Incoming Relationships
     """
 
-    value: List[IncomingRelationship]
+    value: List[IncomingRelationship | Mapping[str, Any]]
     """The collection of Incoming relationships."""
     continuation_token: Optional[str] = dataclass_field(
         default=None,
@@ -267,7 +267,7 @@ class ListRelationshipsResponse:
     Response for List Relationships
     """
 
-    value: List[TwinRelationship]
+    value: List[TwinRelationship | Mapping[str, Any]]
     """The collection of twin relationships."""
     continuation_token: Optional[str] = dataclass_field(
         default=None,
@@ -419,7 +419,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -625,6 +625,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -685,7 +688,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def update_model(
         self,
-        input: UpdateModelInput,
+        input: UpdateModelInput | Mapping[str, Any],
         modelid: str,
         *,
         timeout: Optional[float] = None,
@@ -799,6 +802,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -809,7 +815,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def add_twin(
         self,
-        input: AddTwinInput,
+        input: AddTwinInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -854,7 +860,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def update_twin(
         self,
-        input: UpdateTwinInput,
+        input: UpdateTwinInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -942,7 +948,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def update_component(
         self,
-        input: UpdateComponentInput,
+        input: UpdateComponentInput | Mapping[str, Any],
         twinid: str,
         component_path: str,
         *,
@@ -1067,6 +1073,9 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1077,7 +1086,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def add_relationship(
         self,
-        input: AddRelationshipInput,
+        input: AddRelationshipInput | Mapping[str, Any],
         twinid: str,
         relationship_id: str,
         *,
@@ -1126,7 +1135,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def update_relationship(
         self,
-        input: UpdateRelationshipInput,
+        input: UpdateRelationshipInput | Mapping[str, Any],
         twinid: str,
         relationship_id: str,
         *,
@@ -1243,7 +1252,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def send_telemetry(
         self,
-        input: SendTelemetryInput,
+        input: SendTelemetryInput | Mapping[str, Any],
         twinid: str,
         *,
         timeout: Optional[float] = None,
@@ -1283,7 +1292,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def send_component_telemetry(
         self,
-        input: SendComponentTelemetryInput,
+        input: SendComponentTelemetryInput | Mapping[str, Any],
         twinid: str,
         component_path: str,
         *,
@@ -1399,7 +1408,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
     def query_twins(
         self,
-        input: QueryTwinsInput,
+        input: QueryTwinsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

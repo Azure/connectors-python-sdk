@@ -350,7 +350,7 @@ class TestCompleteMessageInQueue:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
@@ -360,7 +360,7 @@ class TestCompleteMessageInQueue:
                     lock_token="expired-token"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestAbandonMessageInQueue:
@@ -607,7 +607,7 @@ class TestCloseSessionInQueue:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Session not found"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
@@ -617,7 +617,7 @@ class TestCloseSessionInQueue:
                     session_id="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestRenewLockOnSessionInQueue:
@@ -699,7 +699,7 @@ class TestCompleteMessageInTopic:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Lock token expired"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
@@ -710,7 +710,7 @@ class TestCompleteMessageInTopic:
                     lock_token="expired-token"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestAbandonMessageInTopic:
@@ -844,7 +844,7 @@ class TestDeleteTopicSubscription:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(404, '{"error": "Subscription not found"}')
+        mock_response = MockResponse(500, '{"error": "Server error"}')
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ):
@@ -854,7 +854,7 @@ class TestDeleteTopicSubscription:
                     subscription_name="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeadLetterMessageInTopic:

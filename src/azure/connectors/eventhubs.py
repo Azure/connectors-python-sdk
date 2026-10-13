@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -40,25 +40,25 @@ class Event:
     Response for When events are available in Event Hub
     """
 
-    content_data: Optional[ObjectEntity] = dataclass_field(
+    content_data: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ContentData"},
     )
-    properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Key-value pairs for each application property"""
-    system_properties: Optional[SystemProperties] = dataclass_field(
+    system_properties: Optional[SystemProperties | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SystemProperties"},
     )
 
 
-SendEventsInput = List["SendEvent"]
+SendEventsInput = List["SendEvent | Mapping[str, Any]"]
 
 
 @dataclass
@@ -118,7 +118,7 @@ class SendEvent:
         metadata={"wire_name": "ContentData"},
     )
     """Content of the event"""
-    properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Properties"},
@@ -198,7 +198,7 @@ class EventhubsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -232,7 +232,7 @@ class EventhubsClient(ConnectorClientBase):
 
     def send_event(
         self,
-        input: SendEvent,
+        input: SendEvent | Mapping[str, Any],
         event_hub_name: str,
         *,
         partition_key: Optional[str] = None,

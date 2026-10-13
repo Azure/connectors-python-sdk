@@ -82,12 +82,17 @@ class TestPlivoClient:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
+        response_text = (
+            '{"objects": [{"ok": true}]}'
+            if operation == "list_messages"
+            else '{"ok": true}'
+        )
 
         with patch.object(
             client._http_client,
             "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(status=200, text=response_text),
         ) as mock_send:
             result = await invoke_generated_operation(client, operation, plivo_module)
 
@@ -95,7 +100,8 @@ class TestPlivoClient:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = [{"ok": True}] if operation == "list_messages" else {"ok": True}
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_send_sms_success(self, mock_credential):

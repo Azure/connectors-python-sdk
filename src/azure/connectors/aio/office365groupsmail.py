@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -155,7 +155,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -256,7 +256,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def create_conversation(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -415,7 +415,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def create_conversation_thread(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         conversation_id: str,
         *,
@@ -529,7 +529,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def create_group_thread(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -644,6 +644,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -856,7 +859,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def reply_to_a_thread(
         self,
-        input: ReplyConversationThreadBody,
+        input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
         thread_id: str,
         *,
@@ -898,7 +901,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def reply(
         self,
-        input: ReplyConversationThreadBody,
+        input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
         thread_id: str,
         post_id: str,
@@ -985,7 +988,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     async def forward(
         self,
-        input: ForwardPostBody,
+        input: ForwardPostBody | Mapping[str, Any],
         group_mail: str,
         conversation_id: str,
         thread_id: str,

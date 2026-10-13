@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -185,7 +185,7 @@ class WdatpClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -219,7 +219,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def advanced_hunting(
         self,
-        input: AdvancedHuntingInput,
+        input: AdvancedHuntingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -260,7 +260,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def create_alert_by_reference(
         self,
-        input: CreateAlertByReferenceInput,
+        input: CreateAlertByReferenceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -447,7 +447,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def patch_alert(
         self,
-        input: PatchAlertInput,
+        input: PatchAlertInput | Mapping[str, Any],
         alert_id: str,
         *,
         timeout: Optional[float] = None,
@@ -488,7 +488,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def initiate_investigation(
         self,
-        input: InitiateInvestigationInput,
+        input: InitiateInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -532,7 +532,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def start_investigation(
         self,
-        input: StartInvestigationInput,
+        input: StartInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -616,7 +616,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def cancel_single_machine_action(
         self,
-        input: CancelSingleMachineActionInput,
+        input: CancelSingleMachineActionInput | Mapping[str, Any],
         machine_action_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1100,7 +1100,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def collect_investigation_package(
         self,
-        input: CollectInvestigationPackageInput,
+        input: CollectInvestigationPackageInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1187,7 +1187,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def isolate_machine(
         self,
-        input: IsolateMachineInput,
+        input: IsolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1228,7 +1228,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def unisolate_machine(
         self,
-        input: UnisolateMachineInput,
+        input: UnisolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1269,7 +1269,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def restrict_app_execution(
         self,
-        input: RestrictAppExecutionInput,
+        input: RestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1314,7 +1314,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def unrestrict_app_execution(
         self,
-        input: UnrestrictAppExecutionInput,
+        input: UnrestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1358,7 +1358,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def run_antivirus_scan(
         self,
-        input: RunAntivirusScanInput,
+        input: RunAntivirusScanInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1399,7 +1399,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def run_live_response(
         self,
-        input: RunLiveResponseInput,
+        input: RunLiveResponseInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1795,7 +1795,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def machine_tag(
         self,
-        input: MachineTagInput,
+        input: MachineTagInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1836,7 +1836,7 @@ class WdatpClient(ConnectorClientBase):
 
     async def advanced_hunting_schema(
         self,
-        input: AdvancedHuntingSchemaInput,
+        input: AdvancedHuntingSchemaInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

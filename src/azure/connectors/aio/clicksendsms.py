@@ -146,7 +146,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def sms_send(
         self,
-        input: SmsSendInput,
+        input: SmsSendInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -183,7 +183,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def create_list(
         self,
-        input: CreateListInput,
+        input: CreateListInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -271,7 +271,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def send_voice(
         self,
-        input: SendVoiceInput,
+        input: SendVoiceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -334,6 +334,9 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -349,7 +352,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def create_list_contact(
         self,
-        input: CreateListContactInput,
+        input: CreateListContactInput | Mapping[str, Any],
         list_id: int,
         *,
         timeout: Optional[float] = None,
@@ -459,6 +462,9 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -474,7 +480,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def send_mms(
         self,
-        input: SendMmsInput,
+        input: SendMmsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -511,7 +517,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def send_fax(
         self,
-        input: SendFaxInput,
+        input: SendFaxInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -548,7 +554,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def upload_media(
         self,
-        input: UploadMediaInput,
+        input: UploadMediaInput | Mapping[str, Any],
         convert: str,
         *,
         timeout: Optional[float] = None,
@@ -637,7 +643,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def send_letter(
         self,
-        input: SendLetterInput,
+        input: SendLetterInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -674,7 +680,7 @@ class ClicksendsmsClient(ConnectorClientBase):
 
     async def send_postcard(
         self,
-        input: SendPostcardInput,
+        input: SendPostcardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

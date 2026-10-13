@@ -481,7 +481,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_create_blank_document(
         self,
-        input: CreateBlankDocxRequest,
+        input: CreateBlankDocxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -522,7 +522,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_delete_pages(
         self,
-        input: RemoveDocxPagesRequest,
+        input: RemoveDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -559,7 +559,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_delete_table_row(
         self,
-        input: DeleteDocxTableRowRequest,
+        input: DeleteDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -600,7 +600,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_delete_table_row_range(
         self,
-        input: DeleteDocxTableRowRangeRequest,
+        input: DeleteDocxTableRowRangeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -641,7 +641,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_body(
         self,
-        input: GetDocxBodyRequest,
+        input: GetDocxBodyRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -681,7 +681,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_comments_hierarchical(
         self,
-        input: GetDocxGetCommentsHierarchicalRequest,
+        input: GetDocxGetCommentsHierarchicalRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -723,7 +723,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_headers_and_footers(
         self,
-        input: GetDocxHeadersAndFootersRequest,
+        input: GetDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -763,7 +763,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_images(
         self,
-        input: GetDocxImagesRequest,
+        input: GetDocxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -802,7 +802,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_pages(
         self,
-        input: GetDocxPagesRequest,
+        input: GetDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -842,7 +842,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_sections(
         self,
-        input: GetDocxSectionsRequest,
+        input: GetDocxSectionsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -881,7 +881,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_styles(
         self,
-        input: GetDocxStylesRequest,
+        input: GetDocxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -920,7 +920,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_table_row(
         self,
-        input: GetDocxTableRowRequest,
+        input: GetDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -960,7 +960,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_table_by_index(
         self,
-        input: GetDocxTableByIndexRequest,
+        input: GetDocxTableByIndexRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1001,7 +1001,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_get_tables(
         self,
-        input: GetDocxTablesRequest,
+        input: GetDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1040,7 +1040,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_insert_comment_on_paragraph(
         self,
-        input: DocxInsertCommentOnParagraphRequest,
+        input: DocxInsertCommentOnParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1082,7 +1082,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_insert_image(
         self,
-        input: DocxInsertImageRequest,
+        input: DocxInsertImageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1122,7 +1122,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_insert_paragraph(
         self,
-        input: InsertDocxInsertParagraphRequest,
+        input: InsertDocxInsertParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1165,7 +1165,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_insert_table(
         self,
-        input: InsertDocxTablesRequest,
+        input: InsertDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1205,7 +1205,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_insert_table_row(
         self,
-        input: InsertDocxTableRowRequest,
+        input: InsertDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1246,7 +1246,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_remove_headers_and_footers(
         self,
-        input: RemoveDocxHeadersAndFootersRequest,
+        input: RemoveDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1287,7 +1287,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_remove_object(
         self,
-        input: DocxRemoveObjectRequest,
+        input: DocxRemoveObjectRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1330,7 +1330,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1366,7 +1366,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_set_footer(
         self,
-        input: DocxSetFooterRequest,
+        input: DocxSetFooterRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1406,7 +1406,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_set_footer_add_page_number(
         self,
-        input: DocxSetFooterAddPageNumberRequest,
+        input: DocxSetFooterAddPageNumberRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1447,7 +1447,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_set_header(
         self,
-        input: DocxSetHeaderRequest,
+        input: DocxSetHeaderRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1487,7 +1487,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_update_table_cell(
         self,
-        input: UpdateDocxTableCellRequest,
+        input: UpdateDocxTableCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1529,7 +1529,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_docx_update_table_row(
         self,
-        input: UpdateDocxTableRowRequest,
+        input: UpdateDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1572,7 +1572,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_finish_editing(
         self,
-        input: FinishEditingRequest,
+        input: FinishEditingRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1610,7 +1610,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_pptx_delete_slides(
         self,
-        input: RemovePptxSlidesRequest,
+        input: RemovePptxSlidesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1647,7 +1647,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_pptx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1684,7 +1684,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_clear_cell_by_index(
         self,
-        input: ClearXlsxCellRequest,
+        input: ClearXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1725,7 +1725,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_create_blank_spreadsheet(
         self,
-        input: CreateBlankSpreadsheetRequest,
+        input: CreateBlankSpreadsheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1764,7 +1764,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_create_spreadsheet_from_data(
         self,
-        input: CreateSpreadsheetFromDataRequest,
+        input: CreateSpreadsheetFromDataRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1805,7 +1805,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_delete_worksheet(
         self,
-        input: RemoveXlsxWorksheetRequest,
+        input: RemoveXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1847,7 +1847,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_cell_by_identifier(
         self,
-        input: GetXlsxCellByIdentifierRequest,
+        input: GetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1888,7 +1888,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_cell_by_index(
         self,
-        input: GetXlsxCellRequest,
+        input: GetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1929,7 +1929,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_columns(
         self,
-        input: GetXlsxColumnsRequest,
+        input: GetXlsxColumnsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1968,7 +1968,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_images(
         self,
-        input: GetXlsxImagesRequest,
+        input: GetXlsxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2007,7 +2007,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_rows_and_cells(
         self,
-        input: GetXlsxRowsAndCellsRequest,
+        input: GetXlsxRowsAndCellsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2047,7 +2047,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_styles(
         self,
-        input: GetXlsxStylesRequest,
+        input: GetXlsxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2086,7 +2086,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_get_worksheets(
         self,
-        input: GetXlsxWorksheetsRequest,
+        input: GetXlsxWorksheetsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2126,7 +2126,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_insert_worksheet(
         self,
-        input: InsertXlsxWorksheetRequest,
+        input: InsertXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2166,7 +2166,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_set_cell_by_identifier(
         self,
-        input: SetXlsxCellByIdentifierRequest,
+        input: SetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2208,7 +2208,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def edit_document_xlsx_set_cell_by_index(
         self,
-        input: SetXlsxCellRequest,
+        input: SetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2250,7 +2250,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_html_to_docx(
         self,
-        input: HtmlToOfficeRequest,
+        input: HtmlToOfficeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2284,7 +2284,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_data_json_to_xml(
         self,
-        input: ConvertDataJsonToXmlInput,
+        input: ConvertDataJsonToXmlInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2321,7 +2321,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_template_apply_html_template(
         self,
-        input: HtmlTemplateApplicationRequest,
+        input: HtmlTemplateApplicationRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2361,7 +2361,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_html_to_pdf(
         self,
-        input: HtmlToPdfRequest,
+        input: HtmlToPdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2396,7 +2396,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_html_to_png(
         self,
-        input: HtmlToPngRequest,
+        input: HtmlToPngRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2434,7 +2434,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_html_to_txt(
         self,
-        input: HtmlToTextRequest,
+        input: HtmlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2471,7 +2471,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_url_to_pdf(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2506,7 +2506,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_url_to_screenshot(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2544,7 +2544,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     async def convert_web_url_to_txt(
         self,
-        input: UrlToTextRequest,
+        input: UrlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -188,7 +188,7 @@ class DocGenFormFieldsResponse:
     Response for Get document generation form fields from envelope
     """
 
-    docgen_fields: Optional[List[DocGenFormField]] = dataclass_field(
+    docgen_fields: Optional[List[DocGenFormField | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "docgenFields"},
@@ -258,7 +258,12 @@ class ListTabsResponse:
     Response for Get document tabs from envelope
     """
 
-    tabs: Optional[List[Tab]] = dataclass_field(default=None, kw_only=True)
+    tabs: Optional[
+        List[Tab | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Tabs"""
 
 
@@ -271,7 +276,9 @@ class ListEnvelopeDocumentFieldsResponse:
     Response for Get document custom fields from envelope
     """
 
-    envelope_document_fields: Optional[List[EnvelopeDocumentField]] = dataclass_field(
+    envelope_document_fields: Optional[
+        List[EnvelopeDocumentField | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "envelopeDocumentFields"},
@@ -309,7 +316,12 @@ class FilteredEnvelopeListResponse:
     Response for List envelopes
     """
 
-    value: Optional[List[FilteredEnvelopes]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[FilteredEnvelopes | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Filtered envelopes"""
     has_more_results: Optional[bool] = dataclass_field(
         default=None,
@@ -434,7 +446,12 @@ class ListRecipientsResponse:
         kw_only=True,
         metadata={"wire_name": "envelopeId"},
     )
-    signers: Optional[List[Signer]] = dataclass_field(default=None, kw_only=True)
+    signers: Optional[
+        List[Signer | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Signers"""
 
 
@@ -562,7 +579,7 @@ class GetLoginAccountsResponse:
     Response for Login
     """
 
-    login_accounts: Optional[List[LoginAccount]] = dataclass_field(
+    login_accounts: Optional[List[LoginAccount | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "loginAccounts"},
@@ -576,7 +593,9 @@ class ListTemplatesResponse:
     Response for List templates
     """
 
-    envelope_templates: Optional[List[EnvelopeTemplate]] = dataclass_field(
+    envelope_templates: Optional[
+        List[EnvelopeTemplate | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "envelopeTemplates"},
@@ -605,7 +624,9 @@ class AddDocumentsResponse:
         metadata={"wire_name": "envelopeId"},
     )
     """The id of the envelope."""
-    envelope_documents: Optional[List[EnvelopeDocument]] = dataclass_field(
+    envelope_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "envelopeDocuments"},
@@ -619,7 +640,9 @@ class ListTemplateDocumentsResponse:
     Response for List documents from a template
     """
 
-    template_documents: Optional[List[EnvelopeDocument]] = dataclass_field(
+    template_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "templateDocuments"},
@@ -633,7 +656,9 @@ class ListDocumentsResponse:
     Response for List documents from an envelope
     """
 
-    envelope_documents: Optional[List[EnvelopeDocument]] = dataclass_field(
+    envelope_documents: Optional[
+        List[EnvelopeDocument | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "envelopeDocuments"},
@@ -721,7 +746,7 @@ class AddRecipientTabsResponse:
     Response for Add tabs for a recipient on an envelope
     """
 
-    recipient_tabs: Optional[List[RecipientTab]] = dataclass_field(
+    recipient_tabs: Optional[List[RecipientTab | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "recipientTabs"},
@@ -738,7 +763,7 @@ class RecipientTabsResponse:
     Response for Get recipient tabs from envelope
     """
 
-    recipient_tabs: Optional[List[Tab]] = dataclass_field(
+    recipient_tabs: Optional[List[Tab | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "recipientTabs"},
@@ -829,7 +854,12 @@ class GetOrganizationsResponse:
     Response for Get organizations
     """
 
-    organizations: Optional[List[Organization]] = dataclass_field(default=None, kw_only=True)
+    organizations: Optional[
+        List[Organization | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """list of organizations"""
 
 
@@ -839,7 +869,12 @@ class ListFoldersResponse:
     Response for List folders
     """
 
-    folders: Optional[List[Folder]] = dataclass_field(default=None, kw_only=True)
+    folders: Optional[
+        List[Folder | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Folders"""
 
 
@@ -849,7 +884,7 @@ class ListEnvelopesResponse:
     Response for List envelopes
     """
 
-    folder_items: Optional[List[FolderItem]] = dataclass_field(
+    folder_items: Optional[List[FolderItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "folderItems"},
@@ -863,7 +898,7 @@ class RecipientTypesResponse:
     Response for StaticResponseForRecipientTypes
     """
 
-    tab_types: Optional[List[RecipientType]] = dataclass_field(
+    tab_types: Optional[List[RecipientType | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "tabTypes"},
@@ -877,7 +912,7 @@ class SignatureTypesResponse:
     Response for StaticResponseForSignatureTypes
     """
 
-    tab_types: Optional[List[SignatureType]] = dataclass_field(
+    tab_types: Optional[List[SignatureType | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "tabTypes"},
@@ -891,7 +926,7 @@ class ListSigningGroupResponse:
     Response for GetSigningGroups
     """
 
-    signing_groups: Optional[List[SigningGroup]] = dataclass_field(
+    signing_groups: Optional[List[SigningGroup | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "signingGroups"},
@@ -905,7 +940,7 @@ class TabTypesResponse:
     Response for StaticResponseForTabTypes
     """
 
-    tab_types: Optional[List[TabType]] = dataclass_field(
+    tab_types: Optional[List[TabType | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "tabTypes"},
@@ -919,7 +954,9 @@ class WorkflowDefinitionsResponse:
     Response for Get Maestro Workflow Definitions
     """
 
-    workflow_definitions: Optional[List[WorkflowDefinition]] = dataclass_field(
+    workflow_definitions: Optional[
+        List[WorkflowDefinition | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorkflowDefinitions"},
@@ -933,7 +970,7 @@ class GetWorkFlowIdsResponse:
     Response for Get All Workflow Ids
     """
 
-    workflow_ids: Optional[List[WorkflowId]] = dataclass_field(
+    workflow_ids: Optional[List[WorkflowId | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "workflowIds"},
@@ -959,7 +996,9 @@ class WorkflowDefinitionResponse:
         metadata={"wire_name": "Name"},
     )
     """Name"""
-    payload_schema: Optional[List[WorkflowDefPayloadSchema]] = dataclass_field(
+    payload_schema: Optional[
+        List[WorkflowDefPayloadSchema | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PayloadSchema"},
@@ -1328,7 +1367,12 @@ class AddRecipientToEnvelopeRequest:
     Definition: AddRecipientToEnvelopeRequest
     """
 
-    signers: Optional[List[SignerRequest]] = dataclass_field(default=None, kw_only=True)
+    signers: Optional[
+        List[SignerRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1357,7 +1401,12 @@ class OnEnvelopeStatusChangesResponse:
     Definition: OnEnvelopeStatusChangesResponse
     """
 
-    envelopes: Optional[List[Envelope]] = dataclass_field(default=None, kw_only=True)
+    envelopes: Optional[
+        List[Envelope | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Envelopes"""
 
 
@@ -1625,7 +1674,7 @@ class CombinedEmailBodyAndCustomFields:
         metadata={"wire_name": "emailBlurb"},
     )
     """Body of the email."""
-    account_custom_fields: Optional[AccountCustomFields] = dataclass_field(
+    account_custom_fields: Optional[AccountCustomFields | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "AccountCustomFields"},
@@ -1638,7 +1687,12 @@ class EnvelopeIDsResponse:
     Definition: EnvelopeIDsResponse
     """
 
-    envelopes: Optional[List[EnvelopeIds]] = dataclass_field(default=None, kw_only=True)
+    envelopes: Optional[
+        List[EnvelopeIds | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """list of envelope ids"""
 
 
@@ -1649,7 +1703,7 @@ class FilteredSalesCopilotEnvelopeListResponse:
     """
 
     value: Optional[
-        List[SalesCopilotFilteredEnvelopes]
+        List[SalesCopilotFilteredEnvelopes | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1668,7 +1722,12 @@ class ActivityListResponseEnvelope:
     Definition: ActivityListResponseEnvelope
     """
 
-    value: Optional[List[Activity]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Activity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Related activies"""
     has_more_results: Optional[bool] = dataclass_field(
         default=None,
@@ -1683,7 +1742,12 @@ class EmailSummaryResponse:
     Definition: EmailSummaryResponse
     """
 
-    value: Optional[List[EmailSummary]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[EmailSummary | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Key Sales"""
     has_more_results: Optional[bool] = dataclass_field(
         default=None,
@@ -1698,7 +1762,12 @@ class KeySalesResponse:
     Definition: KeySalesResponse
     """
 
-    value: Optional[List[KeySales]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[KeySales | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Key Sales"""
     has_more_results: Optional[bool] = dataclass_field(
         default=None,
@@ -1713,7 +1782,12 @@ class DocumentRecordListResponseEnvelope:
     Definition: DocumentRecordListResponseEnvelope
     """
 
-    value: Optional[List[DocumentRecord]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DocumentRecord | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Related records"""
     has_more_results: Optional[bool] = dataclass_field(
         default=None,
@@ -1774,7 +1848,7 @@ class DocumentTypesResponse:
     Definition: DocumentTypesResponse
     """
 
-    document_types: Optional[List[DocumentType]] = dataclass_field(
+    document_types: Optional[List[DocumentType | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "documentTypes"},
@@ -1814,7 +1888,7 @@ class FontNamesResponse:
     Definition: FontNamesResponse
     """
 
-    font_names: Optional[List[FontName]] = dataclass_field(
+    font_names: Optional[List[FontName | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "fontNames"},
@@ -2085,7 +2159,7 @@ class DocusignClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -2699,7 +2773,7 @@ class DocusignClient(ConnectorClientBase):
 
     def composite_templates(
         self,
-        input: CompositeTemplateSchema,
+        input: CompositeTemplateSchema | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         status: str,
@@ -2953,7 +3027,7 @@ class DocusignClient(ConnectorClientBase):
 
     def send_envelope(
         self,
-        input: DynamicSigners,
+        input: DynamicSigners | Mapping[str, Any],
         account_id: str,
         status: str,
         template_id: str,
@@ -3020,7 +3094,7 @@ class DocusignClient(ConnectorClientBase):
 
     def send_envelope_with_recipient_fields(
         self,
-        input: DynamicRecipients,
+        input: DynamicRecipients | Mapping[str, Any],
         account_id: str,
         template_id: str,
         *,
@@ -3249,7 +3323,7 @@ class DocusignClient(ConnectorClientBase):
 
     def generate_embedded_sender_url(
         self,
-        input: AdditionalURLForSenderView,
+        input: AdditionalURLForSenderView | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         open_in: str,
@@ -3397,6 +3471,9 @@ class DocusignClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3529,7 +3606,7 @@ class DocusignClient(ConnectorClientBase):
 
     def add_verification_to_recipient(
         self,
-        input: AdditionalRecipientData,
+        input: AdditionalRecipientData | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -3594,7 +3671,7 @@ class DocusignClient(ConnectorClientBase):
 
     def update_envelope_recipient(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -3726,7 +3803,7 @@ class DocusignClient(ConnectorClientBase):
 
     def apply_templates_to_documents(
         self,
-        input: ApplyTemplatesToDocumentsInput,
+        input: ApplyTemplatesToDocumentsInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         template_id: str,
@@ -3781,7 +3858,7 @@ class DocusignClient(ConnectorClientBase):
 
     def create_bulk_send_list(
         self,
-        input: CreateBulkSendListInput,
+        input: CreateBulkSendListInput | Mapping[str, Any],
         account_id: str,
         name: str,
         *,
@@ -4001,7 +4078,7 @@ class DocusignClient(ConnectorClientBase):
 
     def add_documents_to_envelope(
         self,
-        input: AddDocumentsToEnvelopeInput,
+        input: AddDocumentsToEnvelopeInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         *,
@@ -4288,7 +4365,7 @@ class DocusignClient(ConnectorClientBase):
 
     def list_add_recipient_tabs(
         self,
-        input: AnchorTabSchema,
+        input: AnchorTabSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -4479,7 +4556,7 @@ class DocusignClient(ConnectorClientBase):
 
     def trigger_maestro_flow(
         self,
-        input: MaestroInputVariables,
+        input: MaestroInputVariables | Mapping[str, Any],
         account_id: str,
         workflow_id: str,
         instance_name: str,
@@ -4533,7 +4610,7 @@ class DocusignClient(ConnectorClientBase):
 
     def build_number(
         self,
-        input: BuildNumberSchema,
+        input: BuildNumberSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4571,7 +4648,7 @@ class DocusignClient(ConnectorClientBase):
 
     def add_recipient_to_envelope(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_type: str,
@@ -4710,7 +4787,7 @@ class DocusignClient(ConnectorClientBase):
 
     def create_blank_envelope(
         self,
-        input: CombinedEmailBodyAndCustomFields,
+        input: CombinedEmailBodyAndCustomFields | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         *,
@@ -4762,7 +4839,7 @@ class DocusignClient(ConnectorClientBase):
 
     def generate_embedded_signing_url(
         self,
-        input: DynamicSigningUrlFields,
+        input: DynamicSigningUrlFields | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         is_in_person_signer: str,

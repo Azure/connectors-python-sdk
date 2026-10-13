@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -129,7 +129,7 @@ class GetTaskResponseV2:
     """The number of external references that exist on the task."""
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = dataclass_field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "appliedCategories"},
@@ -285,7 +285,7 @@ class GetTaskResponseV3:
     """The number of external references that exist on the task."""
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = dataclass_field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "appliedCategories"},
@@ -338,7 +338,12 @@ class ListTasksResponse:
     Response for List my tasks
     """
 
-    value: Optional[List[GetTaskResponseV2]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GetTaskResponseV2 | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     next_link: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -403,7 +408,7 @@ class UpdateTaskRequest:
         metadata={"wire_name": "bucketId"},
     )
     """The bucket to place this task in."""
-    applied_categories: Optional[AppliedCategories] = dataclass_field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "appliedCategories"},
@@ -445,7 +450,7 @@ class CreateTaskRequest:
     Semi-colon separated ids or email addresses of users to assign this task
     to.
     """
-    applied_categories: Optional[AppliedCategories] = dataclass_field(
+    applied_categories: Optional[AppliedCategories | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "appliedCategories"},
@@ -673,7 +678,7 @@ class PlannerClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -732,6 +737,9 @@ class PlannerClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -742,7 +750,7 @@ class PlannerClient(ConnectorClientBase):
 
     def unassign_users(
         self,
-        input: UnassignUsersInput,
+        input: UnassignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -783,7 +791,7 @@ class PlannerClient(ConnectorClientBase):
 
     def assign_users(
         self,
-        input: AssignUsersInput,
+        input: AssignUsersInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -925,7 +933,7 @@ class PlannerClient(ConnectorClientBase):
 
     def create_bucket(
         self,
-        input: CreateBucketInput,
+        input: CreateBucketInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -962,7 +970,7 @@ class PlannerClient(ConnectorClientBase):
 
     def create_task(
         self,
-        input: CreateTaskRequest,
+        input: CreateTaskRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1286,7 +1294,7 @@ class PlannerClient(ConnectorClientBase):
 
     def update_task(
         self,
-        input: UpdateTaskRequest,
+        input: UpdateTaskRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1327,7 +1335,7 @@ class PlannerClient(ConnectorClientBase):
 
     def update_task_details(
         self,
-        input: UpdateTaskDetailsRequest,
+        input: UpdateTaskDetailsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,

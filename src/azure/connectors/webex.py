@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -939,7 +939,7 @@ class WebexClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -973,7 +973,7 @@ class WebexClient(ConnectorClientBase):
 
     def create_space_member(
         self,
-        input: CreateSpaceMemberInput,
+        input: CreateSpaceMemberInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1099,7 +1099,7 @@ class WebexClient(ConnectorClientBase):
 
     def send_message(
         self,
-        input: SendMessageInput,
+        input: SendMessageInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1341,7 +1341,7 @@ class WebexClient(ConnectorClientBase):
 
     def create_space(
         self,
-        input: CreateSpaceInput,
+        input: CreateSpaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1418,7 +1418,7 @@ class WebexClient(ConnectorClientBase):
 
     def create_team_member(
         self,
-        input: CreateTeamMemberInput,
+        input: CreateTeamMemberInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

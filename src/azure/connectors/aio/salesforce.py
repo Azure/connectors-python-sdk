@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -189,7 +189,7 @@ class SalesforceClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1064,6 +1064,9 @@ class SalesforceClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1074,7 +1077,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def execute_soql_query(
         self,
-        input: ExecuteSoqlQueryParameters,
+        input: ExecuteSoqlQueryParameters | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1253,7 +1256,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def close_job(
         self,
-        input: CloseJobRequest,
+        input: CloseJobRequest | Mapping[str, Any],
         job_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1322,6 +1325,9 @@ class SalesforceClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1466,7 +1472,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def mcp_salesforce_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -1514,7 +1520,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def create_job(
         self,
-        input: CreateJobParameters,
+        input: CreateJobParameters | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1609,7 +1615,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         table: str,
         id: str,
         *,
@@ -1666,7 +1672,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def patch_item_by_external_id(
         self,
-        input: PatchItemByExternalIdInput,
+        input: PatchItemByExternalIdInput | Mapping[str, Any],
         table: str,
         external_id_field: str,
         external_id: str,
@@ -1717,7 +1723,7 @@ class SalesforceClient(ConnectorClientBase):
 
     async def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         table: str,
         *,
         timeout: Optional[float] = None,

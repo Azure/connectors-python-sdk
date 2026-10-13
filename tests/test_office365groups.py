@@ -561,11 +561,10 @@ class TestListOwnedGroupsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_owned_groups()
+            result = await resolve_generated_result(client.list_owned_groups())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "my-group", "displayName": "My Team"}]
 
 
 class TestHttpRequestAsync:

@@ -2,7 +2,7 @@
 
 """Contract tests for SeismicplannerClient."""
 
-from typing import Any, Dict, Optional, get_type_hints
+from typing import Any, Dict, Mapping, Optional, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -24,13 +24,13 @@ OPERATION_CONTRACTS = {
     "delete_comment": ("DELETE", False),
     "update_comment": ("PUT", True),
     "get_projects": ("GET", False),
-    "list_delete_projects": ("DELETE", False),
+    "delete_projects": ("DELETE", False),
     "create_project": ("POST", True),
     "get_project": ("GET", False),
-    "list_delete_project": ("DELETE", False),
+    "delete_project": ("DELETE", False),
     "update_project": ("PUT", True),
     "get_requests": ("GET", False),
-    "list_delete_requests": ("DELETE", True),
+    "delete_requests": ("DELETE", True),
     "create_request": ("POST", True),
     "get_request": ("GET", False),
     "delete_request": ("DELETE", False),
@@ -40,7 +40,7 @@ OPERATION_CONTRACTS = {
     "get_tasks": ("GET", False),
     "create_task": ("POST", True),
     "get_task": ("GET", False),
-    "list_delete_task": ("DELETE", False),
+    "delete_task": ("DELETE", False),
     "update_task": ("PUT", True),
 }
 
@@ -96,7 +96,7 @@ class TestSeismicplannerClient(GeneratedConnectorContractTests):
         )
 
         assert type_hints["localizations"] == Optional[
-            Dict[str, CustomPropertyDataDisplay]
+            Dict[str, CustomPropertyDataDisplay | Mapping[str, Any]]
         ]
         assert model.localizations is not None
         assert model.localizations["en-US"].name == "English"

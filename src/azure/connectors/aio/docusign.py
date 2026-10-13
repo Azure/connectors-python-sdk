@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -335,7 +335,7 @@ class DocusignClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -949,7 +949,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def composite_templates(
         self,
-        input: CompositeTemplateSchema,
+        input: CompositeTemplateSchema | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         status: str,
@@ -1203,7 +1203,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def send_envelope(
         self,
-        input: DynamicSigners,
+        input: DynamicSigners | Mapping[str, Any],
         account_id: str,
         status: str,
         template_id: str,
@@ -1270,7 +1270,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def send_envelope_with_recipient_fields(
         self,
-        input: DynamicRecipients,
+        input: DynamicRecipients | Mapping[str, Any],
         account_id: str,
         template_id: str,
         *,
@@ -1499,7 +1499,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def generate_embedded_sender_url(
         self,
-        input: AdditionalURLForSenderView,
+        input: AdditionalURLForSenderView | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         open_in: str,
@@ -1647,6 +1647,9 @@ class DocusignClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1779,7 +1782,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def add_verification_to_recipient(
         self,
-        input: AdditionalRecipientData,
+        input: AdditionalRecipientData | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -1844,7 +1847,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def update_envelope_recipient(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -1976,7 +1979,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def apply_templates_to_documents(
         self,
-        input: ApplyTemplatesToDocumentsInput,
+        input: ApplyTemplatesToDocumentsInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         template_id: str,
@@ -2031,7 +2034,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def create_bulk_send_list(
         self,
-        input: CreateBulkSendListInput,
+        input: CreateBulkSendListInput | Mapping[str, Any],
         account_id: str,
         name: str,
         *,
@@ -2251,7 +2254,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def add_documents_to_envelope(
         self,
-        input: AddDocumentsToEnvelopeInput,
+        input: AddDocumentsToEnvelopeInput | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         *,
@@ -2538,7 +2541,7 @@ class DocusignClient(ConnectorClientBase):
 
     def list_add_recipient_tabs(
         self,
-        input: AnchorTabSchema,
+        input: AnchorTabSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_id: str,
@@ -2729,7 +2732,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def trigger_maestro_flow(
         self,
-        input: MaestroInputVariables,
+        input: MaestroInputVariables | Mapping[str, Any],
         account_id: str,
         workflow_id: str,
         instance_name: str,
@@ -2783,7 +2786,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def build_number(
         self,
-        input: BuildNumberSchema,
+        input: BuildNumberSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2821,7 +2824,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def add_recipient_to_envelope(
         self,
-        input: AdditionalRecipientParamsSchema,
+        input: AdditionalRecipientParamsSchema | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         recipient_type: str,
@@ -2960,7 +2963,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def create_blank_envelope(
         self,
-        input: CombinedEmailBodyAndCustomFields,
+        input: CombinedEmailBodyAndCustomFields | Mapping[str, Any],
         account_id: str,
         email_subject: str,
         *,
@@ -3012,7 +3015,7 @@ class DocusignClient(ConnectorClientBase):
 
     async def generate_embedded_signing_url(
         self,
-        input: DynamicSigningUrlFields,
+        input: DynamicSigningUrlFields | Mapping[str, Any],
         account_id: str,
         envelope_id: str,
         is_in_person_signer: str,

@@ -70,12 +70,24 @@ class SendMailInput:
     """Choose Mail Agent or enter the Mail Agent key."""
     bounce_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to which bounced emails will be sent."""
-    from_: FromAddress = dataclass_field(metadata={"wire_name": "from"})
-    to: List[EmailAddressItems]
+    from_: FromAddress | Mapping[str, Any] = dataclass_field(
+        metadata={"wire_name": "from"},
+    )
+    to: List[EmailAddressItems | Mapping[str, Any]]
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
+    cc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
+    bcc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of bcc'd recipients."""
     mailtype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Format of the mail to be sent"""
@@ -83,7 +95,12 @@ class SendMailInput:
     """Subject line of your email"""
     htmlbody: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This is the body content for your email."""
-    reply_to: Optional[List[ReplyToAddress]] = dataclass_field(default=None, kw_only=True)
+    reply_to: Optional[
+        List[ReplyToAddress | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The email address to which the recipient's email responses will be
     addressed.
@@ -118,19 +135,46 @@ class SendTemplateMailInput:
     """the email address to which bounced emails will be sent."""
     mail_template_key: str
     """Choose the Mail template"""
-    from_: FromAddress = dataclass_field(metadata={"wire_name": "from"})
-    to: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
+    from_: FromAddress | Mapping[str, Any] = dataclass_field(
+        metadata={"wire_name": "from"},
+    )
+    to: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
+    cc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
+    bcc: Optional[
+        List[EmailAddressItems | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Email addresses of bcc'd recipients."""
-    merge_key_detail: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    merge_key_detail: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     You can use merge tags to replace the placeholders with multiple values for
     different recipients.
     """
-    reply_to: Optional[List[ReplyToAddress]] = dataclass_field(default=None, kw_only=True)
+    reply_to: Optional[
+        List[ReplyToAddress | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Reply To"""
 
 
@@ -194,7 +238,12 @@ class EmailAddressItems:
     Definition: EmailAddressItems
     """
 
-    email_address: Optional[EmailAddress] = dataclass_field(default=None, kw_only=True)
+    email_address: Optional[
+        EmailAddress | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 # Client Class
@@ -403,7 +452,7 @@ class ZeptomailClient(ConnectorClientBase):
 
     def send_mail(
         self,
-        input: SendMailInput,
+        input: SendMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -440,7 +489,7 @@ class ZeptomailClient(ConnectorClientBase):
 
     def send_template_mail(
         self,
-        input: SendTemplateMailInput,
+        input: SendTemplateMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

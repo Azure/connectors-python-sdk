@@ -51,10 +51,9 @@ async def example_1_list_keys():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = await client.list_keys()
+                keys = [key async for key in client.list_keys()]
 
-                if result and result.get("value"):
-                    keys = result["value"]
+                if keys:
                     print(f"Found {len(keys)} keys:")
                     for key in keys:
                         print(f"  - {key.get('name')} (enabled: {key.get('is_enabled')})")
@@ -147,10 +146,9 @@ async def example_4_list_secrets():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                items = await client.list_secrets()
+                secrets = [secret async for secret in client.list_secrets()]
 
-                if result and result.get("value"):
-                    secrets = result["value"]
+                if secrets:
                     print(f"Found {len(secrets)} secrets:")
                     for _ in secrets:
                         print("  - [REDACTED]")

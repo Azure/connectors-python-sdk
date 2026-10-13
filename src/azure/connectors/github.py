@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -78,7 +78,12 @@ class IssueDetailsModel:
     """Summary of the issue."""
     body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the issue."""
-    assignee: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    assignee: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique id of the issue."""
     state: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -89,7 +94,7 @@ class IssueDetailsModel:
     """Web link to the repository."""
 
 
-MultipleFetchModel = List["GeneralAPIModel"]
+MultipleFetchModel = List["GeneralAPIModel | Mapping[str, Any]"]
 
 
 @dataclass
@@ -126,12 +131,22 @@ class RepositoryDetails:
     """The name of the repository."""
     full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full name of the repository."""
-    license: Optional[LicenseDetails] = dataclass_field(default=None, kw_only=True)
+    license: Optional[
+        LicenseDetails | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     forks: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of forks of the repository."""
     permissions: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Permissions on the repository."""
-    owner: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    owner: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is private or public."""
     html_url: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -364,12 +379,22 @@ class PullRequest:
     """Whether the pull request is locked or not."""
     title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the pull request."""
-    user: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    user: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The body as Markdown."""
-    labels: Optional[List[Label]] = dataclass_field(default=None, kw_only=True)
+    labels: Optional[
+        List[Label | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of labels associated with the pull request."""
-    milestone: Optional[Milestone] = dataclass_field(default=None, kw_only=True)
+    milestone: Optional[Milestone | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     active_lock_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason that the conversation was locked."""
     created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -382,17 +407,32 @@ class PullRequest:
     """The date and time that the pull request was merged."""
     merge_commit_sha: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The merge commit Sha of the pull request."""
-    assignee: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
-    assignees: Optional[List[UserDetailsModel]] = dataclass_field(default=None, kw_only=True)
+    assignee: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    assignees: Optional[
+        List[UserDetailsModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of assignees for the pull request."""
     requested_reviewers: Optional[
-        List[UserDetailsModel]
+        List[UserDetailsModel | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
     """The list of Users assigned to this pull request."""
-    requested_teams: Optional[List[TeamDetails]] = dataclass_field(default=None, kw_only=True)
+    requested_teams: Optional[
+        List[TeamDetails | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of requested teams to this pull request."""
     head: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Head"""
@@ -413,7 +453,12 @@ class PullRequest:
     """Whether or not the pull request is rebaseable."""
     mergeable_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The mergeable state of the pull request."""
-    merged_by: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    merged_by: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     comments: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of comments in this pull request."""
     review_comments: Optional[int] = dataclass_field(default=None, kw_only=True)
@@ -474,8 +519,13 @@ class CommitComparison:
     """Diff Url"""
     patch_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Patch Url"""
-    base_commit: Optional[Commit] = dataclass_field(default=None, kw_only=True)
-    merge_base_commit: Optional[Commit] = dataclass_field(default=None, kw_only=True)
+    base_commit: Optional[Commit | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    merge_base_commit: Optional[
+        Commit | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the comparision eg. diverged etc.,"""
     ahead_by: Optional[int] = dataclass_field(default=None, kw_only=True)
@@ -484,9 +534,19 @@ class CommitComparison:
     """behind_by base branch"""
     total_commits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """total commits"""
-    commits: Optional[List[Commit]] = dataclass_field(default=None, kw_only=True)
+    commits: Optional[
+        List[Commit | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """commits"""
-    files: Optional[List[DiffEntry]] = dataclass_field(default=None, kw_only=True)
+    files: Optional[
+        List[DiffEntry | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """files"""
 
 
@@ -538,7 +598,12 @@ class Milestone:
     """The title of the milestone."""
     description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the milestone."""
-    creator: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    creator: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     open_issues: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of open issues for the repository."""
     closed_issues: Optional[int] = dataclass_field(default=None, kw_only=True)
@@ -646,7 +711,12 @@ class MultipleSearchFetchModel:
     Response for Find issues by state and keyword
     """
 
-    body: Optional[List[GeneralAPIModel]] = dataclass_field(default=None, kw_only=True)
+    body: Optional[
+        List[GeneralAPIModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """body of result"""
 
 
@@ -668,7 +738,12 @@ class SingleSearchFetchModel:
     Definition: SingleSearchFetchModel
     """
 
-    body: Optional[List[GeneralAPIModel]] = dataclass_field(default=None, kw_only=True)
+    body: Optional[
+        List[GeneralAPIModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """body of result"""
 
 
@@ -802,11 +877,26 @@ class Commit:
     comments_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Comments Url of the commit"""
     commit: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
-    author: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
-    committer: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    author: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    committer: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     parents: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     stats: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
-    files: Optional[List[DiffEntry]] = dataclass_field(default=None, kw_only=True)
+    files: Optional[
+        List[DiffEntry | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -897,7 +987,12 @@ class RepositoryMiniDetails:
     """The full name of the repository."""
     permissions: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Permissions on the repository."""
-    owner: Optional[UserDetailsModel] = dataclass_field(default=None, kw_only=True)
+    owner: Optional[
+        UserDetailsModel | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the repository is private or public."""
     description: Optional[str] = dataclass_field(default=None, kw_only=True)
@@ -1098,7 +1193,12 @@ class WebhookPullRequestResponse:
     """The action that was performed."""
     number: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The pull request number."""
-    pull_request: Optional[PullRequest] = dataclass_field(default=None, kw_only=True)
+    pull_request: Optional[
+        PullRequest | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1213,7 +1313,7 @@ class GithubClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1247,7 +1347,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_issue(
         self,
-        input: IssueBasicDetailsModel,
+        input: IssueBasicDetailsModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1473,7 +1573,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_update_repository_secret(
         self,
-        input: CreateRepositorySecretRequest,
+        input: CreateRepositorySecretRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         secret_name: str,
@@ -1517,7 +1617,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_repository_using_template(
         self,
-        input: CreateRepositoryUsingTemplateRequest,
+        input: CreateRepositoryUsingTemplateRequest | Mapping[str, Any],
         template_owner: str,
         template_repository: str,
         *,
@@ -1604,7 +1704,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_reference(
         self,
-        input: CreateReferenceRequest,
+        input: CreateReferenceRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -1702,7 +1802,7 @@ class GithubClient(ConnectorClientBase):
 
     def merge_pull_request(
         self,
-        input: PullRequestMergeRequest,
+        input: PullRequestMergeRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1796,7 +1896,7 @@ class GithubClient(ConnectorClientBase):
 
     def update_pull_request(
         self,
-        input: PullRequestUpdateRequest,
+        input: PullRequestUpdateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1916,7 +2016,7 @@ class GithubClient(ConnectorClientBase):
 
     def request_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1960,7 +2060,7 @@ class GithubClient(ConnectorClientBase):
 
     def remove_reviewers_pull_request(
         self,
-        input: RequestReviewersBody,
+        input: RequestReviewersBody | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         pull_number: int,
@@ -1994,6 +2094,9 @@ class GithubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2004,7 +2107,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_pull_request(
         self,
-        input: PullRequestCreateRequest,
+        input: PullRequestCreateRequest | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -2163,7 +2266,7 @@ class GithubClient(ConnectorClientBase):
 
     def create_repository_dispatch_event(
         self,
-        input: RepositoryDispatchEvent,
+        input: RepositoryDispatchEvent | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         *,
@@ -2346,6 +2449,9 @@ class GithubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2386,6 +2492,9 @@ class GithubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2443,7 +2552,7 @@ class GithubClient(ConnectorClientBase):
 
     def update_issue_num(
         self,
-        input: IssueUpdateModel,
+        input: IssueUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         issue_number: int,
@@ -2490,7 +2599,7 @@ class GithubClient(ConnectorClientBase):
 
     def update_milestone(
         self,
-        input: MilestoneUpdateModel,
+        input: MilestoneUpdateModel | Mapping[str, Any],
         repository_owner: str,
         repository_name: str,
         milestone_number: int,
@@ -2573,7 +2682,7 @@ class GithubClient(ConnectorClientBase):
 
     def search_github_with_query(
         self,
-        input: GraphQlQuery,
+        input: GraphQlQuery | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3464,7 +3573,7 @@ class GithubClient(ConnectorClientBase):
 
     def invoke_mcp_server(
         self,
-        input: QueryRequest,
+        input: QueryRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

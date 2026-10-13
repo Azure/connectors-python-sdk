@@ -293,7 +293,7 @@ class GetDocxBodyResponse:
     Response for Get body from a Word DOCX document
     """
 
-    body: Optional[DocxBody] = dataclass_field(
+    body: Optional[DocxBody | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Body"},
@@ -313,7 +313,7 @@ class GetDocxCommentsHierarchicalResponse:
     Response for Get comments from a Word DOCX document hierarchically
     """
 
-    comments: Optional[List[DocxTopLevelComment]] = dataclass_field(
+    comments: Optional[List[DocxTopLevelComment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Comments"},
@@ -339,12 +339,12 @@ class GetDocxHeadersAndFootersResponse:
     Response for Get content of a footer from a Word DOCX document
     """
 
-    footers: Optional[List[DocxFooter]] = dataclass_field(
+    footers: Optional[List[DocxFooter | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Footers"},
     )
-    headers: Optional[List[DocxHeader]] = dataclass_field(
+    headers: Optional[List[DocxHeader | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Headers"},
@@ -363,7 +363,7 @@ class GetDocxImagesResponse:
     Response for Get images from a Word DOCX document
     """
 
-    images: Optional[List[DocxImage]] = dataclass_field(
+    images: Optional[List[DocxImage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Images"},
@@ -389,7 +389,7 @@ class GetDocxPagesResponse:
         metadata={"wire_name": "PageCount"},
     )
     """Count of pages"""
-    pages: Optional[List[DocxPage]] = dataclass_field(
+    pages: Optional[List[DocxPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Pages"},
@@ -409,7 +409,7 @@ class GetDocxSectionsResponse:
     Response for Get sections from a Word DOCX document
     """
 
-    sections: Optional[List[DocxSection]] = dataclass_field(
+    sections: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Sections"},
@@ -429,7 +429,7 @@ class GetDocxStylesResponse:
     Response for Get styles from a Word DOCX document
     """
 
-    styles: Optional[List[DocxStyle]] = dataclass_field(
+    styles: Optional[List[DocxStyle | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Styles"},
@@ -449,7 +449,7 @@ class GetDocxTableRowResponse:
     Response for Gets the contents of an existing table row in an existing table in a W
     """
 
-    row_result: Optional[DocxTableRow] = dataclass_field(
+    row_result: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RowResult"},
@@ -475,7 +475,7 @@ class GetDocxTableByIndexResponse:
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    table: Optional[DocxTable] = dataclass_field(
+    table: Optional[DocxTable | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Table"},
@@ -495,7 +495,7 @@ class GetDocxTablesResponse:
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    tables: Optional[List[DocxTable]] = dataclass_field(
+    tables: Optional[List[DocxTable | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Tables"},
@@ -846,7 +846,7 @@ class GetXlsxCellByIdentifierResponse:
     Response for Get cell from an Excel XLSX spreadsheet, worksheet by cell identifier
     """
 
-    cell: Optional[XlsxSpreadsheetCell] = dataclass_field(
+    cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Cell"},
@@ -866,7 +866,7 @@ class GetXlsxCellResponse:
     Response for Get cell from an Excel XLSX spreadsheet, worksheet by index
     """
 
-    cell: Optional[XlsxSpreadsheetCell] = dataclass_field(
+    cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Cell"},
@@ -886,7 +886,7 @@ class GetXlsxColumnsResponse:
     Response for Get rows and cells from a Excel XLSX spreadsheet, worksheet
     """
 
-    columns: Optional[List[XlsxSpreadsheetColumn]] = dataclass_field(
+    columns: Optional[List[XlsxSpreadsheetColumn | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Columns"},
@@ -906,7 +906,7 @@ class GetXlsxImagesResponse:
     Response for Get images from a Excel XLSX spreadsheet, worksheet
     """
 
-    images: Optional[List[XlsxImage]] = dataclass_field(
+    images: Optional[List[XlsxImage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Images"},
@@ -926,7 +926,7 @@ class GetXlsxRowsAndCellsResponse:
     Response for Get rows and cells from a Excel XLSX spreadsheet, worksheet
     """
 
-    rows: Optional[List[XlsxSpreadsheetRow]] = dataclass_field(
+    rows: Optional[List[XlsxSpreadsheetRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Rows"},
@@ -946,7 +946,7 @@ class GetXlsxStylesResponse:
     Response for Get styles from a Excel XLSX spreadsheet, worksheet
     """
 
-    cell_styles: Optional[List[DocxCellStyle]] = dataclass_field(
+    cell_styles: Optional[List[DocxCellStyle | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CellStyles"},
@@ -972,7 +972,7 @@ class GetXlsxWorksheetsResponse:
         metadata={"wire_name": "Successful"},
     )
     """True if successful, false otherwise"""
-    worksheets: Optional[List[XlsxWorksheet]] = dataclass_field(
+    worksheets: Optional[List[XlsxWorksheet | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Worksheets"},
@@ -1141,7 +1141,7 @@ class AddPdfAnnotationRequest:
     Definition: AddPdfAnnotationRequest
     """
 
-    annotations_to_add: Optional[List[PdfAnnotation]] = dataclass_field(
+    annotations_to_add: Optional[List[PdfAnnotation | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "AnnotationsToAdd"},
@@ -1202,7 +1202,9 @@ class AutodetectDocumentValidationResult:
         metadata={"wire_name": "ErrorCount"},
     )
     """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = dataclass_field(
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ErrorsAndWarnings"},
@@ -1227,7 +1229,9 @@ class AutodetectGetInfoResult:
     Definition: AutodetectGetInfoResult
     """
 
-    alternate_file_type_candidates: Optional[List[AlternateFileFormatCandidate]] = dataclass_field(
+    alternate_file_type_candidates: Optional[
+        List[AlternateFileFormatCandidate | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "AlternateFileTypeCandidates"},
@@ -1288,7 +1292,7 @@ class AutodetectToPngResult:
     Definition: AutodetectToPngResult
     """
 
-    png_result_pages: Optional[List[ConvertedPngPage]] = dataclass_field(
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PngResultPages"},
@@ -1462,7 +1466,7 @@ class ClearXlsxCellRequest:
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to clear"""
-    worksheet_to_update: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
@@ -1533,7 +1537,7 @@ class CreateSpreadsheetFromDataRequest:
     Definition: CreateSpreadsheetFromDataRequest
     """
 
-    rows: Optional[List[XlsxSpreadsheetRow]] = dataclass_field(
+    rows: Optional[List[XlsxSpreadsheetRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Rows"},
@@ -1556,7 +1560,7 @@ class CreateZipArchiveRequest:
     Definition: CreateZipArchiveRequest
     """
 
-    directories_in_zip: Optional[List[ZipDirectory]] = dataclass_field(
+    directories_in_zip: Optional[List[ZipDirectory | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DirectoriesInZip"},
@@ -1565,7 +1569,7 @@ class CreateZipArchiveRequest:
     Top-level directories in the root directory of the zip; directories can
     contain sub-directories and files
     """
-    files_in_zip: Optional[List[ZipFile]] = dataclass_field(
+    files_in_zip: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FilesInZip"},
@@ -1748,7 +1752,9 @@ class DocumentValidationResult:
         metadata={"wire_name": "ErrorCount"},
     )
     """Number of validation errors found in the document"""
-    errors_and_warnings: Optional[List[DocumentValidationError]] = dataclass_field(
+    errors_and_warnings: Optional[
+        List[DocumentValidationError | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ErrorsAndWarnings"},
@@ -1768,7 +1774,7 @@ class DocxBody:
     Definition: DocxBody
     """
 
-    all_paragraphs: Optional[List[DocxParagraph]] = dataclass_field(
+    all_paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "AllParagraphs"},
@@ -1777,7 +1783,7 @@ class DocxBody:
     All paragraphs anywhere in the document; these objects are not sequentially
     placed but are scatted across document
     """
-    all_tables: Optional[List[DocxTable]] = dataclass_field(
+    all_tables: Optional[List[DocxTable | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "AllTables"},
@@ -1900,7 +1906,7 @@ class DocxFooter:
     Definition: DocxFooter
     """
 
-    paragraphs: Optional[List[DocxParagraph]] = dataclass_field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Paragraphs"},
@@ -1912,7 +1918,7 @@ class DocxFooter:
         metadata={"wire_name": "Path"},
     )
     """The Path of the location of this object; leave blank for new tables"""
-    sections_with_footer: Optional[List[DocxSection]] = dataclass_field(
+    sections_with_footer: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SectionsWithFooter"},
@@ -1926,7 +1932,7 @@ class DocxHeader:
     Definition: DocxHeader
     """
 
-    paragraphs: Optional[List[DocxParagraph]] = dataclass_field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Paragraphs"},
@@ -1938,7 +1944,7 @@ class DocxHeader:
         metadata={"wire_name": "Path"},
     )
     """The Path of the location of this object; leave blank for new tables"""
-    sections_with_header: Optional[List[DocxSection]] = dataclass_field(
+    sections_with_header: Optional[List[DocxSection | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SectionsWithHeader"},
@@ -2047,7 +2053,7 @@ class DocxInsertCommentOnParagraphRequest:
     Definition: DocxInsertCommentOnParagraphRequest
     """
 
-    comment_to_insert: Optional[DocxComment] = dataclass_field(
+    comment_to_insert: Optional[DocxComment | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CommentToInsert"},
@@ -2094,7 +2100,7 @@ class DocxInsertImageRequest:
         metadata={"wire_name": "HeightInEMUs"},
     )
     """Optional: The height of the image in EMUs"""
-    image_to_add: Optional[DocxImage] = dataclass_field(
+    image_to_add: Optional[DocxImage | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ImageToAdd"},
@@ -2184,7 +2190,7 @@ class DocxPage:
         metadata={"wire_name": "PageNumber"},
     )
     """Page number of this page, 1-based"""
-    paragraphs: Optional[List[DocxParagraph]] = dataclass_field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Paragraphs"},
@@ -2201,7 +2207,7 @@ class DocxParagraph:
     Definition: DocxParagraph
     """
 
-    content_runs: Optional[List[DocxRun]] = dataclass_field(
+    content_runs: Optional[List[DocxRun | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ContentRuns"},
@@ -2308,7 +2314,7 @@ class DocxRun:
         metadata={"wire_name": "RunIndex"},
     )
     """Index of the run, 0-based"""
-    text_items: Optional[List[DocxText]] = dataclass_field(
+    text_items: Optional[List[DocxText | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TextItems"},
@@ -2389,7 +2395,7 @@ class DocxSetFooterRequest:
     Definition: DocxSetFooterRequest
     """
 
-    footer_to_apply: Optional[DocxFooter] = dataclass_field(
+    footer_to_apply: Optional[DocxFooter | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FooterToApply"},
@@ -2420,7 +2426,7 @@ class DocxSetHeaderRequest:
     Definition: DocxSetHeaderRequest
     """
 
-    header_to_apply: Optional[DocxHeader] = dataclass_field(
+    header_to_apply: Optional[DocxHeader | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HeaderToApply"},
@@ -2744,7 +2750,7 @@ class DocxTable:
         metadata={"wire_name": "TableIndentationWidth"},
     )
     """Table indentation width"""
-    table_rows: Optional[List[DocxTableRow]] = dataclass_field(
+    table_rows: Optional[List[DocxTableRow | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TableRows"},
@@ -2837,7 +2843,7 @@ class DocxTableCell:
         metadata={"wire_name": "CellWidthMode"},
     )
     """Width mode of the cell; can be auto (for automatic) or manual"""
-    paragraphs: Optional[List[DocxParagraph]] = dataclass_field(
+    paragraphs: Optional[List[DocxParagraph | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Paragraphs"},
@@ -2869,7 +2875,7 @@ class DocxTableRow:
     The Path of the location of this table row object; leave blank for new
     tables
     """
-    row_cells: Optional[List[DocxTableCell]] = dataclass_field(
+    row_cells: Optional[List[DocxTableCell | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RowCells"},
@@ -2889,7 +2895,7 @@ class DocxTemplateApplicationRequest:
     Definition: DocxTemplateApplicationRequest
     """
 
-    operations: Optional[List[DocxTemplateOperation]] = dataclass_field(
+    operations: Optional[List[DocxTemplateOperation | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Operations"},
@@ -2996,7 +3002,7 @@ class DocxTopLevelComment:
         metadata={"wire_name": "Path"},
     )
     """Path to the comment in the document"""
-    reply_child_comments: Optional[List[DocxComment]] = dataclass_field(
+    reply_child_comments: Optional[List[DocxComment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ReplyChildComments"},
@@ -3134,7 +3140,7 @@ class FindStringRegexResponse:
         metadata={"wire_name": "MatchCount"},
     )
     """The number of matches"""
-    matches: Optional[List[FindRegexMatch]] = dataclass_field(
+    matches: Optional[List[FindRegexMatch | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Matches"},
@@ -3180,7 +3186,7 @@ class FindStringSimpleResponse:
         metadata={"wire_name": "MatchCount"},
     )
     """The number of matches"""
-    matches: Optional[List[FindStringMatch]] = dataclass_field(
+    matches: Optional[List[FindStringMatch | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Matches"},
@@ -3245,7 +3251,7 @@ class GetDocxCommentsResponse:
         metadata={"wire_name": "CommentCount"},
     )
     """The number of comments in the document"""
-    comments: Optional[List[DocxComment]] = dataclass_field(
+    comments: Optional[List[DocxComment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Comments"},
@@ -3589,7 +3595,7 @@ class GetImageInfoResult:
         metadata={"wire_name": "ExifProfileName"},
     )
     """Name of the EXIF profile used"""
-    exif_values: Optional[List[ExifValue]] = dataclass_field(
+    exif_values: Optional[List[ExifValue | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ExifValues"},
@@ -3644,7 +3650,7 @@ class GetPdfAnnotationsResult:
     Definition: GetPdfAnnotationsResult
     """
 
-    annotations: Optional[List[PdfAnnotation]] = dataclass_field(
+    annotations: Optional[List[PdfAnnotation | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Annotations"},
@@ -3690,7 +3696,7 @@ class GetXlsxCellByIdentifierRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
@@ -3736,7 +3742,7 @@ class GetXlsxCellRequest:
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to retrieve"""
-    worksheet_to_query: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
@@ -3770,7 +3776,7 @@ class GetXlsxColumnsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
@@ -3804,7 +3810,7 @@ class GetXlsxImagesRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
@@ -3838,7 +3844,7 @@ class GetXlsxRowsAndCellsRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_query: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_query: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToQuery"},
@@ -3937,7 +3943,7 @@ class HtmlTemplateApplicationRequest:
         metadata={"wire_name": "HtmlTemplateUrl"},
     )
     """URL to HTML template input"""
-    operations: Optional[List[HtmlTemplateOperation]] = dataclass_field(
+    operations: Optional[List[HtmlTemplateOperation | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Operations"},
@@ -4118,7 +4124,7 @@ class InsertDocxInsertParagraphRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    paragraph_to_insert: Optional[DocxParagraph] = dataclass_field(
+    paragraph_to_insert: Optional[DocxParagraph | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ParagraphToInsert"},
@@ -4167,7 +4173,7 @@ class InsertDocxTableRowRequest:
     first row in the table, 1 being the second row in the table, 2 being the
     third row in the table, etc. to insert this row after
     """
-    row_to_insert: Optional[DocxTableRow] = dataclass_field(
+    row_to_insert: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RowToInsert"},
@@ -4221,7 +4227,7 @@ class InsertDocxTablesRequest:
     object), AfterExistingObject (right after an existing object - fill in the
     InsertPath field using the Path value from an existing object)
     """
-    table_to_insert: Optional[DocxTable] = dataclass_field(
+    table_to_insert: Optional[DocxTable | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TableToInsert"},
@@ -4252,7 +4258,7 @@ class InsertXlsxWorksheetRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_insert: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_insert: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToInsert"},
@@ -4272,7 +4278,7 @@ class MultipageImageFormatConversionResult:
         metadata={"wire_name": "PageCount"},
     )
     """The number of pages in the converted output"""
-    pages: Optional[List[PageConversionResult]] = dataclass_field(
+    pages: Optional[List[PageConversionResult | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Pages"},
@@ -4467,7 +4473,7 @@ class PdfFormFields:
     Definition: PdfFormFields
     """
 
-    form_fields: Optional[List[PdfFormField]] = dataclass_field(
+    form_fields: Optional[List[PdfFormField | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FormFields"},
@@ -4578,7 +4584,7 @@ class PdfTextByPageResult:
     Definition: PdfTextByPageResult
     """
 
-    pages: Optional[List[PdfPageText]] = dataclass_field(
+    pages: Optional[List[PdfPageText | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Pages"},
@@ -4598,7 +4604,7 @@ class PdfToPngResult:
     Definition: PdfToPngResult
     """
 
-    png_result_pages: Optional[List[ConvertedPngPage]] = dataclass_field(
+    png_result_pages: Optional[List[ConvertedPngPage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "PngResultPages"},
@@ -4852,7 +4858,7 @@ class RemoveXlsxWorksheetRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_remove: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_remove: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToRemove"},
@@ -5096,7 +5102,7 @@ class SetPdfFormFieldsRequest:
     Definition: SetPdfFormFieldsRequest
     """
 
-    field_values: Optional[List[SetFormFieldValue]] = dataclass_field(
+    field_values: Optional[List[SetFormFieldValue | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FieldValues"},
@@ -5122,7 +5128,7 @@ class SetPdfMetadataRequest:
         metadata={"wire_name": "InputFileBytes"},
     )
     """Input file contents bytes for the file to modify"""
-    metadata_to_set: Optional[PdfMetadata] = dataclass_field(
+    metadata_to_set: Optional[PdfMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "MetadataToSet"},
@@ -5144,7 +5150,7 @@ class SetXlsxCellByIdentifierRequest:
     """
     The Excel cell identifier (e.g. A1, B2, C33, etc.) of the cell to update
     """
-    cell_value: Optional[XlsxSpreadsheetCell] = dataclass_field(
+    cell_value: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CellValue"},
@@ -5167,7 +5173,7 @@ class SetXlsxCellByIdentifierRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    worksheet_to_update: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
@@ -5190,7 +5196,7 @@ class SetXlsxCellRequest:
         metadata={"wire_name": "CellIndex"},
     )
     """0-based index of the cell, 0, 1, 2, ... in the row to set"""
-    cell_value: Optional[XlsxSpreadsheetCell] = dataclass_field(
+    cell_value: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CellValue"},
@@ -5219,7 +5225,7 @@ class SetXlsxCellRequest:
         metadata={"wire_name": "RowIndex"},
     )
     """0-based index of the row, 0, 1, 2, ... to set"""
-    worksheet_to_update: Optional[XlsxWorksheet] = dataclass_field(
+    worksheet_to_update: Optional[XlsxWorksheet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "WorksheetToUpdate"},
@@ -5265,7 +5271,9 @@ class SplitDocxDocumentResult:
     Definition: SplitDocxDocumentResult
     """
 
-    result_documents: Optional[List[SplitDocumentResult]] = dataclass_field(
+    result_documents: Optional[
+        List[SplitDocumentResult | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResultDocuments"},
@@ -5284,7 +5292,7 @@ class SplitPdfResult:
     Definition: SplitPdfResult
     """
 
-    documents: Optional[List[PdfDocument]] = dataclass_field(
+    documents: Optional[List[PdfDocument | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Documents"},
@@ -5304,7 +5312,9 @@ class SplitPptxPresentationResult:
     Definition: SplitPptxPresentationResult
     """
 
-    result_presentations: Optional[List[PresentationResult]] = dataclass_field(
+    result_presentations: Optional[
+        List[PresentationResult | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResultPresentations"},
@@ -5329,7 +5339,7 @@ class SplitTextDocumentByLinesResult:
         metadata={"wire_name": "LineCount"},
     )
     """The count of lines in the text file"""
-    result_lines: Optional[List[TextDocumentLine]] = dataclass_field(
+    result_lines: Optional[List[TextDocumentLine | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResultLines"},
@@ -5354,7 +5364,9 @@ class SplitTextDocumentByStringResult:
         metadata={"wire_name": "ElementCount"},
     )
     """The count of elements in the text file"""
-    result_elements: Optional[List[TextDocumentElement]] = dataclass_field(
+    result_elements: Optional[
+        List[TextDocumentElement | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResultElements"},
@@ -5373,7 +5385,7 @@ class SplitXlsxWorksheetResult:
     Definition: SplitXlsxWorksheetResult
     """
 
-    result_worksheets: Optional[List[WorksheetResult]] = dataclass_field(
+    result_worksheets: Optional[List[WorksheetResult | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResultWorksheets"},
@@ -5478,7 +5490,7 @@ class UpdateDocxTableCellRequest:
     Definition: UpdateDocxTableCellRequest
     """
 
-    cell_to_update: Optional[DocxTableCell] = dataclass_field(
+    cell_to_update: Optional[DocxTableCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CellToUpdate"},
@@ -5550,7 +5562,7 @@ class UpdateDocxTableRowRequest:
     the secure URL result from that operation as the URL here (this URL is not
     public).
     """
-    row_to_update: Optional[DocxTableRow] = dataclass_field(
+    row_to_update: Optional[DocxTableRow | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "RowToUpdate"},
@@ -5718,7 +5730,7 @@ class XlsxSpreadsheetColumn:
     Definition: XlsxSpreadsheetColumn
     """
 
-    heading_cell: Optional[XlsxSpreadsheetCell] = dataclass_field(
+    heading_cell: Optional[XlsxSpreadsheetCell | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "HeadingCell"},
@@ -5738,7 +5750,7 @@ class XlsxSpreadsheetRow:
     Definition: XlsxSpreadsheetRow
     """
 
-    cells: Optional[List[XlsxSpreadsheetCell]] = dataclass_field(
+    cells: Optional[List[XlsxSpreadsheetCell | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Cells"},
@@ -6022,7 +6034,9 @@ class ZipDirectory:
     Definition: ZipDirectory
     """
 
-    directories_in_directory: Optional[List[ZipDirectory]] = dataclass_field(
+    directories_in_directory: Optional[
+        List[ZipDirectory | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DirectoriesInDirectory"},
@@ -6034,7 +6048,7 @@ class ZipDirectory:
         metadata={"wire_name": "DirectoryName"},
     )
     """Name of this directory"""
-    files_in_directory: Optional[List[ZipFile]] = dataclass_field(
+    files_in_directory: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FilesInDirectory"},
@@ -6048,7 +6062,7 @@ class ZipExtractResponse:
     Definition: ZipExtractResponse
     """
 
-    directories_in_zip: Optional[List[ZipDirectory]] = dataclass_field(
+    directories_in_zip: Optional[List[ZipDirectory | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DirectoriesInZip"},
@@ -6057,7 +6071,7 @@ class ZipExtractResponse:
     Top-level directories in the root directory of the zip; directories can
     contain sub-directories and files
     """
-    files_in_zip: Optional[List[ZipFile]] = dataclass_field(
+    files_in_zip: Optional[List[ZipFile | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FilesInZip"},
@@ -6158,7 +6172,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_create_blank_document(
         self,
-        input: CreateBlankDocxRequest,
+        input: CreateBlankDocxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6199,7 +6213,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_delete_pages(
         self,
-        input: RemoveDocxPagesRequest,
+        input: RemoveDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6236,7 +6250,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_delete_table_row(
         self,
-        input: DeleteDocxTableRowRequest,
+        input: DeleteDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6277,7 +6291,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_delete_table_row_range(
         self,
-        input: DeleteDocxTableRowRangeRequest,
+        input: DeleteDocxTableRowRangeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6318,7 +6332,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_body(
         self,
-        input: GetDocxBodyRequest,
+        input: GetDocxBodyRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6358,7 +6372,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_comments_hierarchical(
         self,
-        input: GetDocxGetCommentsHierarchicalRequest,
+        input: GetDocxGetCommentsHierarchicalRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6400,7 +6414,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_headers_and_footers(
         self,
-        input: GetDocxHeadersAndFootersRequest,
+        input: GetDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6440,7 +6454,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_images(
         self,
-        input: GetDocxImagesRequest,
+        input: GetDocxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6479,7 +6493,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_pages(
         self,
-        input: GetDocxPagesRequest,
+        input: GetDocxPagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6519,7 +6533,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_sections(
         self,
-        input: GetDocxSectionsRequest,
+        input: GetDocxSectionsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6558,7 +6572,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_styles(
         self,
-        input: GetDocxStylesRequest,
+        input: GetDocxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6597,7 +6611,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_table_row(
         self,
-        input: GetDocxTableRowRequest,
+        input: GetDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6637,7 +6651,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_table_by_index(
         self,
-        input: GetDocxTableByIndexRequest,
+        input: GetDocxTableByIndexRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6678,7 +6692,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_get_tables(
         self,
-        input: GetDocxTablesRequest,
+        input: GetDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6717,7 +6731,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_insert_comment_on_paragraph(
         self,
-        input: DocxInsertCommentOnParagraphRequest,
+        input: DocxInsertCommentOnParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6759,7 +6773,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_insert_image(
         self,
-        input: DocxInsertImageRequest,
+        input: DocxInsertImageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6799,7 +6813,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_insert_paragraph(
         self,
-        input: InsertDocxInsertParagraphRequest,
+        input: InsertDocxInsertParagraphRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6842,7 +6856,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_insert_table(
         self,
-        input: InsertDocxTablesRequest,
+        input: InsertDocxTablesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6882,7 +6896,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_insert_table_row(
         self,
-        input: InsertDocxTableRowRequest,
+        input: InsertDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6923,7 +6937,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_remove_headers_and_footers(
         self,
-        input: RemoveDocxHeadersAndFootersRequest,
+        input: RemoveDocxHeadersAndFootersRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6964,7 +6978,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_remove_object(
         self,
-        input: DocxRemoveObjectRequest,
+        input: DocxRemoveObjectRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7007,7 +7021,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7043,7 +7057,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_set_footer(
         self,
-        input: DocxSetFooterRequest,
+        input: DocxSetFooterRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7083,7 +7097,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_set_footer_add_page_number(
         self,
-        input: DocxSetFooterAddPageNumberRequest,
+        input: DocxSetFooterAddPageNumberRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7124,7 +7138,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_set_header(
         self,
-        input: DocxSetHeaderRequest,
+        input: DocxSetHeaderRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7164,7 +7178,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_update_table_cell(
         self,
-        input: UpdateDocxTableCellRequest,
+        input: UpdateDocxTableCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7206,7 +7220,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_docx_update_table_row(
         self,
-        input: UpdateDocxTableRowRequest,
+        input: UpdateDocxTableRowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7249,7 +7263,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_finish_editing(
         self,
-        input: FinishEditingRequest,
+        input: FinishEditingRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7287,7 +7301,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_pptx_delete_slides(
         self,
-        input: RemovePptxSlidesRequest,
+        input: RemovePptxSlidesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7324,7 +7338,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_pptx_replace(
         self,
-        input: ReplaceStringRequest,
+        input: ReplaceStringRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7361,7 +7375,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_clear_cell_by_index(
         self,
-        input: ClearXlsxCellRequest,
+        input: ClearXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7402,7 +7416,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_create_blank_spreadsheet(
         self,
-        input: CreateBlankSpreadsheetRequest,
+        input: CreateBlankSpreadsheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7441,7 +7455,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_create_spreadsheet_from_data(
         self,
-        input: CreateSpreadsheetFromDataRequest,
+        input: CreateSpreadsheetFromDataRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7482,7 +7496,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_delete_worksheet(
         self,
-        input: RemoveXlsxWorksheetRequest,
+        input: RemoveXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7524,7 +7538,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_cell_by_identifier(
         self,
-        input: GetXlsxCellByIdentifierRequest,
+        input: GetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7565,7 +7579,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_cell_by_index(
         self,
-        input: GetXlsxCellRequest,
+        input: GetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7606,7 +7620,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_columns(
         self,
-        input: GetXlsxColumnsRequest,
+        input: GetXlsxColumnsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7645,7 +7659,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_images(
         self,
-        input: GetXlsxImagesRequest,
+        input: GetXlsxImagesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7684,7 +7698,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_rows_and_cells(
         self,
-        input: GetXlsxRowsAndCellsRequest,
+        input: GetXlsxRowsAndCellsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7724,7 +7738,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_styles(
         self,
-        input: GetXlsxStylesRequest,
+        input: GetXlsxStylesRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7763,7 +7777,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_get_worksheets(
         self,
-        input: GetXlsxWorksheetsRequest,
+        input: GetXlsxWorksheetsRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7803,7 +7817,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_insert_worksheet(
         self,
-        input: InsertXlsxWorksheetRequest,
+        input: InsertXlsxWorksheetRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7843,7 +7857,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_set_cell_by_identifier(
         self,
-        input: SetXlsxCellByIdentifierRequest,
+        input: SetXlsxCellByIdentifierRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7885,7 +7899,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def edit_document_xlsx_set_cell_by_index(
         self,
-        input: SetXlsxCellRequest,
+        input: SetXlsxCellRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7927,7 +7941,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_html_to_docx(
         self,
-        input: HtmlToOfficeRequest,
+        input: HtmlToOfficeRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7961,7 +7975,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_data_json_to_xml(
         self,
-        input: ConvertDataJsonToXmlInput,
+        input: ConvertDataJsonToXmlInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7998,7 +8012,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_template_apply_html_template(
         self,
-        input: HtmlTemplateApplicationRequest,
+        input: HtmlTemplateApplicationRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8038,7 +8052,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_html_to_pdf(
         self,
-        input: HtmlToPdfRequest,
+        input: HtmlToPdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8073,7 +8087,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_html_to_png(
         self,
-        input: HtmlToPngRequest,
+        input: HtmlToPngRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8111,7 +8125,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_html_to_txt(
         self,
-        input: HtmlToTextRequest,
+        input: HtmlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8148,7 +8162,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_url_to_pdf(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8183,7 +8197,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_url_to_screenshot(
         self,
-        input: ScreenshotRequest,
+        input: ScreenshotRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -8221,7 +8235,7 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
     def convert_web_url_to_txt(
         self,
-        input: UrlToTextRequest,
+        input: UrlToTextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

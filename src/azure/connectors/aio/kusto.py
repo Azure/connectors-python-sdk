@@ -128,7 +128,7 @@ class KustoClient(ConnectorClientBase):
 
     async def begin_list_kusto_results(
         self,
-        input: QueryAndListSchema,
+        input: QueryAndListSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -181,7 +181,7 @@ class KustoClient(ConnectorClientBase):
 
     async def begin_list_kusto_show_command_results(
         self,
-        input: ControlCommandAndListSchema,
+        input: ControlCommandAndListSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -237,7 +237,7 @@ class KustoClient(ConnectorClientBase):
 
     async def begin_run_kusto_query_and_visualize_results(
         self,
-        input: QueryAndVisualizeSchema,
+        input: QueryAndVisualizeSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -292,7 +292,7 @@ class KustoClient(ConnectorClientBase):
 
     async def begin_run_kusto_command_and_visualize_results(
         self,
-        input: CommandAndVisualizeSchema,
+        input: CommandAndVisualizeSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -347,7 +347,7 @@ class KustoClient(ConnectorClientBase):
 
     async def begin_run_async_control_command_and_wait(
         self,
-        input: ControlCommandAndListSchema,
+        input: ControlCommandAndListSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -403,7 +403,7 @@ class KustoClient(ConnectorClientBase):
 
     async def mcp_kusto_query_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -451,7 +451,7 @@ class KustoClient(ConnectorClientBase):
 
     async def list_kusto_results_schema(
         self,
-        input: QueryAndListSchema,
+        input: QueryAndListSchema | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

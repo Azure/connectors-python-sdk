@@ -98,7 +98,7 @@ class SmtpClient(ConnectorClientBase):
 
     async def send_email(
         self,
-        input: Email,
+        input: Email | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

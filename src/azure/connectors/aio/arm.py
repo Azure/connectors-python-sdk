@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -197,7 +197,7 @@ class ArmClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -466,7 +466,7 @@ class ArmClient(ConnectorClientBase):
 
     async def deployments_create_or_update(
         self,
-        input: Deployment,
+        input: Deployment | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
@@ -566,6 +566,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -626,7 +629,7 @@ class ArmClient(ConnectorClientBase):
 
     async def deployments_validate(
         self,
-        input: Deployment,
+        input: Deployment | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         deployment_name: str,
@@ -1349,7 +1352,7 @@ class ArmClient(ConnectorClientBase):
 
     async def resource_groups_create_or_update(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -1432,6 +1435,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1442,7 +1448,7 @@ class ArmClient(ConnectorClientBase):
 
     async def resource_groups_patch(
         self,
-        input: ResourceGroup,
+        input: ResourceGroup | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -1492,7 +1498,7 @@ class ArmClient(ConnectorClientBase):
 
     async def resource_groups_export_template(
         self,
-        input: ExportTemplateRequest,
+        input: ExportTemplateRequest | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         *,
@@ -1777,7 +1783,7 @@ class ArmClient(ConnectorClientBase):
 
     async def resources_create_or_update_by_id(
         self,
-        input: GenericResource,
+        input: GenericResource | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -1878,6 +1884,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1888,7 +1897,7 @@ class ArmClient(ConnectorClientBase):
 
     async def resources_invoke(
         self,
-        input: ResourcesInvokeInput,
+        input: ResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_group_name: str,
         resource_provider_namespace: str,
@@ -2002,7 +2011,7 @@ class ArmClient(ConnectorClientBase):
 
     async def provider_resources_invoke(
         self,
-        input: ProviderResourcesInvokeInput,
+        input: ProviderResourcesInvokeInput | Mapping[str, Any],
         subscription_id: str,
         resource_provider_namespace: str,
         short_resource_id: str,
@@ -2144,6 +2153,9 @@ class ArmClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2234,6 +2246,9 @@ class ArmClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(

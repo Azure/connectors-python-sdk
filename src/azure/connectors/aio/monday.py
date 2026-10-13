@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -233,7 +233,7 @@ class MondayClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -267,7 +267,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_item(
         self,
-        input: CreateItemInput,
+        input: CreateItemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -307,7 +307,7 @@ class MondayClient(ConnectorClientBase):
 
     async def duplicate_board(
         self,
-        input: DuplicateBoardInput,
+        input: DuplicateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -347,7 +347,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_board(
         self,
-        input: CreateBoardInput,
+        input: CreateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -387,7 +387,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_column(
         self,
-        input: CreateColumnInput,
+        input: CreateColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -427,7 +427,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -467,7 +467,7 @@ class MondayClient(ConnectorClientBase):
 
     async def update_item_column(
         self,
-        input: UpdateItemColumnInput,
+        input: UpdateItemColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -508,7 +508,7 @@ class MondayClient(ConnectorClientBase):
 
     async def update_multiple_item_columns(
         self,
-        input: UpdateMultipleItemColumnsInput,
+        input: UpdateMultipleItemColumnsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -549,7 +549,7 @@ class MondayClient(ConnectorClientBase):
 
     async def move_item_to_group(
         self,
-        input: MoveItemToGroupInput,
+        input: MoveItemToGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -589,7 +589,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_notification(
         self,
-        input: CreateNotificationInput,
+        input: CreateNotificationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -630,7 +630,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_subitem(
         self,
-        input: CreateSubitemInput,
+        input: CreateSubitemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -724,7 +724,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_update(
         self,
-        input: CreateUpdateInput,
+        input: CreateUpdateInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -818,7 +818,7 @@ class MondayClient(ConnectorClientBase):
 
     async def create_workspace(
         self,
-        input: CreateWorkspaceInput,
+        input: CreateWorkspaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

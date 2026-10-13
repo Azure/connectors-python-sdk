@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -411,7 +411,7 @@ class ImpexiumClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -507,7 +507,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_exhibitors(
+    def list_all_exhibitors(
         self,
         exhibit_code: str,
         page_number: int,
@@ -516,11 +516,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Exhibitors
 
         List All Exhibitors
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -531,29 +534,47 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Exhibitors"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_of_exams(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_of_exams(
         self,
         page_number: int,
         *,
@@ -567,11 +588,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List of Exams
 
         List of Exams
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -610,29 +634,47 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"includePrices={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_registrants(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_registrants(
         self,
         event_code: str,
         page_number: int,
@@ -644,11 +686,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Registrants
 
         List Registrants
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -677,27 +722,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"registeredSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def get_course_attendees(
         self,
@@ -989,7 +1052,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_nominee(
         self,
-        input: CommitteeNomineeSaveData,
+        input: CommitteeNomineeSaveData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -1086,7 +1149,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_custom_field_value(
         self,
-        input: CustomFieldData,
+        input: CustomFieldData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1120,7 +1183,7 @@ class ImpexiumClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def list_all_event_cancellations_by_event(
+    def list_all_event_cancellations_by_event(
         self,
         event_code: str,
         page_number: int,
@@ -1131,11 +1194,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Event Cancellations by Event
 
         List All Event Cancellations by Event
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1159,27 +1225,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"cancelledSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def get_all_open_orders_for_an_individual(
         self,
@@ -1249,7 +1333,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_completed_user_tasks_by_user_id_or_email(
+    def list_completed_user_tasks_by_user_id_or_email(
         self,
         user_id_or_email: str,
         page_number: int,
@@ -1258,11 +1342,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Completed User Tasks by User ID or Email
 
         List Completed User Tasks by User ID or Email
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1274,29 +1361,47 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Completed"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_pending_user_tasks_by_user_id_or_email(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_pending_user_tasks_by_user_id_or_email(
         self,
         user_id_or_email: str,
         page_number: int,
@@ -1305,11 +1410,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List Pending User Tasks by User ID or Email
 
         List Pending User Tasks by User ID or Email
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1321,31 +1429,49 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Pending"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def add_note_to_sales_opportunity(
         self,
-        input: BaseNoteData,
+        input: BaseNoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1381,7 +1507,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_activity_to_sales_opportunity(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1417,7 +1543,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_task_by_task_number(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         task_number: str,
         *,
         timeout: Optional[float] = None,
@@ -1456,7 +1582,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_countries(
+    def list_all_countries(
         self,
         page_number: int,
         *,
@@ -1464,37 +1590,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Countries
 
         List All Countries
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Countries/All/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def get_all_states_by_country(
         self,
@@ -1543,7 +1690,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_exhibits(
+    def list_all_exhibits(
         self,
         page_number: int,
         *,
@@ -1551,37 +1698,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Exhibits
 
         List All Exhibits
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Exhibits/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def delete_a_category_for_an_organization(
         self,
@@ -1616,6 +1784,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1626,7 +1797,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_customer_request(
         self,
-        input: RequestSaveData,
+        input: RequestSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1658,7 +1829,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_customer_request(
         self,
-        input: RequestUpdateData,
+        input: RequestUpdateData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1733,7 +1904,7 @@ class ImpexiumClient(ConnectorClientBase):
                 response.text,
             )
 
-    async def list_of_customer_relationships(
+    def list_of_customer_relationships(
         self,
         page_number: int,
         *,
@@ -1741,11 +1912,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List of Customer Relationships
 
         List of Customer Relationships
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1755,29 +1929,47 @@ class ImpexiumClient(ConnectorClientBase):
             f"/RelationshipTypes"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_all_open_customer_request(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_all_open_customer_request(
         self,
         page_number: int,
         *,
@@ -1785,37 +1977,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Open Customer Request
 
         List All Open Customer Request
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Requests/Open/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def get_organization_inactive_memberships(
         self,
@@ -1894,6 +2107,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1904,7 +2120,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_user_task_progress_or_mark_as_completed(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -2057,7 +2273,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def assign_task_to_a_user(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -2124,6 +2340,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2134,7 +2353,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_notification_to_individual(
         self,
-        input: NotificationData,
+        input: NotificationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -2210,7 +2429,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_a_new_task(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2245,7 +2464,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_of_all_organization_members(
+    def list_of_all_organization_members(
         self,
         page_number: int,
         *,
@@ -2272,11 +2491,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List of All Organization Members
 
         List of All Organization Members
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2385,29 +2607,47 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_of_all_individual_members(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_of_all_individual_members(
         self,
         page_number: int,
         *,
@@ -2430,11 +2670,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List of All Individual Members
 
         List of All Individual Members
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2523,27 +2766,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def get_list_of_active_certifications_for_an_organization(
         self,
@@ -2684,7 +2945,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_activity_to_organization(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -2816,7 +3077,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_awards(
+    def list_all_awards(
         self,
         page_number: int,
         *,
@@ -2825,11 +3086,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List All Awards
 
         List All Awards
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2843,27 +3107,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"Year={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def find_members_or_individuals_by_name(
         self,
@@ -2963,7 +3245,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_a_service_to_an_organization(
         self,
-        input: ServiceData,
+        input: ServiceData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -3004,7 +3286,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_phone_for_an_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -3051,7 +3333,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_phone_for_an_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -3098,7 +3380,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def delete_an_individual_web_link(
         self,
-        input: DeleteAnIndividualWebLinkInput,
+        input: DeleteAnIndividualWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3128,6 +3410,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3138,7 +3423,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_web_link_for_individual(
         self,
-        input: AddWebLinkForIndividualInput,
+        input: AddWebLinkForIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3178,7 +3463,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_phone_to_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3324,7 +3609,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def delete_an_organization_web_link(
         self,
-        input: DeleteAnOrganizationWebLinkInput,
+        input: DeleteAnOrganizationWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3354,6 +3639,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3364,7 +3652,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_web_link_for_organization(
         self,
-        input: AddWebLinkForOrganizationInput,
+        input: AddWebLinkForOrganizationInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3404,7 +3692,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_email_to_organization(
         self,
-        input: EmailData,
+        input: EmailData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -3501,7 +3789,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_or_update_address_to_organization(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -3652,7 +3940,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_phone_to_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -4117,7 +4405,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_an_individual_email(
         self,
-        input: UpdateAnIndividualEmailInput,
+        input: UpdateAnIndividualEmailInput | Mapping[str, Any],
         id_or_record_number: str,
         current_email_address: str,
         *,
@@ -4159,7 +4447,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def save_relationship_for_organization(
         self,
-        input: SaveRelationshipForOrganizationInput,
+        input: SaveRelationshipForOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4195,7 +4483,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_individual(
         self,
-        input: AddIndividualInput,
+        input: AddIndividualInput | Mapping[str, Any],
         *,
         create_user: Optional[bool] = None,
         timeout: Optional[float] = None,
@@ -4241,7 +4529,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_email_to_individual(
         self,
-        input: AddEmailToIndividualInput,
+        input: AddEmailToIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -4286,7 +4574,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_or_update_address_to_individual(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -4445,7 +4733,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_activity(
         self,
-        input: AddActivityInput,
+        input: AddActivityInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4531,7 +4819,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_relationship_to_individual(
         self,
-        input: AddRelationshipToIndividualInput,
+        input: AddRelationshipToIndividualInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4567,7 +4855,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def individual_add_education_credit(
         self,
-        input: EducationCreditData,
+        input: EducationCreditData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -4607,7 +4895,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def individual_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4692,7 +4980,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_to_committee(
         self,
-        input: CommitteeMemberCreateData,
+        input: CommitteeMemberCreateData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -4733,7 +5021,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_committee_member(
         self,
-        input: CommitteeMemberUpdateData,
+        input: CommitteeMemberUpdateData | Mapping[str, Any],
         code: str,
         member_record_number: str,
         current_position_code: str,
@@ -4777,7 +5065,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def add_organization(
         self,
-        input: AddOrganizationInput,
+        input: AddOrganizationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4814,7 +5102,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def update_organization(
         self,
-        input: UpdateOrganizationInput,
+        input: UpdateOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -4905,7 +5193,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def organization_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5188,7 +5476,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def list_all_individuals(
+    def list_all_individuals(
         self,
         page_number: int,
         *,
@@ -5199,11 +5487,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         List all Individuals
 
         List all Individuals
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5227,27 +5518,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"oldID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def find_customer_phone(
         self,
@@ -5343,7 +5652,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def awards_add_award_nomination(
         self,
-        input: AwardNominationData,
+        input: AwardNominationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5379,7 +5688,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     async def awards_update_award_nomination(
         self,
-        input: UpdateAwardNominationData,
+        input: UpdateAwardNominationData | Mapping[str, Any],
         id: str,
         nominee_record_number: str,
         *,

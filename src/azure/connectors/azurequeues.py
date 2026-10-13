@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -44,14 +44,14 @@ class Messages:
     Response for Get messages
     """
 
-    queue_messages_list: Optional[QueueMessagesList] = dataclass_field(
+    queue_messages_list: Optional[QueueMessagesList | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "QueueMessagesList"},
     )
 
 
-QueueArray = List["QueueInfo"]
+QueueArray = List["QueueInfo | Mapping[str, Any]"]
 
 
 PutMessageInput = str
@@ -63,7 +63,12 @@ class StorageAccountList:
     Response for Get storage accounts
     """
 
-    value: Optional[List[StorageAccount]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[StorageAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of storage account names"""
 
 
@@ -167,7 +172,7 @@ class QueueMessagesList:
     Definition: QueueMessagesList
     """
 
-    queue_message: Optional[List[QueueMessage]] = dataclass_field(
+    queue_message: Optional[List[QueueMessage | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "QueueMessage"},
@@ -246,7 +251,7 @@ class AzurequeuesClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -320,6 +325,9 @@ class AzurequeuesClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(

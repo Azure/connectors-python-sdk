@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -579,19 +579,19 @@ class Cell:
     """
 
 
-CellArray = List["Cell"]
+CellArray = List["Cell | Mapping[str, Any]"]
 
 
-CubeArray = List["Cube"]
+CubeArray = List["Cube | Mapping[str, Any]"]
 
 
-DatabaseArray = List["Database"]
+DatabaseArray = List["Database | Mapping[str, Any]"]
 
 
-DimensionArray = List["Dimension"]
+DimensionArray = List["Dimension | Mapping[str, Any]"]
 
 
-ElementArray = List["Element"]
+ElementArray = List["Element | Mapping[str, Any]"]
 
 
 @dataclass
@@ -603,7 +603,7 @@ class Error:
     error: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
-IntegratorComponentArray = List["IntegratorComponent"]
+IntegratorComponentArray = List["IntegratorComponent | Mapping[str, Any]"]
 
 
 @dataclass
@@ -619,13 +619,13 @@ class IntegratorExtractComponentRow:
     """
 
 
-IntegratorExtractComponentRowArray = List["IntegratorExtractComponentRow"]
+IntegratorExtractComponentRowArray = List["IntegratorExtractComponentRow | Mapping[str, Any]"]
 
 
-IntegratorProjectArray = List["IntegratorProject"]
+IntegratorProjectArray = List["IntegratorProject | Mapping[str, Any]"]
 
 
-IntegratorProjectGroupArray = List["IntegratorProjectGroup"]
+IntegratorProjectGroupArray = List["IntegratorProjectGroup | Mapping[str, Any]"]
 
 
 @dataclass
@@ -641,10 +641,12 @@ class IntegratorTransformComponentRow:
     """
 
 
-IntegratorTransformComponentRowArray = List["IntegratorTransformComponentRow"]
+IntegratorTransformComponentRowArray = List[
+    "IntegratorTransformComponentRow | Mapping[str, Any]"
+]
 
 
-ViewArray = List["View"]
+ViewArray = List["View | Mapping[str, Any]"]
 
 
 @dataclass
@@ -660,7 +662,7 @@ class ViewCell:
     """
 
 
-ViewCellArray = List["ViewCell"]
+ViewCellArray = List["ViewCell | Mapping[str, Any]"]
 
 
 # Client Class
@@ -735,7 +737,7 @@ class JedoxodatahubClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname

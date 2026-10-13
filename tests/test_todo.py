@@ -208,7 +208,7 @@ class TestGetTodoListAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -219,7 +219,7 @@ class TestGetTodoListAsync:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_to_do_list(folder_id="missing-list")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestCreateTodoListAsync:
@@ -372,7 +372,7 @@ class TestDeleteTodoListAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=404, text='{"error": "Not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -383,7 +383,7 @@ class TestDeleteTodoListAsync:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.delete_to_do_list(folder_id="missing-list")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetTodoAsync:

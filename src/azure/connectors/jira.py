@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -97,7 +97,12 @@ class ListIssuesResponse:
         metadata={"wire_name": "isLast"},
     )
     """Indicates whether this is the last page of results."""
-    issues: Optional[List[FullIssue]] = dataclass_field(default=None, kw_only=True)
+    issues: Optional[
+        List[FullIssue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -118,7 +123,12 @@ class ListIssuesResponseDatacenter:
         metadata={"wire_name": "maxResults"},
     )
     """The maximum number of items to return per page"""
-    issues: Optional[List[FullIssue]] = dataclass_field(default=None, kw_only=True)
+    issues: Optional[
+        List[FullIssue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -127,7 +137,12 @@ class ListTransitionsResponse:
     Response for Get list of Transitions
     """
 
-    transitions: Optional[List[Transition]] = dataclass_field(default=None, kw_only=True)
+    transitions: Optional[
+        List[Transition | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -682,7 +697,7 @@ class Transition:
     """ID of the transition"""
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the transition"""
-    to: Optional[TransitionStatus] = dataclass_field(default=None, kw_only=True)
+    to: Optional[TransitionStatus | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Fields required for this transition"""
 
@@ -806,7 +821,7 @@ class JiraClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -902,16 +917,18 @@ class JiraClient(ConnectorClientBase):
         *,
         jql: Optional[str] = None,
         fields: Optional[str] = None,
-        next_page_token: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of issues
 
         This operation returns a list of issues using JQL.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
@@ -926,34 +943,47 @@ class JiraClient(ConnectorClientBase):
             if isinstance(fields, bool):
                 value = value.lower()
             query_params.append(f"fields={quote(value, safe='')}")
-        if next_page_token is not None:
-            value = str(next_page_token)
-            if isinstance(next_page_token, bool):
-                value = value.lower()
-            query_params.append(f"nextPageToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_issues_datacenter(
         self,
@@ -962,34 +992,55 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of issues (Datacenter)
 
         This operation returns a list of issues using JQL.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/datacenter/search"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_transitions(
         self,
@@ -1055,7 +1106,7 @@ class JiraClient(ConnectorClientBase):
 
     def update_transition(
         self,
-        input: TransitionInput,
+        input: TransitionInput | Mapping[str, Any],
         issue_id_or_key: str,
         *,
         timeout: Optional[float] = None,
@@ -1141,7 +1192,7 @@ class JiraClient(ConnectorClientBase):
 
     def mcp_jira_issue_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -1187,7 +1238,7 @@ class JiraClient(ConnectorClientBase):
 
     def add_comment(
         self,
-        input: Comment,
+        input: Comment | Mapping[str, Any],
         issue_key: str,
         *,
         timeout: Optional[float] = None,
@@ -1269,7 +1320,7 @@ class JiraClient(ConnectorClientBase):
 
     def create_issue(
         self,
-        input: CreateIssueInput,
+        input: CreateIssueInput | Mapping[str, Any],
         project_key: str,
         issue_type_ids: str,
         *,
@@ -1319,7 +1370,7 @@ class JiraClient(ConnectorClientBase):
 
     def create_project(
         self,
-        input: CreateProjectInput,
+        input: CreateProjectInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1356,7 +1407,7 @@ class JiraClient(ConnectorClientBase):
 
     def create_project_category(
         self,
-        input: CreateProjectCategoryInput,
+        input: CreateProjectCategoryInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1429,6 +1480,9 @@ class JiraClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1439,7 +1493,7 @@ class JiraClient(ConnectorClientBase):
 
     def edit_issue(
         self,
-        input: EditIssueInput,
+        input: EditIssueInput | Mapping[str, Any],
         issue_id_or_key: str,
         *,
         notify_users: Optional[bool] = None,
@@ -1859,6 +1913,9 @@ class JiraClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1869,7 +1926,7 @@ class JiraClient(ConnectorClientBase):
 
     def update_project(
         self,
-        input: UpdateProjectInput,
+        input: UpdateProjectInput | Mapping[str, Any],
         project_id_or_key: str,
         *,
         timeout: Optional[float] = None,

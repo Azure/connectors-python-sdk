@@ -108,6 +108,76 @@ class TestCodeQuality(unittest.TestCase):
                 f"{violation_text}"
             )
 
+    def test_delete_operations_accept_not_found(self):
+        """Verify every generated DELETE operation treats HTTP 404 as success."""
+        connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
+        connector_paths = [
+            *connector_dir.glob('*.py'),
+            *(connector_dir / 'aio').glob('*.py'),
+        ]
+        violations: list[str] = []
+
+        for filepath in connector_paths:
+            if filepath.name.startswith('_'):
+                continue
+
+            tree = ast.parse(filepath.read_text(encoding='utf-8'))
+            for function in (
+                node for node in ast.walk(tree)
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            ):
+                if not self._sends_delete(function):
+                    continue
+
+                if not self._accepts_not_found(function):
+                    violations.append(
+                        f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
+                        f'{function.lineno}: {function.name}'
+                    )
+
+        assert not violations, (
+            'Generated DELETE operations missing HTTP 404 success guards:\n'
+            + '\n'.join(violations)
+        )
+
+    @staticmethod
+    def _sends_delete(function: ast.AST) -> bool:
+        """Return whether a function sends an HTTP DELETE request."""
+        return any(
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == 'send'
+            and bool(node.args)
+            and isinstance(node.args[0], ast.Constant)
+            and node.args[0].value == 'DELETE'
+            for node in ast.walk(function)
+        )
+
+    @staticmethod
+    def _accepts_not_found(function: ast.AST) -> bool:
+        """Return whether a function returns None for HTTP 404."""
+        for node in ast.walk(function):
+            if not isinstance(node, ast.If) or not isinstance(node.test, ast.Compare):
+                continue
+
+            comparison = node.test
+            if (
+                len(comparison.ops) == 1
+                and isinstance(comparison.ops[0], ast.Eq)
+                and len(comparison.comparators) == 1
+                and isinstance(comparison.comparators[0], ast.Constant)
+                and comparison.comparators[0].value == 404
+                and any(
+                    isinstance(statement, ast.Return)
+                    and isinstance(statement.value, ast.Constant)
+                    and statement.value.value is None
+                    for statement in node.body
+                )
+            ):
+                return True
+
+        return False
+
     def _find_unchecked_send(
         self, filepath: pathlib.Path
     ) -> list[LintViolation]:

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List as TypingList, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -67,7 +67,7 @@ class Card:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique id of the card."""
-    check_item_states: Optional[TypingList[CheckItemState]] = dataclass_field(
+    check_item_states: Optional[TypingList[CheckItemState | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "checkItemStates"},
@@ -141,7 +141,7 @@ class Card:
         metadata={"wire_name": "shortLink"},
     )
     """A short link to the card."""
-    badges: Optional[Badges] = dataclass_field(default=None, kw_only=True)
+    badges: Optional[Badges | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
     short_url: Optional[str] = dataclass_field(
@@ -157,7 +157,12 @@ class Card:
     """
     url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url to the card."""
-    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
+    checklists: Optional[
+        TypingList[Checklist | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The set of board checklists."""
 
 
@@ -169,7 +174,7 @@ class CardWithChecklists:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique id of the card."""
-    check_item_states: Optional[TypingList[CheckItemState]] = dataclass_field(
+    check_item_states: Optional[TypingList[CheckItemState | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "checkItemStates"},
@@ -243,7 +248,7 @@ class CardWithChecklists:
         metadata={"wire_name": "shortLink"},
     )
     """A short link to the card."""
-    badges: Optional[Badges] = dataclass_field(default=None, kw_only=True)
+    badges: Optional[Badges | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
     short_url: Optional[str] = dataclass_field(
@@ -259,7 +264,12 @@ class CardWithChecklists:
     """
     url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url to the card."""
-    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
+    checklists: Optional[
+        TypingList[Checklist | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The set of card checklists."""
 
 
@@ -316,12 +326,17 @@ class Board:
     A boolean value (true, false) determining whether or not the account is
     invited to the board.
     """
-    label_names: Optional[Label] = dataclass_field(
+    label_names: Optional[Label | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "labelNames"},
     )
-    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
+    memberships: Optional[
+        TypingList[Membership | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The set of board memberships."""
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board."""
@@ -336,7 +351,7 @@ class Board:
         metadata={"wire_name": "powerUps"},
     )
     """The set of power ups on the board."""
-    perfs: Optional[Perfs] = dataclass_field(default=None, kw_only=True)
+    perfs: Optional[Perfs | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     short_link: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -399,12 +414,17 @@ class BoardWithChecklists:
     A boolean value (true, false) determining whether or not the account is
     invited to the board.
     """
-    label_names: Optional[Label] = dataclass_field(
+    label_names: Optional[Label | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "labelNames"},
     )
-    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
+    memberships: Optional[
+        TypingList[Membership | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The set of board memberships."""
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board."""
@@ -419,7 +439,7 @@ class BoardWithChecklists:
         metadata={"wire_name": "powerUps"},
     )
     """The set of power ups on the board."""
-    perfs: Optional[Perfs] = dataclass_field(default=None, kw_only=True)
+    perfs: Optional[Perfs | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     short_link: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -440,7 +460,12 @@ class BoardWithChecklists:
     """
     url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url of the board."""
-    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
+    checklists: Optional[
+        TypingList[Checklist | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The set of board checklists."""
 
 
@@ -472,9 +497,14 @@ class List:
     A boolean value (true, false) determining whether or not to the account is
     subscribed to the list.
     """
-    cards: Optional[TypingList[Card]] = dataclass_field(default=None, kw_only=True)
+    cards: Optional[
+        TypingList[Card | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The cards inside the list."""
-    board: Optional[Board] = dataclass_field(default=None, kw_only=True)
+    board: Optional[Board | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -521,7 +551,12 @@ class Team:
         metadata={"wire_name": "billableMemberCount"},
     )
     """The number of members in this team."""
-    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
+    memberships: Optional[
+        TypingList[Membership | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The memberships for this team."""
     web_site: Optional[str] = dataclass_field(
         default=None,
@@ -529,7 +564,12 @@ class Team:
         metadata={"wire_name": "WebSite"},
     )
     """The team website."""
-    prefs: Optional[TeamPreferences] = dataclass_field(default=None, kw_only=True)
+    prefs: Optional[
+        TeamPreferences | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -572,7 +612,7 @@ class Comment:
     Response for List comments for a card
     """
 
-    member_creator: Optional[Member] = dataclass_field(
+    member_creator: Optional[Member | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "memberCreator"},
@@ -1213,7 +1253,7 @@ class Checklist:
         metadata={"wire_name": "idCard"},
     )
     """The unique Id of the card."""
-    check_items: Optional[TypingList[Checkitem]] = dataclass_field(
+    check_items: Optional[TypingList[Checkitem | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "checkItems"},
@@ -1378,7 +1418,7 @@ class TrelloClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1833,6 +1873,9 @@ class TrelloClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2304,7 +2347,7 @@ class TrelloClient(ConnectorClientBase):
 
     def update_board(
         self,
-        input: UpdateBoard,
+        input: UpdateBoard | Mapping[str, Any],
         board_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3120,7 +3163,7 @@ class TrelloClient(ConnectorClientBase):
 
     def add_comment_to_card(
         self,
-        input: CommentPost,
+        input: CommentPost | Mapping[str, Any],
         card_id: str,
         board_id: str,
         *,
@@ -3243,7 +3286,7 @@ class TrelloClient(ConnectorClientBase):
 
     def create_board(
         self,
-        input: CreateBoard,
+        input: CreateBoard | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3280,7 +3323,7 @@ class TrelloClient(ConnectorClientBase):
 
     def create_list(
         self,
-        input: CreateList,
+        input: CreateList | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3357,7 +3400,7 @@ class TrelloClient(ConnectorClientBase):
 
     def create_card(
         self,
-        input: CreateCard,
+        input: CreateCard | Mapping[str, Any],
         board_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3402,7 +3445,7 @@ class TrelloClient(ConnectorClientBase):
 
     def update_card(
         self,
-        input: UpdateCard,
+        input: UpdateCard | Mapping[str, Any],
         card_id: str,
         board_id: str,
         *,

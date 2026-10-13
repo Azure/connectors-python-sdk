@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -125,7 +125,12 @@ class ListTimesOffResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TimeOffResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Time Off instances"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -161,22 +166,22 @@ class TimeOffResponse:
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID."""
-    user_info: Optional[UserInfo] = dataclass_field(
+    user_info: Optional[UserInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = dataclass_field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_time_off: Optional[SharedTimeOff] = dataclass_field(
+    shared_time_off: Optional[SharedTimeOff | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharedTimeOff"},
     )
-    draft_time_off: Optional[DraftTimeOff] = dataclass_field(
+    draft_time_off: Optional[DraftTimeOff | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "draftTimeOff"},
@@ -194,7 +199,12 @@ class ListShiftsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Shifts"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -236,27 +246,27 @@ class ShiftResponse:
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID."""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = dataclass_field(
+    scheduling_group_info: Optional[SchedulingGroupInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    user_info: Optional[UserInfo] = dataclass_field(
+    user_info: Optional[UserInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = dataclass_field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_shift: Optional[SharedShift] = dataclass_field(
+    shared_shift: Optional[SharedShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = dataclass_field(
+    draft_shift: Optional[DraftShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "draftShift"},
@@ -274,7 +284,12 @@ class ListOpenShiftsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[OpenShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Open Shifts"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -310,22 +325,22 @@ class OpenShiftResponse:
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = dataclass_field(
+    scheduling_group_info: Optional[SchedulingGroupInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    team_info: Optional[TeamInfo] = dataclass_field(
+    team_info: Optional[TeamInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = dataclass_field(
+    shared_open_shift: Optional[SharedOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = dataclass_field(
+    draft_open_shift: Optional[DraftOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
@@ -364,7 +379,12 @@ class ListSchedulingGroupsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SchedulingGroupResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SchedulingGroupResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Scheduling Groups."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -416,7 +436,12 @@ class ListTimeOffRequestsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffRequestResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TimeOffRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Time Off requests."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -573,7 +598,12 @@ class ListOfferShiftRequestsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OfferShiftRequestResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[OfferShiftRequestResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Offer Shift requests."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -731,7 +761,7 @@ class ListSwapShiftsChangeRequestsResponse:
         metadata={"wire_name": "@odata.context"},
     )
     value: Optional[
-        List[SwapShiftsChangeRequestResponse]
+        List[SwapShiftsChangeRequestResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -899,7 +929,7 @@ class ListOpenShiftChangeRequestsResponse:
         metadata={"wire_name": "@odata.context"},
     )
     value: Optional[
-        List[OpenShiftChangeRequestResponse]
+        List[OpenShiftChangeRequestResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1048,7 +1078,12 @@ class ListOpenShiftsCrossTeamResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[OpenShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Open Shifts"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1069,7 +1104,12 @@ class ListShiftsCrossTeamResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ShiftResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Shifts"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1090,7 +1130,12 @@ class ListTimesOffCrossTeamResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TimeOffResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Times off"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1135,7 +1180,12 @@ class WebhookPushResponse:
     Definition: WebhookPushResponse
     """
 
-    value: Optional[List[WebhookNotificationEntity]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[WebhookNotificationEntity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -1163,7 +1213,9 @@ class WebhookNotificationEntity:
         metadata={"wire_name": "changeType"},
     )
     """Resource change type (created/updated/deleted)."""
-    resource_data: Optional[WebhookPushResponseResourceEntity] = dataclass_field(
+    resource_data: Optional[
+        WebhookPushResponseResourceEntity | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "resourceData"},
@@ -1658,7 +1710,7 @@ class ShiftsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1821,7 +1873,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def create_time_off(
         self,
-        input: CreateTimeOffRequest,
+        input: CreateTimeOffRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1940,6 +1992,9 @@ class ShiftsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2038,7 +2093,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def create_shift(
         self,
-        input: CreateShiftRequest,
+        input: CreateShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2157,6 +2212,9 @@ class ShiftsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2255,7 +2313,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def create_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2342,7 +2400,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def update_open_shift(
         self,
-        input: EditOpenShiftRequest,
+        input: EditOpenShiftRequest | Mapping[str, Any],
         team_id: str,
         open_shift_id: str,
         *,
@@ -2419,6 +2477,9 @@ class ShiftsClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2770,7 +2831,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def time_off_request_approve(
         self,
-        input: TimeOffRequestApproveInput,
+        input: TimeOffRequestApproveInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -2818,7 +2879,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def time_off_request_decline(
         self,
-        input: TimeOffRequestDeclineInput,
+        input: TimeOffRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         time_off_request_id: str,
         *,
@@ -2998,7 +3059,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def offer_shift_request_approve(
         self,
-        input: OfferShiftRequestApproveInput,
+        input: OfferShiftRequestApproveInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -3047,7 +3108,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def offer_shift_request_decline(
         self,
-        input: OfferShiftRequestDeclineInput,
+        input: OfferShiftRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         offer_shift_request_id: str,
         *,
@@ -3227,7 +3288,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def swap_shifts_change_request_approve(
         self,
-        input: SwapShiftsChangeRequestApproveInput,
+        input: SwapShiftsChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -3275,7 +3336,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def swap_shifts_change_request_decline(
         self,
-        input: SwapShiftsChangeRequestDeclineInput,
+        input: SwapShiftsChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         swap_shifts_change_request_id: str,
         *,
@@ -3455,7 +3516,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def open_shift_change_request_approve(
         self,
-        input: OpenShiftChangeRequestApproveInput,
+        input: OpenShiftChangeRequestApproveInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,
@@ -3503,7 +3564,7 @@ class ShiftsClient(ConnectorClientBase):
 
     def open_shift_change_request_decline(
         self,
-        input: OpenShiftChangeRequestDeclineInput,
+        input: OpenShiftChangeRequestDeclineInput | Mapping[str, Any],
         team_id: str,
         open_shift_change_request_id: str,
         *,

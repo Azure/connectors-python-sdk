@@ -21,7 +21,7 @@ async def main() -> None:
     async with DefaultAzureCredential() as credential:
         try:
             async with TypeformClient(CONNECTION_RUNTIME_URL, credential) as client:
-                forms = await client.list_forms()
+                forms = [form async for form in client.list_forms()]
                 print(f"Forms: {forms}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

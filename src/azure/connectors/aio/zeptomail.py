@@ -255,7 +255,7 @@ class ZeptomailClient(ConnectorClientBase):
 
     async def send_mail(
         self,
-        input: SendMailInput,
+        input: SendMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -292,7 +292,7 @@ class ZeptomailClient(ConnectorClientBase):
 
     async def send_template_mail(
         self,
-        input: SendTemplateMailInput,
+        input: SendTemplateMailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

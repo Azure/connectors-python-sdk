@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -261,7 +261,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -295,7 +295,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_agreements_solution_document(
         self,
-        input: CreateAgreementsSolutionDocumentInput,
+        input: CreateAgreementsSolutionDocumentInput | Mapping[str, Any],
         dataset: str,
         template: str,
         *,
@@ -517,7 +517,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_sharing_link(
         self,
-        input: ItemPermissionCreateLinkBody,
+        input: ItemPermissionCreateLinkBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -634,7 +634,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def copy_file_2(
         self,
-        input: CopyFileParameters,
+        input: CopyFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -679,7 +679,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def copy_folder(
         self,
-        input: CopyFolderParameters,
+        input: CopyFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -905,6 +905,9 @@ class SharepointonlineClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1354,7 +1357,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def http_request(
         self,
-        input: SharePointHttpRequestBodyParameters,
+        input: SharePointHttpRequestBodyParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -1454,7 +1457,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def move_file(
         self,
-        input: MoveFileParameters,
+        input: MoveFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -1499,7 +1502,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def move_folder(
         self,
-        input: MoveFolderParameters,
+        input: MoveFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -1654,7 +1657,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_new_document_set(
         self,
-        input: CreateNewDocumentSetParameters,
+        input: CreateNewDocumentSetParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -1700,7 +1703,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_new_folder(
         self,
-        input: CreateNewFolderParameters,
+        input: CreateNewFolderParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -1871,7 +1874,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def submit_doc_gen_form(
         self,
-        input: SubmitDocGenFormInput,
+        input: SubmitDocGenFormInput | Mapping[str, Any],
         dataset: str,
         table: str,
         form: str,
@@ -2160,7 +2163,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -2303,6 +2306,9 @@ class SharepointonlineClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2313,7 +2319,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2370,7 +2376,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_approval_request(
         self,
-        input: CreateApprovalRequestInput,
+        input: CreateApprovalRequestInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2502,7 +2508,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def check_in_file(
         self,
-        input: FileCheckInParameters,
+        input: FileCheckInParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2702,7 +2708,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def grant_access(
         self,
-        input: ItemGrantAccessBody,
+        input: ItemGrantAccessBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2746,7 +2752,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def patch_file_item(
         self,
-        input: PatchFileItemInput,
+        input: PatchFileItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2807,7 +2813,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def patch_file_item_with_predicted_values(
         self,
-        input: PatchFileItemWithPredictedValuesParameters,
+        input: PatchFileItemWithPredictedValuesParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -3138,6 +3144,9 @@ class SharepointonlineClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3197,7 +3206,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     async def create_content_assembly_document(
         self,
-        input: CreateContentAssemblyDocumentInput,
+        input: CreateContentAssemblyDocumentInput | Mapping[str, Any],
         dataset: str,
         table: str,
         template: str,

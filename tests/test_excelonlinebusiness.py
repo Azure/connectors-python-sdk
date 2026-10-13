@@ -571,7 +571,7 @@ class TestGetItem:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -589,7 +589,7 @@ class TestGetItem:
                     id_column="ID"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeleteItem:
@@ -633,7 +633,7 @@ class TestDeleteItem:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Row not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -651,7 +651,7 @@ class TestDeleteItem:
                     id_column="ID"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestPatchItem:

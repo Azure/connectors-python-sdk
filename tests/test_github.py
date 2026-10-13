@@ -518,7 +518,7 @@ class TestRemoveReviewersPullRequestAsync:
             credential=mock_credential,
         )
         payload = RequestReviewersBody(reviewers=["alice"])
-        mock_response = MockResponse(status=404, text='{"message": "Not Found"}')
+        mock_response = MockResponse(status=500, text='{"message": "Server error"}')
 
         with patch.object(
             client._http_client,

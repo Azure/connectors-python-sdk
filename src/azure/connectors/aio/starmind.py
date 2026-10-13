@@ -138,7 +138,7 @@ class StarmindClient(ConnectorClientBase):
 
     async def find_experts(
         self,
-        input: FindExpertsInput,
+        input: FindExpertsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -289,7 +289,7 @@ class StarmindClient(ConnectorClientBase):
 
     async def post_question_draft(
         self,
-        input: PostQuestionDraftInput,
+        input: PostQuestionDraftInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

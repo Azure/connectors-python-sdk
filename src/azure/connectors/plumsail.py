@@ -107,7 +107,7 @@ class ProfileInfo:
         kw_only=True,
         metadata={"wire_name": "teamName"},
     )
-    license_info: Optional[LicenseInfo] = dataclass_field(
+    license_info: Optional[LicenseInfo | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "licenseInfo"},
@@ -166,7 +166,9 @@ class DocumentsWithFilenamesResponse:
     Response for Split PDF
     """
 
-    result_files: Optional[List[DocumentContentWithFilenameResponse]] = dataclass_field(
+    result_files: Optional[
+        List[DocumentContentWithFilenameResponse | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "resultFiles"},
@@ -423,7 +425,7 @@ class CreateArchiveRequest:
 
     file_name: str = dataclass_field(metadata={"wire_name": "fileName"})
     """Name of the archive without the file extension"""
-    data: List[FileData]
+    data: List[FileData | Mapping[str, Any]]
     """Array of documents to add to the archive"""
     password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Archive password"""
@@ -473,7 +475,12 @@ class Csv2XlsxRequest:
         metadata={"wire_name": "hasHeaderRecords"},
     )
     """If set to \"Yes\" then headers will be read from the first line."""
-    mappings: Optional[List[Csv2XlsxColumnMapping]] = dataclass_field(default=None, kw_only=True)
+    mappings: Optional[
+        List[Csv2XlsxColumnMapping | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Rename headers and specify types for columns."""
 
 
@@ -786,7 +793,12 @@ class Json2XlsxRequest:
     Dot separated path to array in JSON. E.g.: \"data\" or
     \"prop1.prop2.prop3\"
     """
-    mappings: Optional[List[Json2XlsxColumnMapping]] = dataclass_field(default=None, kw_only=True)
+    mappings: Optional[
+        List[Json2XlsxColumnMapping | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Rename headers and specify types for columns."""
 
 
@@ -1325,7 +1337,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_apply_docx_template(
         self,
-        input: ApplyDocxTemplateRequest,
+        input: ApplyDocxTemplateRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1377,7 +1389,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_apply_xlsx_template(
         self,
-        input: ApplyXlsxTemplateRequest,
+        input: ApplyXlsxTemplateRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1429,7 +1441,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_apply_pptx(
         self,
-        input: ApplyPptxTemplateRequest,
+        input: ApplyPptxTemplateRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1484,7 +1496,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_apply_docx(
         self,
-        input: MergeFieldsTemplateRequest,
+        input: MergeFieldsTemplateRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1542,7 +1554,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_apply_html(
         self,
-        input: ApplyHtmlFlowTemplateRequest,
+        input: ApplyHtmlFlowTemplateRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1600,7 +1612,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_html2_pdf(
         self,
-        input: Html2PdfFlowRequest,
+        input: Html2PdfFlowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1656,7 +1668,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_html2_docx(
         self,
-        input: Html2DocxFlowRequest,
+        input: Html2DocxFlowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1712,7 +1724,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_docx2_pdf(
         self,
-        input: Docx2PdfRequest,
+        input: Docx2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1768,7 +1780,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_xslx2_pdf(
         self,
-        input: Xlsx2PdfRequest,
+        input: Xlsx2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1820,7 +1832,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_pptx2_pdf(
         self,
-        input: Pptx2PdfRequest,
+        input: Pptx2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1872,7 +1884,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_any2_pdf_v2(
         self,
-        input: Any2PdfRequest,
+        input: Any2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1923,7 +1935,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_email2_pdf(
         self,
-        input: Email2PdfRequest,
+        input: Email2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1974,7 +1986,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_doc2_docx(
         self,
-        input: Doc2DocxRequest,
+        input: Doc2DocxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2026,7 +2038,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_xls2_xlsx(
         self,
-        input: Xls2XlsxRequest,
+        input: Xls2XlsxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2078,7 +2090,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_ppt2_pptx(
         self,
-        input: Ppt2PptxRequest,
+        input: Ppt2PptxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2130,7 +2142,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_split_pdf_v2(
         self,
-        input: FlowDocumentsJobsSplitPdfInput,
+        input: FlowDocumentsJobsSplitPdfInput | Mapping[str, Any],
         type_: str,
         *,
         timeout: Optional[float] = None,
@@ -2193,7 +2205,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_merge_any_to_pdf_v2(
         self,
-        input: MergeAny2PdfRequest,
+        input: MergeAny2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2246,7 +2258,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_extract_text_from_pdf(
         self,
-        input: Pdf2TextRequest,
+        input: Pdf2TextRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2303,7 +2315,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_pdf2_image_v2(
         self,
-        input: Pdf2ImageRequest,
+        input: Pdf2ImageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2360,7 +2372,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_image2_pdf(
         self,
-        input: Image2PdfRequest,
+        input: Image2PdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2410,7 +2422,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_fill_in_pdf_form(
         self,
-        input: FillInPdfFormRequest,
+        input: FillInPdfFormRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2466,7 +2478,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_get_pdf_form(
         self,
-        input: GetPdfFormRequest,
+        input: GetPdfFormRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2522,7 +2534,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_protect_pdf(
         self,
-        input: ProtectPdfRequest,
+        input: ProtectPdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2578,7 +2590,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_get_pdf_protection_info(
         self,
-        input: PdfProtectionInfoRequest,
+        input: PdfProtectionInfoRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2635,7 +2647,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_compress_pdf(
         self,
-        input: CompressPdfRequest,
+        input: CompressPdfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2687,7 +2699,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_add_watermark_to_pdf(
         self,
-        input: FlowDocumentsJobsAddWatermarkToPdfInput,
+        input: FlowDocumentsJobsAddWatermarkToPdfInput | Mapping[str, Any],
         type_: str,
         *,
         timeout: Optional[float] = None,
@@ -2751,7 +2763,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_merge_docx(
         self,
-        input: MergeDocxRequest,
+        input: MergeDocxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2807,7 +2819,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_parse_csv(
         self,
-        input: ParseCsvFlowRequest,
+        input: ParseCsvFlowRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2862,7 +2874,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_csv2_xlsx(
         self,
-        input: Csv2XlsxRequest,
+        input: Csv2XlsxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2913,7 +2925,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_json2_xlsx(
         self,
-        input: Json2XlsxRequest,
+        input: Json2XlsxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2964,7 +2976,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_json2_csv(
         self,
-        input: Json2CsvRequest,
+        input: Json2CsvRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3015,7 +3027,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_reg_exp_match(
         self,
-        input: RegExpMatchRequest,
+        input: RegExpMatchRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3074,7 +3086,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_reg_exp_replace(
         self,
-        input: RegExpReplaceRequest,
+        input: RegExpReplaceRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3133,7 +3145,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_reg_exp_test(
         self,
-        input: RegExpTestRequest,
+        input: RegExpTestRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3191,7 +3203,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_create_archive(
         self,
-        input: CreateArchiveRequest,
+        input: CreateArchiveRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3246,7 +3258,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_extract_archive(
         self,
-        input: ExtractArchiveRequest,
+        input: ExtractArchiveRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3301,7 +3313,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_documents_jobs_merge_xlsx(
         self,
-        input: MergeXlsxRequest,
+        input: MergeXlsxRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -3357,7 +3369,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_processes_flow_jobs_execute_process(
         self,
-        input: FlowProcessesFlowJobsExecuteProcessInput,
+        input: FlowProcessesFlowJobsExecuteProcessInput | Mapping[str, Any],
         process_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3419,7 +3431,7 @@ class PlumsailClient(ConnectorClientBase):
 
     def begin_flow_v1_processes_flow_jobs_execute_process_with_generated_data(
         self,
-        input: ProcessJsonData,
+        input: ProcessJsonData | Mapping[str, Any],
         process_id: str,
         *,
         timeout: Optional[float] = None,

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -121,7 +121,7 @@ class MeetingroommapClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -155,7 +155,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
     async def get_custom_locations(
         self,
-        input: GetCustomLocationsByCategoriesQuery,
+        input: GetCustomLocationsByCategoriesQuery | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -190,7 +190,7 @@ class MeetingroommapClient(ConnectorClientBase):
 
     async def get_custom_locations_by_image_name(
         self,
-        input: GetCustomLocationListByImageNameQuery,
+        input: GetCustomLocationListByImageNameQuery | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

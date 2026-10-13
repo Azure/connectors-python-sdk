@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -46,7 +46,7 @@ __all__ = [
 
 # Type Definitions
 
-TrigNewActivityResponse = List["ActivityResponse"]
+TrigNewActivityResponse = List["ActivityResponse | Mapping[str, Any]"]
 
 
 @dataclass
@@ -285,7 +285,7 @@ class DealResponseV2:
     """Notes for next activity associated with the deal"""
 
 
-TrigNewDealResponse = List["DealResponseV2"]
+TrigNewDealResponse = List["DealResponseV2 | Mapping[str, Any]"]
 
 
 @dataclass
@@ -417,7 +417,12 @@ class ListStagesResponse:
     Definition: ListStagesResponse
     """
 
-    data: Optional[List[StageResponse]] = dataclass_field(default=None, kw_only=True)
+    data: Optional[
+        List[StageResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """data"""
 
 
@@ -513,7 +518,7 @@ class PipedriveClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -587,7 +592,7 @@ class PipedriveClient(ConnectorClientBase):
 
     def update_deal_status(
         self,
-        input: UpdateDealStatusRequest,
+        input: UpdateDealStatusRequest | Mapping[str, Any],
         deal_id: int,
         *,
         timeout: Optional[float] = None,
@@ -629,7 +634,7 @@ class PipedriveClient(ConnectorClientBase):
 
     def add_activity(
         self,
-        input: AddActivityRequest,
+        input: AddActivityRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -707,7 +712,7 @@ class PipedriveClient(ConnectorClientBase):
 
     def add_deal(
         self,
-        input: AddDealRequest,
+        input: AddDealRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -744,7 +749,7 @@ class PipedriveClient(ConnectorClientBase):
 
     def update_deal_stage(
         self,
-        input: UpdateDealStageRequest,
+        input: UpdateDealStageRequest | Mapping[str, Any],
         deal_id: int,
         *,
         timeout: Optional[float] = None,

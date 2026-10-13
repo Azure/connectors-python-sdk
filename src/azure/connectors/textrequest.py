@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -192,7 +192,12 @@ class GetContactByPhoneNumberResponse:
     """Array of integer ids referring to groups this contact belongs to."""
     contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
     is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
@@ -265,7 +270,12 @@ class CreateContactInput:
     """Array of integer ids referring to groups this contact will belong to."""
     contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
     is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
@@ -320,7 +330,12 @@ class CreateContactResponse:
     """Array of integer ids referring to groups this contact belongs to."""
     contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    custom_fields: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of custom field ids and values defined for this contact."""
     is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
@@ -961,7 +976,7 @@ class TextrequestClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1053,7 +1068,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def send_message_by_phone_number(
         self,
-        input: SendMessageByPhoneNumberInput,
+        input: SendMessageByPhoneNumberInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -1275,6 +1290,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1290,7 +1308,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def create_contact(
         self,
-        input: CreateContactInput,
+        input: CreateContactInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -1662,6 +1680,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1677,7 +1698,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def update_group(
         self,
-        input: UpdateGroupInput,
+        input: UpdateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         group_id: int,
         *,
@@ -1776,7 +1797,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2199,7 +2220,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def create_payment(
         self,
-        input: CreatePaymentInput,
+        input: CreatePaymentInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2306,6 +2327,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2321,7 +2345,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def update_dashboards_name(
         self,
-        input: UpdateDashboardsNameInput,
+        input: UpdateDashboardsNameInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2496,7 +2520,7 @@ class TextrequestClient(ConnectorClientBase):
 
     def create_dashboard(
         self,
-        input: CreateDashboardInput,
+        input: CreateDashboardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

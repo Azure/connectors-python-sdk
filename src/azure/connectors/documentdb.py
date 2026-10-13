@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -161,7 +161,9 @@ class GetDocumentResponse:
     Response for Get a document
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "@metadata"},
@@ -185,7 +187,9 @@ class GetDocumentsResponse:
         kw_only=True,
         metadata={"wire_name": "Documents"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "@metadata"},
@@ -251,7 +255,9 @@ class QueryDocumentsResponse:
         kw_only=True,
         metadata={"wire_name": "ActivityId"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
+    metadata: Optional[
+        List[DataWithSensitivityLabelInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "@metadata"},
@@ -299,7 +305,12 @@ class CosmosDbAccountList:
     Response for Get Cosmos DB accounts
     """
 
-    value: Optional[List[CosmosDbAccount]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CosmosDbAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Azure Cosmos DB account names"""
 
 
@@ -537,7 +548,9 @@ class DataWithSensitivityLabelInfo:
 
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = dataclass_field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
@@ -689,7 +702,7 @@ class DocumentdbClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -723,7 +736,7 @@ class DocumentdbClient(ConnectorClientBase):
 
     def create_document(
         self,
-        input: PostDocumentsRequest,
+        input: PostDocumentsRequest | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -774,7 +787,7 @@ class DocumentdbClient(ConnectorClientBase):
 
     def create_stored_procedure(
         self,
-        input: CreateStoredProcedureInput,
+        input: CreateStoredProcedureInput | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -860,6 +873,9 @@ class DocumentdbClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -905,6 +921,9 @@ class DocumentdbClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1294,7 +1313,7 @@ class DocumentdbClient(ConnectorClientBase):
 
     def replace_document(
         self,
-        input: PutDocumentRequest,
+        input: PutDocumentRequest | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,
@@ -1346,7 +1365,7 @@ class DocumentdbClient(ConnectorClientBase):
 
     def replace_stored_procedure(
         self,
-        input: ReplaceStoredProcedureInput,
+        input: ReplaceStoredProcedureInput | Mapping[str, Any],
         cosmos_db_account_name: str,
         database_id: str,
         collection_id: str,

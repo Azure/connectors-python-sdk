@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -57,7 +57,12 @@ class ListTasksResponse:
     Response for List tasks
     """
 
-    tasks: Optional[List[TaskObject]] = dataclass_field(default=None, kw_only=True)
+    tasks: Optional[
+        List[TaskObject | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of tasks"""
 
 
@@ -265,7 +270,12 @@ class ListProjectsResponse:
     Response for List projects
     """
 
-    projects: Optional[List[Project]] = dataclass_field(default=None, kw_only=True)
+    projects: Optional[
+        List[Project | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of projects"""
 
 
@@ -403,7 +413,12 @@ class ListLeadsResponse:
     Response for List leads
     """
 
-    leads: Optional[List[Lead]] = dataclass_field(default=None, kw_only=True)
+    leads: Optional[
+        List[Lead | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of leads"""
 
 
@@ -643,7 +658,12 @@ class ListContactsResponse:
     Response for List contacts
     """
 
-    contacts: Optional[List[Contact]] = dataclass_field(default=None, kw_only=True)
+    contacts: Optional[
+        List[Contact | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of contacts"""
 
 
@@ -842,7 +862,12 @@ class ListUsersResponse:
     Response for List users
     """
 
-    users: Optional[List[User]] = dataclass_field(default=None, kw_only=True)
+    users: Optional[
+        List[User | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of users"""
 
 
@@ -865,7 +890,12 @@ class ListEventsResponse:
     Response for When an event is created
     """
 
-    events: Optional[List[Event]] = dataclass_field(default=None, kw_only=True)
+    events: Optional[
+        List[Event | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A collection of events"""
 
 
@@ -917,13 +947,15 @@ class Organization:
         metadata={"wire_name": "VISIBLE_TO"},
     )
     """Organization visibility."""
-    a_d_d_r_e_s_s_e_s: Optional[List[Address]] = dataclass_field(
+    a_d_d_r_e_s_s_e_s: Optional[List[Address | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESSES"},
     )
     """Organization Addresses"""
-    c_o_n_t_a_c_t_i_n_f_o_s: Optional[List[ContactInfo]] = dataclass_field(
+    c_o_n_t_a_c_t_i_n_f_o_s: Optional[
+        List[ContactInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACTINFOS"},
@@ -1071,7 +1103,7 @@ class ProjectRequest:
         metadata={"wire_name": "STAGE_ID"},
     )
     """The unique identifier of the stage."""
-    t_a_g_s: Optional[List[Tag]] = dataclass_field(
+    t_a_g_s: Optional[List[Tag | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TAGS"},
@@ -1197,7 +1229,7 @@ class LeadRequest:
         metadata={"wire_name": "INDUSTRY"},
     )
     """The industry of the lead."""
-    t_a_g_s: Optional[List[Tag]] = dataclass_field(
+    t_a_g_s: Optional[List[Tag | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TAGS"},
@@ -1337,13 +1369,15 @@ class ContactRequest:
     """
     Visible User IDs (Required when individuals visibility state is selected)
     """
-    c_o_n_t_a_c_t_i_n_f_o_s: Optional[List[ContactInfo]] = dataclass_field(
+    c_o_n_t_a_c_t_i_n_f_o_s: Optional[
+        List[ContactInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACTINFOS"},
     )
     """Contact Information"""
-    t_a_g_s: Optional[List[Tag]] = dataclass_field(
+    t_a_g_s: Optional[List[Tag | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TAGS"},
@@ -1589,19 +1623,21 @@ class OrganizationRequest:
     """
     Visible User IDs (Required when individuals visibility state is selected)
     """
-    a_d_d_r_e_s_s_e_s: Optional[List[Address]] = dataclass_field(
+    a_d_d_r_e_s_s_e_s: Optional[List[Address | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ADDRESSES"},
     )
     """Organization Addresses"""
-    c_o_n_t_a_c_t_i_n_f_o_s: Optional[List[ContactInfo]] = dataclass_field(
+    c_o_n_t_a_c_t_i_n_f_o_s: Optional[
+        List[ContactInfo | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CONTACTINFOS"},
     )
     """Contact Information"""
-    t_a_g_s: Optional[List[Tag]] = dataclass_field(
+    t_a_g_s: Optional[List[Tag | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TAGS"},
@@ -1681,7 +1717,7 @@ class InsightlyClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1772,7 +1808,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def update_task(
         self,
-        input: TaskRequest,
+        input: TaskRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1817,7 +1853,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def add_task(
         self,
-        input: TaskRequest,
+        input: TaskRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1890,7 +1926,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def update_project(
         self,
-        input: ProjectRequest,
+        input: ProjectRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1935,7 +1971,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def add_project(
         self,
-        input: ProjectRequest,
+        input: ProjectRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2029,7 +2065,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def update_lead(
         self,
-        input: LeadRequest,
+        input: LeadRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -2074,7 +2110,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def add_lead(
         self,
-        input: LeadRequest,
+        input: LeadRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2168,7 +2204,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def update_contact(
         self,
-        input: ContactRequest,
+        input: ContactRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -2213,7 +2249,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def add_contact(
         self,
-        input: ContactRequest,
+        input: ContactRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2332,6 +2368,9 @@ class InsightlyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2412,6 +2451,9 @@ class InsightlyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2451,6 +2493,9 @@ class InsightlyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2492,6 +2537,9 @@ class InsightlyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2507,7 +2555,7 @@ class InsightlyClient(ConnectorClientBase):
 
     def add_organization(
         self,
-        input: OrganizationRequest,
+        input: OrganizationRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

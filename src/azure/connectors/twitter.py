@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -95,18 +95,18 @@ class TweetModel:
         metadata={"wire_name": "Favorited"},
     )
     """Indicates whether the tweet is marked as favorited or not"""
-    user_mentions: Optional[List[UserMentionsModel]] = dataclass_field(
+    user_mentions: Optional[List[UserMentionsModel | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserMentions"},
     )
     """List of users mentioned in the tweet"""
-    original_tweet: Optional[OriginalTweetModel] = dataclass_field(
+    original_tweet: Optional[OriginalTweetModel | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "OriginalTweet"},
     )
-    user_details: Optional[UserDetailsModel] = dataclass_field(
+    user_details: Optional[UserDetailsModel | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserDetails"},
@@ -181,7 +181,12 @@ class TriggerBatchResponseTweetModel:
     Response for When a new tweet is posted
     """
 
-    value: Optional[List[TweetModel]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TweetModel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -266,13 +271,15 @@ class OriginalTweetModel:
         metadata={"wire_name": "Favorited"},
     )
     """Indicates whether the original tweet is marked as favorited"""
-    user_mentions: Optional[List[OriginalTweetUserMentionsModel]] = dataclass_field(
+    user_mentions: Optional[
+        List[OriginalTweetUserMentionsModel | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserMentions"},
     )
     """The list of user mentioned in the tweet"""
-    user_details: Optional[OriginalTweetUserDetailsModel] = dataclass_field(
+    user_details: Optional[OriginalTweetUserDetailsModel | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "UserDetails"},
@@ -425,7 +432,7 @@ class TwitterClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname

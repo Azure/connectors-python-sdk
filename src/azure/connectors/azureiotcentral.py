@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -114,7 +114,7 @@ class DeviceGroupCollection:
     Response for List device groups
     """
 
-    value: List[DeviceGroup]
+    value: List[DeviceGroup | Mapping[str, Any]]
     """The collection of device groups."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -153,7 +153,7 @@ class DeviceGroupDeviceCollection:
     Response for Get devices by device group ID
     """
 
-    value: List[DeviceV1]
+    value: List[DeviceV1 | Mapping[str, Any]]
     """The collection of devices belonging to the device group."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -220,7 +220,7 @@ class DeviceRelationshipCollection:
     Response for List relationships
     """
 
-    value: List[DeviceRelationshipStatic]
+    value: List[DeviceRelationshipStatic | Mapping[str, Any]]
     """The collection of device relationships."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -250,7 +250,7 @@ class JobCollection:
     Response for List jobs
     """
 
-    value: List[JobStatic]
+    value: List[JobStatic | Mapping[str, Any]]
     """The collection of jobs."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -274,9 +274,11 @@ class JobStatic:
     """Detailed description of the job."""
     group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
@@ -314,9 +316,11 @@ class Job:
     """Detailed description of the job."""
     group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
@@ -341,7 +345,7 @@ class JobDeviceStatusCollection:
     Response for Get device statuses
     """
 
-    value: List[JobDeviceStatus]
+    value: List[JobDeviceStatus | Mapping[str, Any]]
     """The collection of job device statuses."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -357,7 +361,7 @@ class OrganizationCollection:
     Response for List organizations
     """
 
-    value: List[Organization]
+    value: List[Organization | Mapping[str, Any]]
     """The collection of organizations."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -391,7 +395,7 @@ class ScheduledJobCollection:
     Response for List scheduled jobs
     """
 
-    value: List[ScheduledJob]
+    value: List[ScheduledJob | Mapping[str, Any]]
     """The collection of scheduled jobs."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -417,9 +421,11 @@ class ScheduledJob:
     """Detailed description of the scheduled job."""
     group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
@@ -454,9 +460,11 @@ class ScheduledJobStatic:
     """Detailed description of the scheduled job."""
     group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
+    batch: Optional[JobBatch | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
+    cancellation_threshold: Optional[
+        JobCancellationThreshold | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
@@ -486,7 +494,7 @@ class ScheduledJobJobCollection:
     Response for Get jobs by scheduled job ID
     """
 
-    value: List[JobStatic]
+    value: List[JobStatic | Mapping[str, Any]]
     """The collection of jobs."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -780,7 +788,7 @@ class DeviceCollection:
     Response for List devices
     """
 
-    value: List[DeviceV1]
+    value: List[DeviceV1 | Mapping[str, Any]]
     """The collection of devices."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -859,7 +867,7 @@ class DeviceTemplateCollectionV1:
     Response for List device templates
     """
 
-    value: List[DeviceTemplateV1]
+    value: List[DeviceTemplateV1 | Mapping[str, Any]]
     """The collection of device templates."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -891,7 +899,7 @@ class RoleCollection:
     Response for List roles
     """
 
-    value: List[Role]
+    value: List[Role | Mapping[str, Any]]
     """The collection of roles."""
 
 
@@ -922,7 +930,7 @@ class UserStatic:
         metadata={"wire_name": "type"},
     )
     """Type of the user."""
-    roles: List[RoleAssignment]
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -935,7 +943,7 @@ class UserCollection:
     Response for List users
     """
 
-    value: List[UserStatic]
+    value: List[UserStatic | Mapping[str, Any]]
     """The collection of users."""
 
 
@@ -958,7 +966,7 @@ class ApplicationCollection:
     Response for Get the list of applications accessible to the signed-in user
     """
 
-    value: List[Application]
+    value: List[Application | Mapping[str, Any]]
     """The collection of applications."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -974,7 +982,7 @@ class DeviceTemplateCollection:
     Response for List device templates
     """
 
-    value: List[DeviceTemplate]
+    value: List[DeviceTemplate | Mapping[str, Any]]
     """The collection of device templates."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1406,7 +1414,7 @@ class RuleCollection:
     Definition: RuleCollection
     """
 
-    value: List[Rule]
+    value: List[Rule | Mapping[str, Any]]
     """The collection of rules."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1492,7 +1500,7 @@ class EmailUser:
     """Unique ID of the user."""
     type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: List[RoleAssignment]
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -1511,7 +1519,7 @@ class ServicePrincipalUser:
     """Unique ID of the user."""
     type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: List[RoleAssignment]
+    roles: List[RoleAssignment | Mapping[str, Any]]
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -1578,13 +1586,13 @@ class WebhookActionBody:
     Definition: WebhookActionBody
     """
 
-    action: Action
+    action: Action | Mapping[str, Any]
     """Action that triggered the webhook."""
-    application: Application
+    application: Application | Mapping[str, Any]
     """Application that triggered the webhook."""
-    device: WebhookActionDevice
+    device: WebhookActionDevice | Mapping[str, Any]
     """Device that triggered the webhook."""
-    rule: Rule
+    rule: Rule | Mapping[str, Any]
     """Rule that triggered the webhook."""
     timestamp: str
     """Timestamp at which the webhook was triggered."""
@@ -1662,7 +1670,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1820,7 +1828,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def device_groups_set(
         self,
-        input: DeviceGroup,
+        input: DeviceGroup | Mapping[str, Any],
         device_group_id: str,
         application: str,
         *,
@@ -1907,6 +1915,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2055,7 +2066,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_update_cloud_properties(
         self,
-        input: DeviceCloudProperties,
+        input: DeviceCloudProperties | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -2114,7 +2125,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_execute_component_command(
         self,
-        input: DeviceCommand,
+        input: DeviceCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
@@ -2312,7 +2323,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def device_relationships_set(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         relationship_id: str,
         device_id: str,
         application: str,
@@ -2368,7 +2379,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def device_relationships_update(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         device_id: str,
         relationship_id: str,
         application: str,
@@ -2463,6 +2474,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2593,7 +2607,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def jobs_set(
         self,
-        input: Job,
+        input: Job | Mapping[str, Any],
         job_id: str,
         application: str,
         *,
@@ -2987,7 +3001,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def organizations_set(
         self,
-        input: Organization,
+        input: Organization | Mapping[str, Any],
         organization_id: str,
         application: str,
         *,
@@ -3074,6 +3088,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -3209,7 +3226,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def scheduled_jobs_set(
         self,
-        input: ScheduledJob,
+        input: ScheduledJob | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
         *,
@@ -3273,7 +3290,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def scheduled_jobs_update(
         self,
-        input: ScheduledJobPatch,
+        input: ScheduledJobPatch | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
         *,
@@ -3366,6 +3383,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -4227,6 +4247,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4237,7 +4260,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_run_command(
         self,
-        input: DeviceCommandV1,
+        input: DeviceCommandV1 | Mapping[str, Any],
         device_id: str,
         command_name: str,
         application: str,
@@ -4298,7 +4321,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_run_component_command(
         self,
-        input: DeviceComponentCommand,
+        input: DeviceComponentCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
@@ -4362,7 +4385,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_run_module_command(
         self,
-        input: DeviceModuleCommand,
+        input: DeviceModuleCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         command_name: str,
@@ -4426,7 +4449,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_run_module_component_command(
         self,
-        input: DeviceModuleComponentCommand,
+        input: DeviceModuleComponentCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         component_name: str,
@@ -4493,7 +4516,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_set(
         self,
-        input: DeviceV2,
+        input: DeviceV2 | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -4542,7 +4565,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_update_module_properties(
         self,
-        input: ModuleProperties,
+        input: ModuleProperties | Mapping[str, Any],
         device_id: str,
         module: str,
         application: str,
@@ -4604,7 +4627,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def devices_update_properties(
         self,
-        input: DeviceProperties,
+        input: DeviceProperties | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -4811,6 +4834,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4934,7 +4960,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def users_create(
         self,
-        input: User,
+        input: User | Mapping[str, Any],
         user_id: str,
         application: str,
         *,
@@ -5135,6 +5161,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5145,7 +5174,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     def users_update(
         self,
-        input: UserPatch,
+        input: UserPatch | Mapping[str, Any],
         user_id: str,
         application: str,
         *,

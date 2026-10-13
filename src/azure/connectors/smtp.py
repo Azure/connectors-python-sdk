@@ -119,7 +119,7 @@ class Email:
         metadata={"wire_name": "DeliveryReceipt"},
     )
     """Specify email address for Delivery receipt"""
-    attachments: Optional[List[Attachment]] = dataclass_field(
+    attachments: Optional[List[Attachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -194,7 +194,7 @@ class SmtpClient(ConnectorClientBase):
 
     def send_email(
         self,
-        input: Email,
+        input: Email | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

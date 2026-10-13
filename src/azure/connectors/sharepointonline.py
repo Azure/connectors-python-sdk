@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -205,7 +205,12 @@ class TablesList:
     Response for Get all lists and libraries
     """
 
-    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Tables"""
 
 
@@ -229,7 +234,7 @@ class SharingLinkPermission:
     Response for Create sharing link for a file or folder
     """
 
-    link: Optional[SharingLink] = dataclass_field(default=None, kw_only=True)
+    link: Optional[SharingLink | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -512,7 +517,7 @@ class TableForm:
     Gets or sets the output format (e.g. \"Word document\", \"PDF document\",
     \"None\")
     """
-    fields_metadata: Optional[List[FormFieldMetadata]] = dataclass_field(
+    fields_metadata: Optional[List[FormFieldMetadata | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "FieldsMetadata"},
@@ -539,7 +544,12 @@ class ItemsList:
     Response for Get files (properties only)
     """
 
-    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Item | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Items"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -656,7 +666,7 @@ class Item:
     Response for Get file properties
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
@@ -759,7 +769,12 @@ class DeletedItemList:
     Response for When a file is deleted
     """
 
-    value: Optional[List[DeletedItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DeletedItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Deleted Items"""
 
 
@@ -794,7 +809,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
@@ -808,7 +823,12 @@ class DataSetsList:
     Response for Get datasets
     """
 
-    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DataSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -828,13 +848,13 @@ class TableMetadata:
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
-    referenced_entities: Optional[ObjectEntity] = dataclass_field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "referencedEntities"},
@@ -886,7 +906,7 @@ class GetItemChangesMetadataResponse:
     Response for Get metadata about the return type of the GetItemChanges operation
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -931,7 +951,12 @@ class BlobMetadataPage:
     Definition: BlobMetadataPage
     """
 
-    value: Optional[List[BlobMetadata]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[BlobMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Blob metadata collection."""
 
 
@@ -995,7 +1020,7 @@ class CreateNewDocumentSetParameters:
         metadata={"wire_name": "contentTypeId"},
     )
     """Example: 0x0120D520"""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
@@ -1030,7 +1055,12 @@ class DataSet:
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
+    query: Optional[
+        List[PassThroughNativeQuery | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Pass-through Native Queries"""
 
 
@@ -1040,8 +1070,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
-    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1224,7 +1264,7 @@ class ItemPermissionAddBody:
     Definition: ItemPermissionAddBody
     """
 
-    recipients: List[ItemPermissionRecipient]
+    recipients: List[ItemPermissionRecipient | Mapping[str, Any]]
     """
     A collection of recipients who will receive access and the sharing
     invitation.
@@ -1312,7 +1352,7 @@ class ItemReference:
     """The name of the parent item"""
     path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Path that can be used to navigate to the parent item"""
-    sharepoint_ids: Optional[SharePointIds] = dataclass_field(
+    sharepoint_ids: Optional[SharePointIds | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharepointIds"},
@@ -1409,12 +1449,14 @@ class Permission:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permission id"""
-    granted_to: Optional[PermissionIdentitySet] = dataclass_field(
+    granted_to: Optional[PermissionIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "grantedTo"},
     )
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = dataclass_field(
+    granted_to_identities: Optional[
+        List[SharingLinkPermissionIdentitySet | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "grantedToIdentities"},
@@ -1423,13 +1465,18 @@ class Permission:
     For link type permissions, the details of the users to whom permission was
     granted
     """
-    invitation: Optional[SharingInvitation] = dataclass_field(default=None, kw_only=True)
-    inherited_from: Optional[ItemReference] = dataclass_field(
+    invitation: Optional[
+        SharingInvitation | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    inherited_from: Optional[ItemReference | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "inheritedFrom"},
     )
-    link: Optional[SharingLink] = dataclass_field(default=None, kw_only=True)
+    link: Optional[SharingLink | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     roles: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The type of permission - read, write, owner, member"""
 
@@ -1441,13 +1488,23 @@ class PermissionIdentitySet:
     """
 
     application: Optional[
-        ApplicationPermissionIdentity
+        ApplicationPermissionIdentity | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
     )
-    group: Optional[GroupPermissionIdentity] = dataclass_field(default=None, kw_only=True)
-    user: Optional[UserPermissionIdentity] = dataclass_field(default=None, kw_only=True)
+    group: Optional[
+        GroupPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    user: Optional[
+        UserPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1456,7 +1513,12 @@ class PermissionsList:
     Definition: PermissionsList
     """
 
-    value: Optional[List[Permission]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Permission | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Permissions"""
 
 
@@ -1605,7 +1667,12 @@ class SharingLinkPermissionIdentitySet:
     Definition: SharingLinkPermissionIdentitySet
     """
 
-    user: Optional[SharingLinkUserPermissionIdentity] = dataclass_field(default=None, kw_only=True)
+    user: Optional[
+        SharingLinkUserPermissionIdentity | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1676,22 +1743,30 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = dataclass_field(
+    count_restrictions: Optional[
+        TableCountRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "countRestrictions"},
@@ -1902,7 +1977,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1936,7 +2011,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_agreements_solution_document(
         self,
-        input: CreateAgreementsSolutionDocumentInput,
+        input: CreateAgreementsSolutionDocumentInput | Mapping[str, Any],
         dataset: str,
         template: str,
         *,
@@ -2158,7 +2233,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_sharing_link(
         self,
-        input: ItemPermissionCreateLinkBody,
+        input: ItemPermissionCreateLinkBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -2275,7 +2350,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def copy_file_2(
         self,
-        input: CopyFileParameters,
+        input: CopyFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2320,7 +2395,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def copy_folder(
         self,
-        input: CopyFolderParameters,
+        input: CopyFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -2546,6 +2621,9 @@ class SharepointonlineClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2995,7 +3073,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def http_request(
         self,
-        input: SharePointHttpRequestBodyParameters,
+        input: SharePointHttpRequestBodyParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -3095,7 +3173,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def move_file(
         self,
-        input: MoveFileParameters,
+        input: MoveFileParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -3140,7 +3218,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def move_folder(
         self,
-        input: MoveFolderParameters,
+        input: MoveFolderParameters | Mapping[str, Any],
         dataset: str,
         *,
         timeout: Optional[float] = None,
@@ -3295,7 +3373,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_new_document_set(
         self,
-        input: CreateNewDocumentSetParameters,
+        input: CreateNewDocumentSetParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -3341,7 +3419,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_new_folder(
         self,
-        input: CreateNewFolderParameters,
+        input: CreateNewFolderParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -3512,7 +3590,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def submit_doc_gen_form(
         self,
-        input: SubmitDocGenFormInput,
+        input: SubmitDocGenFormInput | Mapping[str, Any],
         dataset: str,
         table: str,
         form: str,
@@ -3801,7 +3879,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         *,
@@ -3944,6 +4022,9 @@ class SharepointonlineClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3954,7 +4035,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4011,7 +4092,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_approval_request(
         self,
-        input: CreateApprovalRequestInput,
+        input: CreateApprovalRequestInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4143,7 +4224,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def check_in_file(
         self,
-        input: FileCheckInParameters,
+        input: FileCheckInParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4343,7 +4424,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def grant_access(
         self,
-        input: ItemGrantAccessBody,
+        input: ItemGrantAccessBody | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4387,7 +4468,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def patch_file_item(
         self,
-        input: PatchFileItemInput,
+        input: PatchFileItemInput | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4448,7 +4529,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def patch_file_item_with_predicted_values(
         self,
-        input: PatchFileItemWithPredictedValuesParameters,
+        input: PatchFileItemWithPredictedValuesParameters | Mapping[str, Any],
         dataset: str,
         table: str,
         id: int,
@@ -4779,6 +4860,9 @@ class SharepointonlineClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4838,7 +4922,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
     def create_content_assembly_document(
         self,
-        input: CreateContentAssemblyDocumentInput,
+        input: CreateContentAssemblyDocumentInput | Mapping[str, Any],
         dataset: str,
         table: str,
         template: str,

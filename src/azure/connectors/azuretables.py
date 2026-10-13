@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core import MatchConditions
@@ -123,7 +123,12 @@ class GetEntitiesResponse:
         metadata={"wire_name": "odata.metadata"},
     )
     """Table Metadata location"""
-    value: Optional[List[EntityItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[EntityItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of Entities"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -239,7 +244,12 @@ class StorageAccountList:
     Response for Get storage accounts
     """
 
-    value: Optional[List[StorageAccount]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[StorageAccount | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of storage account names"""
 
 
@@ -398,7 +408,7 @@ class AzuretablesClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -432,7 +442,7 @@ class AzuretablesClient(ConnectorClientBase):
 
     def create_entity(
         self,
-        input: CreateEntityInput,
+        input: CreateEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         *,
@@ -570,6 +580,9 @@ class AzuretablesClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -609,6 +622,9 @@ class AzuretablesClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -858,7 +874,7 @@ class AzuretablesClient(ConnectorClientBase):
 
     def insert_merge_entity(
         self,
-        input: InsertMergeEntityInput,
+        input: InsertMergeEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
@@ -907,7 +923,7 @@ class AzuretablesClient(ConnectorClientBase):
 
     def insert_replace_entity(
         self,
-        input: InsertReplaceEntityInput,
+        input: InsertReplaceEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
@@ -956,7 +972,7 @@ class AzuretablesClient(ConnectorClientBase):
 
     def merge_entity(
         self,
-        input: MergeEntityInput,
+        input: MergeEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,
@@ -1014,7 +1030,7 @@ class AzuretablesClient(ConnectorClientBase):
 
     def replace_entity(
         self,
-        input: ReplaceEntityInput,
+        input: ReplaceEntityInput | Mapping[str, Any],
         storage_account_name: str,
         table_name: str,
         partition_key: str,

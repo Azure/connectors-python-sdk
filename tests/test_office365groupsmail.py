@@ -11,6 +11,7 @@ from azure.connectors.office365groupsmail import (
     Conversation,
     CreateConversationBody,
     ForwardPostBody,
+    GetUsersGraphAction,
     ListConversationsResponse,
     ReplyConversationThreadBody,
     TRIGGER_OPERATIONS,
@@ -359,7 +360,10 @@ class TestOffice365groupsmailTypeSerialization:
 
     def test_forward_post_body_uses_swagger_wire_names(self):
         """Test the current forward-post request preserves Swagger casing."""
-        request = model_instance(ForwardPostBody, comment="Please review")
+        request = ForwardPostBody(
+            to_recipients=[GetUsersGraphAction()],
+            comment="Please review",
+        )
 
         assert to_wire(request) == {
             "Comment": "Please review",

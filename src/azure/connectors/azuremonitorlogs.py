@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -65,8 +65,18 @@ class Table:
     Response for Run query and list results
     """
 
-    value: Optional[List[Row]] = dataclass_field(default=None, kw_only=True)
-    error: Optional[PartialQueryError] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Row | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    error: Optional[
+        PartialQueryError | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -100,7 +110,12 @@ class VisualizeResults:
         kw_only=True,
         metadata={"wire_name": "attachmentName"},
     )
-    error: Optional[PartialQueryError] = dataclass_field(default=None, kw_only=True)
+    error: Optional[
+        PartialQueryError | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -109,7 +124,12 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The subscriptions ."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -125,7 +145,12 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource groups. """
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -141,7 +166,12 @@ class ResourceItemListResult:
     Response for List resources
     """
 
-    value: Optional[List[ResourceItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ResourceItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource items. """
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -250,7 +280,12 @@ class TimeRangeTypesListResult:
     Definition: TimeRangeTypesListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TimeRangeItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of time range types (Relative\\Absolute\\SetInQuery). """
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -266,7 +301,12 @@ class TimeRangeListResult:
     Definition: TimeRangeListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[TimeRangeItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of time range. """
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -360,7 +400,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -394,7 +434,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
     def query_data(
         self,
-        input: QueryDataInput,
+        input: QueryDataInput | Mapping[str, Any],
         subscriptions: str,
         resourcegroups: str,
         resourcetype: str,
@@ -455,7 +495,7 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
     def visualize_query(
         self,
-        input: VisualizeQueryInput,
+        input: VisualizeQueryInput | Mapping[str, Any],
         subscriptions: str,
         resourcegroups: str,
         resourcetype: str,

@@ -16,6 +16,7 @@ from azure.connectors.msgraphgroupsanduser import (
     GetMemberGroupsResponse,
 )
 from azure.connectors.sdk import ConnectorException
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMsgraphClientInitialization:
@@ -123,10 +124,10 @@ class TestListUsers:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_users()
+            result = await resolve_generated_result(client.list_users())
 
             assert result is not None
-            assert result["value"][0]["id"] == "user1"
+            assert result[0]["id"] == "user1"
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v1.0/users",
@@ -151,9 +152,9 @@ class TestListUsers:
             new_callable=AsyncMock,
             return_value=mock_response_empty
         ):
-            result = await client.list_users()
+            result = await resolve_generated_result(client.list_users())
 
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_raises_exception(self, mock_credential, mock_response_error):
@@ -170,7 +171,7 @@ class TestListUsers:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_users()
+                await resolve_generated_result(client.list_users())
 
             assert exc_info.value.status_code == 400
 
@@ -197,12 +198,11 @@ class TestListGroupsByDisplayNameSearch:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_groups_by_display_name_search(
-                search="Test"
+            result = await resolve_generated_result(
+                client.list_groups_by_display_name_search(search="Test")
             )
 
-            assert result is not None
-            assert "@odata.count" in result
+            assert result == [{"id": "group1", "displayName": "Test Group"}]
             mock_send.assert_called_once()
             call_path = mock_send.call_args[0][1]
             assert "$search=Test" in call_path
@@ -223,9 +223,11 @@ class TestListGroupsByDisplayNameSearch:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_groups_by_display_name_search()
+            result = await resolve_generated_result(
+                client.list_groups_by_display_name_search()
+            )
 
-            assert result is not None
+            assert result == []
             call_path = mock_send.call_args[0][1]
             assert "$search" not in call_path
 
@@ -245,8 +247,8 @@ class TestListGroupsByDisplayNameSearch:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            await client.list_groups_by_display_name_search(
-                search="Test Group Name"
+            await resolve_generated_result(
+                client.list_groups_by_display_name_search(search="Test Group Name")
             )
 
             call_path = mock_send.call_args[0][1]
@@ -267,7 +269,9 @@ class TestListGroupsByDisplayNameSearch:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_groups_by_display_name_search()
+                await resolve_generated_result(
+                    client.list_groups_by_display_name_search()
+                )
 
             assert exc_info.value.status_code == 400
 
@@ -293,10 +297,9 @@ class TestListSubscribedSkus:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_subscribed_skus()
+            result = await resolve_generated_result(client.list_subscribed_skus())
 
-            assert result is not None
-            assert result["value"][0]["skuPartNumber"] == "ENTERPRISEPACK"
+            assert result[0]["skuPartNumber"] == "ENTERPRISEPACK"
             mock_send.assert_called_once_with(
                 "GET",
                 "https://example.azure.com/connections/test/v1.0/subscribedSkus",
@@ -322,7 +325,7 @@ class TestListSubscribedSkus:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_subscribed_skus()
+                await resolve_generated_result(client.list_subscribed_skus())
 
             assert exc_info.value.status_code == 400
 
@@ -349,14 +352,15 @@ class TestListDirectGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_direct_group_members(
-                group_id="group-123",
-                filter="userType eq 'Member'",
-                select="id,displayName"
+            result = await resolve_generated_result(
+                client.list_direct_group_members(
+                    group_id="group-123",
+                    filter="userType eq 'Member'",
+                    select="id,displayName"
+                )
             )
 
-            assert result is not None
-            assert result["@odata.count"] == 5
+            assert result == [{"id": "member1", "displayName": "Member One"}]
             call_path = mock_send.call_args[0][1]
             assert "/v1.0/groups/group-123/members" in call_path
             assert "$filter=userType%20eq%20%27Member%27" in call_path
@@ -380,11 +384,11 @@ class TestListDirectGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.list_direct_group_members(
-                group_id="group-456"
+            result = await resolve_generated_result(
+                client.list_direct_group_members(group_id="group-456")
             )
 
-            assert result is not None
+            assert result == []
             call_path = mock_send.call_args[0][1]
             assert "/v1.0/groups/group-456/members" in call_path
             assert "$filter" not in call_path
@@ -406,8 +410,8 @@ class TestListDirectGroupMembers:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            await client.list_direct_group_members(
-                group_id="test-group-id"
+            await resolve_generated_result(
+                client.list_direct_group_members(group_id="test-group-id")
             )
 
             call_path = mock_send.call_args[0][1]
@@ -428,8 +432,8 @@ class TestListDirectGroupMembers:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_direct_group_members(
-                    group_id="group-123"
+                await resolve_generated_result(
+                    client.list_direct_group_members(group_id="group-123")
                 )
 
             assert exc_info.value.status_code == 400
@@ -809,8 +813,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ):
-            result1 = await client.list_users()
-            result2 = await client.list_subscribed_skus()
+            result1 = await resolve_generated_result(client.list_users())
+            result2 = await resolve_generated_result(client.list_subscribed_skus())
             result3 = await client.get_group_properties(group_id="group-123")
 
             assert result1 is not None
@@ -836,7 +840,7 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(Exception):  # JSON parse error
-                await client.list_users()
+                await resolve_generated_result(client.list_users())
 
     @pytest.mark.asyncio
     async def test_boolean_parameter_conversion(self, mock_credential, mock_response_success):
@@ -854,7 +858,9 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            await client.list_groups_by_display_name_search(search="Group")
+            await resolve_generated_result(
+                client.list_groups_by_display_name_search(search="Group")
+            )
 
             call_path = mock_send.call_args[0][1]
             assert "$search=Group" in call_path
@@ -877,10 +883,12 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            await client.list_direct_group_members(
-                group_id="group-123",
-                filter=None,
-                select=None
+            await resolve_generated_result(
+                client.list_direct_group_members(
+                    group_id="group-123",
+                    filter=None,
+                    select=None
+                )
             )
 
             call_path = mock_send.call_args[0][1]
@@ -926,7 +934,7 @@ class TestEdgeCases:
             return_value=mock_response_success
         ) as mock_send:
             # GET methods
-            await client.list_users()
+            await resolve_generated_result(client.list_users())
             assert mock_send.call_args[0][0] == "GET"
 
             await client.get_group_properties(group_id="group-123")

@@ -13,6 +13,7 @@ changing the payload sent to the connector service.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import fields, is_dataclass
 from typing import Any
 
@@ -28,8 +29,8 @@ def to_wire(value: Any) -> Any:
     name). ``None`` dataclass fields and ``None`` map values are omitted.
     ``additional_properties`` are merged into the containing object, mirroring
     the .NET ``[JsonExtensionData]`` behavior. Lists and tuples are converted
-    element-by-element, and dictionaries are converted value-by-value with
-    their keys preserved. Raw ``bytes`` and ``bytearray`` are returned
+    element-by-element, and mappings are converted value-by-value with their
+    keys preserved. Raw ``bytes`` and ``bytearray`` are returned
     unchanged so binary payloads are never JSON-encoded. All other scalar
     values pass through unchanged.
 
@@ -45,7 +46,7 @@ def to_wire(value: Any) -> Any:
     if is_dataclass(value) and not isinstance(value, type):
         return _dataclass_to_wire(value)
 
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {
             key: to_wire(item)
             for key, item in value.items()

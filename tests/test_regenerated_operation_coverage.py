@@ -270,6 +270,47 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
         }
 
 
+@pytest.mark.asyncio
+async def test_relative_continuation_resolves_against_current_page(
+    mock_credential: Any,
+) -> None:
+    """Test a bare relative continuation keeps the current nested route."""
+    async with AzurevmClient(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    ) as client:
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            side_effect=[
+                MockResponse(
+                    status=200,
+                    text=json.dumps({"value": [], "nextLink": "next-page"}),
+                ),
+                MockResponse(
+                    status=200,
+                    text=json.dumps({"value": [{"id": "vm-2"}]}),
+                ),
+            ],
+        ) as transport:
+            items = [
+                item async for item in client.list_virtual_machines_in_scale_set(
+                    subscription_id="subscription",
+                    resource_group_name="group",
+                    virtual_machine_scale_set_name="scale-set",
+                )
+            ]
+
+    assert items == [{"id": "vm-2"}]
+    assert transport.await_args_list[1].args == (
+        "GET",
+        "https://example.azure.com/connections/test/subscriptions/subscription/"
+        "resourcegroups/group/providers/Microsoft.Compute/virtualMachineScaleSets/"
+        "scale-set/next-page",
+    )
+
+
 @pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,

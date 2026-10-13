@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -167,7 +167,7 @@ class TextrequestClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -259,7 +259,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def send_message_by_phone_number(
         self,
-        input: SendMessageByPhoneNumberInput,
+        input: SendMessageByPhoneNumberInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -481,6 +481,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -496,7 +499,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def create_contact(
         self,
-        input: CreateContactInput,
+        input: CreateContactInput | Mapping[str, Any],
         dashboard_id: int,
         phone_number: str,
         *,
@@ -868,6 +871,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -883,7 +889,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def update_group(
         self,
-        input: UpdateGroupInput,
+        input: UpdateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         group_id: int,
         *,
@@ -982,7 +988,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1405,7 +1411,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def create_payment(
         self,
-        input: CreatePaymentInput,
+        input: CreatePaymentInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1512,6 +1518,9 @@ class TextrequestClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1527,7 +1536,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def update_dashboards_name(
         self,
-        input: UpdateDashboardsNameInput,
+        input: UpdateDashboardsNameInput | Mapping[str, Any],
         dashboard_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1702,7 +1711,7 @@ class TextrequestClient(ConnectorClientBase):
 
     async def create_dashboard(
         self,
-        input: CreateDashboardInput,
+        input: CreateDashboardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

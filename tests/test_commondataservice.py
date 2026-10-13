@@ -154,7 +154,7 @@ class TestGetItem:
     async def test_get_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -164,7 +164,7 @@ class TestGetItem:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_item(dataset="default", table="accounts", id="99")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetItems:
@@ -647,7 +647,7 @@ class TestGetMetadataForPatchItem:
     async def test_get_metadata_for_patch_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -657,7 +657,7 @@ class TestGetMetadataForPatchItem:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_metadata_for_patch_item(dataset="default", table="accounts")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetMetadataForPostItem:
@@ -687,7 +687,7 @@ class TestGetMetadataForPostItem:
     async def test_get_metadata_for_post_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -697,7 +697,7 @@ class TestGetMetadataForPostItem:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_metadata_for_post_item(dataset="default", table="accounts")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetTable:
@@ -1102,7 +1102,7 @@ class TestDeleteAttachment:
     async def test_delete_attachment_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -1114,7 +1114,7 @@ class TestDeleteAttachment:
                     dataset="default", table="accounts", id="1", attachment_id="att1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeleteItem:
@@ -1141,7 +1141,7 @@ class TestDeleteItem:
     async def test_delete_item_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -1153,7 +1153,7 @@ class TestDeleteItem:
                     dataset="default", table="accounts", id="1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDisassociateRecordsPostItem:
@@ -1235,7 +1235,7 @@ class TestDisassociateSingleValueRecordDeleteItem:
     async def test_disassociate_single_value_error_response(self, mock_credential):
         """Test that error response raises ConnectorException."""
         client = _make_client(mock_credential)
-        mock_response = MockResponse(status=404, text="Not found")
+        mock_response = MockResponse(status=500, text="Server error")
 
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock
@@ -1250,7 +1250,7 @@ class TestDisassociateSingleValueRecordDeleteItem:
                     relationship="primarycontactid",
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetCollectionRelationships:

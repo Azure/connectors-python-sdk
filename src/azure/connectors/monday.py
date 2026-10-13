@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -325,7 +325,7 @@ class CreateItemInput:
     """Select a group from the drop-down or specify a group ID."""
     item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify the name of the item you want to create."""
-    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "columnValues"},
@@ -479,7 +479,7 @@ class UpdateItemColumnInput:
     )
     item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to update."""
-    column_values: DynamicResponseGetSingleColumnSchema = dataclass_field(
+    column_values: DynamicResponseGetSingleColumnSchema | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "columnValues"},
     )
 
@@ -513,7 +513,7 @@ class UpdateMultipleItemColumnsInput:
     """
     Specify a new name for the item. Leave blank to keep the current name.
     """
-    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "columnValues"},
@@ -595,7 +595,7 @@ class CreateSubitemInput:
     """Select a parent item from the drop-down or specify a parent item ID."""
     item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify a name for the subitem."""
-    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
+    column_values: Optional[DynamicResponseGetListSchema | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "columnValues"},
@@ -972,7 +972,7 @@ class MondayClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1006,7 +1006,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_item(
         self,
-        input: CreateItemInput,
+        input: CreateItemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1046,7 +1046,7 @@ class MondayClient(ConnectorClientBase):
 
     def duplicate_board(
         self,
-        input: DuplicateBoardInput,
+        input: DuplicateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1086,7 +1086,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_board(
         self,
-        input: CreateBoardInput,
+        input: CreateBoardInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1126,7 +1126,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_column(
         self,
-        input: CreateColumnInput,
+        input: CreateColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1166,7 +1166,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1206,7 +1206,7 @@ class MondayClient(ConnectorClientBase):
 
     def update_item_column(
         self,
-        input: UpdateItemColumnInput,
+        input: UpdateItemColumnInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1247,7 +1247,7 @@ class MondayClient(ConnectorClientBase):
 
     def update_multiple_item_columns(
         self,
-        input: UpdateMultipleItemColumnsInput,
+        input: UpdateMultipleItemColumnsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1288,7 +1288,7 @@ class MondayClient(ConnectorClientBase):
 
     def move_item_to_group(
         self,
-        input: MoveItemToGroupInput,
+        input: MoveItemToGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1328,7 +1328,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_notification(
         self,
-        input: CreateNotificationInput,
+        input: CreateNotificationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1369,7 +1369,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_subitem(
         self,
-        input: CreateSubitemInput,
+        input: CreateSubitemInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1463,7 +1463,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_update(
         self,
-        input: CreateUpdateInput,
+        input: CreateUpdateInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1557,7 +1557,7 @@ class MondayClient(ConnectorClientBase):
 
     def create_workspace(
         self,
-        input: CreateWorkspaceInput,
+        input: CreateWorkspaceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

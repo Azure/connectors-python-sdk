@@ -116,7 +116,7 @@ class FreshserviceClient(ConnectorClientBase):
 
     async def add_note(
         self,
-        input: AddNoteRequest,
+        input: AddNoteRequest | Mapping[str, Any],
         ticket_id: int,
         *,
         timeout: Optional[float] = None,
@@ -157,7 +157,7 @@ class FreshserviceClient(ConnectorClientBase):
 
     async def create_ticket(
         self,
-        input: CreateTicketRequest,
+        input: CreateTicketRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -194,7 +194,7 @@ class FreshserviceClient(ConnectorClientBase):
 
     async def update_ticket(
         self,
-        input: UpdateTicketRequest,
+        input: UpdateTicketRequest | Mapping[str, Any],
         ticket_id: int,
         *,
         timeout: Optional[float] = None,

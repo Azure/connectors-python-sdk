@@ -74,7 +74,12 @@ class EventGetResponse:
         kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    classifications: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    classifications: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     dates: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
@@ -170,7 +175,12 @@ class AttractionGetResponse:
     locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale."""
     images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
-    classifications: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    classifications: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,

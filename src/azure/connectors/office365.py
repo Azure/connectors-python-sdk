@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -222,31 +222,33 @@ class OutlookReceiveMessage:
         metadata={"wire_name": "LastModifiedDateTime"},
     )
     """Last modified date and time"""
-    attachments: Optional[List[OutlookReceiveAttachment]] = dataclass_field(
+    attachments: Optional[
+        List[OutlookReceiveAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    to_recipients: Optional[List[Recipient]] = dataclass_field(
+    to_recipients: Optional[List[Recipient | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ToRecipients"},
     )
     """To Recipient"""
-    cc_recipients: Optional[List[Recipient]] = dataclass_field(
+    cc_recipients: Optional[List[Recipient | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CcRecipients"},
     )
     """Cc Recipients"""
-    bcc_recipients: Optional[List[Recipient]] = dataclass_field(
+    bcc_recipients: Optional[List[Recipient | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "BccRecipients"},
     )
     """Bcc Recipients"""
-    reply_to: Optional[List[Recipient]] = dataclass_field(
+    reply_to: Optional[List[Recipient | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ReplyTo"},
@@ -258,12 +260,12 @@ class OutlookReceiveMessage:
         metadata={"wire_name": "Subject"},
     )
     """Subject"""
-    body: Optional[ItemBody] = dataclass_field(
+    body: Optional[ItemBody | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Body"},
     )
-    from_: Optional[Recipient] = dataclass_field(
+    from_: Optional[Recipient | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "From"},
@@ -274,7 +276,9 @@ class OutlookReceiveMessage:
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    internet_message_headers: Optional[List[InternetMessageHeader]] = dataclass_field(
+    internet_message_headers: Optional[
+        List[InternetMessageHeader | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "InternetMessageHeaders"},
@@ -297,7 +301,12 @@ class BatchOperationResult:
         metadata={"wire_name": "successCount"},
     )
     """The count of messages processed successfully."""
-    failures: Optional[List[BatchItemFailureResult]] = dataclass_field(default=None, kw_only=True)
+    failures: Optional[
+        List[BatchItemFailureResult | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of failed messages with errors."""
 
 
@@ -536,7 +545,7 @@ class GraphCalendarEventListClientReceive:
     """
 
     value: Optional[
-        List[GraphCalendarEventClientReceive]
+        List[GraphCalendarEventClientReceive | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -551,7 +560,7 @@ class GraphCalendarEventListWithActionType:
     """
 
     value: Optional[
-        List[GraphCalendarEventClientWithActionType]
+        List[GraphCalendarEventClientWithActionType | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -623,7 +632,7 @@ class ContactResponse:
     """The contact's title"""
     generation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddressV2]] = dataclass_field(
+    email_addresses: Optional[List[EmailAddressV2 | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "emailAddresses"},
@@ -689,17 +698,17 @@ class ContactResponse:
         metadata={"wire_name": "mobilePhone"},
     )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = dataclass_field(
+    home_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "homeAddress"},
     )
-    business_address: Optional[PhysicalAddress] = dataclass_field(
+    business_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "businessAddress"},
     )
-    other_address: Optional[PhysicalAddress] = dataclass_field(
+    other_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "otherAddress"},
@@ -750,7 +759,12 @@ class EntityListResponseContactResponse:
     Response for Get contacts
     """
 
-    value: Optional[List[ContactResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ContactResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -766,7 +780,12 @@ class EntityListResponseGraphContactFolder:
     Response for Get contact folders
     """
 
-    value: Optional[List[GraphContactFolder]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphContactFolder | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -902,7 +921,9 @@ class GetAttachmentResponse:
         metadata={"wire_name": "contentId"},
     )
     """Content Id"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = dataclass_field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
@@ -990,7 +1011,7 @@ class GraphClientReceiveMessage:
     )
     """Indicates whether the message has been read"""
     attachments: Optional[
-        List[GraphClientReceiveFileAttachment]
+        List[GraphClientReceiveFileAttachment | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1002,7 +1023,9 @@ class GraphClientReceiveMessage:
         metadata={"wire_name": "isHtml"},
     )
     """Is Html?"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = dataclass_field(
+    sensitivity_label_info: Optional[
+        List[SensitivityLabelMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
@@ -1015,7 +1038,12 @@ class BatchResponseGraphClientReceiveMessage:
     Response for Get emails
     """
 
-    value: Optional[List[GraphClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphClientReceiveMessage | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -1026,7 +1054,7 @@ class EntityListResponseGraphCalendarEventClientReceive:
     """
 
     value: Optional[
-        List[GraphCalendarEventClientReceive]
+        List[GraphCalendarEventClientReceive | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1056,7 +1084,12 @@ class GetMailTipsResponse:
     Response for Get mail tips for a mailbox
     """
 
-    value: Optional[List[MailTipsClientReceive]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[MailTipsClientReceive | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1105,7 +1138,12 @@ class TriggerBatchResponseGraphClientReceiveMessage:
     Response for When an email is flagged
     """
 
-    value: Optional[List[GraphClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GraphClientReceiveMessage | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -1115,7 +1153,9 @@ class SetAutomaticRepliesSettingInput:
     Set up automatic replies
     """
 
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClient] = dataclass_field(
+    automatic_replies_setting: Optional[
+        AutomaticRepliesSettingClient | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "automaticRepliesSetting"},
@@ -1128,7 +1168,9 @@ class SetAutomaticRepliesSettingResponse:
     Response for Set up automatic replies
     """
 
-    automatic_replies_setting: Optional[AutomaticRepliesSettingClient] = dataclass_field(
+    automatic_replies_setting: Optional[
+        AutomaticRepliesSettingClient | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "automaticRepliesSetting"},
@@ -1151,13 +1193,13 @@ class TableMetadata:
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
-    referenced_entities: Optional[ObjectEntity] = dataclass_field(
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "referencedEntities"},
@@ -1176,17 +1218,23 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
+    sort_restrictions: Optional[
+        TableSortRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
+    filter_restrictions: Optional[
+        TableFilterRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
+    select_restrictions: Optional[
+        TableSelectRestrictionsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
@@ -1284,7 +1332,12 @@ class CalendarEventList:
     Definition: CalendarEventList
     """
 
-    value: Optional[List[CalendarEventBackend]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CalendarEventBackend | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of calendar items"""
 
 
@@ -1300,13 +1353,13 @@ class CalendarEventBackend:
         metadata={"wire_name": "Id"},
     )
     """The Event's unique identifier"""
-    attendees: Optional[List[Attendee]] = dataclass_field(
+    attendees: Optional[List[Attendee | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attendees"},
     )
     """List of attendees for the event"""
-    body: Optional[ItemBody] = dataclass_field(
+    body: Optional[ItemBody | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Body"},
@@ -1394,17 +1447,17 @@ class CalendarEventBackend:
         metadata={"wire_name": "IsOrganizer"},
     )
     """Set to true if the message sender is also the organizer"""
-    location: Optional[Location] = dataclass_field(
+    location: Optional[Location | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Location"},
     )
-    organizer: Optional[Recipient] = dataclass_field(
+    organizer: Optional[Recipient | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Organizer"},
     )
-    recurrence: Optional[PatternedRecurrence] = dataclass_field(
+    recurrence: Optional[PatternedRecurrence | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Recurrence"},
@@ -1424,7 +1477,7 @@ class CalendarEventBackend:
     Set to true if the sender would like a response when the event is accepted
     or declined
     """
-    response_status: Optional[ResponseStatus] = dataclass_field(
+    response_status: Optional[ResponseStatus | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResponseStatus"},
@@ -1485,7 +1538,7 @@ class Attendee:
     Definition: Attendee
     """
 
-    status: Optional[ResponseStatus] = dataclass_field(
+    status: Optional[ResponseStatus | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Status"},
@@ -1495,7 +1548,7 @@ class Attendee:
         kw_only=True,
         metadata={"wire_name": "Type"},
     )
-    email_address: Optional[EmailAddress] = dataclass_field(
+    email_address: Optional[EmailAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EmailAddress"},
@@ -1531,12 +1584,12 @@ class Location:
         kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
-    address: Optional[PhysicalAddress] = dataclass_field(
+    address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Address"},
     )
-    coordinates: Optional[GeoCoordinates] = dataclass_field(
+    coordinates: Optional[GeoCoordinates | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Coordinates"},
@@ -1549,7 +1602,7 @@ class Recipient:
     Definition: Recipient
     """
 
-    email_address: Optional[EmailAddress] = dataclass_field(
+    email_address: Optional[EmailAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "EmailAddress"},
@@ -1562,12 +1615,12 @@ class PatternedRecurrence:
     Definition: PatternedRecurrence
     """
 
-    pattern: Optional[RecurrencePattern] = dataclass_field(
+    pattern: Optional[RecurrencePattern | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Pattern"},
     )
-    range: Optional[RecurrenceRange] = dataclass_field(
+    range: Optional[RecurrenceRange | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Range"},
@@ -1720,7 +1773,12 @@ class CalendarEventListClientReceive:
     Definition: CalendarEventListClientReceive
     """
 
-    value: Optional[List[CalendarEventClientReceive]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CalendarEventClientReceive | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of calendar items"""
 
 
@@ -1921,7 +1979,9 @@ class PaginatedListResponseCalendarEventClientReceiveStringEnums:
     Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]
     """
 
-    values: Optional[List[CalendarEventClientReceiveStringEnums]] = dataclass_field(
+    values: Optional[
+        List[CalendarEventClientReceiveStringEnums | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Values"},
@@ -2135,7 +2195,12 @@ class EntityListResponseFilePickerFile:
     Definition: EntityListResponse[FilePickerFile]
     """
 
-    value: Optional[List[FilePickerFile]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[FilePickerFile | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -2212,7 +2277,7 @@ class ClientSendMessage:
     """Specify the subject of the mail"""
     body: str = dataclass_field(metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2354,7 +2419,9 @@ class ClientReceiveMessageStringEnums:
         metadata={"wire_name": "IsRead"},
     )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = dataclass_field(
+    attachments: Optional[
+        List[ClientReceiveFileAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2465,7 +2532,7 @@ class SendEmailInput:
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2532,7 +2599,7 @@ class DraftEmailInput:
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2584,7 +2651,12 @@ class BatchResponseClientReceiveMessage:
     Definition: BatchResponse[ClientReceiveMessage]
     """
 
-    value: Optional[List[ClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ClientReceiveMessage | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -2684,7 +2756,9 @@ class ClientReceiveMessage:
         metadata={"wire_name": "IsRead"},
     )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = dataclass_field(
+    attachments: Optional[
+        List[ClientReceiveFileAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2796,7 +2870,7 @@ class ReplyMessage:
         metadata={"wire_name": "Importance"},
     )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2852,7 +2926,7 @@ class ReplyEmailInput:
         metadata={"wire_name": "Importance"},
     )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -2866,7 +2940,12 @@ class TriggerBatchResponseClientReceiveMessage:
     Definition: TriggerBatchResponse[ClientReceiveMessage]
     """
 
-    value: Optional[List[ClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ClientReceiveMessage | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -2876,7 +2955,12 @@ class BatchResponseSensitivityLabel:
     Definition: BatchResponse[SensitivityLabel]
     """
 
-    value: Optional[List[SensitivityLabel]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SensitivityLabel | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -2904,7 +2988,7 @@ class SensitivityLabel:
         metadata={"wire_name": "ApplicableTo"},
     )
     """Gets or sets the applicable to."""
-    sub_labels: Optional[List[SensitivityLabel]] = dataclass_field(
+    sub_labels: Optional[List[SensitivityLabel | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "SubLabels"},
@@ -2918,7 +3002,12 @@ class TriggerBatchResponseReceiveMessageMetadata:
     Definition: TriggerBatchResponse[ReceiveMessageMetadata]
     """
 
-    value: Optional[List[ReceiveMessageMetadata]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ReceiveMessageMetadata | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of the response objects"""
 
 
@@ -3002,8 +3091,18 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
-    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    tabular: Optional[
+        TabularDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    blob: Optional[
+        BlobDataSetsMetadata | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -3074,7 +3173,7 @@ class OptionsEmailSubscription:
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: MessageWithOptions = dataclass_field(
+    message: MessageWithOptions | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "Message"},
     )
 
@@ -3125,7 +3224,7 @@ class MessageWithOptions:
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -3218,7 +3317,7 @@ class ApprovalEmailSubscription:
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: ApprovalMessage = dataclass_field(
+    message: ApprovalMessage | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "Message"},
     )
 
@@ -3269,7 +3368,7 @@ class ApprovalMessage:
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -3336,7 +3435,7 @@ class SharedMailboxClientSendMessage:
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -3402,7 +3501,7 @@ class SharedMailboxSendEmailInput:
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+    attachments: Optional[List[ClientSendAttachment | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "Attachments"},
@@ -3435,7 +3534,7 @@ class SubscriptionPayloadOutlookReceiveMessage:
     """
 
     value: Optional[
-        List[SubscriptionPayloadEntityOutlookReceiveMessage]
+        List[SubscriptionPayloadEntityOutlookReceiveMessage | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3473,7 +3572,7 @@ class SubscriptionPayloadEntityOutlookReceiveMessage:
         metadata={"wire_name": "Resource"},
     )
     """Resource"""
-    resource_data: Optional[OutlookReceiveMessage] = dataclass_field(
+    resource_data: Optional[OutlookReceiveMessage | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResourceData"},
@@ -3587,7 +3686,7 @@ class SubscriptionPayloadSubscriptionEvent:
     """
 
     value: Optional[
-        List[SubscriptionPayloadEntitySubscriptionEvent]
+        List[SubscriptionPayloadEntitySubscriptionEvent | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3625,7 +3724,7 @@ class SubscriptionPayloadEntitySubscriptionEvent:
         metadata={"wire_name": "Resource"},
     )
     """Resource"""
-    resource_data: Optional[SubscriptionEvent] = dataclass_field(
+    resource_data: Optional[SubscriptionEvent | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ResourceData"},
@@ -3652,7 +3751,12 @@ class EntityListResponseTable:
     Definition: EntityListResponse[Table]
     """
 
-    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Table | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -3674,7 +3778,7 @@ class Table:
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
@@ -3688,7 +3792,12 @@ class EntityListResponseCalendarEventBackend:
     Definition: EntityListResponse[CalendarEventBackend]
     """
 
-    value: Optional[List[CalendarEventBackend]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CalendarEventBackend | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -3699,7 +3808,7 @@ class EntityListResponseCalendarEventClientReceiveStringEnums:
     """
 
     value: Optional[
-        List[CalendarEventClientReceiveStringEnums]
+        List[CalendarEventClientReceiveStringEnums | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -4025,7 +4134,7 @@ class CalendarEventListWithActionType:
     """
 
     value: Optional[
-        List[CalendarEventClientWithActionType]
+        List[CalendarEventClientWithActionType | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -4477,7 +4586,12 @@ class DataSetsList:
     Definition: DataSetsList
     """
 
-    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[DataSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of datasets"""
 
 
@@ -4499,7 +4613,12 @@ class DataSet:
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
+    query: Optional[
+        List[PassThroughNativeQuery | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Pass-through Native Queries"""
 
 
@@ -4581,7 +4700,7 @@ class MailTipsClientReceive:
     Definition: MailTipsClientReceive
     """
 
-    automatic_replies: Optional[MailTipsAutomaticReplies] = dataclass_field(
+    automatic_replies: Optional[MailTipsAutomaticReplies | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "automaticReplies"},
@@ -4817,7 +4936,7 @@ class Contact:
     """The contact's title"""
     generation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddressV2]] = dataclass_field(
+    email_addresses: Optional[List[EmailAddressV2 | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "emailAddresses"},
@@ -4881,17 +5000,17 @@ class Contact:
         metadata={"wire_name": "mobilePhone"},
     )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = dataclass_field(
+    home_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "homeAddress"},
     )
-    business_address: Optional[PhysicalAddress] = dataclass_field(
+    business_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "businessAddress"},
     )
-    other_address: Optional[PhysicalAddress] = dataclass_field(
+    other_address: Optional[PhysicalAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "otherAddress"},
@@ -5079,7 +5198,7 @@ class Office365Client(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -5170,7 +5289,7 @@ class Office365Client(ConnectorClientBase):
 
     def draft_email(
         self,
-        input: DraftEmailInput,
+        input: DraftEmailInput | Mapping[str, Any],
         *,
         message_id: Optional[str] = None,
         draft_type: Optional[str] = None,
@@ -5228,7 +5347,7 @@ class Office365Client(ConnectorClientBase):
 
     def update_draft_email(
         self,
-        input: DraftEmailInput,
+        input: DraftEmailInput | Mapping[str, Any],
         message_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5388,7 +5507,7 @@ class Office365Client(ConnectorClientBase):
 
     def send_mail_with_options(
         self,
-        input: OptionsEmailSubscription,
+        input: OptionsEmailSubscription | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5431,7 +5550,7 @@ class Office365Client(ConnectorClientBase):
 
     def send_approval_mail(
         self,
-        input: ApprovalEmailSubscription,
+        input: ApprovalEmailSubscription | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5566,7 +5685,7 @@ class Office365Client(ConnectorClientBase):
 
     def mcp_emails_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -5612,7 +5731,7 @@ class Office365Client(ConnectorClientBase):
 
     def mcp_meeting_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -5658,7 +5777,7 @@ class Office365Client(ConnectorClientBase):
 
     def mcp_contacts_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -5735,6 +5854,9 @@ class Office365Client(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -5951,7 +6073,7 @@ class Office365Client(ConnectorClientBase):
 
     def calendar_patch_item(
         self,
-        input: GraphCalendarEventClient,
+        input: GraphCalendarEventClient | Mapping[str, Any],
         table: str,
         id: str,
         *,
@@ -5999,7 +6121,7 @@ class Office365Client(ConnectorClientBase):
 
     def calendar_post_item(
         self,
-        input: GraphCalendarEventClient,
+        input: GraphCalendarEventClient | Mapping[str, Any],
         table: str,
         *,
         timeout: Optional[float] = None,
@@ -6076,6 +6198,9 @@ class Office365Client(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -6292,7 +6417,7 @@ class Office365Client(ConnectorClientBase):
 
     def contact_patch_item(
         self,
-        input: Contact,
+        input: Contact | Mapping[str, Any],
         folder: str,
         id: str,
         *,
@@ -6340,7 +6465,7 @@ class Office365Client(ConnectorClientBase):
 
     def contact_post_item(
         self,
-        input: Contact,
+        input: Contact | Mapping[str, Any],
         folder: str,
         *,
         timeout: Optional[float] = None,
@@ -6420,6 +6545,9 @@ class Office365Client(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6481,7 +6609,7 @@ class Office365Client(ConnectorClientBase):
 
     def find_meeting_times(
         self,
-        input: FindMeetingTimesInput,
+        input: FindMeetingTimesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6521,7 +6649,7 @@ class Office365Client(ConnectorClientBase):
 
     def flag(
         self,
-        input: UpdateEmailFlag,
+        input: UpdateEmailFlag | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -6571,7 +6699,7 @@ class Office365Client(ConnectorClientBase):
 
     def forward_email(
         self,
-        input: DirectForwardMessage,
+        input: DirectForwardMessage | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -7026,7 +7154,7 @@ class Office365Client(ConnectorClientBase):
 
     def list_mail_tips(
         self,
-        input: GetMailTipsInput,
+        input: GetMailTipsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7269,7 +7397,7 @@ class Office365Client(ConnectorClientBase):
 
     def mark_as_read(
         self,
-        input: MarkAsReadInput,
+        input: MarkAsReadInput | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -7375,7 +7503,7 @@ class Office365Client(ConnectorClientBase):
 
     def reply_to(
         self,
-        input: ReplyEmailInput,
+        input: ReplyEmailInput | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -7420,7 +7548,7 @@ class Office365Client(ConnectorClientBase):
 
     def respond_to_event(
         self,
-        input: ResponseToEventInvite,
+        input: ResponseToEventInvite | Mapping[str, Any],
         event_id: str,
         response: str,
         *,
@@ -7462,7 +7590,7 @@ class Office365Client(ConnectorClientBase):
 
     def send_email(
         self,
-        input: SendEmailInput,
+        input: SendEmailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7494,7 +7622,7 @@ class Office365Client(ConnectorClientBase):
 
     def set_automatic_replies_setting(
         self,
-        input: SetAutomaticRepliesSettingInput,
+        input: SetAutomaticRepliesSettingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -7533,7 +7661,7 @@ class Office365Client(ConnectorClientBase):
 
     def shared_mailbox_send_email(
         self,
-        input: SharedMailboxSendEmailInput,
+        input: SharedMailboxSendEmailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

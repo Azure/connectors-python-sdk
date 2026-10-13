@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -58,7 +58,7 @@ class VirtualMachineInScaleSet:
     )
     """The instance Id of the virtual machine."""
     properties: Optional[
-        VirtualMachineInScaleSetProperties
+        VirtualMachineInScaleSetProperties | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -75,7 +75,12 @@ class VirtualMachine:
     """The ID of the virtual machine."""
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine."""
-    properties: Optional[VirtualMachineProperties] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[
+        VirtualMachineProperties | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -84,7 +89,12 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Subscription | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The subscriptions."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -100,7 +110,12 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ResourceGroup | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of resource groups."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -116,7 +131,12 @@ class VirtualMachineScaleSetListResult:
     Response for List virtual machine scale sets
     """
 
-    value: Optional[List[VirtualMachineScaleSet]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[VirtualMachineScaleSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of virtual machine scale sets."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -132,7 +152,12 @@ class VirtualMachineInScaleSetListResult:
     Response for List virtual machines in a VM scale set
     """
 
-    value: Optional[List[VirtualMachineInScaleSet]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[VirtualMachineInScaleSet | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of virtual machines in a VM scale set."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -148,7 +173,12 @@ class VirtualMachineListResult:
     Response for List virtual machines
     """
 
-    value: Optional[List[VirtualMachine]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[VirtualMachine | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of virtual machines."""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -227,7 +257,7 @@ class VirtualMachineScaleSet:
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine scale set."""
     properties: Optional[
-        VirtualMachineScaleSetProperties
+        VirtualMachineScaleSetProperties | Mapping[str, Any]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -348,7 +378,7 @@ class AzurevmClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname

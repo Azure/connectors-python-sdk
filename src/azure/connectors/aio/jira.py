@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -191,7 +191,7 @@ class JiraClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -282,21 +282,23 @@ class JiraClient(ConnectorClientBase):
 
         return AsyncItemPaged(get_next, extract_data)
 
-    async def list_issues(
+    def list_issues(
         self,
         *,
         jql: Optional[str] = None,
         fields: Optional[str] = None,
-        next_page_token: Optional[str] = None,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of issues
 
         This operation returns a list of issues using JQL.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
@@ -311,70 +313,104 @@ class JiraClient(ConnectorClientBase):
             if isinstance(fields, bool):
                 value = value.lower()
             query_params.append(f"fields={quote(value, safe='')}")
-        if next_page_token is not None:
-            value = str(next_page_token)
-            if isinstance(next_page_token, bool):
-                value = value.lower()
-            query_params.append(f"nextPageToken={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def list_issues_datacenter(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_issues_datacenter(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get list of issues (Datacenter)
 
         This operation returns a list of issues using JQL.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/datacenter/search"
+        initial_request_url = request_url
+        request_body = None
 
-        response = await self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page.get("issues", []):
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     def list_transitions(
         self,
@@ -440,7 +476,7 @@ class JiraClient(ConnectorClientBase):
 
     async def update_transition(
         self,
-        input: TransitionInput,
+        input: TransitionInput | Mapping[str, Any],
         issue_id_or_key: str,
         *,
         timeout: Optional[float] = None,
@@ -526,7 +562,7 @@ class JiraClient(ConnectorClientBase):
 
     async def mcp_jira_issue_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -572,7 +608,7 @@ class JiraClient(ConnectorClientBase):
 
     async def add_comment(
         self,
-        input: Comment,
+        input: Comment | Mapping[str, Any],
         issue_key: str,
         *,
         timeout: Optional[float] = None,
@@ -654,7 +690,7 @@ class JiraClient(ConnectorClientBase):
 
     async def create_issue(
         self,
-        input: CreateIssueInput,
+        input: CreateIssueInput | Mapping[str, Any],
         project_key: str,
         issue_type_ids: str,
         *,
@@ -704,7 +740,7 @@ class JiraClient(ConnectorClientBase):
 
     async def create_project(
         self,
-        input: CreateProjectInput,
+        input: CreateProjectInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -741,7 +777,7 @@ class JiraClient(ConnectorClientBase):
 
     async def create_project_category(
         self,
-        input: CreateProjectCategoryInput,
+        input: CreateProjectCategoryInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -814,6 +850,9 @@ class JiraClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -824,7 +863,7 @@ class JiraClient(ConnectorClientBase):
 
     async def edit_issue(
         self,
-        input: EditIssueInput,
+        input: EditIssueInput | Mapping[str, Any],
         issue_id_or_key: str,
         *,
         notify_users: Optional[bool] = None,
@@ -1244,6 +1283,9 @@ class JiraClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1254,7 +1296,7 @@ class JiraClient(ConnectorClientBase):
 
     async def update_project(
         self,
-        input: UpdateProjectInput,
+        input: UpdateProjectInput | Mapping[str, Any],
         project_id_or_key: str,
         *,
         timeout: Optional[float] = None,

@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -179,7 +179,7 @@ class MailchimpClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -356,7 +356,7 @@ class MailchimpClient(ConnectorClientBase):
 
     async def newlist(
         self,
-        input: NewListRequest,
+        input: NewListRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -393,7 +393,7 @@ class MailchimpClient(ConnectorClientBase):
 
     async def add_members(
         self,
-        input: NewMembersInListRequest,
+        input: NewMembersInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         skip_merge_validation: Optional[bool] = None,
@@ -504,7 +504,7 @@ class MailchimpClient(ConnectorClientBase):
 
     async def addmember(
         self,
-        input: NewMemberInListRequest,
+        input: NewMemberInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         timeout: Optional[float] = None,
@@ -545,7 +545,7 @@ class MailchimpClient(ConnectorClientBase):
 
     async def newcampaign(
         self,
-        input: NewCampaignRequest,
+        input: NewCampaignRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -611,6 +611,9 @@ class MailchimpClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -621,7 +624,7 @@ class MailchimpClient(ConnectorClientBase):
 
     async def updatemember(
         self,
-        input: UpdateMemberInListRequest,
+        input: UpdateMemberInListRequest | Mapping[str, Any],
         list_id: str,
         *,
         timeout: Optional[float] = None,

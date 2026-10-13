@@ -279,7 +279,7 @@ class TestDeleteEntity:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Entity not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -295,7 +295,7 @@ class TestDeleteEntity:
                     row_key="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeleteTable:
@@ -335,7 +335,7 @@ class TestDeleteTable:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Table not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -349,7 +349,7 @@ class TestDeleteTable:
                     table_name="nonexistent"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetEntities:

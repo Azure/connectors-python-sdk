@@ -190,7 +190,7 @@ class CloudconvertClient(ConnectorClientBase):
 
     def convert_file(
         self,
-        input: ConvertFileInput,
+        input: ConvertFileInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -224,7 +224,7 @@ class CloudconvertClient(ConnectorClientBase):
 
     def optimize_file(
         self,
-        input: OptimizeFileInput,
+        input: OptimizeFileInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -258,7 +258,7 @@ class CloudconvertClient(ConnectorClientBase):
 
     def capture_website(
         self,
-        input: CaptureWebsiteInput,
+        input: CaptureWebsiteInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -294,7 +294,7 @@ class CloudconvertClient(ConnectorClientBase):
 
     def merge_files(
         self,
-        input: MergeFilesInput,
+        input: MergeFilesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

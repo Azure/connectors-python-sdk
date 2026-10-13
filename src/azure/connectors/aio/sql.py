@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -215,7 +215,7 @@ class SqlClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -286,6 +286,9 @@ class SqlClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -296,7 +299,7 @@ class SqlClient(ConnectorClientBase):
 
     async def execute_pass_through_native_query(
         self,
-        input: SqlPassThroughNativeQueryBody,
+        input: SqlPassThroughNativeQueryBody | Mapping[str, Any],
         server: str,
         database: str,
         *,
@@ -345,7 +348,7 @@ class SqlClient(ConnectorClientBase):
 
     async def execute_procedure(
         self,
-        input: ExecuteProcedureInput,
+        input: ExecuteProcedureInput | Mapping[str, Any],
         server: str,
         database: str,
         procedure: str,
@@ -643,7 +646,7 @@ class SqlClient(ConnectorClientBase):
 
     async def patch_item(
         self,
-        input: PatchItemInput,
+        input: PatchItemInput | Mapping[str, Any],
         server: str,
         database: str,
         table: str,
@@ -696,7 +699,7 @@ class SqlClient(ConnectorClientBase):
 
     async def post_item(
         self,
-        input: PostItemInput,
+        input: PostItemInput | Mapping[str, Any],
         server: str,
         database: str,
         table: str,
@@ -944,7 +947,7 @@ class SqlClient(ConnectorClientBase):
 
     async def get_pass_through_native_query_metadata(
         self,
-        input: SqlPassThroughNativeQueryBody,
+        input: SqlPassThroughNativeQueryBody | Mapping[str, Any],
         server: str,
         database: str,
         *,

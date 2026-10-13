@@ -920,11 +920,11 @@ class TestResourceGroupsDeleteAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, arm_client):
-        """Test 404 Not Found raises ConnectorException."""
+    async def test_server_error_raises_exception(self, arm_client):
+        """Test a server error raises ConnectorException."""
         mock_response = MockResponse(
-            status=404,
-            text='{"error": {"code": "NotFound", "message": "Resource group not found"}}'
+            status=500,
+            text='{"error": {"code": "ServerError", "message": "Request failed"}}'
         )
 
         with patch.object(
@@ -939,7 +939,7 @@ class TestResourceGroupsDeleteAsync:
                     resource_group_name="rg-1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestDeploymentsGetAsync:
@@ -1254,11 +1254,11 @@ class TestResourcesDeleteByIdAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_error_not_found(self, arm_client):
-        """Test 404 Not Found raises ConnectorException."""
+    async def test_server_error_raises_exception(self, arm_client):
+        """Test a server error raises ConnectorException."""
         mock_response = MockResponse(
-            status=404,
-            text='{"error": {"code": "NotFound", "message": "Resource not found"}}'
+            status=500,
+            text='{"error": {"code": "ServerError", "message": "Request failed"}}'
         )
 
         with patch.object(
@@ -1276,4 +1276,4 @@ class TestResourcesDeleteByIdAsync:
                     short_resource_id="virtualMachines/vm-1"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500

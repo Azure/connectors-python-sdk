@@ -167,7 +167,7 @@ class TestDeleteMessage:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "Message not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -183,7 +183,7 @@ class TestDeleteMessage:
                     popreceipt="receipt-abc"
                 )
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetMessages:

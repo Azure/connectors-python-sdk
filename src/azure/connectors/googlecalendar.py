@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -44,7 +44,12 @@ class CalendarList:
     Response for List calendars
     """
 
-    items: Optional[List[CalendarListEntry]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[CalendarListEntry | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Calendars in the list."""
 
 
@@ -54,7 +59,12 @@ class CalendarEventList:
     Response for List the events on a calendar
     """
 
-    items: Optional[List[ResponseEvent]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[ResponseEvent | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Events in the calendar."""
 
 
@@ -127,7 +137,12 @@ class CalendarEventChangedList:
     Response for When an event is added, updated or deleted from a calendar
     """
 
-    items: Optional[List[ResponseEventWithActionType]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[ResponseEventWithActionType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Changed events in the calendar."""
 
 
@@ -343,7 +358,7 @@ class GooglecalendarClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -526,7 +541,7 @@ class GooglecalendarClient(ConnectorClientBase):
 
     def create_event(
         self,
-        input: RequestEvent,
+        input: RequestEvent | Mapping[str, Any],
         calendar_id: str,
         *,
         timeout: Optional[float] = None,
@@ -641,6 +656,9 @@ class GooglecalendarClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -656,7 +674,7 @@ class GooglecalendarClient(ConnectorClientBase):
 
     def update_event(
         self,
-        input: PatchEvent,
+        input: PatchEvent | Mapping[str, Any],
         calendar_id: str,
         event_id: str,
         *,

@@ -57,7 +57,7 @@ async def example_2_list_issues(cloud_id: str) -> None:
         async with JiraClient(CONNECTION_RUNTIME_URL, credential) as client:
             del cloud_id
 
-            issues_response = await client.list_issues()
+            issues_response = [item async for item in client.list_issues()]
 
             issues = issues_response
             print(f"Found {len(issues)} issues")

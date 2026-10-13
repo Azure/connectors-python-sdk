@@ -166,7 +166,7 @@ class TestGetFileMetadata:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -177,7 +177,7 @@ class TestGetFileMetadata:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.get_file_metadata(id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestGetFileContent:
@@ -464,7 +464,7 @@ class TestDeleteFile:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=404, text='{"error": "File not found"}')
+        mock_response = MockResponse(status=500, text='{"error": "Server error"}')
 
         with patch.object(
             client._http_client,
@@ -475,7 +475,7 @@ class TestDeleteFile:
             with pytest.raises(ConnectorException) as exc_info:
                 await client.delete_file(id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestCopyFile:

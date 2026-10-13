@@ -691,7 +691,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def receipt_create_shipment(
         self,
-        input: ReceiptCreateShipmentInput,
+        input: ReceiptCreateShipmentInput | Mapping[str, Any],
         shop_id: int,
         receipt_id: int,
         *,
@@ -1087,7 +1087,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_create_profile(
         self,
-        input: ShippingCreateProfileInput,
+        input: ShippingCreateProfileInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1199,6 +1199,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1214,7 +1217,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_update_profile(
         self,
-        input: ShippingUpdateProfileInput,
+        input: ShippingUpdateProfileInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -1320,7 +1323,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_create_destination(
         self,
-        input: ShippingCreateDestinationInput,
+        input: ShippingCreateDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -1412,6 +1415,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1422,7 +1428,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_update_profile_destination(
         self,
-        input: ShippingUpdateProfileDestinationInput,
+        input: ShippingUpdateProfileDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: str,
         shipping_profile_destination_id: str,
@@ -1517,7 +1523,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_create_upgrade(
         self,
-        input: ShippingCreateUpgradeInput,
+        input: ShippingCreateUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -1597,6 +1603,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1607,7 +1616,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shipping_update_profile_upgrade(
         self,
-        input: ShippingUpdateProfileUpgradeInput,
+        input: ShippingUpdateProfileUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         upgrade_id: int,
@@ -1656,7 +1665,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shop_update(
         self,
-        input: ShopUpdateInput,
+        input: ShopUpdateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1835,7 +1844,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def shop_create_section(
         self,
-        input: ShopCreateSectionInput,
+        input: ShopCreateSectionInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2206,7 +2215,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_create(
         self,
-        input: ListingCreateInput,
+        input: ListingCreateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2318,6 +2327,9 @@ class EtsyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2623,6 +2635,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2633,7 +2648,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_update_property(
         self,
-        input: ListingUpdatePropertyInput,
+        input: ListingUpdatePropertyInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         property_id: int,
@@ -2774,7 +2789,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_update(
         self,
-        input: ListingUpdateInput,
+        input: ListingUpdateInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -3035,6 +3050,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3091,7 +3109,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_upload(
         self,
-        input: ListingUploadInput,
+        input: ListingUploadInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -3224,6 +3242,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3280,7 +3301,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_upload_image(
         self,
-        input: ListingUploadImageInput,
+        input: ListingUploadImageInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -3384,7 +3405,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_update_inventory(
         self,
-        input: ListingUpdateInventoryInput,
+        input: ListingUpdateInventoryInput | Mapping[str, Any],
         listing_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3568,7 +3589,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_create_translation(
         self,
-        input: ListingCreateTranslationInput,
+        input: ListingCreateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -3616,7 +3637,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_update_translation(
         self,
-        input: ListingUpdateTranslationInput,
+        input: ListingUpdateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -3709,7 +3730,7 @@ class EtsyClient(ConnectorClientBase):
 
     async def listing_update_variation(
         self,
-        input: ListingUpdateVariationInput,
+        input: ListingUpdateVariationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,

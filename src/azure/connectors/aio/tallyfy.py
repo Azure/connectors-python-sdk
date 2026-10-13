@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -319,7 +319,7 @@ class TallyfyClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -437,7 +437,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def invite_user_to_organization(
         self,
-        input: InviteUserToOrganizationInput,
+        input: InviteUserToOrganizationInput | Mapping[str, Any],
         org: str,
         *,
         timeout: Optional[float] = None,
@@ -478,7 +478,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def create_run(
         self,
-        input: CreateRunInput,
+        input: CreateRunInput | Mapping[str, Any],
         org: str,
         *,
         timeout: Optional[float] = None,
@@ -519,7 +519,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def completed_one_off_task(
         self,
-        input: CompletedOneOffTaskInput,
+        input: CompletedOneOffTaskInput | Mapping[str, Any],
         org: str,
         *,
         timeout: Optional[float] = None,
@@ -589,6 +589,9 @@ class TallyfyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -604,7 +607,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def completed_process_task(
         self,
-        input: CompletedProcessTaskInput,
+        input: CompletedProcessTaskInput | Mapping[str, Any],
         org: str,
         run: str,
         *,
@@ -697,7 +700,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def comment_task(
         self,
-        input: CommentTaskInput,
+        input: CommentTaskInput | Mapping[str, Any],
         org: str,
         task: str,
         *,
@@ -743,7 +746,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def create_task(
         self,
-        input: CreateTaskInput,
+        input: CreateTaskInput | Mapping[str, Any],
         org: str,
         *,
         timeout: Optional[float] = None,
@@ -788,7 +791,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def edit_task_deadline(
         self,
-        input: EditTaskDeadlineInput,
+        input: EditTaskDeadlineInput | Mapping[str, Any],
         org: str,
         task: str,
         *,
@@ -934,7 +937,7 @@ class TallyfyClient(ConnectorClientBase):
 
     async def edit_step_type(
         self,
-        input: EditStepTypeInput,
+        input: EditStepTypeInput | Mapping[str, Any],
         org: str,
         blueprint: str,
         step: str,

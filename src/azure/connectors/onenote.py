@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -117,7 +117,7 @@ class Page:
 
     title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the page."""
-    links: Optional[Link] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Link | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     content_url: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -189,7 +189,12 @@ class GetSectionsInNotebookResponse:
     Response for Get sections in notebook
     """
 
-    value: Optional[List[SectionListItem]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SectionListItem | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -198,7 +203,12 @@ class NewSectionResponse:
     Response for When a new section is created
     """
 
-    value: Optional[List[SectionResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SectionResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific section."""
 
 
@@ -208,7 +218,12 @@ class NewSectionGroupResponse:
     Response for When a new section group is created
     """
 
-    value: Optional[List[SectionGroupResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SectionGroupResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific section group."""
 
 
@@ -218,7 +233,12 @@ class NewPageResponse:
     Response for When a new page is created in a section
     """
 
-    value: Optional[List[Page]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Page | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """An array of objects, each representing a specific page."""
 
 
@@ -271,10 +291,10 @@ class Link:
     Definition: Link
     """
 
-    one_note_client_url: OneNoteClientUrl = dataclass_field(
+    one_note_client_url: OneNoteClientUrl | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "oneNoteClientUrl"},
     )
-    one_note_web_url: OneNoteWebUrl = dataclass_field(
+    one_note_web_url: OneNoteWebUrl | Mapping[str, Any] = dataclass_field(
         metadata={"wire_name": "oneNoteWebUrl"},
     )
 
@@ -363,7 +383,7 @@ class SectionResponse:
         metadata={"wire_name": "pagesUrl"},
     )
     """Url to the pages in this section."""
-    parent_notebook: Optional[ParentNotebook] = dataclass_field(
+    parent_notebook: Optional[ParentNotebook | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "parentNotebook"},
@@ -488,7 +508,7 @@ class OnenoteClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -522,7 +542,7 @@ class OnenoteClient(ConnectorClientBase):
 
     def create_section_in_notebook(
         self,
-        input: CreateSectionRequest,
+        input: CreateSectionRequest | Mapping[str, Any],
         notebook_key: str,
         *,
         timeout: Optional[float] = None,
@@ -770,6 +790,9 @@ class OnenoteClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(

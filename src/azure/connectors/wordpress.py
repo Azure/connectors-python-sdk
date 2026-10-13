@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -48,7 +48,12 @@ class ListPostsResponse:
     Response for When a post is created
     """
 
-    posts: Optional[List[PostResponse]] = dataclass_field(default=None, kw_only=True)
+    posts: Optional[
+        List[PostResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Posts"""
 
 
@@ -151,7 +156,12 @@ class SiteList:
     Response for List sites
     """
 
-    sites: Optional[List[Site]] = dataclass_field(default=None, kw_only=True)
+    sites: Optional[
+        List[Site | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of sites"""
 
 
@@ -357,7 +367,7 @@ class WordpressClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -479,7 +489,7 @@ class WordpressClient(ConnectorClientBase):
 
     def create(
         self,
-        input: CreatePostModel,
+        input: CreatePostModel | Mapping[str, Any],
         site_id: str,
         *,
         timeout: Optional[float] = None,

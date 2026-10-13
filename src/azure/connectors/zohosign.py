@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -229,7 +229,7 @@ class ZohosignClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -263,7 +263,7 @@ class ZohosignClient(ConnectorClientBase):
 
     def invoke_api(
         self,
-        input: InvokeAPIInput,
+        input: InvokeAPIInput | Mapping[str, Any],
         url: str,
         method: str,
         *,
@@ -614,7 +614,7 @@ class ZohosignClient(ConnectorClientBase):
 
     def update_document(
         self,
-        input: UpdateDocumentInput,
+        input: UpdateDocumentInput | Mapping[str, Any],
         request_id: str,
         *,
         timeout: Optional[float] = None,

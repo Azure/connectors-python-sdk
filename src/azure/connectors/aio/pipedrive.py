@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -139,7 +139,7 @@ class PipedriveClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -213,7 +213,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def update_deal_status(
         self,
-        input: UpdateDealStatusRequest,
+        input: UpdateDealStatusRequest | Mapping[str, Any],
         deal_id: int,
         *,
         timeout: Optional[float] = None,
@@ -255,7 +255,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def add_activity(
         self,
-        input: AddActivityRequest,
+        input: AddActivityRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -333,7 +333,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def add_deal(
         self,
-        input: AddDealRequest,
+        input: AddDealRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -370,7 +370,7 @@ class PipedriveClient(ConnectorClientBase):
 
     async def update_deal_stage(
         self,
-        input: UpdateDealStageRequest,
+        input: UpdateDealStageRequest | Mapping[str, Any],
         deal_id: int,
         *,
         timeout: Optional[float] = None,

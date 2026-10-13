@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core import MatchConditions
@@ -366,7 +366,12 @@ class GetAllAssociatedTeamsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AssociatedTeamInfo]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[AssociatedTeamInfo | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of the teams you are associated with"""
 
 
@@ -381,7 +386,12 @@ class GetChannelsForGroupResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[GetChannelResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GetChannelResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of one or more channels for a specific team"""
 
 
@@ -535,7 +545,12 @@ class GetAllChannelsForTeamResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ChannelWithOwnerTeamId]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ChannelWithOwnerTeamId | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of one or more channels for a specific team"""
 
 
@@ -631,7 +646,7 @@ class ListMembersResponseSchema:
     """List members response"""
 
 
-ChatMessageList = List["ChatMessage"]
+ChatMessageList = List["ChatMessage | Mapping[str, Any]"]
 
 
 @dataclass
@@ -681,27 +696,27 @@ class GetTeamResponse:
         metadata={"wire_name": "isArchived"},
     )
     """Whether this team is in read-only mode"""
-    member_settings: Optional[MemberSettings] = dataclass_field(
+    member_settings: Optional[MemberSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "memberSettings"},
     )
-    guest_settings: Optional[GuestSettings] = dataclass_field(
+    guest_settings: Optional[GuestSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "guestSettings"},
     )
-    messaging_settings: Optional[MessagingSettings] = dataclass_field(
+    messaging_settings: Optional[MessagingSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "messagingSettings"},
     )
-    fun_settings: Optional[FunSettings] = dataclass_field(
+    fun_settings: Optional[FunSettings | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "funSettings"},
     )
-    discovery_settings: Optional[DiscoverySettings] = dataclass_field(
+    discovery_settings: Optional[DiscoverySettings | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "discoverySettings"},
@@ -1042,7 +1057,12 @@ class CallTranscriptCollectionResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallTranscriptResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CallTranscriptResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of transcripts"""
 
 
@@ -1097,7 +1117,12 @@ class CallRecordingCollectionResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallRecordingResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[CallRecordingResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recordings"""
 
 
@@ -1161,7 +1186,12 @@ class ListSectionsResponse:
     Version identifier for the sections hierarchy. Pass as If-Match on Create,
     Update, Delete, Add Item, Remove Item, and Move Item operations.
     """
-    value: Optional[List[SectionResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SectionResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of sections"""
 
 
@@ -1303,7 +1333,12 @@ class ListSectionItemsResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SectionItemResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[SectionItemResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of section items"""
 
 
@@ -1492,7 +1527,12 @@ class AiInsightCollectionResponse:
         kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AiInsightResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[AiInsightResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of AI insights"""
 
 
@@ -1543,7 +1583,7 @@ class AiInsightDetailResponse:
     the underlying callAiInsight resource returned by the fetch. Present when
     the underlying resource provides it; otherwise absent.
     """
-    meeting_notes: Optional[List[AiInsightMeetingNote]] = dataclass_field(
+    meeting_notes: Optional[List[AiInsightMeetingNote | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "meetingNotes"},
@@ -1552,13 +1592,18 @@ class AiInsightDetailResponse:
     Detailed notes of the meeting discussion generated by Microsoft Teams
     Copilot.
     """
-    action_items: Optional[List[AiInsightActionItem]] = dataclass_field(
+    action_items: Optional[List[AiInsightActionItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "actionItems"},
     )
     """Action items generated from the meeting conversation."""
-    viewpoint: Optional[AiInsightViewpoint] = dataclass_field(default=None, kw_only=True)
+    viewpoint: Optional[
+        AiInsightViewpoint | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -1577,7 +1622,7 @@ class GetMessageDetailsSchema:
     Response for Get message details response schema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1586,7 +1631,7 @@ class ListMembersSchema:
     Response for List members input schema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1595,7 +1640,7 @@ class PostFeedSchema:
     Response for Get feed notification input metadata
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1604,7 +1649,7 @@ class UnifiedActionSchema:
     Response for Get unified action input metadata
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1615,7 +1660,7 @@ class ConnectorMetadata:
 
     metadatatype: Optional[str] = dataclass_field(default=None, kw_only=True)
     activitytype: Optional[str] = dataclass_field(default=None, kw_only=True)
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1624,7 +1669,7 @@ class WebhookTriggerSchema:
     Response for Input schema for webhook trigger
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1633,7 +1678,7 @@ class DynamicResponseSchema:
     Response for Get response schema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 GetFlowContinuationSubscriptionWithPosterOutputMetadataInput = str
@@ -1658,7 +1703,7 @@ class PostMessageSchema:
     Definition: PostMessageSchema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1667,7 +1712,7 @@ class PostCardSchema:
     Definition: PostCardSchema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1676,7 +1721,7 @@ class PostCardAndWaitSchema:
     Definition: PostCardAndWaitSchema
     """
 
-    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2118,7 +2163,7 @@ class TranscriptWebhookResponseSchema:
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = dataclass_field(
+    meeting_organizer: Optional[TeamsIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
@@ -2203,7 +2248,7 @@ class RecordingWebhookResponseSchema:
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = dataclass_field(
+    meeting_organizer: Optional[TeamsIdentitySet | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
@@ -2846,17 +2891,17 @@ class OpenShiftResponse:
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = dataclass_field(
+    last_modified_by: Optional[LastModifiedBy | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = dataclass_field(
+    shared_open_shift: Optional[SharedOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = dataclass_field(
+    draft_open_shift: Optional[DraftOpenShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
@@ -2969,17 +3014,17 @@ class ShiftResponse:
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = dataclass_field(
+    last_modified_by: Optional[LastModifiedBy | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_shift: Optional[SharedShift] = dataclass_field(
+    shared_shift: Optional[SharedShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = dataclass_field(
+    draft_shift: Optional[DraftShift | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "draftShift"},
@@ -3440,12 +3485,12 @@ class SelectedMessageTriggerMetadata:
     Definition: SelectedMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = dataclass_field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CardOutputs"},
@@ -3458,12 +3503,12 @@ class ComposeMessageTriggerMetadata:
     Definition: ComposeMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = dataclass_field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CardOutputs"},
@@ -3476,12 +3521,12 @@ class CardResponseTriggerMetadata:
     Definition: CardResponseTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
+    teams_flow_run_context: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = dataclass_field(
+    card_outputs: Optional[ObjectEntity | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "CardOutputs"},
@@ -3750,7 +3795,7 @@ class AiInsightMeetingNote:
     text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary text of the meeting note."""
     subpoints: Optional[
-        List[AiInsightMeetingNoteSubpoint]
+        List[AiInsightMeetingNoteSubpoint | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -3794,7 +3839,9 @@ class AiInsightViewpoint:
     Definition: AiInsightViewpoint
     """
 
-    mention_events: Optional[List[AiInsightMentionEvent]] = dataclass_field(
+    mention_events: Optional[
+        List[AiInsightMentionEvent | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "mentionEvents"},
@@ -3936,7 +3983,7 @@ class TeamsClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -3970,7 +4017,7 @@ class TeamsClient(ConnectorClientBase):
 
     def create_teams_meeting(
         self,
-        input: NewMeeting,
+        input: NewMeeting | Mapping[str, Any],
         calendarid: str,
         *,
         timeout: Optional[float] = None,
@@ -4142,7 +4189,7 @@ class TeamsClient(ConnectorClientBase):
 
     def create_channel(
         self,
-        input: CreateChannelInput,
+        input: CreateChannelInput | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -4228,7 +4275,7 @@ class TeamsClient(ConnectorClientBase):
 
     def update_channel_properties(
         self,
-        input: UpdateChannelPropertiesInput,
+        input: UpdateChannelPropertiesInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -4272,7 +4319,7 @@ class TeamsClient(ConnectorClientBase):
 
     def archive_channel(
         self,
-        input: ArchiveChannelInput,
+        input: ArchiveChannelInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -4427,7 +4474,7 @@ class TeamsClient(ConnectorClientBase):
 
     def post_feed_notification(
         self,
-        input: DynamicPostFeedNotificationRequest,
+        input: DynamicPostFeedNotificationRequest | Mapping[str, Any],
         poster: str,
         notification_type: str,
         *,
@@ -4591,7 +4638,7 @@ class TeamsClient(ConnectorClientBase):
 
     def get_message_details(
         self,
-        input: DynamicGetMessageDetailsSchema,
+        input: DynamicGetMessageDetailsSchema | Mapping[str, Any],
         message_id: str,
         thread_type: str,
         *,
@@ -4719,7 +4766,7 @@ class TeamsClient(ConnectorClientBase):
 
     def list_members(
         self,
-        input: DynamicListMembersSchema,
+        input: DynamicListMembersSchema | Mapping[str, Any],
         thread_type: str,
         *,
         filter: Optional[str] = None,
@@ -4794,7 +4841,7 @@ class TeamsClient(ConnectorClientBase):
 
     def subscribe_user_message_with_options(
         self,
-        input: DynamicUserMessageWithOptionsSubscriptionRequest,
+        input: DynamicUserMessageWithOptionsSubscriptionRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -4917,7 +4964,7 @@ class TeamsClient(ConnectorClientBase):
 
     def create_chat(
         self,
-        input: NewChat,
+        input: NewChat | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5042,7 +5089,7 @@ class TeamsClient(ConnectorClientBase):
 
     def post_message_to_self(
         self,
-        input: PostMessageToSelfRequest,
+        input: PostMessageToSelfRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5082,7 +5129,7 @@ class TeamsClient(ConnectorClientBase):
 
     def create_a_team(
         self,
-        input: CreateATeamInput,
+        input: CreateATeamInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -5195,7 +5242,7 @@ class TeamsClient(ConnectorClientBase):
 
     def add_member_to_team(
         self,
-        input: AddMemberToTeamInput,
+        input: AddMemberToTeamInput | Mapping[str, Any],
         team_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5261,6 +5308,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5271,7 +5321,7 @@ class TeamsClient(ConnectorClientBase):
 
     def add_member_to_channel(
         self,
-        input: AddMemberToChannelInput,
+        input: AddMemberToChannelInput | Mapping[str, Any],
         group_id: str,
         channel_id: str,
         *,
@@ -5348,6 +5398,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5358,7 +5411,7 @@ class TeamsClient(ConnectorClientBase):
 
     def post_message_to_conversation(
         self,
-        input: DynamicPostMessageRequest,
+        input: DynamicPostMessageRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5407,7 +5460,7 @@ class TeamsClient(ConnectorClientBase):
 
     def reply_with_message_to_conversation(
         self,
-        input: DynamicReplyMessageRequest,
+        input: DynamicReplyMessageRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5456,7 +5509,7 @@ class TeamsClient(ConnectorClientBase):
 
     def post_card_to_conversation(
         self,
-        input: DynamicPostCardRequest,
+        input: DynamicPostCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5505,7 +5558,7 @@ class TeamsClient(ConnectorClientBase):
 
     def post_card_and_wait_for_response(
         self,
-        input: PostCardAndWaitForResponseInput,
+        input: PostCardAndWaitForResponseInput | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5556,7 +5609,7 @@ class TeamsClient(ConnectorClientBase):
 
     def reply_with_card_to_conversation(
         self,
-        input: DynamicReplyCardRequest,
+        input: DynamicReplyCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5605,7 +5658,7 @@ class TeamsClient(ConnectorClientBase):
 
     def update_card_in_conversation(
         self,
-        input: DynamicUpdateCardRequest,
+        input: DynamicUpdateCardRequest | Mapping[str, Any],
         poster: str,
         location: str,
         *,
@@ -5698,7 +5751,7 @@ class TeamsClient(ConnectorClientBase):
 
     def add_member_to_chat(
         self,
-        input: AddMemberToChatInput,
+        input: AddMemberToChatInput | Mapping[str, Any],
         chat_id: str,
         *,
         timeout: Optional[float] = None,
@@ -5764,6 +5817,9 @@ class TeamsClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -5833,11 +5889,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List meeting transcripts
 
         Lists all transcripts for an online meeting
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5847,27 +5906,45 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/transcripts"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_meeting_transcript(
         self,
@@ -5970,11 +6047,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List meeting recordings
 
         Lists all recordings for an online meeting
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5984,27 +6064,45 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/recordings"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_meeting_recording(
         self,
@@ -6103,40 +6201,61 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List sections
 
         Lists the current user's teamwork sections
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_section(
         self,
-        input: CreateSectionInput,
+        input: CreateSectionInput | Mapping[str, Any],
         *,
         etag: Optional[str] = None,
         match_condition: Optional[MatchConditions] = None,
@@ -6224,7 +6343,7 @@ class TeamsClient(ConnectorClientBase):
 
     def update_section(
         self,
-        input: UpdateSectionInput,
+        input: UpdateSectionInput | Mapping[str, Any],
         section_id: str,
         *,
         etag: Optional[str] = None,
@@ -6308,6 +6427,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6324,12 +6446,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List section items
 
         Lists the items (chats, channels, meetings, communities) in a teamwork
         section. Each item belongs to exactly one section at a time.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6340,31 +6465,49 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(section_id), safe='')}"
             f"/items"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def add_section_item(
         self,
-        input: AddSectionItemInput,
+        input: AddSectionItemInput | Mapping[str, Any],
         section_id: str,
         *,
         etag: Optional[str] = None,
@@ -6464,6 +6607,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6474,7 +6620,7 @@ class TeamsClient(ConnectorClientBase):
 
     def move_section_item(
         self,
-        input: MoveSectionItemInput,
+        input: MoveSectionItemInput | Mapping[str, Any],
         section_id: str,
         section_item_id: str,
         *,
@@ -6575,7 +6721,7 @@ class TeamsClient(ConnectorClientBase):
 
     def create_tag(
         self,
-        input: CreateTagInput,
+        input: CreateTagInput | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -6661,7 +6807,7 @@ class TeamsClient(ConnectorClientBase):
 
     def update_tag(
         self,
-        input: UpdateTagInput,
+        input: UpdateTagInput | Mapping[str, Any],
         group_id: str,
         tag_id: str,
         *,
@@ -6737,6 +6883,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6747,7 +6896,7 @@ class TeamsClient(ConnectorClientBase):
 
     def add_member_to_tag(
         self,
-        input: AddMemberToTagInput,
+        input: AddMemberToTagInput | Mapping[str, Any],
         group_id: str,
         tag_id: str,
         *,
@@ -6894,6 +7043,9 @@ class TeamsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6910,37 +7062,58 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List call recordings
 
         Lists all recordings for an ad-hoc call
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/recordings"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_call_recording(
         self,
@@ -7040,37 +7213,58 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List call transcripts
 
         Lists all transcripts for an ad-hoc call
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/me/adhocCalls/{quote(str(call_id), safe='')}/transcripts"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_call_transcript(
         self,
@@ -7317,12 +7511,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List AI insights
 
         Lists AI-generated insights for an online meeting. Requires Microsoft
         365 Copilot license.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7333,27 +7530,45 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(meeting_id), safe='')}"
             f"/aiInsights"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_ai_insight(
         self,

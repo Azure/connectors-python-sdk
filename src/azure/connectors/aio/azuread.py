@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -133,7 +133,7 @@ class AzureadClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -167,7 +167,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def create_office365_group(
         self,
-        input: CreateOffice365GroupInput,
+        input: CreateOffice365GroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -204,7 +204,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def create_security_group(
         self,
-        input: CreateSecurityGroupInput,
+        input: CreateSecurityGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -323,7 +323,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def update_user(
         self,
-        input: UpdateUserRequest,
+        input: UpdateUserRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -394,7 +394,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def create_user(
         self,
-        input: CreateUserRequest,
+        input: CreateUserRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -541,6 +541,9 @@ class AzureadClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -551,7 +554,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def add_user_to_group(
         self,
-        input: GetGroupRequest,
+        input: GetGroupRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -587,7 +590,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def assign_manager(
         self,
-        input: AssignManagerRequest,
+        input: AssignManagerRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -623,7 +626,7 @@ class AzureadClient(ConnectorClientBase):
 
     async def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -660,7 +663,7 @@ class AzureadClient(ConnectorClientBase):
 
     def list_check_member_groups(
         self,
-        input: CheckMemberGroupsRequest,
+        input: CheckMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -723,7 +726,7 @@ class AzureadClient(ConnectorClientBase):
 
     def list_member_groups(
         self,
-        input: GetMemberGroupsRequest,
+        input: GetMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,

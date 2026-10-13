@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -339,7 +339,7 @@ class Office365Client(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -430,7 +430,7 @@ class Office365Client(ConnectorClientBase):
 
     async def draft_email(
         self,
-        input: DraftEmailInput,
+        input: DraftEmailInput | Mapping[str, Any],
         *,
         message_id: Optional[str] = None,
         draft_type: Optional[str] = None,
@@ -488,7 +488,7 @@ class Office365Client(ConnectorClientBase):
 
     async def update_draft_email(
         self,
-        input: DraftEmailInput,
+        input: DraftEmailInput | Mapping[str, Any],
         message_id: str,
         *,
         timeout: Optional[float] = None,
@@ -648,7 +648,7 @@ class Office365Client(ConnectorClientBase):
 
     async def send_mail_with_options(
         self,
-        input: OptionsEmailSubscription,
+        input: OptionsEmailSubscription | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -691,7 +691,7 @@ class Office365Client(ConnectorClientBase):
 
     async def send_approval_mail(
         self,
-        input: ApprovalEmailSubscription,
+        input: ApprovalEmailSubscription | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -826,7 +826,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_emails_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -872,7 +872,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_meeting_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -918,7 +918,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mcp_contacts_management(
         self,
-        input: MCPQueryRequest,
+        input: MCPQueryRequest | Mapping[str, Any],
         *,
         session_id: Optional[str] = None,
         timeout: Optional[float] = None,
@@ -995,6 +995,9 @@ class Office365Client(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1211,7 +1214,7 @@ class Office365Client(ConnectorClientBase):
 
     async def calendar_patch_item(
         self,
-        input: GraphCalendarEventClient,
+        input: GraphCalendarEventClient | Mapping[str, Any],
         table: str,
         id: str,
         *,
@@ -1259,7 +1262,7 @@ class Office365Client(ConnectorClientBase):
 
     async def calendar_post_item(
         self,
-        input: GraphCalendarEventClient,
+        input: GraphCalendarEventClient | Mapping[str, Any],
         table: str,
         *,
         timeout: Optional[float] = None,
@@ -1336,6 +1339,9 @@ class Office365Client(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1552,7 +1558,7 @@ class Office365Client(ConnectorClientBase):
 
     async def contact_patch_item(
         self,
-        input: Contact,
+        input: Contact | Mapping[str, Any],
         folder: str,
         id: str,
         *,
@@ -1600,7 +1606,7 @@ class Office365Client(ConnectorClientBase):
 
     async def contact_post_item(
         self,
-        input: Contact,
+        input: Contact | Mapping[str, Any],
         folder: str,
         *,
         timeout: Optional[float] = None,
@@ -1680,6 +1686,9 @@ class Office365Client(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1741,7 +1750,7 @@ class Office365Client(ConnectorClientBase):
 
     async def find_meeting_times(
         self,
-        input: FindMeetingTimesInput,
+        input: FindMeetingTimesInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1781,7 +1790,7 @@ class Office365Client(ConnectorClientBase):
 
     async def flag(
         self,
-        input: UpdateEmailFlag,
+        input: UpdateEmailFlag | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -1831,7 +1840,7 @@ class Office365Client(ConnectorClientBase):
 
     async def forward_email(
         self,
-        input: DirectForwardMessage,
+        input: DirectForwardMessage | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -2286,7 +2295,7 @@ class Office365Client(ConnectorClientBase):
 
     def list_mail_tips(
         self,
-        input: GetMailTipsInput,
+        input: GetMailTipsInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2529,7 +2538,7 @@ class Office365Client(ConnectorClientBase):
 
     async def mark_as_read(
         self,
-        input: MarkAsReadInput,
+        input: MarkAsReadInput | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -2635,7 +2644,7 @@ class Office365Client(ConnectorClientBase):
 
     async def reply_to(
         self,
-        input: ReplyEmailInput,
+        input: ReplyEmailInput | Mapping[str, Any],
         message_id: str,
         *,
         mailbox_address: Optional[str] = None,
@@ -2680,7 +2689,7 @@ class Office365Client(ConnectorClientBase):
 
     async def respond_to_event(
         self,
-        input: ResponseToEventInvite,
+        input: ResponseToEventInvite | Mapping[str, Any],
         event_id: str,
         response: str,
         *,
@@ -2722,7 +2731,7 @@ class Office365Client(ConnectorClientBase):
 
     async def send_email(
         self,
-        input: SendEmailInput,
+        input: SendEmailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2754,7 +2763,7 @@ class Office365Client(ConnectorClientBase):
 
     async def set_automatic_replies_setting(
         self,
-        input: SetAutomaticRepliesSettingInput,
+        input: SetAutomaticRepliesSettingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2793,7 +2802,7 @@ class Office365Client(ConnectorClientBase):
 
     async def shared_mailbox_send_email(
         self,
-        input: SharedMailboxSendEmailInput,
+        input: SharedMailboxSendEmailInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

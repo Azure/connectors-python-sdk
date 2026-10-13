@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -211,7 +211,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -357,7 +357,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
     def post_entity_by_id(
         self,
-        input: PostEntityByIdInput,
+        input: PostEntityByIdInput | Mapping[str, Any],
         entity_name: str,
         *,
         timeout: Optional[float] = None,
@@ -469,6 +469,9 @@ class ElfsquaddataClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -479,7 +482,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
     def put_entity_by_id(
         self,
-        input: PutEntityByIdInput,
+        input: PutEntityByIdInput | Mapping[str, Any],
         entity_name: str,
         id: str,
         *,
@@ -518,7 +521,7 @@ class ElfsquaddataClient(ConnectorClientBase):
 
     def invoke_function(
         self,
-        input: InvokeFunctionInput,
+        input: InvokeFunctionInput | Mapping[str, Any],
         function_path: str,
         *,
         timeout: Optional[float] = None,

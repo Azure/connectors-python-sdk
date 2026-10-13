@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -119,7 +119,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -153,7 +153,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
     async def create_file_item(
         self,
-        input: CreateFileItemInput,
+        input: CreateFileItemInput | Mapping[str, Any],
         source: str,
         drive: str,
         file: str,
@@ -206,7 +206,7 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
     async def create_word_file_with_content(
         self,
-        input: ContentBody,
+        input: ContentBody | Mapping[str, Any],
         *,
         file_name: Optional[str] = None,
         timeout: Optional[float] = None,

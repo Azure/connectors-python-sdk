@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -79,7 +79,12 @@ class ListedScorecards:
     Response for Get scorecards
     """
 
-    value: Optional[List[ListedScorecard]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ListedScorecard | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of scorecards."""
 
 
@@ -99,7 +104,12 @@ class FetchedGoals:
     Response for Get multiple goals
     """
 
-    value: Optional[List[FetchedGoal]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[FetchedGoal | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The list of the goals."""
 
 
@@ -383,7 +393,7 @@ class GoalRefreshIssues:
     Response for When a data refresh for a goal fails
     """
 
-    issues: List[GoalRefreshIssue]
+    issues: List[GoalRefreshIssue | Mapping[str, Any]]
     """Goal refresh issues."""
 
 
@@ -866,7 +876,12 @@ class ExportReportPage:
         metadata={"wire_name": "visualName"},
     )
     """(Optional) Visual name to be exported"""
-    bookmark: Optional[PageBookmark] = dataclass_field(default=None, kw_only=True)
+    bookmark: Optional[
+        PageBookmark | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """(Optional) The bookmark to be applied on the page"""
 
 
@@ -901,7 +916,7 @@ class EffectiveIdentity:
     The value of customdata to be used for applying RLS rules. Only supported
     for live connections to Azure Analysis Services.
     """
-    identity_blob: Optional[IdentityBlob] = dataclass_field(
+    identity_blob: Optional[IdentityBlob | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "identityBlob"},
@@ -1025,7 +1040,7 @@ class PowerbiClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1128,7 +1143,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def create_scorecard(
         self,
-        input: CreateScorecardRequest,
+        input: CreateScorecardRequest | Mapping[str, Any],
         groupid: str,
         *,
         timeout: Optional[float] = None,
@@ -1249,7 +1264,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def create_goal(
         self,
-        input: CreateGoalRequest,
+        input: CreateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         *,
@@ -1352,7 +1367,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def update_goal(
         self,
-        input: UpdateGoalRequest,
+        input: UpdateGoalRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1399,7 +1414,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def list_execute_dataset_query(
         self,
-        input: QuerySpecification,
+        input: QuerySpecification | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -1472,7 +1487,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def execute_dataset_queries_json(
         self,
-        input: ExecuteDatasetQueriesJsonInput,
+        input: ExecuteDatasetQueriesJsonInput | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         *,
@@ -1525,7 +1540,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def add_rows(
         self,
-        input: Payload,
+        input: Payload | Mapping[str, Any],
         groupid: str,
         datasetid: str,
         tablename: str,
@@ -1625,7 +1640,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def goal_value_checkin(
         self,
-        input: GoalValueCheckinRequest,
+        input: GoalValueCheckinRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1747,7 +1762,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def update_goal_checkin(
         self,
-        input: GoalValueCheckinUpdateRequest,
+        input: GoalValueCheckinUpdateRequest | Mapping[str, Any],
         groupid: str,
         scorecard_id: str,
         goal_id: str,
@@ -1896,7 +1911,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def initiate_export_to_file_for_pbi_reports(
         self,
-        input: ExportPayloadPowerBIReport,
+        input: ExportPayloadPowerBIReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,
@@ -1941,7 +1956,7 @@ class PowerbiClient(ConnectorClientBase):
 
     def initiate_export_to_file_for_paginated_reports(
         self,
-        input: ExportPayloadPaginatedReport,
+        input: ExportPayloadPaginatedReport | Mapping[str, Any],
         groupid: str,
         reportid: str,
         *,

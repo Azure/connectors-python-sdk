@@ -1,6 +1,8 @@
 """Unit tests for SDK wire serialization module."""
 
+from collections import UserDict
 from dataclasses import dataclass, field
+from types import MappingProxyType
 
 from azure.connectors.sdk.serialization import to_wire
 
@@ -87,3 +89,20 @@ class TestToWire:
         result = to_wire({"a": Leaf(leaf_value="x"), "b": None, "c": 1})
 
         assert result == {"a": {"leafValue": "x"}, "c": 1}
+
+    def test_mapping_values_are_recursively_converted(self):
+        """Test arbitrary mappings recurse and omit None values."""
+        payload = UserDict(
+            {
+                "nested": MappingProxyType(
+                    {
+                        "model": Leaf(leaf_value="deep"),
+                        "omitted": None,
+                    }
+                )
+            }
+        )
+
+        result = to_wire(payload)
+
+        assert result == {"nested": {"model": {"leafValue": "deep"}}}

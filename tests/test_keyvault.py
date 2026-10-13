@@ -128,7 +128,7 @@ class TestKeyvaultClientLifecycle:
 
 
 class TestListKeysAsync:
-    """Tests for list_keys_async method."""
+    """Tests for list_keys method."""
 
     @pytest.mark.asyncio
     async def test_success_returns_keys(self, mock_credential):
@@ -150,18 +150,17 @@ class TestListKeysAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_keys()
+            result = [item async for item in client.list_keys()]
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/keys" in call_args[0][1]
-            assert result is not None
-            assert "value" in result
+            assert result == [{"name": "key1", "version": "v1"}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test empty response returns an empty page."""
         mock_response = MockResponse(status=200, text='')
 
         client = KeyvaultClient(
@@ -175,8 +174,8 @@ class TestListKeysAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_keys()
-            assert result is None
+            result = [item async for item in client.list_keys()]
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -198,13 +197,13 @@ class TestListKeysAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_keys()
+                [item async for item in client.list_keys()]
 
             assert exc_info.value.status_code == 403
 
 
 class TestListKeyVersionsAsync:
-    """Tests for list_key_versions_async method."""
+    """Tests for list_key_versions method."""
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -223,13 +222,17 @@ class TestListKeyVersionsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_key_versions(key_name="mykey")
+            result = [
+                item async for item in client.list_key_versions(
+                    key_name="mykey"
+                )
+            ]
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/keys/mykey/versions" in call_args[0][1]
-            assert result is not None
+            assert result == [{"version": "v1"}, {"version": "v2"}]
 
 
 class TestGetKeyMetadataAsync:
@@ -503,7 +506,7 @@ class TestDecryptDataWithVersionAsync:
 
 
 class TestListSecretsAsync:
-    """Tests for list_secrets_async method."""
+    """Tests for list_secrets method."""
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -522,13 +525,13 @@ class TestListSecretsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_secrets()
+            result = [item async for item in client.list_secrets()]
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/secrets" in call_args[0][1]
-            assert result is not None
+            assert result == [{"name": "secret1"}, {"name": "secret2"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -547,13 +550,13 @@ class TestListSecretsAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_secrets()
+                [item async for item in client.list_secrets()]
 
             assert exc_info.value.status_code == 403
 
 
 class TestListSecretVersionsAsync:
-    """Tests for list_secret_versions_async method."""
+    """Tests for list_secret_versions method."""
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -572,15 +575,17 @@ class TestListSecretVersionsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_secret_versions(
-                secret_name="mysecret"
-            )
+            result = [
+                item async for item in client.list_secret_versions(
+                    secret_name="mysecret"
+                )
+            ]
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/secrets/mysecret/versions" in call_args[0][1]
-            assert result is not None
+            assert result == [{"version": "v1"}, {"version": "v2"}]
 
 
 class TestGetSecretMetadataAsync:

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -220,7 +220,12 @@ class GetAlertsResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available alerts by this query"""
-    value: Optional[List[Alert]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Alert | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The alerts returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -382,7 +387,7 @@ class MachineAction:
     )
     """relatedFileInfo"""
     commands: Optional[
-        List[LiveResponseCommandStatus]
+        List[LiveResponseCommandStatus | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -422,7 +427,12 @@ class GetMachineActionsResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machine actions by this query"""
-    value: Optional[List[MachineAction]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[MachineAction | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The machine actions returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -559,7 +569,12 @@ class GetInvestigationsResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available investigations by this query"""
-    value: Optional[List[Investigation]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Investigation | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The investigations returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -660,7 +675,7 @@ class RunLiveResponseInput:
 
     comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the isolation"""
-    commands: List[LiveResponseCommand] = dataclass_field(
+    commands: List[LiveResponseCommand | Mapping[str, Any]] = dataclass_field(
         metadata={"wire_name": "Commands"},
     )
     """The live response commands to execute"""
@@ -678,7 +693,12 @@ class GetRemediationActivitiesResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[RemediationActivity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The remediation activities returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -857,7 +877,12 @@ class GetRemediationActivityMachineListResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Machine | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The machines returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -882,7 +907,12 @@ class GetMachinesResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Machine | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The machines returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1054,7 +1084,12 @@ class OnNewRemediationActivityResponse:
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[RemediationActivity | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The remediation activities returned"""
     next_link: Optional[str] = dataclass_field(
         default=None,
@@ -1121,7 +1156,12 @@ class LiveResponseCommandStatus:
     List of command execution errors. In case no errors reported this will be
     an empty list.
     """
-    command: Optional[LiveResponseCommand] = dataclass_field(default=None, kw_only=True)
+    command: Optional[
+        LiveResponseCommand | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """The live response command"""
 
 
@@ -1248,7 +1288,7 @@ class WdatpClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -1282,7 +1322,7 @@ class WdatpClient(ConnectorClientBase):
 
     def advanced_hunting(
         self,
-        input: AdvancedHuntingInput,
+        input: AdvancedHuntingInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1323,7 +1363,7 @@ class WdatpClient(ConnectorClientBase):
 
     def create_alert_by_reference(
         self,
-        input: CreateAlertByReferenceInput,
+        input: CreateAlertByReferenceInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1510,7 +1550,7 @@ class WdatpClient(ConnectorClientBase):
 
     def patch_alert(
         self,
-        input: PatchAlertInput,
+        input: PatchAlertInput | Mapping[str, Any],
         alert_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1551,7 +1591,7 @@ class WdatpClient(ConnectorClientBase):
 
     def initiate_investigation(
         self,
-        input: InitiateInvestigationInput,
+        input: InitiateInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1595,7 +1635,7 @@ class WdatpClient(ConnectorClientBase):
 
     def start_investigation(
         self,
-        input: StartInvestigationInput,
+        input: StartInvestigationInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1679,7 +1719,7 @@ class WdatpClient(ConnectorClientBase):
 
     def cancel_single_machine_action(
         self,
-        input: CancelSingleMachineActionInput,
+        input: CancelSingleMachineActionInput | Mapping[str, Any],
         machine_action_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2163,7 +2203,7 @@ class WdatpClient(ConnectorClientBase):
 
     def collect_investigation_package(
         self,
-        input: CollectInvestigationPackageInput,
+        input: CollectInvestigationPackageInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2250,7 +2290,7 @@ class WdatpClient(ConnectorClientBase):
 
     def isolate_machine(
         self,
-        input: IsolateMachineInput,
+        input: IsolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2291,7 +2331,7 @@ class WdatpClient(ConnectorClientBase):
 
     def unisolate_machine(
         self,
-        input: UnisolateMachineInput,
+        input: UnisolateMachineInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2332,7 +2372,7 @@ class WdatpClient(ConnectorClientBase):
 
     def restrict_app_execution(
         self,
-        input: RestrictAppExecutionInput,
+        input: RestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2377,7 +2417,7 @@ class WdatpClient(ConnectorClientBase):
 
     def unrestrict_app_execution(
         self,
-        input: UnrestrictAppExecutionInput,
+        input: UnrestrictAppExecutionInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2421,7 +2461,7 @@ class WdatpClient(ConnectorClientBase):
 
     def run_antivirus_scan(
         self,
-        input: RunAntivirusScanInput,
+        input: RunAntivirusScanInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2462,7 +2502,7 @@ class WdatpClient(ConnectorClientBase):
 
     def run_live_response(
         self,
-        input: RunLiveResponseInput,
+        input: RunLiveResponseInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2858,7 +2898,7 @@ class WdatpClient(ConnectorClientBase):
 
     def machine_tag(
         self,
-        input: MachineTagInput,
+        input: MachineTagInput | Mapping[str, Any],
         machine_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2899,7 +2939,7 @@ class WdatpClient(ConnectorClientBase):
 
     def advanced_hunting_schema(
         self,
-        input: AdvancedHuntingSchemaInput,
+        input: AdvancedHuntingSchemaInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

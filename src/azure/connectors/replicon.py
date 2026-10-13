@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -534,7 +534,7 @@ class RepliconClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -568,7 +568,7 @@ class RepliconClient(ConnectorClientBase):
 
     def list_bulk_get_project_details3(
         self,
-        input: BulkGetProjectDetails3Input,
+        input: BulkGetProjectDetails3Input | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -637,7 +637,7 @@ class RepliconClient(ConnectorClientBase):
 
     def create_project_or_apply_modifications(
         self,
-        input: CreateProjectOrApplyModificationsInput,
+        input: CreateProjectOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -685,7 +685,7 @@ class RepliconClient(ConnectorClientBase):
 
     def user_list_service_get_data(
         self,
-        input: UserListServiceGetDataInput,
+        input: UserListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -733,7 +733,7 @@ class RepliconClient(ConnectorClientBase):
 
     def get_descendant_task_details(
         self,
-        input: GetDescendantTaskDetailsInput,
+        input: GetDescendantTaskDetailsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -781,7 +781,7 @@ class RepliconClient(ConnectorClientBase):
 
     def list_create_task_hierarchy_or_apply_modifications(
         self,
-        input: CreateTaskHierarchyOrApplyModificationsInput,
+        input: CreateTaskHierarchyOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -852,7 +852,7 @@ class RepliconClient(ConnectorClientBase):
 
     def move_task(
         self,
-        input: MoveTaskInput,
+        input: MoveTaskInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -895,7 +895,7 @@ class RepliconClient(ConnectorClientBase):
 
     def task_list_service_get_data(
         self,
-        input: TaskListServiceGetDataInput,
+        input: TaskListServiceGetDataInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -943,7 +943,7 @@ class RepliconClient(ConnectorClientBase):
 
     def get_timesheet_summary(
         self,
-        input: GetTimesheetSummaryInput,
+        input: GetTimesheetSummaryInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -991,7 +991,7 @@ class RepliconClient(ConnectorClientBase):
 
     def list_bulk_get_time_entered_summary(
         self,
-        input: BulkGetTimeEnteredSummaryInput,
+        input: BulkGetTimeEnteredSummaryInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -1060,7 +1060,7 @@ class RepliconClient(ConnectorClientBase):
 
     def put_project_team_member_assignments(
         self,
-        input: PutProjectTeamMemberAssignmentsInput,
+        input: PutProjectTeamMemberAssignmentsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,
@@ -1103,7 +1103,7 @@ class RepliconClient(ConnectorClientBase):
 
     def put_resource_assignments(
         self,
-        input: PutResourceAssignmentsInput,
+        input: PutResourceAssignmentsInput | Mapping[str, Any],
         host_url: str,
         *,
         timeout: Optional[float] = None,

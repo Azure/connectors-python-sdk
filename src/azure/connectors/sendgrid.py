@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -76,7 +76,7 @@ class ObjectEntity:
     """
 
 
-Bounces = List["Bounce"]
+Bounces = List["Bounce | Mapping[str, Any]"]
 
 
 @dataclass
@@ -99,7 +99,12 @@ class RecipientLists:
     Response for List Recipient Lists
     """
 
-    lists: Optional[List[RecipientList]] = dataclass_field(default=None, kw_only=True)
+    lists: Optional[
+        List[RecipientList | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recipient lists"""
 
 
@@ -109,7 +114,12 @@ class Recipients:
     Response for List Recipients
     """
 
-    recipients: Optional[List[Recipient]] = dataclass_field(default=None, kw_only=True)
+    recipients: Optional[
+        List[Recipient | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of recipients"""
 
 
@@ -142,7 +152,12 @@ class EmailRequest:
     Definition: EmailRequest
     """
 
-    attachments: Optional[List[EmailAttachment]] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[
+        List[EmailAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Attachments"""
     from_: str = dataclass_field(metadata={"wire_name": "from"})
     """
@@ -319,7 +334,7 @@ class SendgridClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -353,7 +368,7 @@ class SendgridClient(ConnectorClientBase):
 
     def list_add_global_suppression(
         self,
-        input: AddGlobalSuppressRequestAndResponse,
+        input: AddGlobalSuppressRequestAndResponse | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -475,6 +490,9 @@ class SendgridClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -618,6 +636,9 @@ class SendgridClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -668,7 +689,7 @@ class SendgridClient(ConnectorClientBase):
 
     def send_email(
         self,
-        input: EmailRequest,
+        input: EmailRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,

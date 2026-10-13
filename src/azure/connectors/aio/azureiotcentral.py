@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -263,7 +263,7 @@ class AzureiotcentralClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -421,7 +421,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def device_groups_set(
         self,
-        input: DeviceGroup,
+        input: DeviceGroup | Mapping[str, Any],
         device_group_id: str,
         application: str,
         *,
@@ -508,6 +508,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -656,7 +659,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_update_cloud_properties(
         self,
-        input: DeviceCloudProperties,
+        input: DeviceCloudProperties | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -715,7 +718,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_execute_component_command(
         self,
-        input: DeviceCommand,
+        input: DeviceCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
@@ -913,7 +916,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def device_relationships_set(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         relationship_id: str,
         device_id: str,
         application: str,
@@ -969,7 +972,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def device_relationships_update(
         self,
-        input: DeviceRelationship,
+        input: DeviceRelationship | Mapping[str, Any],
         device_id: str,
         relationship_id: str,
         application: str,
@@ -1064,6 +1067,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1194,7 +1200,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def jobs_set(
         self,
-        input: Job,
+        input: Job | Mapping[str, Any],
         job_id: str,
         application: str,
         *,
@@ -1588,7 +1594,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def organizations_set(
         self,
-        input: Organization,
+        input: Organization | Mapping[str, Any],
         organization_id: str,
         application: str,
         *,
@@ -1675,6 +1681,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1810,7 +1819,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def scheduled_jobs_set(
         self,
-        input: ScheduledJob,
+        input: ScheduledJob | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
         *,
@@ -1874,7 +1883,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def scheduled_jobs_update(
         self,
-        input: ScheduledJobPatch,
+        input: ScheduledJobPatch | Mapping[str, Any],
         scheduled_job_id: str,
         application: str,
         *,
@@ -1967,6 +1976,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2828,6 +2840,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2838,7 +2853,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_command(
         self,
-        input: DeviceCommandV1,
+        input: DeviceCommandV1 | Mapping[str, Any],
         device_id: str,
         command_name: str,
         application: str,
@@ -2899,7 +2914,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_component_command(
         self,
-        input: DeviceComponentCommand,
+        input: DeviceComponentCommand | Mapping[str, Any],
         device_id: str,
         component_name: str,
         command_name: str,
@@ -2963,7 +2978,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_module_command(
         self,
-        input: DeviceModuleCommand,
+        input: DeviceModuleCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         command_name: str,
@@ -3027,7 +3042,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_run_module_component_command(
         self,
-        input: DeviceModuleComponentCommand,
+        input: DeviceModuleComponentCommand | Mapping[str, Any],
         device_id: str,
         module: str,
         component_name: str,
@@ -3094,7 +3109,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_set(
         self,
-        input: DeviceV2,
+        input: DeviceV2 | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -3143,7 +3158,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_update_module_properties(
         self,
-        input: ModuleProperties,
+        input: ModuleProperties | Mapping[str, Any],
         device_id: str,
         module: str,
         application: str,
@@ -3205,7 +3220,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def devices_update_properties(
         self,
-        input: DeviceProperties,
+        input: DeviceProperties | Mapping[str, Any],
         device_id: str,
         application: str,
         *,
@@ -3412,6 +3427,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3535,7 +3553,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def users_create(
         self,
-        input: User,
+        input: User | Mapping[str, Any],
         user_id: str,
         application: str,
         *,
@@ -3736,6 +3754,9 @@ class AzureiotcentralClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3746,7 +3767,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
     async def users_update(
         self,
-        input: UserPatch,
+        input: UserPatch | Mapping[str, Any],
         user_id: str,
         application: str,
         *,

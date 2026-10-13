@@ -167,8 +167,8 @@ class TestGetEmail:
             assert "includeAttachments=true" in url
 
     @pytest.mark.asyncio
-    async def test_error_response_raises_exception(self, mock_credential):
-        """Test that error response raises ConnectorException."""
+    async def test_not_found_succeeds(self, mock_credential):
+        """Test deleting an absent email succeeds."""
         client = OutlookClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -230,10 +230,30 @@ class TestDeleteEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
+            result = await client.delete_email(message_id="nonexistent")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_other_error_response_raises_exception(self, mock_credential):
+        """Test that non-404 error responses still raise ConnectorException."""
+        client = OutlookClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential
+        )
+
+        mock_response = MockResponse(status=500, text='{"error": "Failed"}')
+
+        with patch.object(
+            client._http_client,
+            'send',
+            new_callable=AsyncMock,
+            return_value=mock_response
+        ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.delete_email(message_id="nonexistent")
 
-            assert exc_info.value.status_code == 404
+            assert exc_info.value.status_code == 500
 
 
 class TestMoveEmail:

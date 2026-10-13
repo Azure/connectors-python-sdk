@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -638,7 +638,7 @@ class TodoClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -672,7 +672,7 @@ class TodoClient(ConnectorClientBase):
 
     def update_to_do_list(
         self,
-        input: CreateToDoList,
+        input: CreateToDoList | Mapping[str, Any],
         folder_id: str,
         *,
         timeout: Optional[float] = None,
@@ -738,6 +738,9 @@ class TodoClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -748,7 +751,7 @@ class TodoClient(ConnectorClientBase):
 
     def create_to_do(
         self,
-        input: CreateToDo,
+        input: CreateToDo | Mapping[str, Any],
         folder_id: str,
         *,
         timeout: Optional[float] = None,
@@ -789,7 +792,7 @@ class TodoClient(ConnectorClientBase):
 
     def create_to_do_list(
         self,
-        input: CreateToDoList,
+        input: CreateToDoList | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -854,6 +857,9 @@ class TodoClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1076,7 +1082,7 @@ class TodoClient(ConnectorClientBase):
 
     def update_to_do(
         self,
-        input: UpdateToDo,
+        input: UpdateToDo | Mapping[str, Any],
         folder_id: str,
         id: str,
         *,

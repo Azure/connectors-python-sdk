@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 from typing import Optional, AsyncIterator, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.async_paging import AsyncItemPaged
@@ -583,7 +583,7 @@ class SigninghubClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -650,6 +650,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -834,7 +837,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def checkbox_add_check_box(
         self,
-        input: CheckBoxFieldRequest,
+        input: CheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -895,7 +898,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def checkbox_update_check_box(
         self,
-        input: UpdateCheckBoxFieldRequest,
+        input: UpdateCheckBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1069,6 +1072,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1224,7 +1230,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def documents_rename_document(
         self,
-        input: RenameDocumentRequest,
+        input: RenameDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1271,7 +1277,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def documents_update_certify_policy(
         self,
-        input: UpdateCertifyPolicyRequest,
+        input: UpdateCertifyPolicyRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1478,7 +1484,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def enterprise_documents_update_enterprise_workflow_access(
         self,
-        input: AccessUpdateRequest,
+        input: AccessUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -1587,7 +1593,7 @@ class SigninghubClient(ConnectorClientBase):
 
     def list_fields_auto_place(
         self,
-        input: AutoPlaceFieldRequest,
+        input: AutoPlaceFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1680,7 +1686,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def fields_delete_document_field(
         self,
-        input: DeleteDocumentFieldRequest,
+        input: DeleteDocumentFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1713,6 +1719,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1728,7 +1737,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def fields_fill_form_fields(
         self,
-        input: FormFillingRequest,
+        input: FormFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1825,7 +1834,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def folder_move_package(
         self,
-        input: MoveToRequest,
+        input: MoveToRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -1867,7 +1876,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def initials_add_initial(
         self,
-        input: InitialFieldRequest,
+        input: InitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1924,7 +1933,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def initials_fill(
         self,
-        input: InitialFillingRequest,
+        input: InitialFillingRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -1972,7 +1981,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def initials_update_initial(
         self,
-        input: UpdateInitialFieldRequest,
+        input: UpdateInitialFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -2027,7 +2036,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def in_person_add_in_person(
         self,
-        input: InPersonFieldRequest,
+        input: InPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -2093,7 +2102,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def in_person_update_in_person(
         self,
-        input: UpdateInPersonFieldRequest,
+        input: UpdateInPersonFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -2149,7 +2158,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_add_package(
         self,
-        input: AddDocumentPackageRequest,
+        input: AddDocumentPackageRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -2192,7 +2201,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2234,7 +2243,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2305,6 +2314,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -2445,7 +2457,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_gatekeeper_approve(
         self,
-        input: ApproveRequest,
+        input: ApproveRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2491,7 +2503,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_gatekeeper_decline(
         self,
-        input: DeclineRequest,
+        input: DeclineRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -2777,7 +2789,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def package_rename_package(
         self,
-        input: RenameDocumentPackageRequest,
+        input: RenameDocumentPackageRequest | Mapping[str, Any],
         package_id_bulk_action: int,
         *,
         timeout: Optional[float] = None,
@@ -2866,7 +2878,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def qr_add_qr_code(
         self,
-        input: QrCodeRequest,
+        input: QrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -2915,7 +2927,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def qr_update_qr_code(
         self,
-        input: UpdateQrCodeRequest,
+        input: UpdateQrCodeRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -2964,7 +2976,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def radio_add_radio_box(
         self,
-        input: RadioBoxFieldRequest,
+        input: RadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3025,7 +3037,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def radio_update_radio_box(
         self,
-        input: UpdateRadioBoxFieldRequest,
+        input: UpdateRadioBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3166,7 +3178,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def signature_add_signature(
         self,
-        input: DigitalSignatureFieldRequest,
+        input: DigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3224,7 +3236,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def signature_update_signature(
         self,
-        input: UpdateDigitalSignatureFieldRequest,
+        input: UpdateDigitalSignatureFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3280,7 +3292,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def signing_bulk_sign_documents(
         self,
-        input: BulkSignRequest,
+        input: BulkSignRequest | Mapping[str, Any],
         package_id_bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -3357,7 +3369,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def signing_bulk_sign_status(
         self,
-        input: BulkSignStatusRequest,
+        input: BulkSignStatusRequest | Mapping[str, Any],
         bulk_action: str,
         *,
         timeout: Optional[float] = None,
@@ -3415,7 +3427,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def signing_sign_document(
         self,
-        input: SignDocumentRequest,
+        input: SignDocumentRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3596,7 +3608,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def text_box_add_text_box(
         self,
-        input: TextBoxFieldRequest,
+        input: TextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3653,7 +3665,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def text_box_update_text_box(
         self,
-        input: UpdateTextBoxFieldRequest,
+        input: UpdateTextBoxFieldRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -3708,7 +3720,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_apply_template(
         self,
-        input: ApplyTemplateRequest,
+        input: ApplyTemplateRequest | Mapping[str, Any],
         package_id: int,
         document_id: int,
         *,
@@ -4112,7 +4124,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_permission_update_workflow_permissions(
         self,
-        input: WorkflowPermissionsUpdateRequest,
+        input: WorkflowPermissionsUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -4191,6 +4203,9 @@ class SigninghubClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -4272,7 +4287,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_update_workflow(
         self,
-        input: WorkflowDetailUpdateRequest,
+        input: WorkflowDetailUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4317,7 +4332,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_update_workflow_post_process(
         self,
-        input: PostProcessUpdateRequest,
+        input: PostProcessUpdateRequest | Mapping[str, Any],
         package_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4363,7 +4378,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_update_workflow_reminder(
         self,
-        input: UpdateReminderRequest,
+        input: UpdateReminderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -4680,6 +4695,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4695,7 +4713,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_workflow_update_placeholder(
         self,
-        input: WorkflowPlaceholderUpdateRequest,
+        input: WorkflowPlaceholderUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -4749,7 +4767,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_workflow_user_update(
         self,
-        input: WorkflowUserUpdateRequest,
+        input: WorkflowUserUpdateRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -4804,7 +4822,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def workflow_workflow_user_update_order(
         self,
-        input: WorkflowUserReorderRequest,
+        input: WorkflowUserReorderRequest | Mapping[str, Any],
         package_id: int,
         order: int,
         *,
@@ -4880,6 +4898,9 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4937,7 +4958,7 @@ class SigninghubClient(ConnectorClientBase):
 
     async def work_space_update_shared_space(
         self,
-        input: UpdateWorkSpaceRequest,
+        input: UpdateWorkSpaceRequest | Mapping[str, Any],
         id: int,
         *,
         timeout: Optional[float] = None,

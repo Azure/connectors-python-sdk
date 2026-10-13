@@ -148,7 +148,7 @@ class PaymentAccountLedgerEntries:
 
     count: int
     """The number of payment account ledger entry resources found."""
-    results: List[PaymentAccountLedgerEntry]
+    results: List[PaymentAccountLedgerEntry | Mapping[str, Any]]
     """The payment account ledger entry resources found."""
 
 
@@ -160,7 +160,7 @@ class Payments:
 
     count: int
     """The number of payments in the response."""
-    results: List[Payment]
+    results: List[Payment | Mapping[str, Any]]
     """A list of payments."""
 
 
@@ -244,15 +244,15 @@ class ShopReceipt:
     """The time of the last update to the receipt, in epoch seconds."""
     gift_message: str
     """A gift message string the buyer requests delivered with the product."""
-    grandtotal: Money
-    subtotal: Money
-    total_price: Money
-    total_shipping_cost: Money
-    total_tax_cost: Money
-    total_vat_cost: Money
-    discount_amt: Money
-    gift_wrap_price: Money
-    shipments: List[ShopReceiptShipment]
+    grandtotal: Money | Mapping[str, Any]
+    subtotal: Money | Mapping[str, Any]
+    total_price: Money | Mapping[str, Any]
+    total_shipping_cost: Money | Mapping[str, Any]
+    total_tax_cost: Money | Mapping[str, Any]
+    total_vat_cost: Money | Mapping[str, Any]
+    discount_amt: Money | Mapping[str, Any]
+    gift_wrap_price: Money | Mapping[str, Any]
+    shipments: List[ShopReceiptShipment | Mapping[str, Any]]
     """A list of shipment statements for this receipt."""
 
 
@@ -264,7 +264,7 @@ class ShopReceipts:
 
     count: int
     """The number of Shop Receipts found."""
-    results: List[ShopReceipt]
+    results: List[ShopReceipt | Mapping[str, Any]]
     """
     List of Shop Receipt resources found, with all Shop Receipt fields for each
     resource.
@@ -293,7 +293,7 @@ class ShopReceiptTransactions:
 
     count: int
     """The number of shop receipt transaction resources found."""
-    results: List[ShopReceiptTransaction]
+    results: List[ShopReceiptTransaction | Mapping[str, Any]]
     """The shop receipt transaction resources found."""
 
 
@@ -337,8 +337,8 @@ class ShopReceiptTransaction:
     """The type string for the transaction, usually listing"""
     product_id: int
     """The numeric ID for a specific product purchased from a listing."""
-    price: Money
-    shipping_cost: Money
+    price: Money | Mapping[str, Any]
+    shipping_cost: Money | Mapping[str, Any]
 
 
 @dataclass
@@ -349,7 +349,7 @@ class TransactionReviews:
 
     count: int
     """The number of TransactionReview resources found."""
-    results: List[TransactionReview]
+    results: List[TransactionReview | Mapping[str, Any]]
     """The TransactionReview resources found."""
 
 
@@ -360,7 +360,7 @@ class ShippingCarriers:
     """
 
     count: int
-    results: List[ShippingCarrier]
+    results: List[ShippingCarrier | Mapping[str, Any]]
 
 
 @dataclass
@@ -385,12 +385,12 @@ class ShopShippingProfile:
     """The ISO code of the country from which the listing ships."""
     is_deleted: bool
     """When true, someone deleted this shipping profile."""
-    shipping_profile_destinations: List[ShopShippingProfileDestination]
+    shipping_profile_destinations: List[ShopShippingProfileDestination | Mapping[str, Any]]
     """
     A list of shipping profile destinations available for this shipping
     profile.
     """
-    shipping_profile_upgrades: List[ShopShippingProfileUpgrade]
+    shipping_profile_upgrades: List[ShopShippingProfileUpgrade | Mapping[str, Any]]
     """
     A list of shipping profile upgrades available for this shipping profile.
     """
@@ -512,7 +512,7 @@ class ShopShippingProfileDestinations:
 
     count: int
     """The number of results."""
-    results: List[ShopShippingProfileDestination]
+    results: List[ShopShippingProfileDestination | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -567,8 +567,8 @@ class ShopShippingProfileDestination:
     sets destination to destination_region
     """
     destination_region: DestinationRegion
-    primary_cost: Money
-    secondary_cost: Money
+    primary_cost: Money | Mapping[str, Any]
+    secondary_cost: Money | Mapping[str, Any]
     shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
@@ -623,7 +623,7 @@ class ShopShippingProfileUpgrades:
 
     count: int
     """The number of results."""
-    results: List[ShopShippingProfileUpgrade]
+    results: List[ShopShippingProfileUpgrade | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -692,8 +692,8 @@ class ShopShippingProfileUpgrade:
     The IETF language tag for the language of the shipping profile. Ex: de, en,
     es, fr, it, ja, nl, pl, pt, ru.
     """
-    price: Money
-    secondary_price: Money
+    price: Money | Mapping[str, Any]
+    secondary_price: Money | Mapping[str, Any]
     shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
@@ -910,7 +910,7 @@ class Shops:
 
     count: int
     """The total number of Shops"""
-    results: List[Shop]
+    results: List[Shop | Mapping[str, Any]]
     """The Shop resources."""
 
 
@@ -922,7 +922,7 @@ class ShopSections:
 
     count: int
     """The number of results."""
-    results: List[ShopSection]
+    results: List[ShopSection | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -1036,7 +1036,7 @@ class UserAddresses:
 
     count: int
     """The number of UserAddress records being returned."""
-    results: List[UserAddress]
+    results: List[UserAddress | Mapping[str, Any]]
     """An array of UserAddress resources."""
 
 
@@ -1048,7 +1048,7 @@ class SellerTaxonomyNodes:
 
     count: int
     """The number of results."""
-    results: List[SellerTaxonomyNode]
+    results: List[SellerTaxonomyNode | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -1060,7 +1060,7 @@ class TaxonomyNodeProperties:
 
     count: int
     """The number of results."""
-    results: List[TaxonomyNodeProperty]
+    results: List[TaxonomyNodeProperty | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -1072,7 +1072,7 @@ class ShopListings:
 
     count: int
     """The number of shop listing resources found."""
-    results: List[ShopListing]
+    results: List[ShopListing | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -1377,7 +1377,7 @@ class ShopListing:
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Money
+    price: Money | Mapping[str, Any]
     taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
@@ -1393,7 +1393,7 @@ class ShopListingsWithAssociations:
 
     count: int
     """The number of shop listing resources found."""
-    results: List[ShopListing]
+    results: List[ShopListing | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -1439,7 +1439,7 @@ class ListingPropertyValues:
 
     count: int
     """The number of shop listing resources found."""
-    results: List[ListingPropertyValue]
+    results: List[ListingPropertyValue | Mapping[str, Any]]
     """The shop listing resources found."""
 
 
@@ -1636,7 +1636,7 @@ class ShopListingFiles:
 
     count: int
     """The number of ShopListingFiles being returned.."""
-    results: List[ShopListingFile]
+    results: List[ShopListingFile | Mapping[str, Any]]
     """An array of ShopListingFile resources."""
 
 
@@ -1745,7 +1745,7 @@ class ListingImages:
 
     count: int
     """The number of results."""
-    results: List[ListingImage]
+    results: List[ListingImage | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -1777,7 +1777,7 @@ class ListingInventoryWithAssociations:
     Response for Get a listing's inventory
     """
 
-    products: List[ListingInventoryProduct]
+    products: List[ListingInventoryProduct | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
@@ -1803,7 +1803,7 @@ class ListingInventoryWithAssociations:
     different colored products in the same listing, then this array contains
     the property ID for color.
     """
-    listing: ShopListing
+    listing: ShopListing | Mapping[str, Any]
 
 
 @dataclass
@@ -1846,7 +1846,7 @@ class ListingInventory:
     Response for Update a listing's inventory
     """
 
-    products: List[ListingInventoryProduct]
+    products: List[ListingInventoryProduct | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
@@ -1888,7 +1888,7 @@ class ListingInventoryProductOffering:
     """Whether or not the offering can be shown to buyers."""
     is_deleted: bool
     """Whether or not the offering has been deleted."""
-    price: Money
+    price: Money | Mapping[str, Any]
 
 
 @dataclass
@@ -1903,9 +1903,9 @@ class ListingInventoryProduct:
     """The SKU string for the product"""
     is_deleted: bool
     """When true, someone deleted this product."""
-    offerings: List[ListingInventoryProductOffering]
+    offerings: List[ListingInventoryProductOffering | Mapping[str, Any]]
     """A list of product offering entries for this product."""
-    property_values: List[ListingPropertyValue]
+    property_values: List[ListingPropertyValue | Mapping[str, Any]]
     """A list of property value entries for this product."""
 
 
@@ -1965,7 +1965,7 @@ class ListingVariationImages:
 
     count: int
     """The count of variation images."""
-    results: List[ListingVariationImage]
+    results: List[ListingVariationImage | Mapping[str, Any]]
     """The variation images results."""
 
 
@@ -2173,20 +2173,20 @@ class ShopListingWithAssociations:
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Money
+    price: Money | Mapping[str, Any]
     taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop. See seller taxonomy for more information.
     """
-    user: User
-    shop: Shop
-    images: List[ListingImage]
+    user: User | Mapping[str, Any]
+    shop: Shop | Mapping[str, Any]
+    images: List[ListingImage | Mapping[str, Any]]
     """
     Represents a list of listing image resources, each of which contains the
     reference URLs and metadata for an image
     """
-    production_partners: List[ShopProductionPartner]
+    production_partners: List[ShopProductionPartner | Mapping[str, Any]]
     """Represents a list of production partners for a shop."""
 
 
@@ -2266,15 +2266,20 @@ class Payment:
     """The unique positive non-zero numeric ID for an Etsy Shop."""
     receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    amount_gross: Money
-    amount_fees: Money
-    amount_net: Money
-    posted_gross: Optional[Money] = dataclass_field(default=None, kw_only=True)
-    posted_fees: Optional[Money] = dataclass_field(default=None, kw_only=True)
-    posted_net: Optional[Money] = dataclass_field(default=None, kw_only=True)
-    adjusted_gross: Optional[Money] = dataclass_field(default=None, kw_only=True)
-    adjusted_fees: Optional[Money] = dataclass_field(default=None, kw_only=True)
-    adjusted_net: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    amount_gross: Money | Mapping[str, Any]
+    amount_fees: Money | Mapping[str, Any]
+    amount_net: Money | Mapping[str, Any]
+    posted_gross: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    posted_fees: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    posted_net: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    adjusted_gross: Optional[
+        Money | Mapping[str, Any]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    adjusted_fees: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    adjusted_net: Optional[Money | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     currency: str
     """The ISO (alphabetic) code string for the payment's currency."""
     shop_currency: str
@@ -2304,7 +2309,7 @@ class Payment:
     The date and time of the last change to the payment adjustment in epoch
     seconds.
     """
-    payment_adjustments: List[PaymentAdjustment]
+    payment_adjustments: List[PaymentAdjustment | Mapping[str, Any]]
     """
     List of refund objects on an Etsy Payments transaction. All monetary
     amounts are in USD pennies unless otherwise specified.
@@ -2435,7 +2440,7 @@ class SellerTaxonomyNode:
     """The name string for this taxonomy node."""
     parent_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric taxonomy ID of the parent of this node."""
-    children: List[SellerTaxonomyNode]
+    children: List[SellerTaxonomyNode | Mapping[str, Any]]
     """
     An array of taxonomy nodes for all the direct children of this taxonomy
     node in the seller taxanomy tree.
@@ -2460,7 +2465,7 @@ class TaxonomyNodeProperty:
     """The name string for this taxonomy node."""
     display_name: str
     """The human-readable product property name string."""
-    scales: List[TaxonomyPropertyScale]
+    scales: List[TaxonomyPropertyScale | Mapping[str, Any]]
     """A list of available scales."""
     is_required: bool
     """
@@ -2472,9 +2477,9 @@ class TaxonomyNodeProperty:
     """When true, you can use this property in listing variations."""
     is_multivalued: bool
     """When true, you can assign multiple property values to this property"""
-    possible_values: List[TaxonomyPropertyValue]
+    possible_values: List[TaxonomyPropertyValue | Mapping[str, Any]]
     """A list of supported property value strings for this property."""
-    selected_values: List[TaxonomyPropertyValue]
+    selected_values: List[TaxonomyPropertyValue | Mapping[str, Any]]
     """
     A list of property value strings automatically and always selected for the
     given property.
@@ -2526,9 +2531,9 @@ class ShippingCarrier:
     """The numeric ID of this shipping carrier."""
     name: str
     """The name of this shipping carrier."""
-    domestic_classes: List[ShippingCarrierMailClass]
+    domestic_classes: List[ShippingCarrierMailClass | Mapping[str, Any]]
     """Set of domestic mail classes of this shipping carrier."""
-    international_classes: List[ShippingCarrierMailClass]
+    international_classes: List[ShippingCarrierMailClass | Mapping[str, Any]]
     """Set of international mail classes of this shipping carrier."""
 
 
@@ -2552,7 +2557,7 @@ class ShopProductionPartners:
 
     count: int
     """The number of results."""
-    results: List[ShopProductionPartner]
+    results: List[ShopProductionPartner | Mapping[str, Any]]
     """The list of requested resources."""
 
 
@@ -2563,7 +2568,7 @@ class ShopShippingProfiles:
     """
 
     count: int
-    results: List[ShopShippingProfile]
+    results: List[ShopShippingProfile | Mapping[str, Any]]
 
 
 Channel = Literal["etsy.com", "wholesale", "pattern", "sell_on_facebook"]
@@ -2658,9 +2663,19 @@ class Product:
 
     sku: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SKU string for the product"""
-    property_values: Optional[List[PropertyValue]] = dataclass_field(default=None, kw_only=True)
+    property_values: Optional[
+        List[PropertyValue | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of property value entries for this product."""
-    offerings: Optional[List[Offering]] = dataclass_field(default=None, kw_only=True)
+    offerings: Optional[
+        List[Offering | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """A list of product offering entries for this product."""
 
 
@@ -2738,7 +2753,7 @@ class ApplicationListingsInventoryRequest:
     Definition: V3ApplicationListingsInventoryRequest
     """
 
-    products: List[Product]
+    products: List[Product | Mapping[str, Any]]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
@@ -2772,7 +2787,7 @@ class ApplicationShopsListingsVariationImagesRequest:
     Definition: V3ApplicationShopsListingsVariationImagesRequest
     """
 
-    variation_images: List[VariationImage]
+    variation_images: List[VariationImage | Mapping[str, Any]]
     """A list of variation image data."""
 
 
@@ -3293,7 +3308,7 @@ class EtsyClient(ConnectorClientBase):
 
     def receipt_create_shipment(
         self,
-        input: ReceiptCreateShipmentInput,
+        input: ReceiptCreateShipmentInput | Mapping[str, Any],
         shop_id: int,
         receipt_id: int,
         *,
@@ -3689,7 +3704,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_create_profile(
         self,
-        input: ShippingCreateProfileInput,
+        input: ShippingCreateProfileInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -3801,6 +3816,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3816,7 +3834,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_update_profile(
         self,
-        input: ShippingUpdateProfileInput,
+        input: ShippingUpdateProfileInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -3922,7 +3940,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_create_destination(
         self,
-        input: ShippingCreateDestinationInput,
+        input: ShippingCreateDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -4014,6 +4032,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4024,7 +4045,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_update_profile_destination(
         self,
-        input: ShippingUpdateProfileDestinationInput,
+        input: ShippingUpdateProfileDestinationInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: str,
         shipping_profile_destination_id: str,
@@ -4119,7 +4140,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_create_upgrade(
         self,
-        input: ShippingCreateUpgradeInput,
+        input: ShippingCreateUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         *,
@@ -4199,6 +4220,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4209,7 +4233,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shipping_update_profile_upgrade(
         self,
-        input: ShippingUpdateProfileUpgradeInput,
+        input: ShippingUpdateProfileUpgradeInput | Mapping[str, Any],
         shop_id: int,
         shipping_profile_id: int,
         upgrade_id: int,
@@ -4258,7 +4282,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shop_update(
         self,
-        input: ShopUpdateInput,
+        input: ShopUpdateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4437,7 +4461,7 @@ class EtsyClient(ConnectorClientBase):
 
     def shop_create_section(
         self,
-        input: ShopCreateSectionInput,
+        input: ShopCreateSectionInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4808,7 +4832,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_create(
         self,
-        input: ListingCreateInput,
+        input: ListingCreateInput | Mapping[str, Any],
         shop_id: int,
         *,
         timeout: Optional[float] = None,
@@ -4920,6 +4944,9 @@ class EtsyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -5225,6 +5252,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5235,7 +5265,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_update_property(
         self,
-        input: ListingUpdatePropertyInput,
+        input: ListingUpdatePropertyInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         property_id: int,
@@ -5376,7 +5406,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_update(
         self,
-        input: ListingUpdateInput,
+        input: ListingUpdateInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5637,6 +5667,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5693,7 +5726,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_upload(
         self,
-        input: ListingUploadInput,
+        input: ListingUploadInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5826,6 +5859,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -5882,7 +5918,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_upload_image(
         self,
-        input: ListingUploadImageInput,
+        input: ListingUploadImageInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,
@@ -5986,7 +6022,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_update_inventory(
         self,
-        input: ListingUpdateInventoryInput,
+        input: ListingUpdateInventoryInput | Mapping[str, Any],
         listing_id: str,
         *,
         timeout: Optional[float] = None,
@@ -6170,7 +6206,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_create_translation(
         self,
-        input: ListingCreateTranslationInput,
+        input: ListingCreateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -6218,7 +6254,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_update_translation(
         self,
-        input: ListingUpdateTranslationInput,
+        input: ListingUpdateTranslationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         language: str,
@@ -6311,7 +6347,7 @@ class EtsyClient(ConnectorClientBase):
 
     def listing_update_variation(
         self,
-        input: ListingUpdateVariationInput,
+        input: ListingUpdateVariationInput | Mapping[str, Any],
         shop_id: int,
         listing_id: int,
         *,

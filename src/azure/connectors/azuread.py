@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -324,7 +324,12 @@ class GetGroupMembersResponse:
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[GetUserResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[GetUserResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array of users that are members of the group."""
 
 
@@ -650,7 +655,7 @@ class AzureadClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -684,7 +689,7 @@ class AzureadClient(ConnectorClientBase):
 
     def create_office365_group(
         self,
-        input: CreateOffice365GroupInput,
+        input: CreateOffice365GroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -721,7 +726,7 @@ class AzureadClient(ConnectorClientBase):
 
     def create_security_group(
         self,
-        input: CreateSecurityGroupInput,
+        input: CreateSecurityGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -840,7 +845,7 @@ class AzureadClient(ConnectorClientBase):
 
     def update_user(
         self,
-        input: UpdateUserRequest,
+        input: UpdateUserRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -911,7 +916,7 @@ class AzureadClient(ConnectorClientBase):
 
     def create_user(
         self,
-        input: CreateUserRequest,
+        input: CreateUserRequest | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1058,6 +1063,9 @@ class AzureadClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1068,7 +1076,7 @@ class AzureadClient(ConnectorClientBase):
 
     def add_user_to_group(
         self,
-        input: GetGroupRequest,
+        input: GetGroupRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1104,7 +1112,7 @@ class AzureadClient(ConnectorClientBase):
 
     def assign_manager(
         self,
-        input: AssignManagerRequest,
+        input: AssignManagerRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1140,7 +1148,7 @@ class AzureadClient(ConnectorClientBase):
 
     def create_group(
         self,
-        input: CreateGroupInput,
+        input: CreateGroupInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -1177,7 +1185,7 @@ class AzureadClient(ConnectorClientBase):
 
     def list_check_member_groups(
         self,
-        input: CheckMemberGroupsRequest,
+        input: CheckMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -1240,7 +1248,7 @@ class AzureadClient(ConnectorClientBase):
 
     def list_member_groups(
         self,
-        input: GetMemberGroupsRequest,
+        input: GetMemberGroupsRequest | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,

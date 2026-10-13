@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -66,7 +66,12 @@ class ListConversationsResponse:
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[Conversation]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Conversation | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -131,7 +136,12 @@ class Conversation:
     """
     A short summary from the body of the latest post in this Conversation.
     """
-    threads: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
+    threads: Optional[
+        List[ConversationThread | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -152,7 +162,12 @@ class ListConversationThreadsResponse:
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ConversationThread | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -183,7 +198,12 @@ class ListGroupThreadsResponse:
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ConversationThread | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -230,19 +250,24 @@ class ConversationThread:
         metadata={"wire_name": "isLocked"},
     )
     """Indicates if the thread is locked."""
-    to_recipients: Optional[List[EmailAddress]] = dataclass_field(
+    to_recipients: Optional[List[EmailAddress | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "toRecipients"},
     )
     """The To: recipients for the thread."""
-    cc_recipients: Optional[List[EmailAddress]] = dataclass_field(
+    cc_recipients: Optional[List[EmailAddress | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "ccRecipients"},
     )
     """The Cc: recipients for the thread."""
-    posts: Optional[List[Post]] = dataclass_field(default=None, kw_only=True)
+    posts: Optional[
+        List[Post | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -263,7 +288,12 @@ class ListThreadPostsResponse:
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    value: Optional[List[Post]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Post | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array containing the posts in the specified thread."""
 
 
@@ -317,7 +347,7 @@ class Post:
         metadata={"wire_name": "hasAttachments"},
     )
     """Indicates whether the post has at least one attachment."""
-    new_participants: Optional[List[EmailAddress]] = dataclass_field(
+    new_participants: Optional[List[EmailAddress | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "newParticipants"},
@@ -326,14 +356,19 @@ class Post:
     Conversation participants that were added to the thread as part of this
     post.
     """
-    body: Optional[ItemBody] = dataclass_field(default=None, kw_only=True)
-    from_: Optional[EmailAddress] = dataclass_field(
+    body: Optional[ItemBody | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    from_: Optional[EmailAddress | Mapping[str, Any]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "from"},
     )
-    sender: Optional[EmailAddress] = dataclass_field(default=None, kw_only=True)
-    attachments: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
+    sender: Optional[EmailAddress | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -354,7 +389,12 @@ class GetAttachmentsResponse:
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    value: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Attachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Array containing the attachments of the post."""
 
 
@@ -364,7 +404,12 @@ class OnNewEmailInGroupResponse:
     Response for When a new email arrives to a group
     """
 
-    value: Optional[List[ConversationTriggerResponse]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[ConversationTriggerResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Response of the trigger."""
 
 
@@ -456,7 +501,7 @@ class ReplyConversationThreadBody:
     Definition: ReplyConversationThreadBody
     """
 
-    post: Optional[NewPostBody] = dataclass_field(default=None, kw_only=True)
+    post: Optional[NewPostBody | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -471,7 +516,7 @@ class ForwardPostBody:
         metadata={"wire_name": "Comment"},
     )
     """Comment to forward with the post."""
-    to_recipients: List[GetUsersGraphAction] = dataclass_field(
+    to_recipients: List[GetUsersGraphAction | Mapping[str, Any]] = dataclass_field(
         metadata={"wire_name": "ToRecipients"},
     )
     """The recipients to whom the threaded is forwarded to."""
@@ -485,7 +530,7 @@ class CreateConversationBody:
 
     topic: str
     """Topic of the new conversation."""
-    post: Optional[NewPostBody] = dataclass_field(default=None, kw_only=True)
+    post: Optional[NewPostBody | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -498,13 +543,20 @@ class NewPostBody:
     """Body of the new post."""
     categories: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The categories associated with the post."""
-    new_participants: Optional[List[GetUsersGraphAction]] = dataclass_field(
+    new_participants: Optional[
+        List[GetUsersGraphAction | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "newParticipants"},
     )
     """Add participants to the thread as part of this post."""
-    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[
+        List[ClientSendAttachment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """File attachments to include."""
 
 
@@ -556,7 +608,7 @@ class ConversationTriggerResponse:
     format and is always in UTC time.
     """
     threads: Optional[
-        List[ConversationThreadTriggerResponse]
+        List[ConversationThreadTriggerResponse | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -571,7 +623,12 @@ class ConversationThreadTriggerResponse:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The conversation thread's unique identifier."""
-    posts: Optional[List[PostTriggerResponse]] = dataclass_field(default=None, kw_only=True)
+    posts: Optional[
+        List[PostTriggerResponse | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -667,7 +724,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -768,7 +825,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def create_conversation(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -927,7 +984,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def create_conversation_thread(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         conversation_id: str,
         *,
@@ -1041,7 +1098,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def create_group_thread(
         self,
-        input: CreateConversationBody,
+        input: CreateConversationBody | Mapping[str, Any],
         group_id: str,
         *,
         timeout: Optional[float] = None,
@@ -1156,6 +1213,9 @@ class Office365groupsmailClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -1368,7 +1428,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def reply_to_a_thread(
         self,
-        input: ReplyConversationThreadBody,
+        input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
         thread_id: str,
         *,
@@ -1410,7 +1470,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def reply(
         self,
-        input: ReplyConversationThreadBody,
+        input: ReplyConversationThreadBody | Mapping[str, Any],
         group_id: str,
         thread_id: str,
         post_id: str,
@@ -1497,7 +1557,7 @@ class Office365groupsmailClient(ConnectorClientBase):
 
     def forward(
         self,
-        input: ForwardPostBody,
+        input: ForwardPostBody | Mapping[str, Any],
         group_mail: str,
         conversation_id: str,
         thread_id: str,

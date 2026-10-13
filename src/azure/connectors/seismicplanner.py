@@ -6,11 +6,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from typing import Optional, Dict, List, Any, Mapping
+from urllib.parse import quote
 import json
 
-from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -18,7 +17,6 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
-    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -76,11 +74,16 @@ class CommentQueryResponse:
     """Number of records returned"""
     cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[Comment]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[Comment | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of items in the response"""
     limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -178,11 +181,16 @@ class PlannerProjectQueryResponse:
     """Number of records returned"""
     cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerProject]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[PlannerProject | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of project items in the response"""
     limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -223,13 +231,20 @@ class PlannerProject:
         metadata={"wire_name": "actualStartDate"},
     )
     """Calculated start date from when the project actually started"""
-    associated_nodes: Optional[List[ProjectAssociatedNodes]] = dataclass_field(
+    associated_nodes: Optional[
+        List[ProjectAssociatedNodes | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "associatedNodes"},
     )
     """List of association data"""
-    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations (Library content)"""
     copy_from: Optional[str] = dataclass_field(
         default=None,
@@ -249,7 +264,9 @@ class PlannerProject:
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -257,7 +274,12 @@ class PlannerProject:
     """List of custom properties"""
     description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of project"""
-    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of followers"""
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     is_active: Optional[bool] = dataclass_field(
@@ -327,7 +349,12 @@ class PlannerProject:
         metadata={"wire_name": "updatedAt"},
     )
     """Date project was last updated"""
-    works: Optional[List[PlannerTask]] = dataclass_field(default=None, kw_only=True)
+    works: Optional[
+        List[PlannerTask | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of tasks and requests"""
 
 
@@ -341,11 +368,16 @@ class PlannerRequestQueryResponse:
     """Number of records returned"""
     cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerRequest]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[PlannerRequest | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of request objects in the response"""
     limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -366,9 +398,14 @@ class PlannerRequest:
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the assigner"""
-    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = dataclass_field(
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "contentRefs"},
@@ -386,13 +423,20 @@ class PlannerRequest:
         metadata={"wire_name": "creatorId"},
     )
     """User ID of the creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of followers"""
     form_ref: Optional[Any] = dataclass_field(
         default=None,
@@ -431,7 +475,9 @@ class PlannerRequest:
     """Project ID of the project the request is associated with"""
     rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of request in request list"""
-    request_form_custom_property_option: Optional[RequestFormCustomProperties] = dataclass_field(
+    request_form_custom_property_option: Optional[
+        RequestFormCustomProperties | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "requestFormCustomPropertyOption"},
@@ -472,11 +518,16 @@ class StatusSchemaQueryResponse:
     """Number of records returned"""
     cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[StatusSchema]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[StatusSchema | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of status schema objects in the response"""
     limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -539,11 +590,16 @@ class PlannerTaskQueryResponse:
     """Number of records returned"""
     cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerTask]] = dataclass_field(default=None, kw_only=True)
+    items: Optional[
+        List[PlannerTask | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of task objects in the response"""
     limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[Meta | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -582,7 +638,12 @@ class PlannerTask:
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations on a task"""
     copy_from: Optional[str] = dataclass_field(
         default=None,
@@ -602,7 +663,9 @@ class PlannerTask:
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -610,7 +673,12 @@ class PlannerTask:
     """List of custom properties on a task"""
     description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of followers on a task"""
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     is_template: Optional[bool] = dataclass_field(
@@ -687,7 +755,7 @@ class PlannerTask:
         metadata={"wire_name": "subTaskIds"},
     )
     """List of subtask IDs"""
-    sub_tasks: Optional[List[PlannerSubTask]] = dataclass_field(
+    sub_tasks: Optional[List[PlannerSubTask | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "subTasks"},
@@ -896,9 +964,16 @@ class CreateProject:
     Definition: CreateProject
     """
 
-    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of association objects"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -946,15 +1021,22 @@ class CreateRequest:
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = dataclass_field(
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (DocCenter and Workspace associations)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1013,9 +1095,16 @@ class CreateTask:
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[AssociationReq | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations (Library content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1113,13 +1202,15 @@ class CustomProperty:
     """
     order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number indicating order within custom property list"""
-    possible_values: Optional[List[PossibleValuesItem]] = dataclass_field(
+    possible_values: Optional[List[PossibleValuesItem | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "possibleValues"},
     )
     """List of possible values for the custom property (if applicable)"""
-    scope_settings: Optional[List[ScopeSettingsItemDefinition]] = dataclass_field(
+    scope_settings: Optional[
+        List[ScopeSettingsItemDefinition | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "scopeSettings"},
@@ -1135,7 +1226,9 @@ class CustomProperty:
         metadata={"wire_name": "valueSchemaName"},
     )
     """Name of custom property value schema"""
-    value_schema_property: Optional[ValueSchemaPropertyDefinition] = dataclass_field(
+    value_schema_property: Optional[
+        ValueSchemaPropertyDefinition | Mapping[str, Any]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "valueSchemaProperty"},
@@ -1166,7 +1259,7 @@ class CustomPropertyValues:
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     localizations: Optional[
-        Dict[str, CustomPropertyDataDisplay]
+        Dict[str, CustomPropertyDataDisplay | Mapping[str, Any]]
     ] = dataclass_field(
         default=None,
         kw_only=True,
@@ -1180,7 +1273,12 @@ class CustomPropertyValues:
     """Indicate if the custom property allows multiple values"""
     name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
-    values: Optional[List[CustomPropertyValuesValues]] = dataclass_field(default=None, kw_only=True)
+    values: Optional[
+        List[CustomPropertyValuesValues | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of custom property values"""
 
 
@@ -1191,7 +1289,12 @@ class CustomPropertyValuesInput:
     """
 
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
-    values: Optional[List[CustomPropertyValuesValues]] = dataclass_field(default=None, kw_only=True)
+    values: Optional[
+        List[CustomPropertyValuesValues | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of custom property values"""
 
 
@@ -1240,7 +1343,12 @@ class Meta:
 
     count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    query: Optional[List[MetaQueryInfo]] = dataclass_field(default=None, kw_only=True)
+    query: Optional[
+        List[MetaQueryInfo | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Query object"""
 
 
@@ -1290,7 +1398,12 @@ class PlannerSubTask:
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
+    associations: Optional[
+        List[Association | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of associations on a task"""
     copy_from: Optional[str] = dataclass_field(
         default=None,
@@ -1310,7 +1423,9 @@ class PlannerSubTask:
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1318,7 +1433,12 @@ class PlannerSubTask:
     """List of custom properties on a task"""
     description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
+    followers: Optional[
+        List[Follower | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of followers on a task"""
     id: Optional[str] = dataclass_field(default=None, kw_only=True)
     is_template: Optional[bool] = dataclass_field(
@@ -1477,7 +1597,7 @@ class RequestFormCustomProperties:
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    custom_properties: Optional[List[CustomProperty]] = dataclass_field(
+    custom_properties: Optional[List[CustomProperty | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1539,7 +1659,9 @@ class UpdateProject:
     Definition: UpdateProject
     """
 
-    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValues | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1605,13 +1727,15 @@ class UpdateRequest:
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    content_refs: Optional[List[ContentRef]] = dataclass_field(
+    content_refs: Optional[List[ContentRef | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (WorkSpace and DocCenter content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1673,7 +1797,9 @@ class UpdateTask:
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
+    custom_properties: Optional[
+        List[CustomPropertyValuesInput | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "customProperties"},
@@ -1798,45 +1924,6 @@ class SeismicplannerClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "seismicplanner"
 
-    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
-            if next_link.startswith("/"):
-                return f"{self._connection_runtime_url}{next_link}"
-            if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
-
-        parsed_connection = urlsplit(self._connection_runtime_url)
-        next_link_hostname = parsed_next_link.hostname
-        connection_hostname = parsed_connection.hostname
-        if next_link_hostname is None or connection_hostname is None:
-            raise ValueError("Pagination URLs must include a hostname.")
-
-        next_link_port = parsed_next_link.port
-        if next_link_port is None:
-            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
-        connection_port = parsed_connection.port
-        if connection_port is None:
-            connection_port = 443 if parsed_connection.scheme == "https" else 80
-        if next_link_hostname.lower() == connection_hostname.lower():
-            if (
-                parsed_next_link.scheme == parsed_connection.scheme
-                and next_link_port == connection_port
-            ):
-                return next_link
-
-            raise ValueError(
-                "Pagination URL origin "
-                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
-                "must use the connection runtime scheme and port."
-            )
-
-        suffix = parsed_next_link.path
-        if parsed_next_link.query:
-            suffix += f"?{parsed_next_link.query}"
-        return f"{self._connection_runtime_url}{suffix}"
-
     def get_comments(
         self,
         space_id: str,
@@ -1935,7 +2022,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
     def create_comment(
         self,
-        input: CreateCommentModel,
+        input: CreateCommentModel | Mapping[str, Any],
         space_id: str,
         node_id: str,
         *,
@@ -2069,6 +2156,9 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2079,7 +2169,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
     def update_comment(
         self,
-        input: UpdateCommentModel,
+        input: UpdateCommentModel | Mapping[str, Any],
         space_id: str,
         node_id: str,
         comment_id: str,
@@ -2322,7 +2412,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_delete_projects(
+    def delete_projects(
         self,
         space_id: str,
         ids: List[str],
@@ -2332,14 +2422,11 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Delete projects
 
         Delete one or more projects.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2368,49 +2455,34 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = None
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "DELETE", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if response.status == 404:
+            return None
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "DELETE",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("asyncOperationIds", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def create_project(
         self,
-        input: CreateProject,
+        input: CreateProject | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -2510,7 +2582,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_delete_project(
+    def delete_project(
         self,
         space_id: str,
         project_id: str,
@@ -2520,14 +2592,11 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Delete project
 
         Delete a project.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2546,49 +2615,34 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = None
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "DELETE", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if response.status == 404:
+            return None
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "DELETE",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("asyncOperationIds", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def update_project(
         self,
-        input: UpdateProject,
+        input: UpdateProject | Mapping[str, Any],
         space_id: str,
         project_id: str,
         *,
@@ -2939,71 +2993,53 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_delete_requests(
+    def delete_requests(
         self,
-        input: DeleteRequest,
+        input: DeleteRequest | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Delete requests
 
         Bulk delete requests.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "DELETE", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "DELETE", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if response.status == 404:
+            return None
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "DELETE",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("asyncOperationIds", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def create_request(
         self,
-        input: CreateRequest,
+        input: CreateRequest | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3121,6 +3157,9 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3131,7 +3170,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
     def update_request(
         self,
-        input: UpdateRequest,
+        input: UpdateRequest | Mapping[str, Any],
         space_id: str,
         request_id: str,
         *,
@@ -3636,7 +3675,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
     def create_task(
         self,
-        input: CreateTask,
+        input: CreateTask | Mapping[str, Any],
         space_id: str,
         *,
         timeout: Optional[float] = None,
@@ -3721,7 +3760,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_delete_task(
+    def delete_task(
         self,
         space_id: str,
         task_id: str,
@@ -3730,14 +3769,11 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Delete task
 
         Delete a task.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3748,49 +3784,34 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/tasks"
             f"/{quote(str(task_id), safe='')}"
         )
-        initial_request_url = request_url
-        request_body = None
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "DELETE", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "DELETE", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if response.status == 404:
+            return None
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "DELETE",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "DELETE",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("asyncOperationIds", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def update_task(
         self,
-        input: UpdateTask,
+        input: UpdateTask | Mapping[str, Any],
         space_id: str,
         task_id: str,
         *,

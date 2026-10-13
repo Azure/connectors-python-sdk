@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -194,7 +194,7 @@ class GetAbandonedCheckoutsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[AbandonedCheckoutData]] = dataclass_field(
+    data_list: Optional[List[AbandonedCheckoutData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -214,7 +214,7 @@ class ListAllExhibitorsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExhibitorData]] = dataclass_field(
+    data_list: Optional[List[ExhibitorData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -234,7 +234,7 @@ class ListOfExamsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExamData]] = dataclass_field(
+    data_list: Optional[List[ExamData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -254,7 +254,7 @@ class ListRegistrantsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrantData]] = dataclass_field(
+    data_list: Optional[List[RegistrantData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -274,7 +274,7 @@ class GetCourseAttendeesResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CourseAttendeeData]] = dataclass_field(
+    data_list: Optional[List[CourseAttendeeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -282,7 +282,7 @@ class GetCourseAttendeesResponse:
     """dataList"""
 
 
-AddExamScoresInput = List["ExamScoreData"]
+AddExamScoresInput = List["ExamScoreData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -315,7 +315,7 @@ class FindMembersByNameResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[ContactData]] = dataclass_field(
+    data_list: Optional[List[ContactData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -335,7 +335,7 @@ class GetPurchasesForAnIndividualResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[PurchasedItemData]] = dataclass_field(
+    data_list: Optional[List[PurchasedItemData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -343,7 +343,9 @@ class GetPurchasesForAnIndividualResponse:
     """dataList"""
 
 
-AddOrUpdateAListOfCustomFieldsPerOrganizationInput = List["CustomFieldValueData"]
+AddOrUpdateAListOfCustomFieldsPerOrganizationInput = List[
+    "CustomFieldValueData | Mapping[str, Any]"
+]
 
 
 @dataclass
@@ -390,7 +392,9 @@ class ListAllEventCancellationsByEventResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrantCancellationData]] = dataclass_field(
+    data_list: Optional[
+        List[RegistrantCancellationData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -410,7 +414,7 @@ class GetAllOpenOrdersForAnIndividualResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[PayableOrderData]] = dataclass_field(
+    data_list: Optional[List[PayableOrderData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -430,7 +434,7 @@ class ListCompletedUserTasksByUserIdOrEmailResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[UserTaskData]] = dataclass_field(
+    data_list: Optional[List[UserTaskData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -450,7 +454,7 @@ class ListPendingUserTasksByUserIdOrEmailResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[UserTaskData]] = dataclass_field(
+    data_list: Optional[List[UserTaskData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -502,7 +506,7 @@ class ListAllCountriesResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[CountryData]] = dataclass_field(
+    data_list: Optional[List[CountryData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -522,7 +526,7 @@ class GetAllStatesByCountryResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[StateProvinceData]] = dataclass_field(
+    data_list: Optional[List[StateProvinceData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -542,7 +546,7 @@ class ListAllExhibitsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[ExhibitData]] = dataclass_field(
+    data_list: Optional[List[ExhibitData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -570,7 +574,7 @@ class RequestUpdateData:
     """Closed Date."""
 
 
-AddCategoriesForAnOrganizationInput = List["SaveCategoryBasicData"]
+AddCategoriesForAnOrganizationInput = List["SaveCategoryBasicData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -585,7 +589,7 @@ class ListOfCustomerRelationshipsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipTypeData]] = dataclass_field(
+    data_list: Optional[List[RelationshipTypeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -605,7 +609,7 @@ class ListAllOpenCustomerRequestResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RequestData]] = dataclass_field(
+    data_list: Optional[List[RequestData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -797,7 +801,12 @@ class IndividualData:
         metadata={"wire_name": "designationData"},
     )
     """Designations."""
-    relationships: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    relationships: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Relationships."""
     job_roles: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
@@ -887,7 +896,7 @@ class IndividualData:
     """Is Deceased."""
 
 
-AddCategoriesForAnIndividualInput = List["SaveCategoryBasicData"]
+AddCategoriesForAnIndividualInput = List["SaveCategoryBasicData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -902,7 +911,7 @@ class ListOfAllOrganizationMembersResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[OrganizationData]] = dataclass_field(
+    data_list: Optional[List[OrganizationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -922,7 +931,7 @@ class ListOfAllIndividualMembersResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = dataclass_field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -942,7 +951,7 @@ class GetListOfActiveCertificationsForAnOrganizationResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CertificationData]] = dataclass_field(
+    data_list: Optional[List[CertificationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -962,7 +971,7 @@ class GetListOfActiveCertificationsForAnIndividualResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CertificationData]] = dataclass_field(
+    data_list: Optional[List[CertificationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -970,7 +979,7 @@ class GetListOfActiveCertificationsForAnIndividualResponse:
     """dataList"""
 
 
-RegisterAnIndividualForAFreeSessionInput = List["SessionRegistrationData"]
+RegisterAnIndividualForAFreeSessionInput = List["SessionRegistrationData | Mapping[str, Any]"]
 
 
 @dataclass
@@ -985,7 +994,7 @@ class GetAListOfLicensesResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[LicenseData]] = dataclass_field(
+    data_list: Optional[List[LicenseData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1005,7 +1014,7 @@ class ListAllAwardsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardData]] = dataclass_field(
+    data_list: Optional[List[AwardData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1025,7 +1034,7 @@ class FindMembersOrIndividualsByNameResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = dataclass_field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1045,7 +1054,7 @@ class GetAListOfAllServicesOfAnOrganizationResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[ServiceData]] = dataclass_field(
+    data_list: Optional[List[ServiceData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1144,7 +1153,7 @@ class GetNomineesByCommitteeResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteeNomineeData]] = dataclass_field(
+    data_list: Optional[List[CommitteeNomineeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1164,7 +1173,7 @@ class GetOrganizationsActiveSubscriptionsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[SubscriptionData]] = dataclass_field(
+    data_list: Optional[List[SubscriptionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1208,7 +1217,7 @@ class GetOrganizationsRelationshipsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipData]] = dataclass_field(
+    data_list: Optional[List[RelationshipData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1287,7 +1296,7 @@ class GetUpcomingEventsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[EventData]] = dataclass_field(
+    data_list: Optional[List[EventData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1307,7 +1316,7 @@ class GetCommitteeInformationForAnIndividualResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number"""
-    data_list: Optional[List[CommitteeMemberData]] = dataclass_field(
+    data_list: Optional[List[CommitteeMemberData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1327,7 +1336,7 @@ class GetAllEventsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[EventData]] = dataclass_field(
+    data_list: Optional[List[EventData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1347,7 +1356,7 @@ class GetAllEventRegistrationsInformationForAnIndividualResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RegistrationData]] = dataclass_field(
+    data_list: Optional[List[RegistrationData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1367,7 +1376,7 @@ class GetIndividualsRelationshipsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[RelationshipData]] = dataclass_field(
+    data_list: Optional[List[RelationshipData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1525,7 +1534,7 @@ class FindMembersOrIndividualsByFirstAndLastNameResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = dataclass_field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1565,7 +1574,7 @@ class FindIndividualIdOrEmailResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = dataclass_field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1629,7 +1638,9 @@ class IndividualsLookupByNameResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualLookupBasicData]] = dataclass_field(
+    data_list: Optional[
+        List[IndividualLookupBasicData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1871,7 +1882,9 @@ class OrganizationLookupByNameResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[OrganizationLookupBasicData]] = dataclass_field(
+    data_list: Optional[
+        List[OrganizationLookupBasicData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1891,7 +1904,7 @@ class GetAllCommitteesResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteeData]] = dataclass_field(
+    data_list: Optional[List[CommitteeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1911,7 +1924,7 @@ class GetPositionsByCommitteeResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[CommitteePositionData]] = dataclass_field(
+    data_list: Optional[List[CommitteePositionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1931,7 +1944,7 @@ class GetSubCommitteesResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """pageNumber"""
-    data_list: Optional[List[CommitteeData]] = dataclass_field(
+    data_list: Optional[List[CommitteeData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1951,7 +1964,7 @@ class GetIndividualsActiveSubscriptionsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[SubscriptionData]] = dataclass_field(
+    data_list: Optional[List[SubscriptionData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -1971,7 +1984,7 @@ class ListAllIndividualsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[IndividualData]] = dataclass_field(
+    data_list: Optional[List[IndividualData | Mapping[str, Any]]] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -2012,7 +2025,9 @@ class AwardsGetIndividualAwardRecipientsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardRecipientIndividualData]] = dataclass_field(
+    data_list: Optional[
+        List[AwardRecipientIndividualData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -2032,7 +2047,9 @@ class AwardsGetOrganizationAwardRecipientsResponse:
         metadata={"wire_name": "pageNumber"},
     )
     """Page Number."""
-    data_list: Optional[List[AwardRecipientOrganizationData]] = dataclass_field(
+    data_list: Optional[
+        List[AwardRecipientOrganizationData | Mapping[str, Any]]
+    ] = dataclass_field(
         default=None,
         kw_only=True,
         metadata={"wire_name": "dataList"},
@@ -4828,7 +4845,7 @@ class ImpexiumClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -4933,11 +4950,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Exhibitors
 
         List All Exhibitors
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4948,27 +4968,45 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Exhibitors"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_of_exams(
         self,
@@ -4984,11 +5022,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of Exams
 
         List of Exams
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5027,27 +5068,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"includePrices={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_registrants(
         self,
@@ -5061,11 +5120,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Registrants
 
         List Registrants
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5094,27 +5156,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"registeredSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_course_attendees(
         self,
@@ -5406,7 +5486,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_nominee(
         self,
-        input: CommitteeNomineeSaveData,
+        input: CommitteeNomineeSaveData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -5503,7 +5583,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_custom_field_value(
         self,
-        input: CustomFieldData,
+        input: CustomFieldData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5548,11 +5628,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Event Cancellations by Event
 
         List All Event Cancellations by Event
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5576,27 +5659,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"cancelledSince={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_all_open_orders_for_an_individual(
         self,
@@ -5675,11 +5776,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Completed User Tasks by User ID or Email
 
         List Completed User Tasks by User ID or Email
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5691,27 +5795,45 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Completed"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_pending_user_tasks_by_user_id_or_email(
         self,
@@ -5722,11 +5844,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Pending User Tasks by User ID or Email
 
         List Pending User Tasks by User ID or Email
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5738,31 +5863,49 @@ class ImpexiumClient(ConnectorClientBase):
             f"/Pending"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def add_note_to_sales_opportunity(
         self,
-        input: BaseNoteData,
+        input: BaseNoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5798,7 +5941,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_activity_to_sales_opportunity(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -5834,7 +5977,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_task_by_task_number(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         task_number: str,
         *,
         timeout: Optional[float] = None,
@@ -5881,37 +6024,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Countries
 
         List All Countries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Countries/All/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_all_states_by_country(
         self,
@@ -5968,37 +6132,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Exhibits
 
         List All Exhibits
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Exhibits/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def delete_a_category_for_an_organization(
         self,
@@ -6033,6 +6218,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6043,7 +6231,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_customer_request(
         self,
-        input: RequestSaveData,
+        input: RequestSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6075,7 +6263,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_customer_request(
         self,
-        input: RequestUpdateData,
+        input: RequestUpdateData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6158,11 +6346,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of Customer Relationships
 
         List of Customer Relationships
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6172,27 +6363,45 @@ class ImpexiumClient(ConnectorClientBase):
             f"/RelationshipTypes"
             f"/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_all_open_customer_request(
         self,
@@ -6202,37 +6411,58 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Open Customer Request
 
         List All Open Customer Request
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/api/v1/Requests/Open/{quote(str(page_number), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_organization_inactive_memberships(
         self,
@@ -6311,6 +6541,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6321,7 +6554,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_user_task_progress_or_mark_as_completed(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -6474,7 +6707,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def assign_task_to_a_user(
         self,
-        input: UserTaskData,
+        input: UserTaskData | Mapping[str, Any],
         user_id_or_email: str,
         *,
         timeout: Optional[float] = None,
@@ -6541,6 +6774,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -6551,7 +6787,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_notification_to_individual(
         self,
-        input: NotificationData,
+        input: NotificationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -6627,7 +6863,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_a_new_task(
         self,
-        input: TaskSaveData,
+        input: TaskSaveData | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -6689,11 +6925,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of All Organization Members
 
         List of All Organization Members
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6802,27 +7041,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_of_all_individual_members(
         self,
@@ -6847,11 +7104,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List of All Individual Members
 
         List of All Individual Members
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6940,27 +7200,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"expiringTo={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_list_of_active_certifications_for_an_organization(
         self,
@@ -7101,7 +7379,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_activity_to_organization(
         self,
-        input: ActivityData,
+        input: ActivityData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -7242,11 +7520,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List All Awards
 
         List All Awards
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7260,27 +7541,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"Year={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def find_members_or_individuals_by_name(
         self,
@@ -7380,7 +7679,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_a_service_to_an_organization(
         self,
-        input: ServiceData,
+        input: ServiceData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -7421,7 +7720,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_phone_for_an_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -7468,7 +7767,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_phone_for_an_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         id: str,
         *,
@@ -7515,7 +7814,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def delete_an_individual_web_link(
         self,
-        input: DeleteAnIndividualWebLinkInput,
+        input: DeleteAnIndividualWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7545,6 +7844,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -7555,7 +7857,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_web_link_for_individual(
         self,
-        input: AddWebLinkForIndividualInput,
+        input: AddWebLinkForIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7595,7 +7897,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_phone_to_organization(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7741,7 +8043,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def delete_an_organization_web_link(
         self,
-        input: DeleteAnOrganizationWebLinkInput,
+        input: DeleteAnOrganizationWebLinkInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7771,6 +8073,9 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -7781,7 +8086,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_web_link_for_organization(
         self,
-        input: AddWebLinkForOrganizationInput,
+        input: AddWebLinkForOrganizationInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -7821,7 +8126,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_email_to_organization(
         self,
-        input: EmailData,
+        input: EmailData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -7918,7 +8223,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_or_update_address_to_organization(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8069,7 +8374,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_phone_to_individual(
         self,
-        input: PhoneSaveData,
+        input: PhoneSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8534,7 +8839,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_an_individual_email(
         self,
-        input: UpdateAnIndividualEmailInput,
+        input: UpdateAnIndividualEmailInput | Mapping[str, Any],
         id_or_record_number: str,
         current_email_address: str,
         *,
@@ -8576,7 +8881,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def save_relationship_for_organization(
         self,
-        input: SaveRelationshipForOrganizationInput,
+        input: SaveRelationshipForOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8612,7 +8917,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_individual(
         self,
-        input: AddIndividualInput,
+        input: AddIndividualInput | Mapping[str, Any],
         *,
         create_user: Optional[bool] = None,
         timeout: Optional[float] = None,
@@ -8658,7 +8963,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_email_to_individual(
         self,
-        input: AddEmailToIndividualInput,
+        input: AddEmailToIndividualInput | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8703,7 +9008,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_or_update_address_to_individual(
         self,
-        input: AddressSaveData,
+        input: AddressSaveData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -8862,7 +9167,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_activity(
         self,
-        input: AddActivityInput,
+        input: AddActivityInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8948,7 +9253,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_relationship_to_individual(
         self,
-        input: AddRelationshipToIndividualInput,
+        input: AddRelationshipToIndividualInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -8984,7 +9289,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def individual_add_education_credit(
         self,
-        input: EducationCreditData,
+        input: EducationCreditData | Mapping[str, Any],
         id_or_record_number: str,
         *,
         timeout: Optional[float] = None,
@@ -9024,7 +9329,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def individual_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -9109,7 +9414,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_to_committee(
         self,
-        input: CommitteeMemberCreateData,
+        input: CommitteeMemberCreateData | Mapping[str, Any],
         code: str,
         *,
         timeout: Optional[float] = None,
@@ -9150,7 +9455,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_committee_member(
         self,
-        input: CommitteeMemberUpdateData,
+        input: CommitteeMemberUpdateData | Mapping[str, Any],
         code: str,
         member_record_number: str,
         current_position_code: str,
@@ -9194,7 +9499,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def add_organization(
         self,
-        input: AddOrganizationInput,
+        input: AddOrganizationInput | Mapping[str, Any],
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
@@ -9231,7 +9536,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def update_organization(
         self,
-        input: UpdateOrganizationInput,
+        input: UpdateOrganizationInput | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -9322,7 +9627,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def organization_add_note(
         self,
-        input: NoteData,
+        input: NoteData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -9616,11 +9921,14 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List all Individuals
 
         List all Individuals
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9644,27 +9952,45 @@ class ImpexiumClient(ConnectorClientBase):
             query_params.append(f"oldID={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("dataList", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def find_customer_phone(
         self,
@@ -9760,7 +10086,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def awards_add_award_nomination(
         self,
-        input: AwardNominationData,
+        input: AwardNominationData | Mapping[str, Any],
         id: str,
         *,
         timeout: Optional[float] = None,
@@ -9796,7 +10122,7 @@ class ImpexiumClient(ConnectorClientBase):
 
     def awards_update_award_nomination(
         self,
-        input: UpdateAwardNominationData,
+        input: UpdateAwardNominationData | Mapping[str, Any],
         id: str,
         nominee_record_number: str,
         *,

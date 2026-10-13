@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urlsplit
+from urllib.parse import quote, urljoin, urlsplit
 import json
 
 from azure.core.paging import ItemPaged
@@ -105,7 +105,12 @@ class PageableMessageList:
     Response for Get all messages
     """
 
-    value: Optional[List[Message]] = dataclass_field(default=None, kw_only=True)
+    value: Optional[
+        List[Message | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     next_link: Optional[str] = dataclass_field(
         default=None,
         kw_only=True,
@@ -120,7 +125,12 @@ class MessageList:
     Response for When there is a new message in my followed feed
     """
 
-    messages: Optional[List[Message]] = dataclass_field(default=None, kw_only=True)
+    messages: Optional[
+        List[Message | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """messages"""
 
 
@@ -152,7 +162,7 @@ class Message:
     """Web url of the post."""
     group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of group who posted the message."""
-    body: Optional[MessageBody] = dataclass_field(default=None, kw_only=True)
+    body: Optional[MessageBody | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     thread_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of thread."""
     direct_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
@@ -167,7 +177,7 @@ class Message:
     """Details of users notified."""
     privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Details of the privacy associated with the message."""
-    liked_by: Optional[LikedBy] = dataclass_field(default=None, kw_only=True)
+    liked_by: Optional[LikedBy | Mapping[str, Any]] = dataclass_field(default=None, kw_only=True)
     system_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Flag to specify if the post is a system generated message or not."""
 
@@ -305,7 +315,7 @@ class YammerClient(ConnectorClientBase):
                 return f"{self._connection_runtime_url}{next_link}"
             if next_link.startswith("?"):
                 return f"{current_request_url.partition('?')[0]}{next_link}"
-            return f"{self._connection_runtime_url}/{next_link}"
+            return urljoin(current_request_url, next_link)
 
         parsed_connection = urlsplit(self._connection_runtime_url)
         next_link_hostname = parsed_next_link.hostname
@@ -920,7 +930,7 @@ class YammerClient(ConnectorClientBase):
 
     def list_post_message(
         self,
-        input: PostOperationRequest,
+        input: PostOperationRequest | Mapping[str, Any],
         *,
         network_id: Optional[str] = None,
         timeout: Optional[float] = None,
