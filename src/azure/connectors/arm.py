@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -81,7 +81,7 @@ class LocationListResult:
     Response for Lists the subscription locations
     """
 
-    value: Optional[List[Location]] = None
+    value: Optional[List[Location]] = dataclass_field(default=None, kw_only=True)
     """The locations."""
 
 
@@ -91,34 +91,39 @@ class Subscription:
     Response for Read a subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant Id."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The subscription display name."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    subscription_policies: Optional[SubscriptionPolicies] = field(
+    subscription_policies: Optional[SubscriptionPolicies] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionPolicies"},
     )
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -134,10 +139,11 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
+    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
     """The subscriptions."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -149,11 +155,11 @@ class DeploymentExtended:
     Response for Read a template deployment
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the deployment."""
-    name: Optional[str] = None
+    name: str
     """The name of the deployment."""
-    properties: Optional[DeploymentPropertiesExtended] = None
+    properties: Optional[DeploymentPropertiesExtended] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -162,8 +168,13 @@ class DeploymentValidateResult:
     Response for Validate a template deployment
     """
 
-    error: Optional[ResourceManagementErrorWithDetails] = None
-    properties: Optional[DeploymentPropertiesExtended] = None
+    error: Optional[
+        ResourceManagementErrorWithDetails
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    properties: Optional[DeploymentPropertiesExtended] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -172,7 +183,7 @@ class DeploymentExportResult:
     Response for Export deployment template
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content."""
 
 
@@ -182,10 +193,11 @@ class DeploymentListResult:
     Response for List template deployments
     """
 
-    value: Optional[List[DeploymentExtended]] = None
+    value: Optional[List[DeploymentExtended]] = dataclass_field(default=None, kw_only=True)
     """The list of deployments."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -197,14 +209,20 @@ class DeploymentOperation:
     Response for Read a template deployment operation
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Full deployment operation id."""
-    operation_id: Optional[str] = field(
+    operation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "operationId"},
     )
     """Deployment operation id."""
-    properties: Optional[DeploymentOperationProperties] = None
+    properties: Optional[
+        DeploymentOperationProperties
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -213,10 +231,11 @@ class DeploymentOperationsListResult:
     Response for Lists template deployment operations
     """
 
-    value: Optional[List[DeploymentOperation]] = None
+    value: Optional[List[DeploymentOperation]] = dataclass_field(default=None, kw_only=True)
     """The list of deployments."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -228,17 +247,19 @@ class Provider:
     Response for Unregister resource provider
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The provider id."""
-    namespace: Optional[str] = None
+    namespace: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The namespace of the provider."""
-    registration_state: Optional[str] = field(
+    registration_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "registrationState"},
     )
     """The registration state of the provider."""
-    resource_types: Optional[List[ProviderResourceType]] = field(
+    resource_types: Optional[List[ProviderResourceType]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceTypes"},
     )
     """The collection of provider resource types."""
@@ -250,10 +271,11 @@ class ProviderListResult:
     Response for List resource providers
     """
 
-    value: Optional[List[Provider]] = None
+    value: Optional[List[Provider]] = dataclass_field(default=None, kw_only=True)
     """The list of resource providers."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -265,10 +287,11 @@ class ResourceListResult:
     Response for List resources by resource group
     """
 
-    value: Optional[List[GenericResource]] = None
+    value: Optional[List[GenericResource]] = dataclass_field(default=None, kw_only=True)
     """The list of resources."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -280,26 +303,27 @@ class ResourceGroup:
     Response for Read a resource group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ID of the resource group (e.g. /subscriptions/XXX/resourceGroups/YYY).
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group."""
-    location: Optional[str] = None
+    location: str
     """
     The location of the resource group. It cannot be changed after the resource
     group has been created. Has to be one of the supported Azure Locations,
     such as West US, East US, West Europe, East Asia, etc.
     """
-    managed_by: Optional[str] = field(
+    managed_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
-    tags: Optional[Dict[str, str]] = None
+    tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The tags attached to the resource group."""
-    properties: Optional[ResourceGroupProperties] = None
+    properties: Optional[ResourceGroupProperties] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -308,9 +332,14 @@ class ResourceGroupExportResult:
     Response for Export a resource group template
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content."""
-    error: Optional[ResourceManagementErrorWithDetails] = None
+    error: Optional[
+        ResourceManagementErrorWithDetails
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -319,10 +348,11 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
+    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
     """The list of resource groups."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -334,27 +364,32 @@ class GenericResource:
     Response for Read a resource
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource Id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Resource type"""
-    location: Optional[str] = None
-    """Resource location"""
-    tags: Optional[Dict[str, str]] = None
-    """Resource tags"""
-    plan: Optional[Plan] = None
-    kind: Optional[str] = None
-    """The kind of the resource."""
-    managed_by: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Resource type"""
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """Resource location"""
+    tags: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
+    """Resource tags"""
+    plan: Optional[Plan] = dataclass_field(default=None, kw_only=True)
+    kind: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The kind of the resource."""
+    managed_by: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource."""
-    sku: Optional[Sku] = None
-    identity: Optional[Identity] = None
-    properties: Optional[Dict[str, Any]] = None
+    sku: Optional[Sku] = dataclass_field(default=None, kw_only=True)
+    identity: Optional[Identity] = dataclass_field(default=None, kw_only=True)
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The resource properties."""
 
 
@@ -364,7 +399,7 @@ class ResourcesInvokeInput:
     Invoke resource operation
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -377,7 +412,7 @@ class ResourcesInvokeResponse:
     Response for Invoke resource operation
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -390,7 +425,7 @@ class ProviderResourcesInvokeInput:
     Invoke resource operation in provider
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -403,7 +438,7 @@ class ProviderResourcesInvokeResponse:
     Response for Invoke resource operation in provider
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -416,14 +451,15 @@ class TagValue:
     Response for Create or update a subscription resource tag value
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag ID."""
-    tag_value: Optional[str] = field(
+    tag_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagValue"},
     )
     """The tag value."""
-    count: Optional[TagCount] = None
+    count: Optional[TagCount] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -432,15 +468,16 @@ class TagDetails:
     Response for Create or update a subscription resource tag name
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag ID."""
-    tag_name: Optional[str] = field(
+    tag_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagName"},
     )
     """The tag name."""
-    count: Optional[TagCount] = None
-    values: Optional[List[TagValue]] = None
+    count: Optional[TagCount] = dataclass_field(default=None, kw_only=True)
+    values: Optional[List[TagValue]] = dataclass_field(default=None, kw_only=True)
     """The list of tag values."""
 
 
@@ -450,10 +487,11 @@ class TagsListResult:
     Response for List subscription resource tags
     """
 
-    value: Optional[List[TagDetails]] = None
+    value: Optional[List[TagDetails]] = dataclass_field(default=None, kw_only=True)
     """The list of tags."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -465,26 +503,28 @@ class Location:
     Definition: Location
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id of the location. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000/locations/westus.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The location name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the location."""
-    latitude: Optional[str] = None
+    latitude: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The latitude of the location."""
-    longitude: Optional[str] = None
+    longitude: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The longitude of the location."""
 
 
@@ -494,8 +534,9 @@ class SubscriptionPolicies:
     Definition: SubscriptionPolicies
     """
 
-    location_placement_id: Optional[str] = field(
+    location_placement_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "locationPlacementId"},
     )
     """
@@ -503,13 +544,15 @@ class SubscriptionPolicies:
     visible for a subscription. For example, a subscription with a location
     placement Id of Public_2014-09-01 has access to Azure public regions.
     """
-    quota_id: Optional[str] = field(
+    quota_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "quotaId"},
     )
     """The subscription quota Id."""
-    spending_limit: Optional[str] = field(
+    spending_limit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spendingLimit"},
     )
     """The subscription spending limit."""
@@ -521,10 +564,11 @@ class TemplateLink:
     Definition: TemplateLink
     """
 
-    uri: Optional[str] = None
+    uri: str
     """URI referencing the template."""
-    content_version: Optional[str] = field(
+    content_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentVersion"},
     )
     """If included it must match the ContentVersion in the template."""
@@ -536,10 +580,11 @@ class ParametersLink:
     Definition: ParametersLink
     """
 
-    uri: Optional[str] = None
+    uri: str
     """URI referencing the template."""
-    content_version: Optional[str] = field(
+    content_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentVersion"},
     )
     """If included it must match the ContentVersion in the template."""
@@ -551,28 +596,31 @@ class DeploymentProperties:
     Definition: DeploymentProperties
     """
 
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     The template content. It can be a JObject or a well formed JSON string. Use
     only one of Template or TemplateLink.
     """
-    template_link: Optional[TemplateLink] = field(
+    template_link: Optional[TemplateLink] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateLink"},
     )
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Deployment parameters. It can be a JObject or a well formed JSON string.
     Use only one of Parameters or ParametersLink.
     """
-    parameters_link: Optional[ParametersLink] = field(
+    parameters_link: Optional[ParametersLink] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
-    mode: Optional[str] = None
+    mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = field(
+    debug_setting: Optional[DebugSetting] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "debugSetting"},
     )
 
@@ -583,8 +631,9 @@ class DebugSetting:
     Definition: DebugSetting
     """
 
-    detail_level: Optional[str] = field(
+    detail_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "detailLevel"},
     )
     """The debug detail level."""
@@ -596,7 +645,7 @@ class Deployment:
     Definition: Deployment
     """
 
-    properties: Optional[DeploymentProperties] = None
+    properties: Optional[DeploymentProperties] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -605,13 +654,13 @@ class ResourceManagementErrorWithDetails:
     Definition: ResourceManagementErrorWithDetails
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The error code returned from the server."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The error message returned from the server."""
-    target: Optional[str] = None
+    target: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The target of the error."""
-    details: Optional[List[Dict[str, Any]]] = None
+    details: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Validation error."""
 
 
@@ -621,10 +670,11 @@ class AliasPathType:
     Definition: AliasPathType
     """
 
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The path of an alias."""
-    api_versions: Optional[List[str]] = field(
+    api_versions: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersions"},
     )
     """The api versions."""
@@ -636,9 +686,9 @@ class AliasType:
     Definition: AliasType
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The alias name."""
-    paths: Optional[List[AliasPathType]] = None
+    paths: Optional[List[AliasPathType]] = dataclass_field(default=None, kw_only=True)
     """The paths for an alias."""
 
 
@@ -648,23 +698,25 @@ class ProviderResourceType:
     Definition: ProviderResourceType
     """
 
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The resource type."""
-    locations: Optional[List[ObjectWithoutType]] = None
+    locations: Optional[List[ObjectWithoutType]] = dataclass_field(default=None, kw_only=True)
     """
     The collection of locations where this resource type can be created in.
     """
-    aliases: Optional[List[AliasType]] = None
+    aliases: Optional[List[AliasType]] = dataclass_field(default=None, kw_only=True)
     """The aliases that are supported by this resource type."""
-    api_versions: Optional[List[str]] = field(
+    api_versions: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersions"},
     )
     """The api version."""
-    properties: Optional[Dict[str, str]] = None
+    properties: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """The properties."""
 
 
@@ -674,15 +726,17 @@ class BasicDependency:
     Definition: BasicDependency
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the dependency."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The dependency resource type."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The dependency resource name."""
@@ -694,20 +748,23 @@ class Dependency:
     Definition: Dependency
     """
 
-    depends_on: Optional[List[BasicDependency]] = field(
+    depends_on: Optional[List[BasicDependency]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dependsOn"},
     )
     """The list of dependencies."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the dependency."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The dependency resource type."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The dependency resource name."""
@@ -719,40 +776,45 @@ class DeploymentPropertiesExtended:
     Definition: DeploymentPropertiesExtended
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the provisioning."""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "correlationId"},
     )
     """The correlation ID of the deployment."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timestamp of the template deployment."""
-    outputs: Optional[Dict[str, Any]] = None
+    outputs: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Key/value pairs that represent deploymentoutput."""
-    providers: Optional[List[Provider]] = None
+    providers: Optional[List[Provider]] = dataclass_field(default=None, kw_only=True)
     """The list of resource providers needed for the deployment."""
-    dependencies: Optional[List[Dependency]] = None
+    dependencies: Optional[List[Dependency]] = dataclass_field(default=None, kw_only=True)
     """The list of deployment dependencies."""
-    template: Optional[Dict[str, Any]] = None
+    template: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The template content. Use only one of Template or TemplateLink."""
-    template_link: Optional[TemplateLink] = field(
+    template_link: Optional[TemplateLink] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateLink"},
     )
-    parameters: Optional[Dict[str, Any]] = None
+    parameters: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Deployment parameters. Use only one of Parameters or ParametersLink."""
-    parameters_link: Optional[ParametersLink] = field(
+    parameters_link: Optional[ParametersLink] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parametersLink"},
     )
-    mode: Optional[str] = None
+    mode: str
     """The deployment mode."""
-    debug_setting: Optional[DebugSetting] = field(
+    debug_setting: Optional[DebugSetting] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "debugSetting"},
     )
 
@@ -763,14 +825,15 @@ class Plan:
     Definition: Plan
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The plan ID."""
-    publisher: Optional[str] = None
+    publisher: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The publisher ID."""
-    product: Optional[str] = None
+    product: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The offer ID."""
-    promotion_code: Optional[str] = field(
+    promotion_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "promotionCode"},
     )
     """The promotion code."""
@@ -782,17 +845,17 @@ class Sku:
     Definition: Sku
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku name."""
-    tier: Optional[str] = None
+    tier: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku tier."""
-    size: Optional[str] = None
+    size: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku size."""
-    family: Optional[str] = None
+    family: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku family."""
-    model: Optional[str] = None
+    model: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sku model."""
-    capacity: Optional[int] = None
+    capacity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The sku capacity."""
 
 
@@ -802,17 +865,23 @@ class Identity:
     Definition: Identity
     """
 
-    principal_id: Optional[str] = field(
+    principal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "principalId"},
     )
     """The principal id of resource identity."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant id of resource."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The identity type."""
 
 
@@ -822,8 +891,9 @@ class ResourceGroupProperties:
     Definition: ResourceGroupProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The provisioning state."""
@@ -835,12 +905,12 @@ class ExportTemplateRequest:
     Definition: ExportTemplateRequest
     """
 
-    resources: Optional[List[str]] = None
+    resources: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The ids of the resources. The only supported string currently is '*' (all
     resources). Future api updates will support exporting specific resources.
     """
-    options: Optional[str] = None
+    options: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The export template options. Supported values include
     'IncludeParameterDefaultValue', 'IncludeComments' or
@@ -854,9 +924,13 @@ class TagCount:
     Definition: TagCount
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of count."""
-    value: Optional[int] = None
+    value: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Value of count."""
 
 
@@ -866,15 +940,17 @@ class TargetResource:
     Definition: TargetResource
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource."""
-    resource_name: Optional[str] = field(
+    resource_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceName"},
     )
     """The name of the resource."""
-    resource_type: Optional[str] = field(
+    resource_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceType"},
     )
     """The type of the resource."""
@@ -886,7 +962,7 @@ class HttpMessage:
     Definition: HttpMessage
     """
 
-    content: Optional[Dict[str, Any]] = None
+    content: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """HTTP message content."""
 
 
@@ -896,34 +972,39 @@ class DeploymentOperationProperties:
     Definition: DeploymentOperationProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the provisioning."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time of the operation."""
-    service_request_id: Optional[str] = field(
+    service_request_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serviceRequestId"},
     )
     """Deployment operation service request id."""
-    status_code: Optional[str] = field(
+    status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusCode"},
     )
     """Operation status code."""
-    status_message: Optional[Dict[str, Any]] = field(
+    status_message: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusMessage"},
     )
     """Operation status message."""
-    target_resource: Optional[TargetResource] = field(
+    target_resource: Optional[TargetResource] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetResource"},
     )
-    request: Optional[HttpMessage] = None
-    response: Optional[HttpMessage] = None
+    request: Optional[HttpMessage] = dataclass_field(default=None, kw_only=True)
+    response: Optional[HttpMessage] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -932,7 +1013,7 @@ class ObjectWithoutType:
     Definition: ObjectWithoutType
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1043,7 +1124,7 @@ class ArmClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def subscriptions_list_locations(
+    def list_subscriptions_list_locations(
         self,
         subscription_id: str,
         *,
@@ -1051,11 +1132,14 @@ class ArmClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists the subscription locations
 
         Lists the locations available for the subscription.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1065,27 +1149,45 @@ class ArmClient(ConnectorClientBase):
         query_params.append("x-ms-api-version=" + quote("2016-06-01", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def subscriptions_get(
         self,

@@ -17,7 +17,7 @@ async def list_sites() -> None:
     """List WordPress sites available to the connection."""
     async with DefaultAzureCredential() as credential:
         async with WordpressClient(CONNECTION_RUNTIME_URL, credential) as client:
-            sites = await client.list_sites()
+            sites = [item async for item in client.list_sites()]
             print(f"Sites: {sites}")
 
 

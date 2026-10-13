@@ -13,6 +13,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: UniversalprintClient, operation: str):
@@ -24,7 +25,7 @@ async def _invoke_operation(client: UniversalprintClient, operation: str):
             file_name="document.pdf",
         )
     if operation == "list_recent_shares":
-        return await client.list_recent_shares()
+        return await resolve_generated_result(client.list_recent_shares())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -193,9 +194,9 @@ class TestUniversalprintClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_recent_shares()
+            result = await resolve_generated_result(client.list_recent_shares())
 
-            assert result["value"][0]["id"] == "share123"
+            assert result == [{"id": "share123"}]
             assert mock_send.call_args[0][0] == "GET"
             assert "/beta/me/print/recentPrinterShares" in mock_send.call_args[0][1]
 
@@ -206,7 +207,7 @@ class TestUniversalprintClientMethods:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text="")
+        mock_response = MockResponse(status=200, text='{"value": []}')
 
         with patch.object(
             client._http_client,
@@ -214,9 +215,9 @@ class TestUniversalprintClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_recent_shares()
+            result = await resolve_generated_result(client.list_recent_shares())
 
-            assert result is None
+            assert result == []
 
 
 class TestUniversalprintClientErrorHandling:

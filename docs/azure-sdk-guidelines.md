@@ -12,7 +12,8 @@ decisions so future changes preserve the public contract.
 | Transports | Accept Azure Core `HttpTransport`/`AsyncHttpTransport` implementations. | Follow |
 | Paging | Return `ItemPaged`/`AsyncItemPaged` and support `by_page(continuation_token=...)`. | Follow |
 | Models | Define wire models once in the root connector module and share object identity with aio. | Project convention |
-| Imports | Require per-connector module imports; do not add generated-client barrel exports. | Project convention |
+| Imports | Export clients lazily from package roots while retaining direct per-connector imports. | Follow |
+| Errors | Derive connector service errors from Azure Core `HttpResponseError`. | Follow |
 | Request options | Expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` on both modes. | Follow |
 | Long-running operations | Return `LROPoller`/`AsyncLROPoller` for retained operations with an HTTP 202 `Location` contract. | Follow |
 | Return values | Return connector payloads directly rather than Azure Core `Response[T]` wrappers. | Intentional deviation |
@@ -26,6 +27,10 @@ from azure.connectors.office365 import Office365Client, SendEmailInput
 # Asynchronous client; models still come from the root module
 from azure.connectors.aio.office365 import Office365Client
 from azure.connectors.office365 import SendEmailInput
+
+# Clients are also available as lazy package-root exports
+from azure.connectors import Office365Client
+from azure.connectors.aio import Office365Client
 ```
 
 The two clients have distinct identities and runtimes. Models, type aliases,
@@ -38,6 +43,7 @@ not part of the current contract.
 ## Compatibility policy
 
 The pre-1.0 async-only surface is replaced rather than shimmed. Root modules do
-not retain asynchronous client aliases, aio methods do not retain `_async`
-aliases, and package roots do not aggregate all generated clients. See the
-[migration guide](migration-sync-aio.md) for mechanical changes.
+not retain asynchronous client aliases, and aio methods do not retain `_async`
+aliases. Package-root exports are lazy so importing `azure.connectors` does not
+load every generated module. See the [migration guide](migration-sync-aio.md)
+for mechanical changes.

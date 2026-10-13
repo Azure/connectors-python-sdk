@@ -9,7 +9,7 @@ The **CodefulSdkGenerator** tool generates typed Python clients from managed con
 - **Type-safe contracts** - Dataclass models with proper JSON field mappings
 - **Paired client classes** - Root sync and `.aio` async clients with identical unsuffixed operations
 - **Authentication handling** - Caller-owned Azure Core token or key credentials
-- **Azure Core paging** - `ItemPaged` and `AsyncItemPaged` for pageable operations
+- **Azure Core paging** - `ItemPaged` and `AsyncItemPaged` for collection operations
 
 ## Prerequisites
 
@@ -52,17 +52,17 @@ cd <BPM-repo-root>
 dotnet build .\src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli\LogicAppsCompiler.Cli.csproj -c Release
 ```
 
-The compiled executable will be at:
+The compiled compiler assembly will be at:
 
 ```text
-src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli\bin\Release\net8.0\LogicAppsCompiler.exe
+src\tools\CodefulSdkGenerator\LogicAppsCompiler.Cli\bin\Release\net8.0\LogicAppsCompiler.dll
 ```
 
 ## Generation Commands
 
-Use the [live-download workflow](#live-regeneration-and-review) for every refresh
-and review. The examples below show CLI argument forms, not permission to reuse
-responses from an earlier run.
+Capture live definitions only when intentionally refreshing the committed
+Swagger inputs. Normal regeneration uses the reviewed snapshots in this
+repository.
 
 ### Generate Python Client SDK (Recommended)
 
@@ -70,13 +70,13 @@ Generates synchronous and asynchronous Python clients in one request:
 
 ```powershell
 # Generate all connectors
-LogicAppsCompiler.exe <output-directory> --pythonDirectClient
+dotnet LogicAppsCompiler.dll <output-directory> --pythonDirectClient
 
 # Generate specific connectors only
-LogicAppsCompiler.exe <output-directory> --pythonDirectClient --connectors=office365,sharepointonline,teams
+dotnet LogicAppsCompiler.dll <output-directory> --pythonDirectClient --connectors=office365,sharepointonline,teams
 
 # Example: Generate to this SDK repo's src/azure/connectors folder
-LogicAppsCompiler.exe "<path-to-sdk>/src/azure/connectors" --pythonDirectClient --connectors=office365
+dotnet LogicAppsCompiler.dll "<path-to-sdk>/src/azure/connectors" --pythonDirectClient --connectors=office365
 ```
 
 **Output structure per connector:**
@@ -100,12 +100,12 @@ LogicAppsCompiler.exe <output-directory> --directClient --connectors=office365
 LogicAppsCompiler.exe <output-directory> --directClient --language=csharp --connectors=office365
 ```
 
-## Live Regeneration and Review
+## Capture and Deterministic Regeneration
 
-Refresh existing clients from live managed connector definitions. Set the source
-subscription and region explicitly, and use a new empty temporary `ARMCACHE_PATH`
-for every run. The generator's cache is only a transport implementation detail;
-never seed it from repository fixtures or reuse a previous run's responses.
+To refresh connector contracts, set the source subscription and region
+explicitly, use a new empty temporary `ARMCACHE_PATH`, and capture raw responses
+with `--swagger-output-directory`. Review the snapshot changes before replacing
+the committed files under `swagger-cache/`.
 
 ```powershell
 $env:AZURE_SUBSCRIPTION_ID = "<live-subscription-id>"
@@ -117,7 +117,9 @@ $liveCachePath = Join-Path $env:TEMP ("connector-live-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $liveCachePath, $outputDirectory -Force | Out-Null
 try {
     $env:ARMCACHE_PATH = $liveCachePath
-    LogicAppsCompiler.exe $outputDirectory --directClient --language=python "--connectors=$connectorNames"
+    dotnet LogicAppsCompiler.dll $outputDirectory --directClient --language=python `
+        "--connectors=$connectorNames" `
+        "--swagger-output-directory=<snapshot-output-directory>"
 }
 finally {
     $env:ARMCACHE_PATH = $previousCachePath
@@ -125,22 +127,26 @@ finally {
 }
 ```
 
-Check per-connector failures as well as the CLI exit code. Record the exact
-generator revision, linked PR and its status, source subscription, region, and capture time.
-Paired generator/SDK PRs show generated output from the active generator PR before
-it merges. Label that source as unmerged; final SDK merge still requires upstream integration.
-Do not add cache folders or replay scaffolding as part of a client refresh.
+After committing exactly one `<connector>.swagger.json` snapshot per generated
+connector, regenerate the complete catalog offline:
 
-Reviewers must fetch live definitions independently using their own new empty
-temporary directory. Do not give the producer's responses to the reviewer as
-generation inputs. Compare generated outputs after normalizing CRLF to LF;
-investigate live differences instead of substituting cached inputs to make them match.
+```powershell
+python scripts/regenerate_connectors.py <path-to-LogicAppsCompiler.dll> `
+    --generator-revision=<full-AzureUX-BPM-commit> `
+    --captured-at-utc=<UTC-capture-timestamp>
+```
+
+The helper validates exact snapshot and sync/aio inventories, generates into an
+isolated directory before replacing outputs, writes the lazy client registry and
+package type stubs, and updates `generation.manifest.json` with canonical hashes.
+Run it a second time and require a clean diff to prove reproducibility.
 
 ### Pageable Results
 
-Pageable operations return Azure Core pagers. Iteration follows continuation
-links and yields items directly; an empty response yields no items. Do not await
-pager construction:
+Collection operations return Azure Core pagers, including bounded collections
+without continuation metadata. Iteration follows continuation links when the
+contract provides them and yields items directly; an empty response yields no
+items. Do not await pager construction:
 
 ```python
 for item in sync_client.list_items(...):
@@ -291,14 +297,16 @@ String and integer enums become `Literal` aliases, and array roots become typed 
 
 #### 2. Dataclass Models
 
-Connector object schemas are generated as dataclasses with optional fields:
+Connector object schemas are generated as dataclasses. Swagger-required fields
+are required constructor arguments; optional fields are keyword-only and
+default to `None`:
 
 ```python
 @dataclass
 class FileMetadata:
     """Metadata for a file in SharePoint or OneDrive."""
-    
-    id: Optional[str] = None
+
+    id: str
     name: Optional[str] = None
     path: Optional[str] = None
     size: Optional[int] = None
@@ -390,9 +398,8 @@ After generating a new connector client:
     Copy-Item "output\aio\office365.py" "src\azure\connectors\aio\office365.py"
    ```
 
-2. **Do not add package-level client exports.** Consumers import each client
-    from its connector module. Keep root and aio package `__init__.py` files
-    minimal.
+2. **Regenerate package-level artifacts.** The helper writes the lazy client
+    registry and root/aio `.pyi` files. Do not edit them manually.
 
 3. **Create unit tests** following the pattern in `tests/`:
 
@@ -501,7 +508,8 @@ Every generated connector client MUST satisfy these invariants before merge:
 ### 2. Response Status Checking (All Operations)
 
 - Every HTTP operation MUST capture the response and check the status code
-- Non-2xx responses MUST raise `ConnectorException` with status code and message
+- Non-2xx responses MUST raise `ConnectorException`, an Azure Core
+    `HttpResponseError`, with status code and message
 - Void operations (DELETE, PATCH, fire-and-forget POST) MUST NOT discard the response unchecked
 
 **Correct pattern:**
@@ -557,7 +565,8 @@ non-2xx responses raise `ConnectorException`.
 
 - All public types (dataclasses) referenced by method signatures MUST be defined
 - No `# type: ignore` comments unless accompanied by a tracked issue link
-- All optional parameters MUST have `Optional[T]` type hints and default values
+- All optional parameters MUST have `Optional[T]` type hints and default values;
+    Swagger-required model fields MUST remain required constructor arguments
 
 ## Generator File Locations (BPM Repository)
 

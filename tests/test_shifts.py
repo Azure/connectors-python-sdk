@@ -19,7 +19,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestShiftsClientInitialization:
@@ -280,7 +280,11 @@ class TestCreateShiftAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
+        payload = model_instance(
+            CreateShiftRequest,
+            scheduling_group_id="group-1",
+            user_id="user-1",
+        )
         mock_response = MockResponse(status=201, text='{"id": "shift-1"}')
 
         with patch.object(
@@ -306,7 +310,11 @@ class TestCreateShiftAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        payload = CreateShiftRequest(scheduling_group_id="group-1", user_id="user-1")
+        payload = model_instance(
+            CreateShiftRequest,
+            scheduling_group_id="group-1",
+            user_id="user-1",
+        )
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
         with patch.object(

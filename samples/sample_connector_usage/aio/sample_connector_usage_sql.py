@@ -55,16 +55,16 @@ async def example_1_list_servers_and_databases():
     async with DefaultAzureCredential() as credential:
 
         async with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-            servers = await client.get_servers()
-            server_values = servers.get("value", []) if servers else []
+            servers = [item async for item in client.list_servers()]
+            server_values = servers
             print(f"Found {len(server_values)} server(s).")
 
             if not SERVER:
                 print("Set SQL_SERVER to list databases and tables.")
                 return
 
-            databases = await client.get_databases(server=SERVER)
-            database_values = databases.get("value", []) if databases else []
+            databases = [item async for item in client.list_databases(server=SERVER)]
+            database_values = databases
             print(f"Found {len(database_values)} database(s) on '{SERVER}'.")
 
             if not DATABASE:
@@ -168,11 +168,11 @@ async def example_4_query_and_procedures():
                 result_sets = (query_result or {}).get("resultSets", {})
                 print(f"Query returned {len(result_sets)} result set(s).")
 
-                procedures = await client.get_procedures_v2(
+                procedures = [item async for item in client.list_procedures_v2(
                     server=SERVER,
                     database=DATABASE,
-                )
-                procedure_values = procedures.get("value", []) if procedures else []
+                )]
+                procedure_values = procedures
                 print(f"Found {len(procedure_values)} stored procedure(s).")
 
                 if procedure_values:

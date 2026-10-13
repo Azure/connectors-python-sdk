@@ -35,7 +35,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 WRITE_OPERATIONS = [
     (
-        "add_models",
+        "list_add_models",
         [{"@id": "dtmi:example:Room;1"}],
         {},
         "POST",
@@ -192,7 +192,9 @@ class TestWriteOperationSignatures:
             return_value=MockResponse(status=200, text="{}"),
         ) as mock_send:
             method = getattr(client, f"{operation}")
-            await method(input=input_value, **operation_args)
+            await resolve_generated_result(
+                method(input=input_value, **operation_args)
+            )
 
             mock_send.assert_called_once_with(
                 http_method,
@@ -232,7 +234,9 @@ class TestWriteOperationSignatures:
         ):
             method = getattr(client, f"{operation}")
             with pytest.raises(ConnectorException) as exc_info:
-                await method(input=input_value, **operation_args)
+                await resolve_generated_result(
+                    method(input=input_value, **operation_args)
+                )
 
             assert exc_info.value.status_code == 400
 

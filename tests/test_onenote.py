@@ -145,7 +145,7 @@ class TestGetNotebooksAsync:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"fileName": "Work Notes", "key": "nb-123"}]}'
+            text='[{"fileName": "Work Notes", "key": "nb-123"}]'
         )
 
         with patch.object(
@@ -154,11 +154,10 @@ class TestGetNotebooksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_notebooks()
+            result = await resolve_generated_result(client.list_notebooks())
 
             mock_send.assert_called_once()
-            assert result is not None
-            assert "value" in result
+            assert result[0]["key"] == "nb-123"
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -176,8 +175,8 @@ class TestGetNotebooksAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_notebooks()
-            assert result is None
+            result = await resolve_generated_result(client.list_notebooks())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -196,7 +195,7 @@ class TestGetNotebooksAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_notebooks()
+                await resolve_generated_result(client.list_notebooks())
 
 
 class TestGetSectionsInNotebookAsync:
@@ -221,7 +220,9 @@ class TestGetSectionsInNotebookAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_sections_in_notebook(notebook_key="nb-123")
+            result = await resolve_generated_result(
+                client.list_sections_in_notebook(notebook_key="nb-123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -245,7 +246,9 @@ class TestGetSectionsInNotebookAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.get_sections_in_notebook(notebook_key="invalid")
+                await resolve_generated_result(
+                    client.list_sections_in_notebook(notebook_key="invalid")
+                )
 
 
 class TestCreateSectionInNotebookAsync:
@@ -698,10 +701,10 @@ class TestDataclasses:
         response = NewPageResponse()
         assert response.value is None
 
-    def test_create_section_request_defaults(self):
-        """Test CreateSectionRequest default values."""
-        request = CreateSectionRequest()
-        assert request.name is None
+    def test_create_section_request_required_value(self):
+        """Test CreateSectionRequest required value."""
+        request = CreateSectionRequest(name="New Section")
+        assert request.name == "New Section"
 
     def test_create_section_request_with_values(self):
         """Test CreateSectionRequest with values."""
@@ -736,26 +739,31 @@ class TestDataclasses:
         assert parent.id == "nb-123"
         assert parent.name == "Work Notebook"
 
-    def test_link_defaults(self):
-        """Test Link default values."""
-        link = Link()
-        assert link.one_note_client_url is None
-        assert link.one_note_web_url is None
+    def test_link_required_values(self):
+        """Test Link required values."""
+        client_url = OneNoteClientUrl(href="onenote:https://example.com/notebook")
+        web_url = OneNoteWebUrl(href="https://example.com/notebook")
+        link = Link(
+            one_note_client_url=client_url,
+            one_note_web_url=web_url,
+        )
+        assert link.one_note_client_url is client_url
+        assert link.one_note_web_url is web_url
 
-    def test_one_note_client_url_defaults(self):
-        """Test OneNoteClientUrl default values."""
-        url = OneNoteClientUrl()
-        assert url.href is None
+    def test_one_note_client_url_required_value(self):
+        """Test OneNoteClientUrl required value."""
+        url = OneNoteClientUrl(href="onenote:https://example.com/notebook")
+        assert url.href == "onenote:https://example.com/notebook"
 
     def test_one_note_client_url_with_values(self):
         """Test OneNoteClientUrl with values."""
         url = OneNoteClientUrl(href="onenote:https://example.com/notebook")
         assert url.href == "onenote:https://example.com/notebook"
 
-    def test_one_note_web_url_defaults(self):
-        """Test OneNoteWebUrl default values."""
-        url = OneNoteWebUrl()
-        assert url.href is None
+    def test_one_note_web_url_required_value(self):
+        """Test OneNoteWebUrl required value."""
+        url = OneNoteWebUrl(href="https://example.com/notebook")
+        assert url.href == "https://example.com/notebook"
 
     def test_section_list_item_defaults(self):
         """Test SectionListItem default values."""

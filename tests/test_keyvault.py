@@ -770,11 +770,14 @@ class TestDataClasses:
         assert collection.value is None
         assert collection.continuation_token is None
 
-    def test_key_encrypt_input_defaults(self):
-        """Test KeyEncryptInput dataclass with defaults."""
-        input_obj = KeyEncryptInput()
-        assert input_obj.algorithm is None
-        assert input_obj.raw_data is None
+    def test_key_encrypt_input_required_fields(self):
+        """Test KeyEncryptInput dataclass required fields."""
+        input_obj = KeyEncryptInput(
+            algorithm="RSA-OAEP",
+            raw_data="data to encrypt",
+        )
+        assert input_obj.algorithm == "RSA-OAEP"
+        assert input_obj.raw_data == "data to encrypt"
 
     def test_key_encrypt_input_with_values(self):
         """Test KeyEncryptInput dataclass with values."""
@@ -785,11 +788,14 @@ class TestDataClasses:
         assert input_obj.algorithm == "RSA-OAEP"
         assert input_obj.raw_data == "data to encrypt"
 
-    def test_key_decrypt_input_defaults(self):
-        """Test KeyDecryptInput dataclass with defaults."""
-        input_obj = KeyDecryptInput()
-        assert input_obj.algorithm is None
-        assert input_obj.encrypted_data is None
+    def test_key_decrypt_input_required_fields(self):
+        """Test KeyDecryptInput dataclass required fields."""
+        input_obj = KeyDecryptInput(
+            algorithm="RSA-OAEP",
+            encrypted_data="encrypted data",
+        )
+        assert input_obj.algorithm == "RSA-OAEP"
+        assert input_obj.encrypted_data == "encrypted data"
 
     def test_key_encrypt_output_defaults(self):
         """Test KeyEncryptOutput dataclass with defaults."""

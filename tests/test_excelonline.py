@@ -72,16 +72,20 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             id="row1",
             id_column="ID",
         )
-    if operation == "get_all_worksheets":
-        return await client.get_all_worksheets(drive="drive123", file="file123")
+    if operation == "list_all_worksheets":
+        return await resolve_generated_result(
+            client.list_all_worksheets(drive="drive123", file="file123")
+        )
     if operation == "create_worksheet":
         return await client.create_worksheet(
             input=CreateWorksheetInput(name="Sheet2"),
             drive="drive123",
             file="file123",
         )
-    if operation == "get_tables":
-        return await client.get_tables(drive="drive123", file="file123")
+    if operation == "list_tables":
+        return await resolve_generated_result(
+            client.list_tables(drive="drive123", file="file123")
+        )
     if operation == "add_row":
         return await client.add_row(
             input=Item(dynamic_properties={"Name": "Item1", "Value": 100}),
@@ -89,11 +93,13 @@ async def _invoke_operation(client: ExcelonlineClient, operation: str):
             file="file123",
             table="Table1",
         )
-    if operation == "get_columns":
-        return await client.get_columns(
-            drive="drive123",
-            file="file123",
-            table="Table1",
+    if operation == "list_columns":
+        return await resolve_generated_result(
+            client.list_columns(
+                drive="drive123",
+                file="file123",
+                table="Table1",
+            )
         )
 
     raise ValueError(f"Unsupported operation '{operation}'.")
@@ -270,8 +276,8 @@ class TestExcelonlineClientMethods:
             assert isinstance(mock_send.call_args.kwargs["body"], Item)
 
     @pytest.mark.asyncio
-    async def test_get_all_worksheets_success(self, mock_credential):
-        """Test get_all_worksheets_async uses codeless worksheets endpoint."""
+    async def test_list_all_worksheets_success(self, mock_credential):
+        """Test list_all_worksheets uses codeless worksheets endpoint."""
         client = ExcelonlineClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -284,9 +290,11 @@ class TestExcelonlineClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_worksheets(drive="drive123", file="file123")
+            result = await resolve_generated_result(
+                client.list_all_worksheets(drive="drive123", file="file123")
+            )
 
-            assert len(result["value"]) == 1
+            assert result == [{"name": "Sheet1"}]
             assert "/workbook/worksheets" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
@@ -328,11 +336,11 @@ class TestExcelonlineClientErrorHandling:
             "get_item",
             "delete_item",
             "patch_item",
-            "get_all_worksheets",
+            "list_all_worksheets",
             "create_worksheet",
-            "get_tables",
+            "list_tables",
             "add_row",
-            "get_columns",
+            "list_columns",
         ],
     )
     async def test_error_response_raises_exception_for_all_operations(

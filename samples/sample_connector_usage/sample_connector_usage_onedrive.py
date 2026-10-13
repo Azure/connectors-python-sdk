@@ -153,7 +153,7 @@ def example_5_search_files():
 
         with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.find_files(
+                result = client.list_find_files(
                     id=folder_id,
                     query=search_query,
                     find_mode="search"
@@ -210,7 +210,7 @@ def example_7_file_tags():
         with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
-                tags_result = client.get_file_tags(id=file_id)
+                tags_result = client.list_file_tags(id=file_id)
 
                 if tags_result and "tags" in tags_result:
                     print(f"Current tags: {', '.join(tags_result['tags'])}")
@@ -219,10 +219,10 @@ def example_7_file_tags():
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                client.add_file_tag(id=file_id, tag="sdk-sample")
+                client.list_add_file_tag(id=file_id, tag="sdk-sample")
 
                 # Get updated tags
-                tags_result = client.get_file_tags(id=file_id)
+                tags_result = client.list_file_tags(id=file_id)
                 if tags_result and "tags" in tags_result:
                     print(f"Updated tags: {', '.join(tags_result['tags'])}")
             except ConnectorException as e:

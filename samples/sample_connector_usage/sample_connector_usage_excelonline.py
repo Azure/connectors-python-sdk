@@ -24,13 +24,13 @@ def main() -> None:
 
     with DefaultAzureCredential() as credential:
         with ExcelonlineClient(connection_url, credential) as client:
-            worksheets = client.get_all_worksheets(
+            worksheets = client.list_all_worksheets(
                 drive=drive_id,
                 file=file_id,
             )
             print("worksheets", worksheets)
 
-            tables = client.get_tables(
+            tables = client.list_tables(
                 drive=drive_id,
                 file=file_id,
             )

@@ -11,11 +11,11 @@ from tests.generated_connector_test_utils import GeneratedConnectorContractTests
 OPERATION_CONTRACTS = {
     "create_event": ("POST", False),
     "update_event": ("POST", False),
-    "get_organizations": ("GET", False),
-    "get_organizers": ("GET", False),
-    "get_my_venues": ("GET", False),
-    "get_categories": ("GET", False),
-    "get_organization_events": ("GET", False),
+    "list_organizations": ("GET", False),
+    "list_organizers": ("GET", False),
+    "list_my_venues": ("GET", False),
+    "list_categories": ("GET", False),
+    "list_organization_events": ("GET", False),
 }
 
 

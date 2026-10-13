@@ -39,8 +39,8 @@ async def example_1_list_tasks() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = await client.list_tasks()
-            tasks = response.get("tasks", []) if response else []
+            response = [item async for item in client.list_tasks()]
+            tasks = response
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:
@@ -53,8 +53,8 @@ async def example_2_list_contacts() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with InsightlyClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = await client.list_contacts()
-            contacts = response.get("contacts", []) if response else []
+            response = [item async for item in client.list_contacts()]
+            contacts = response
 
             print(f"Found {len(contacts)} contacts")
             for contact in contacts[:5]:
@@ -73,6 +73,8 @@ async def example_3_add_task() -> None:
                 t_i_t_l_e="SDK sample task",
                 d_e_t_a_i_l_s="Created from insightly SDK sample.",
                 s_t_a_t_u_s="NOT STARTED",
+                c_o_m_p_l_e_t_e_d=False,
+                p_u_b_l_i_c_l_y_v_i_s_i_b_l_e=False,
             )
 
             created = await client.add_task(input=request)

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -114,10 +114,11 @@ class DeviceGroupCollection:
     Response for List device groups
     """
 
-    value: Optional[List[DeviceGroup]] = None
+    value: List[DeviceGroup]
     """The collection of device groups."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device groups."""
@@ -129,20 +130,17 @@ class DeviceGroup:
     Response for Get a device group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device group."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the device group."""
-    filter: Optional[str] = None
+    filter: str
     """Query defining which devices should be in this group."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short summary of device group."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device group updates."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the device group, only one organization is
     supported today, multiple organizations will be supported soon.
@@ -155,10 +153,11 @@ class DeviceGroupDeviceCollection:
     Response for Get devices by device group ID
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: List[DeviceV1]
     """The collection of devices belonging to the device group."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of devices in the group."""
@@ -170,7 +169,7 @@ class DeviceCloudProperties:
     Response for Get device cloud properties (deprecated)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -183,30 +182,33 @@ class DeviceCommand:
     Response for Execute a device command (deprecated)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -218,10 +220,11 @@ class DeviceRelationshipCollection:
     Response for List relationships
     """
 
-    value: Optional[List[DeviceRelationshipStatic]] = None
+    value: List[DeviceRelationshipStatic]
     """The collection of device relationships."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device relationships."""
@@ -233,11 +236,11 @@ class DeviceRelationshipStatic:
     Response for Get device relationship
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device relationship."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device ID of the source (parent) device."""
-    target: Optional[str] = None
+    target: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device ID of the source (child) device."""
 
 
@@ -247,10 +250,11 @@ class JobCollection:
     Response for List jobs
     """
 
-    value: Optional[List[JobStatic]] = None
+    value: List[JobStatic]
     """The collection of jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of jobs."""
@@ -262,36 +266,35 @@ class JobStatic:
     Response for Get a job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the job."""
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
     """
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = field(
+    scheduled_job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scheduledJobId"},
     )
     """Id of the scheduled job definition that created this job."""
@@ -303,31 +306,30 @@ class Job:
     Response for Create a job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the job."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    scheduled_job_id: Optional[str] = field(
+    scheduled_job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scheduledJobId"},
     )
     """Id of the scheduled job definition that created this job."""
@@ -339,10 +341,11 @@ class JobDeviceStatusCollection:
     Response for Get device statuses
     """
 
-    value: Optional[List[JobDeviceStatus]] = None
+    value: List[JobDeviceStatus]
     """The collection of job device statuses."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of job device statuses."""
@@ -354,10 +357,11 @@ class OrganizationCollection:
     Response for List organizations
     """
 
-    value: Optional[List[Organization]] = None
+    value: List[Organization]
     """The collection of organizations."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of organizations."""
@@ -369,14 +373,15 @@ class Organization:
     Response for Get an organization
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the organization."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the organization."""
-    parent: Optional[str] = None
+    parent: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Display name of the parent organization."""
 
 
@@ -386,10 +391,11 @@ class ScheduledJobCollection:
     Response for List scheduled jobs
     """
 
-    value: Optional[List[ScheduledJob]] = None
+    value: List[ScheduledJob]
     """The collection of scheduled jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of scheduled jobs."""
@@ -401,36 +407,34 @@ class ScheduledJob:
     Response for Get a scheduled job
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the scheduled job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the scheduled job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the scheduled job."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -440,41 +444,39 @@ class ScheduledJobStatic:
     Response for Update a scheduled job
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the scheduled job."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the scheduled job."""
-    group: Optional[str] = None
+    group: str
     """The ID of the device group on which to execute the job."""
-    batch: Optional[JobBatch] = None
+    batch: Optional[JobBatch] = dataclass_field(default=None, kw_only=True)
     """The batching configuration for the scheduled job."""
-    cancellation_threshold: Optional[JobCancellationThreshold] = field(
+    cancellation_threshold: Optional[JobCancellationThreshold] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cancellationThreshold"},
     )
     """The cancellation threshold for the scheduled job."""
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
     """
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the job, only one organization is supported today,
     multiple organizations will be supported soon.
     """
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -484,10 +486,11 @@ class ScheduledJobJobCollection:
     Response for Get jobs by scheduled job ID
     """
 
-    value: Optional[List[JobStatic]] = None
+    value: List[JobStatic]
     """The collection of jobs."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of jobs."""
@@ -499,11 +502,11 @@ class WorkflowTrigger:
     Response for When a rule is fired
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the workflow trigger."""
-    rule: Optional[str] = None
+    rule: str
     """Unique ID of the rule that is tied to the workflow trigger."""
-    url: Optional[str] = None
+    url: str
     """Callback URL of the workflow Trigger."""
 
 
@@ -513,22 +516,23 @@ class DeviceV1:
     Response for Get a device by ID
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    template: Optional[str] = None
+    template: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device connection to IoT Central has been enabled."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -538,30 +542,33 @@ class DeviceCommandV1:
     Response for Get device command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -573,30 +580,33 @@ class DeviceComponentCommand:
     Response for Get component command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -608,9 +618,9 @@ class DeviceComponentTelemetry:
     Response for Get component telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -623,30 +633,33 @@ class DeviceModuleCommand:
     Response for Get module command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -658,30 +671,33 @@ class DeviceModuleComponentCommand:
     Response for Get module component command response
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The request ID of the device command execution."""
-    request: Optional[Any] = None
+    request: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload for the device command."""
-    response: Optional[Any] = None
+    response: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The payload of the device command response."""
-    connection_timeout: Optional[int] = field(
+    connection_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "connectionTimeout"},
     )
     """
     Connection timeout in seconds to wait for a disconnected device to come
     online. Defaults to 0 seconds.
     """
-    response_timeout: Optional[int] = field(
+    response_timeout: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseTimeout"},
     )
     """
     Response timeout in seconds to wait for a command completion on a device.
     Defaults to 30 seconds.
     """
-    response_code: Optional[int] = field(
+    response_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseCode"},
     )
     """The status code of the device command response."""
@@ -693,9 +709,9 @@ class DeviceModuleComponentTelemetry:
     Response for Get module component telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -708,7 +724,7 @@ class ModuleProperties:
     Response for Get module properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -721,9 +737,9 @@ class DeviceModuleTelemetry:
     Response for Get module telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -736,7 +752,7 @@ class DeviceProperties:
     Response for Get device properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -749,9 +765,9 @@ class DeviceTelemetry:
     Response for Get device telemetry value
     """
 
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """The last known value of this device telemetry."""
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     String-formatted date representing the time when the telemetry value was
     sent.
@@ -764,10 +780,11 @@ class DeviceCollection:
     Response for List devices
     """
 
-    value: Optional[List[DeviceV1]] = None
+    value: List[DeviceV1]
     """The collection of devices."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of devices."""
@@ -779,27 +796,28 @@ class DeviceV2:
     Response for Create or update a device
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    template: Optional[str] = None
+    template: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device connection to IoT Central has been enabled."""
-    organizations: Optional[List[str]] = None
+    organizations: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of organizations of the device, only one organization is supported
     today, multiple organizations will be supported soon.
     """
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -809,24 +827,27 @@ class DeviceTemplateV1:
     Response for Get a device template by ID
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "@id"})
-    """Unique ID of the device template."""
-    etag: Optional[str] = None
-    """ETag used to prevent conflict in device template updates."""
-    type_: Optional[List[str]] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "@type"},
+        kw_only=True,
+        metadata={"wire_name": "@id"},
     )
+    """Unique ID of the device template."""
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """ETag used to prevent conflict in device template updates."""
+    type_: List[str] = dataclass_field(metadata={"wire_name": "@type"})
     """The JSON-LD types of this device template."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device template."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the device template."""
-    capability_model: Optional[Any] = field(
+    capability_model: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "capabilityModel"},
     )
     """The capability model utilized by this device template."""
@@ -838,10 +859,11 @@ class DeviceTemplateCollectionV1:
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplateV1]] = None
+    value: List[DeviceTemplateV1]
     """The collection of device templates."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device templates."""
@@ -853,10 +875,11 @@ class Role:
     Response for Get role
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the role."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the role."""
@@ -868,7 +891,7 @@ class RoleCollection:
     Response for List roles
     """
 
-    value: Optional[List[Role]] = None
+    value: List[Role]
     """The collection of roles."""
 
 
@@ -878,7 +901,7 @@ class User:
     Response for Create user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -891,11 +914,15 @@ class UserStatic:
     Response for Get user
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment]
     """
     List of role assignments that specify the permissions to access the
     application.
@@ -908,7 +935,7 @@ class UserCollection:
     Response for List users
     """
 
-    value: Optional[List[UserStatic]] = None
+    value: List[UserStatic]
     """The collection of users."""
 
 
@@ -918,7 +945,7 @@ class UserPatch:
     Response for Update user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -931,10 +958,11 @@ class ApplicationCollection:
     Response for Get the list of applications accessible to the signed-in user
     """
 
-    value: Optional[List[Application]] = None
+    value: List[Application]
     """The collection of applications."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of applications."""
@@ -946,10 +974,11 @@ class DeviceTemplateCollection:
     Response for List device templates
     """
 
-    value: Optional[List[DeviceTemplate]] = None
+    value: List[DeviceTemplate]
     """The collection of device templates."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of device templates."""
@@ -964,7 +993,7 @@ class SchemaDeviceCloudPropertiesResponse:
     Response for Schema_DeviceCloudProperties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -977,7 +1006,7 @@ class SchemaDeviceCommandResponse:
     Response for Schema_DeviceCommand
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -990,7 +1019,7 @@ class SchemaDevicePropertiesResponse:
     Response for Schema_DeviceProperties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1003,7 +1032,7 @@ class SchemaDeviceTelemetryResponse:
     Response for Schema_DeviceTelemetry
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1016,7 +1045,7 @@ class SchemaJobResponse:
     Response for Schema_Job
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1029,7 +1058,7 @@ class SchemaScheduledJobResponse:
     Response for Schema_ScheduledJob
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1042,7 +1071,7 @@ class SchemaUserResponse:
     Response for Schema_User
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1055,16 +1084,17 @@ class Action:
     Definition: Action
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the action."""
 
 
@@ -1074,16 +1104,17 @@ class EmailAction:
     Definition: EmailAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the email action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the email action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the email action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the email action."""
 
 
@@ -1093,18 +1124,19 @@ class WebhookAction:
     Definition: WebhookAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the webhook action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the webhook action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the webhook action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the webhook action."""
-    url: Optional[str] = None
+    url: str
     """Callback URL of the webhook."""
 
 
@@ -1114,16 +1146,17 @@ class PowerAutomateAction:
     Definition: PowerAutomateAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Power Automate action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Power Automate action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Power Automate action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Power Automate action."""
 
 
@@ -1133,16 +1166,17 @@ class LogicAppsAction:
     Definition: LogicAppsAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Logic Apps action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Logic Apps action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Logic Apps action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Logic Apps action."""
 
 
@@ -1152,16 +1186,17 @@ class ActionGroupsAction:
     Definition: ActionGroupsAction
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the Action Groups action."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Action Groups action."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the Action Groups action."""
-    rules: Optional[List[str]] = None
+    rules: List[str]
     """Unique IDs of the rules that are tied to the Action Groups action."""
 
 
@@ -1171,16 +1206,17 @@ class Application:
     Definition: Application
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the application."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the application."""
-    subdomain: Optional[str] = None
+    subdomain: str
     """The URL subdomain of the application."""
-    host: Optional[str] = None
+    host: str
     """The URL host of the application."""
 
 
@@ -1190,25 +1226,27 @@ class Device:
     Definition: Device
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    instance_of: Optional[str] = field(
+    instance_of: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceOf"},
     )
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    approved: Optional[bool] = None
+    approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device has been approved to connect to IoT Central."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
 
 
@@ -1218,9 +1256,9 @@ class DeviceRelationship:
     Definition: DeviceRelationship
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device relationship."""
-    target: Optional[str] = None
+    target: str
     """The device ID of the source (child) device."""
 
 
@@ -1230,18 +1268,19 @@ class DeviceTemplate:
     Definition: DeviceTemplate
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device template."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device template updates."""
-    types: Optional[List[str]] = None
+    types: List[str]
     """The types of device to which this template applies."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device template."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Detailed description of the device template."""
 
 
@@ -1251,7 +1290,7 @@ class PropertyJobData:
     Definition: PropertyJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
@@ -1264,7 +1303,7 @@ class CommandJobData:
     Definition: CommandJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """
     Data related to the operation being performed by this job. All entries must
     be of the same type.
@@ -1277,7 +1316,7 @@ class CloudPropertyJobData:
     Definition: CloudPropertyJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """The collection of job data."""
 
 
@@ -1287,7 +1326,7 @@ class DeviceTemplateMigrationJobData:
     Definition: DeviceTemplateMigrationJobData
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: List[Dict[str, Any]]
     """The collection of job data."""
 
 
@@ -1297,9 +1336,9 @@ class JobDeviceStatus:
     Definition: JobDeviceStatus
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the device whose job status is being provided."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Indicates whether the job is starting, running, etc. for the given device.
     """
@@ -1311,12 +1350,12 @@ class JobBatch:
     Definition: JobBatch
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
     Whether batching is done on a specified number of devices or a percentage
     of the total devices.
     """
-    value: Optional[float] = None
+    value: float
     """The number or percentage of devices on which batching is done."""
 
 
@@ -1326,17 +1365,17 @@ class JobCancellationThreshold:
     Definition: JobCancellationThreshold
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
     Whether the cancellation threshold is per a specified number of devices or
     a percentage of the total devices.
     """
-    value: Optional[float] = None
+    value: float
     """
     The number or percentage of devices on which the cancellation threshold is
     applied.
     """
-    batch: Optional[bool] = None
+    batch: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the cancellation threshold applies per-batch or to the overall job.
     """
@@ -1351,10 +1390,11 @@ class Rule:
     Definition: Rule
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the rule."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the rule."""
@@ -1366,10 +1406,11 @@ class RuleCollection:
     Definition: RuleCollection
     """
 
-    value: Optional[List[Rule]] = None
+    value: List[Rule]
     """The collection of rules."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of rules."""
@@ -1381,7 +1422,7 @@ class JobSchedule:
     Definition: JobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The schedule at which to execute the job."""
 
 
@@ -1391,7 +1432,7 @@ class DateJobSchedule:
     Definition: DateJobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
 
 
@@ -1401,7 +1442,7 @@ class OccurrencesJobSchedule:
     Definition: OccurrencesJobSchedule
     """
 
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
 
 
@@ -1411,11 +1452,15 @@ class JobScheduleEnd:
     Definition: JobScheduleEnd
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the job schedule end."""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date when to end the scheduled job (YYYY-MM-DDTHH:MM:SSZ)."""
-    occurrences: Optional[int] = None
+    occurrences: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of occurrences after which to end the scheduled job."""
 
 
@@ -1425,15 +1470,15 @@ class ScheduledJobPatch:
     Definition: ScheduledJobPatch
     """
 
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in scheduled job updates."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the scheduled job."""
-    schedule: Optional[Dict[str, Any]] = None
+    schedule: Dict[str, Any]
     """The schedule at which to execute the job."""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job is enabled."""
-    completed: Optional[bool] = None
+    completed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the scheduled job has completed."""
 
 
@@ -1443,16 +1488,16 @@ class EmailUser:
     Definition: EmailUser
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment]
     """
     List of role assignments that specify the permissions to access the
     application.
     """
-    email: Optional[str] = None
+    email: str
     """Email address of the user."""
 
 
@@ -1462,24 +1507,18 @@ class ServicePrincipalUser:
     Definition: ServicePrincipalUser
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the user."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Type of the user."""
-    roles: Optional[List[RoleAssignment]] = None
+    roles: List[RoleAssignment]
     """
     List of role assignments that specify the permissions to access the
     application.
     """
-    tenant_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tenantId"},
-    )
+    tenant_id: str = dataclass_field(metadata={"wire_name": "tenantId"})
     """The Microsoft Entra ID tenant ID of the service principal."""
-    object_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "objectId"},
-    )
+    object_id: str = dataclass_field(metadata={"wire_name": "objectId"})
     """The Microsoft Entra ID object ID of the service principal."""
 
 
@@ -1489,7 +1528,7 @@ class RoleAssignment:
     Definition: RoleAssignment
     """
 
-    role: Optional[str] = None
+    role: str
     """ID of the role for this role assignment."""
 
 
@@ -1499,34 +1538,37 @@ class WebhookActionDevice:
     Definition: WebhookActionDevice
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the device."""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ETag used to prevent conflict in device updates."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the device."""
-    instance_of: Optional[str] = field(
+    instance_of: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceOf"},
     )
     """The device template definition for the device."""
-    simulated: Optional[bool] = None
+    simulated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device is simulated."""
-    approved: Optional[bool] = None
+    approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether the device has been approved to connect to IoT Central."""
-    provisioned: Optional[bool] = None
+    provisioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether resources have been allocated for the device."""
-    cloud_properties: Optional[Dict[str, Any]] = field(
+    cloud_properties: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cloudProperties"},
     )
     """Cloud properties that triggered the webhook."""
-    properties: Optional[Dict[str, Any]] = None
+    properties: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device properties that triggered the webhook."""
-    telemetry: Optional[Dict[str, Any]] = None
+    telemetry: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device telemetry that triggered the webhook."""
 
 
@@ -1536,15 +1578,15 @@ class WebhookActionBody:
     Definition: WebhookActionBody
     """
 
-    action: Optional[Action] = None
+    action: Action
     """Action that triggered the webhook."""
-    application: Optional[Application] = None
+    application: Application
     """Application that triggered the webhook."""
-    device: Optional[WebhookActionDevice] = None
+    device: WebhookActionDevice
     """Device that triggered the webhook."""
-    rule: Optional[Rule] = None
+    rule: Rule
     """Rule that triggered the webhook."""
-    timestamp: Optional[str] = None
+    timestamp: str
     """Timestamp at which the webhook was triggered."""
 
 
@@ -4825,7 +4867,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def roles_list(
+    def list_roles(
         self,
         application: str,
         *,
@@ -4833,11 +4875,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List roles
 
         Get the list of roles in an application.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/roles"
         query_params = []
@@ -4847,27 +4892,45 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def users_create(
         self,
@@ -4972,7 +5035,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def users_list(
+    def list_users(
         self,
         application: str,
         *,
@@ -4980,11 +5043,14 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List users
 
         Get the list of users in an application
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/users"
         query_params = []
@@ -4994,27 +5060,45 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"application={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def users_remove(
         self,
@@ -5250,7 +5334,7 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def workflow_get_components(
+    def list_workflow_get_components(
         self,
         application: str,
         template: str,
@@ -5260,9 +5344,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Workflow_GetComponents
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5284,29 +5371,47 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def workflow_get_capabilities(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_workflow_get_capabilities(
         self,
         application: str,
         template: str,
@@ -5318,9 +5423,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Workflow_GetCapabilities
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5352,29 +5460,47 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def workflow_get_capabilities_v1(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_workflow_get_capabilities_v1(
         self,
         application: str,
         template: str,
@@ -5386,9 +5512,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Workflow_GetCapabilities_V1
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5420,29 +5549,47 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"type={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def workflow_get_components_v1(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_workflow_get_components_v1(
         self,
         application: str,
         template: str,
@@ -5452,9 +5599,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Workflow_GetComponents_V1
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5476,29 +5626,47 @@ class AzureiotcentralClient(ConnectorClientBase):
             query_params.append(f"module={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def workflow_get_modules(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_workflow_get_modules(
         self,
         application: str,
         template: str,
@@ -5507,9 +5675,12 @@ class AzureiotcentralClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Workflow_GetModules
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/v1/_internal/workflow/modules"
@@ -5525,27 +5696,45 @@ class AzureiotcentralClient(ConnectorClientBase):
         query_params.append(f"template={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def schema_device_cloud_properties(
         self,

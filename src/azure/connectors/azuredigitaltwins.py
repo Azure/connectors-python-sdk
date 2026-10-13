@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -56,15 +56,17 @@ class ListModelsResponse:
     Response for List Models
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array values."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Models."""
@@ -76,19 +78,20 @@ class GetModelByIdResponse:
     Response for Get Model By Id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the model as specified in the model definition."""
-    upload_time: Optional[str] = field(
+    upload_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "uploadTime"},
     )
     """The time the model was uploaded to the service."""
-    decommissioned: Optional[bool] = None
+    decommissioned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Indicates if the model is decommissioned. Decommissioned models cannot be
     referenced by newly created digital twins.
     """
-    model: Optional[Dict[str, Any]] = None
+    model: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Model reference."""
 
 
@@ -98,7 +101,7 @@ class UpdateModelInput:
     Update Model's Property
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -108,7 +111,7 @@ class TwinResult:
     Response for Get Twin by Id
     """
 
-    result: Optional[str] = None
+    result: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
 
 
@@ -118,7 +121,7 @@ class AddTwinInput:
     Add Twin
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -128,7 +131,7 @@ class UpdateTwinInput:
     Update Twin
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -138,7 +141,7 @@ class GetComponentResult:
     Response for Get Component
     """
 
-    result: Optional[str] = None
+    result: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
 
 
@@ -148,7 +151,7 @@ class UpdateComponentInput:
     Update Component
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -158,30 +161,39 @@ class TwinRelationship:
     Response for Get Relationship by Id
     """
 
-    source_id: Optional[str] = field(
+    source_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$sourceId"},
     )
     """Source Id."""
-    relationship_id: Optional[str] = field(
+    relationship_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipId"},
     )
     """Relationship Id."""
-    target_id: Optional[str] = field(
+    target_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$targetId"},
     )
     """Target Id."""
-    relationship_name: Optional[str] = field(
+    relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipName"},
     )
     """Relationship Name."""
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "$etag"})
-    """E Tag Link."""
-    additional_properties: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "$etag"},
+    )
+    """E Tag Link."""
+    additional_properties: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Property Values."""
@@ -193,7 +205,7 @@ class AddRelationshipInput:
     Add Relationship
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -203,7 +215,7 @@ class UpdateRelationshipInput:
     Update Relationship
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Request for the API."""
 
 
@@ -213,15 +225,17 @@ class ListIncomingRelationshipsResponse:
     Response for List Incoming Relationships
     """
 
-    value: Optional[List[IncomingRelationship]] = None
+    value: List[IncomingRelationship]
     """The collection of Incoming relationships."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Incoming Relationship."""
@@ -233,7 +247,7 @@ class SendTelemetryInput:
     Send Telemetry
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Send Telemetry Inputs."""
 
 
@@ -243,7 +257,7 @@ class SendComponentTelemetryInput:
     Send Component Telemetry
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Send Component Telemetry Inputs."""
 
 
@@ -253,15 +267,17 @@ class ListRelationshipsResponse:
     Response for List Relationships
     """
 
-    value: Optional[List[TwinRelationship]] = None
+    value: List[TwinRelationship]
     """The collection of twin relationships."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation Token the next page of Twin Relationship."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """URL to get the next page of Twin Relationship."""
@@ -273,10 +289,11 @@ class QueryTwinsInput:
     Query API
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Query the Twins."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Link to get next set of items."""
@@ -288,10 +305,11 @@ class QueryResult:
     Response for Query API
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Results From the Twin."""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Link to get next set of items."""
@@ -303,23 +321,27 @@ class IncomingRelationship:
     Definition: IncomingRelationship
     """
 
-    source_id: Optional[str] = field(
+    source_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$sourceId"},
     )
     """Source Id."""
-    relationship_id: Optional[str] = field(
+    relationship_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipId"},
     )
     """Relationship Id."""
-    relationship_name: Optional[str] = field(
+    relationship_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipName"},
     )
     """Relationship Name."""
-    relationship_link: Optional[str] = field(
+    relationship_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "$relationshipLink"},
     )
     """Relationship Link."""
@@ -429,7 +451,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def add_models(
+    def list_add_models(
         self,
         input: AddModelsInput,
         *,
@@ -437,39 +459,60 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Add Model
 
         Uploads one or more models. When any error occurs, no models are
         uploaded.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
         query_params.append("api-version=" + quote("2020-10-31", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_models(
         self,

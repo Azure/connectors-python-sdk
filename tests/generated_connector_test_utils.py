@@ -7,6 +7,7 @@ from __future__ import annotations
 import dataclasses
 import importlib
 import inspect
+import re
 from collections.abc import Mapping
 from enum import Enum
 from types import ModuleType
@@ -53,6 +54,20 @@ def get_generated_operations(client_type: type[Any]) -> set[str]:
         and name != "close"
         and callable(member)
     }
+
+
+def generated_pager_response_text(method: Any) -> str:
+    """Build a one-item response matching a generated pager's wire shape."""
+    method_source = inspect.getsource(method)
+    if "for item in page:" in method_source:
+        return '[{"ok": true}]'
+
+    collection_match = re.search(
+        r'for item in page\.get\("([^"]+)", \[\]\):',
+        method_source,
+    )
+    assert collection_match is not None, method.__qualname__
+    return f'{{"{collection_match.group(1)}": [{{"ok": true}}]}}'
 
 
 def resolve_sync_generated_result(result: Any) -> Any:
@@ -117,6 +132,39 @@ async def invoke_generated_operation(
     return await resolve_generated_result(method(**arguments))
 
 
+def model_instance(
+    model_type: type[Any],
+    *args: Any,
+    **kwargs: Any,
+) -> Any:
+    """Construct a model while filling required fields omitted by a focused test."""
+    type_hints = get_type_hints(model_type)
+    model_fields = [
+        model_field
+        for model_field in dataclasses.fields(model_type)
+        if model_field.init
+    ]
+    positional_field_names = [
+        model_field.name
+        for model_field in model_fields
+        if not model_field.kw_only
+    ]
+    provided_field_names = set(positional_field_names[:len(args)]) | set(kwargs)
+
+    for model_field in model_fields:
+        if (
+            model_field.name not in provided_field_names
+            and model_field.default is dataclasses.MISSING
+            and model_field.default_factory is dataclasses.MISSING
+        ):
+            kwargs[model_field.name] = _representative_value(
+                type_hints[model_field.name],
+                active_model_types=frozenset({model_type}),
+            )
+
+    return model_type(*args, **kwargs)
+
+
 class GeneratedConnectorContractTests:
     """Shared contract tests for a generated connector client."""
 
@@ -172,7 +220,7 @@ class GeneratedConnectorContractTests:
         assert model_types
 
         for model_type in model_types:
-            instance = model_type()
+            instance = model_instance(model_type)
             expected = {}
             wire_names = []
 
@@ -210,7 +258,9 @@ class GeneratedConnectorContractTests:
             )["return"]
             is_pageable = get_origin(return_type) is AsyncItemPaged
             response_text = (
-                '{"value": [{"ok": true}]}' if is_pageable else '{"ok": true}'
+                generated_pager_response_text(generated_method)
+                if is_pageable
+                else '{"ok": true}'
             )
 
             with patch.object(
@@ -264,7 +314,10 @@ class GeneratedConnectorContractTests:
                     await invoke_generated_operation(client, operation, self.connector_module)
 
 
-def _representative_value(annotation: Any) -> Any:
+def _representative_value(
+    annotation: Any,
+    active_model_types: frozenset[type[Any]] = frozenset(),
+) -> Any:
     """Create a representative value for a required generated parameter."""
     if annotation is str:
         return "value"
@@ -284,7 +337,18 @@ def _representative_value(annotation: Any) -> Any:
     origin = get_origin(annotation)
     if origin is list:
         item_types = get_args(annotation)
-        return [_representative_value(item_types[0])] if item_types else ["value"]
+        if not item_types:
+            return ["value"]
+
+        if item_types[0] in active_model_types:
+            return []
+
+        return [
+            _representative_value(
+                item_types[0],
+                active_model_types=active_model_types,
+            )
+        ]
 
     if origin is dict:
         return {"key": "value"}
@@ -301,7 +365,10 @@ def _representative_value(annotation: Any) -> Any:
         if item_type is not type(None)
     ]
     if len(non_null_types) == 1:
-        return _representative_value(non_null_types[0])
+        return _representative_value(
+            non_null_types[0],
+            active_model_types=active_model_types,
+        )
 
     mapping_types = [
         item_type
@@ -309,11 +376,17 @@ def _representative_value(annotation: Any) -> Any:
         if get_origin(item_type) is Mapping
     ]
     if mapping_types:
-        return _representative_value(mapping_types[0])
+        return _representative_value(
+            mapping_types[0],
+            active_model_types=active_model_types,
+        )
 
     for item_type in non_null_types:
         try:
-            return _representative_value(item_type)
+            return _representative_value(
+                item_type,
+                active_model_types=active_model_types,
+            )
         except AssertionError:
             continue
 
@@ -324,16 +397,26 @@ def _representative_value(annotation: Any) -> Any:
         return next(iter(annotation))
 
     if inspect.isclass(annotation) and dataclasses.is_dataclass(annotation):
-        return _representative_model(annotation)
+        return _representative_model(
+            annotation,
+            active_model_types=active_model_types,
+        )
 
     raise AssertionError(f"Unsupported generated parameter type '{annotation}'.")
 
 
-def _representative_model(model_type: type[Any]) -> Any:
+def _representative_model(
+    model_type: type[Any],
+    active_model_types: frozenset[type[Any]],
+) -> Any:
     """Construct a generated model with values for every required field."""
     type_hints = get_type_hints(model_type)
+    nested_model_types = active_model_types | {model_type}
     arguments = {
-        model_field.name: _representative_value(type_hints[model_field.name])
+        model_field.name: _representative_value(
+            type_hints[model_field.name],
+            active_model_types=nested_model_types,
+        )
         for model_field in dataclasses.fields(model_type)
         if model_field.init
         and model_field.default is dataclasses.MISSING

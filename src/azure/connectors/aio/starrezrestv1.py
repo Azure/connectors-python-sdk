@@ -5,10 +5,11 @@
 
 from __future__ import annotations
 
-from typing import Optional, Any, Mapping
-from urllib.parse import quote
+from typing import Optional, AsyncIterator, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -17,6 +18,7 @@ from azure.connectors.sdk.aio import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 from azure.connectors.starrezrestv1 import (
@@ -182,7 +184,46 @@ class Starrezrestv1Client(ConnectorClientBase):
     def connector_name(self) -> str:
         return "starrezrestv1"
 
-    async def select_entry(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_select_entry(
         self,
         input: SelectEntryInput,
         *,
@@ -190,34 +231,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry
 
         Retrieves one or more records from the Entry table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/entry.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_entry(
         self,
@@ -340,7 +402,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_custom_field(
+    def list_select_entry_custom_field(
         self,
         input: SelectEntryCustomFieldInput,
         *,
@@ -348,36 +410,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry Custom Field
 
         Retrieves one or more records from the Entry Custom Field table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryCustomField.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def update_entry_custom_field(
         self,
@@ -422,7 +505,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_term(
+    def list_select_term(
         self,
         input: SelectTermInput,
         *,
@@ -430,36 +513,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Term
 
         Retrieves one or more records from the Term table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Term.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def select_entry_address(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_select_entry_address(
         self,
         input: SelectEntryAddressInput,
         *,
@@ -467,36 +571,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry Address
 
         Retrieves one or more records from the Entry Address table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryAddress.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def update_entry_address(
         self,
@@ -541,7 +666,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_application(
+    def list_select_entry_application(
         self,
         input: SelectEntryApplicationInput,
         *,
@@ -549,36 +674,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry Application
 
         Retrieves one or more records from the Entry Application table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryApplication.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_entry_application(
         self,
@@ -662,7 +808,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_term_session(
+    def list_select_term_session(
         self,
         input: SelectTermSessionInput,
         *,
@@ -670,36 +816,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Term Session
 
         Retrieves one or more records from the Term Session table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/TermSession.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def select_entry_detail(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_select_entry_detail(
         self,
         input: SelectEntryDetailInput,
         *,
@@ -707,34 +874,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry Detail
 
         Retrieves one or more records from the Entry Detail table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/EntryDetail.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def update_entry_detail(
         self,
@@ -777,7 +965,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_entry_enrollment(
+    def list_select_entry_enrollment(
         self,
         input: SelectEntryEnrollmentInput,
         *,
@@ -785,36 +973,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Entry Enrollment
 
         Retrieves one or more records from the Entry Enrollment table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryEnrollment.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_entry_enrollment(
         self,
@@ -898,7 +1107,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_booking(
+    def list_select_booking(
         self,
         input: SelectBookingInput,
         *,
@@ -906,34 +1115,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Booking
 
         Retrieves one or more records from the Booking table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Booking.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_booking(
         self,
@@ -1013,7 +1243,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_space(
+    def list_select_room_space(
         self,
         input: SelectRoomSpaceInput,
         *,
@@ -1021,34 +1251,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Room Space
 
         Retrieves one or more records from the Room Space table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/RoomSpace.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_room_space(
         self,
@@ -1087,7 +1338,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_location(
+    def list_select_room_location(
         self,
         input: SelectRoomLocationInput,
         *,
@@ -1095,38 +1346,59 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Room Location
 
         Retrieves one or more records from the Room Location table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomLocation.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    async def select_transaction(
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
+
+    def list_select_transaction(
         self,
         input: SelectTransactionInput,
         *,
@@ -1134,34 +1406,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Transaction
 
         Retrieves one or more records from the Transaction table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Transaction.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_transaction(
         self,
@@ -1200,7 +1493,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    async def select_room_space_maintenance(
+    def list_select_room_space_maintenance(
         self,
         input: SelectRoomSpaceMaintenanceInput,
         *,
@@ -1208,36 +1501,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> AsyncItemPaged[dict[str, Any]]:
         """
         Get Room Space Maintenance
 
         Retrieves one or more records from the Room Space Maintenance table.
+
+        Returns an Azure Core async pager that follows the connector
+        continuation URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomSpaceMaintenance.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = await self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        async def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = await self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        async def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            async def items() -> AsyncIterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return AsyncItemPaged(get_next, extract_data)
 
     async def create_room_space_maintenance(
         self,

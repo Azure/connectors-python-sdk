@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -79,8 +81,9 @@ class ListIssuesResponse:
     Response for Get list of issues
     """
 
-    next_page_token: Optional[str] = field(
+    next_page_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPageToken"},
     )
     """
@@ -88,12 +91,13 @@ class ListIssuesResponse:
     the 'Next page token' input of a subsequent call to fetch the next page.
     Absent on the last page.
     """
-    is_last: Optional[bool] = field(
+    is_last: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isLast"},
     )
     """Indicates whether this is the last page of results."""
-    issues: Optional[List[FullIssue]] = None
+    issues: Optional[List[FullIssue]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -102,17 +106,19 @@ class ListIssuesResponseDatacenter:
     Response for Get list of issues (Datacenter)
     """
 
-    start_at: Optional[int] = field(
+    start_at: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startAt"},
     )
     """The index of the first item to return in a page of results"""
-    max_results: Optional[int] = field(
+    max_results: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxResults"},
     )
     """The maximum number of items to return per page"""
-    issues: Optional[List[FullIssue]] = None
+    issues: Optional[List[FullIssue]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -121,7 +127,7 @@ class ListTransitionsResponse:
     Response for Get list of Transitions
     """
 
-    transitions: Optional[List[Transition]] = None
+    transitions: Optional[List[Transition]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -130,7 +136,7 @@ class UpdateTransitionResponse:
     Response for Performs an issue transition
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -143,7 +149,7 @@ class GetCurrentUserResponse:
     Response for Get current user
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -156,13 +162,13 @@ class FullIssue:
     Response for When a new issue is created (Datacenter)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the issue."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Browse to the issue using this URL."""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -171,12 +177,12 @@ class MCPQueryResponse:
     Response for Jira MCP Server
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -185,11 +191,11 @@ class CommentResponse:
     Response for Add comment
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the comment."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Body of the comment."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
 
 
@@ -199,7 +205,7 @@ class CancelTaskResponse:
     Response for Cancel Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -212,7 +218,7 @@ class CreateIssueInput:
     Create a new issue
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -225,9 +231,9 @@ class CreateIssueResponse:
     Response for Create a new issue
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the issue."""
 
 
@@ -237,21 +243,19 @@ class CreateProjectInput:
     Create a new project
     """
 
-    key: Optional[str] = None
+    key: str
     """The unique key, starts with a capital letter."""
-    name: Optional[str] = None
+    name: str
     """Title of the project."""
-    project_type_key: Optional[str] = field(
-        default=None,
+    project_type_key: str = dataclass_field(
         metadata={"wire_name": "projectTypeKey"},
     )
     """Project type key."""
-    lead_account_id: Optional[str] = field(
-        default=None,
+    lead_account_id: str = dataclass_field(
         metadata={"wire_name": "leadAccountId"},
     )
     """Id of Project lead."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Verbose description of the project."""
 
 
@@ -261,9 +265,9 @@ class CreateProjectResponse:
     Response for Create a new project
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique id of the project."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the project."""
 
 
@@ -273,9 +277,9 @@ class CreateProjectCategoryInput:
     Create Project Category
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description"""
 
 
@@ -285,7 +289,7 @@ class CreateProjectCategoryResponse:
     Response for Create Project Category
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -298,27 +302,28 @@ class EditIssueInput:
     Edit Issue
     """
 
-    transition: Optional[Dict[str, Any]] = None
+    transition: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Transition"""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     List of issue screen fields to update, specifying the sub-field to update
     and its value for each field. This field provides a straightforward option
     when setting a sub-field. When multiple sub-fields or other operations are
     required, use update. Fields included in here cannot be included in update.
     """
-    update: Optional[Dict[str, Any]] = None
+    update: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     A Map containing the field field name and a list of operations to perform
     on the issue screen field. Note that fields included in here cannot be
     included in fields.
     """
-    history_metadata: Optional[Dict[str, Any]] = field(
+    history_metadata: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "historyMetadata"},
     )
     """History meta data"""
-    properties: Optional[List[Dict[str, Any]]] = None
+    properties: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Properties"""
 
 
@@ -328,7 +333,7 @@ class EditIssueResponse:
     Response for Edit Issue
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -341,7 +346,7 @@ class GetTaskResponse:
     Response for Get Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -354,7 +359,7 @@ class GetUserResponse:
     Response for Get User
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -367,12 +372,13 @@ class ListFiltersResponse:
     Response for Get list of Filters
     """
 
-    next_page: Optional[str] = field(
+    next_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPage"},
     )
     """Next page of filters"""
-    values: Optional[FilterArray] = None
+    values: Optional[FilterArray] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -381,12 +387,13 @@ class ListProjectsResponse:
     Response for Get projects
     """
 
-    next_page: Optional[str] = field(
+    next_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextPage"},
     )
     """Next page of projects"""
-    values: Optional[ProjectArray] = None
+    values: Optional[ProjectArray] = dataclass_field(default=None, kw_only=True)
 
 
 UserList = List[Dict[str, Any]]
@@ -398,58 +405,67 @@ class UpdateProjectInput:
     Update Project
     """
 
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Key"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    project_type_key: Optional[str] = field(
+    project_type_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTypeKey"},
     )
     """Project Type Key"""
-    project_template_key: Optional[str] = field(
+    project_template_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTemplateKey"},
     )
     """Project Template Key"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description"""
-    lead: Optional[str] = None
+    lead: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Lead"""
-    lead_account_id: Optional[str] = field(
+    lead_account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "leadAccountId"},
     )
     """Lead Account ID"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL"""
-    assignee_type: Optional[str] = field(
+    assignee_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeType"},
     )
     """Assignee Type"""
-    avatar_id: Optional[str] = field(
+    avatar_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "avatarId"},
     )
     """Avatar ID"""
-    issue_security_scheme: Optional[str] = field(
+    issue_security_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "issueSecurityScheme"},
     )
     """Issue Security Scheme"""
-    permission_scheme: Optional[str] = field(
+    permission_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "permissionScheme"},
     )
     """Permission Scheme"""
-    notification_scheme: Optional[str] = field(
+    notification_scheme: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationScheme"},
     )
     """Notification Scheme"""
-    category_id: Optional[str] = field(
+    category_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryId"},
     )
     """Category ID"""
@@ -461,7 +477,7 @@ class UpdateProjectResponse:
     Response for Update Project
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -477,14 +493,15 @@ class Project:
     Definition: Project
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the project."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique key of the project."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the project."""
-    project_type_key: Optional[str] = field(
+    project_type_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectTypeKey"},
     )
     """The unique key of the project type."""
@@ -499,11 +516,11 @@ class PartialIssue:
     Definition: PartialIssue
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the Issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique key of the issue."""
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -512,20 +529,23 @@ class Creator:
     Definition: Creator
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Person who created the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person who created the issue."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person who created the issue."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person who created the issue."""
@@ -537,20 +557,23 @@ class Assignee:
     Definition: Assignee
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Person whom the issue is assigned to."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person whom the issue is assigned to."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person whom the issue is assigned to."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person whom the issue is assigned to."""
@@ -562,20 +585,23 @@ class User:
     Definition: User
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountId"},
     )
     """Id of the Jira user."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the Jira user."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the Jira user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the Jira user."""
@@ -587,20 +613,23 @@ class Reporter:
     Definition: Reporter
     """
 
-    account_id: Optional[str] = field(
+    account_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountId"},
     )
     """Person who reported the issue."""
-    key: Optional[str] = None
+    key: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique key of the person who reported the issue."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """Email of the person who reported the issue."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the person who reported the issue."""
@@ -615,7 +644,7 @@ class CreateIssueRequest:
     Definition: CreateIssueRequest
     """
 
-    fields: Optional[Dict[str, Any]] = None
+    fields: Dict[str, Any]
 
 
 @dataclass
@@ -624,7 +653,7 @@ class UpdateIssueRequest:
     Definition: UpdateIssueRequest
     """
 
-    fields: Optional[Dict[str, Any]] = None
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 StatusList = List[Dict[str, Any]]
@@ -639,7 +668,7 @@ class Comment:
     Definition: Comment
     """
 
-    body: Optional[str] = None
+    body: str
     """Body of the comment."""
 
 
@@ -649,12 +678,12 @@ class Transition:
     Definition: Transition
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the transition"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the transition"""
-    to: Optional[TransitionStatus] = None
-    fields: Optional[Dict[str, Any]] = None
+    to: Optional[TransitionStatus] = dataclass_field(default=None, kw_only=True)
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Fields required for this transition"""
 
 
@@ -664,9 +693,9 @@ class TransitionStatus:
     Definition: TransitionStatus
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the status"""
 
 
@@ -676,13 +705,14 @@ class TransitionInput:
     Definition: TransitionInput
     """
 
-    fields: Optional[Dict[str, Any]] = None
-    history_metadata: Optional[Dict[str, Any]] = field(
+    fields: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    history_metadata: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "historyMetadata"},
     )
-    transition: Optional[Dict[str, Any]] = None
-    update: Optional[Dict[str, Any]] = None
+    transition: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    update: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -691,14 +721,15 @@ class MCPQueryRequest:
     Definition: MCPQueryRequest
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = field(
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    callback_endpoint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callbackEndpoint"},
     )
 
@@ -768,6 +799,45 @@ class JiraClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "jira"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     def list_resources(
         self,
         *,
@@ -775,36 +845,57 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of Resources
 
         This operation returns a list of resources accessible to user.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/oauth/token/accessible-resources"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_issues(
         self,
@@ -908,38 +999,59 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of Transitions
 
         Returns a list of the transitions possible for this issue by the
         current user
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/3/issue/{quote(str(issue_id_or_key), safe='')}/transitions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("transitions", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_transition(
         self,
@@ -1389,41 +1501,62 @@ class JiraClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_all_project_categories(
+    def list_all_project_categories(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get All Project Categories
 
         Returns all project categories.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_issue(
         self,
@@ -1638,12 +1771,15 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List users by project
 
         This operation is used to retrieve a list of all users associated with
         a project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/user/permission/search"
@@ -1655,27 +1791,45 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def remove_project_category(
         self,
@@ -1762,12 +1916,15 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get issue types
 
         This operation is used to retrieve a list of issue types for a given
         project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/types/issue/createmeta"
@@ -1779,27 +1936,45 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"projectKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_issue_types_fields(
         self,
@@ -1810,12 +1985,15 @@ class JiraClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get issue types fields
 
         This operation is used to retrieve a list of fields for a specific
         issue type.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v3/issue/createmeta"
         query_params = []
@@ -1829,27 +2007,45 @@ class JiraClient(ConnectorClientBase):
         query_params.append(f"issuetypeIds={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

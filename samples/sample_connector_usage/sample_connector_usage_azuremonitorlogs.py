@@ -96,6 +96,7 @@ def example_run_query():
                 request = QueryDataInput(
                     query="Heartbeat | take 5",
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
                 result = client.query_data(
@@ -132,6 +133,7 @@ def example_visualize_query():
                         "| order by TimeGenerated asc"
                     ),
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
                 result = client.visualize_query(

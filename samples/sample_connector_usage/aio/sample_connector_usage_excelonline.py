@@ -26,16 +26,16 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ExcelonlineClient(connection_url, credential) as client:
-            worksheets = await client.get_all_worksheets(
+            worksheets = [item async for item in client.list_all_worksheets(
                 drive=drive_id,
                 file=file_id,
-            )
+            )]
             print("worksheets", worksheets)
 
-            tables = await client.get_tables(
+            tables = [item async for item in client.list_tables(
                 drive=drive_id,
                 file=file_id,
-            )
+            )]
             print("tables", tables)
 
             new_sheet = await client.create_worksheet(

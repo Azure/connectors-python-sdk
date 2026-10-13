@@ -55,7 +55,7 @@ def example_2_get_spaces() -> None:
 
     with DefaultAzureCredential() as credential:
         with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            spaces = client.get_spaces()
+            spaces = client.list_spaces()
             print(f"Spaces: {spaces}")
 
 

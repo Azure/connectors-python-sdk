@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -44,70 +46,90 @@ class ServiceBusMessage:
     Response for When a message is received in a queue (auto-complete)
     """
 
-    content_data: Optional[str] = field(
+    content_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentData"},
     )
     """Content of the message"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Content type of the message content"""
-    properties: Optional[Dict[str, str]] = field(
+    properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Key-value pairs for each brokered property"""
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Send to address"""
-    reply_to: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Send to address"""
+    reply_to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = field(
+    reply_to_session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToSessionId"},
     )
     """Identifier of the session to reply to"""
-    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
-    """Application specific label"""
-    scheduled_enqueue_time_utc: Optional[str] = field(
+    label: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Label"},
+    )
+    """Application specific label"""
+    scheduled_enqueue_time_utc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ScheduledEnqueueTimeUtc"},
     )
     """Date and time, in UTC, when the message will be added to the queue"""
-    session_id: Optional[str] = field(
+    session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionId"},
     )
     """Identifier of the session"""
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Identifier of the correlation"""
-    sequence_number: Optional[int] = field(
+    sequence_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SequenceNumber"},
     )
     """Identifier of the sequence number"""
-    lock_token: Optional[str] = field(
+    lock_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LockToken"},
     )
     """The lock token of the message as a string."""
-    time_to_live: Optional[str] = field(
+    time_to_live: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeToLive"},
     )
     """
@@ -122,7 +144,7 @@ class CreateTopicSubscriptionInput:
     Create a topic subscription
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -135,8 +157,9 @@ class Subscription:
     Response for Create a topic subscription
     """
 
-    subscription_name: Optional[str] = field(
+    subscription_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SubscriptionName"},
     )
     """Subscription name."""
@@ -148,10 +171,15 @@ class ServiceBusEntity:
     Response for Get all entities
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The entity name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The entity name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name for the entity"""
@@ -163,7 +191,7 @@ class ObjectEntity:
     Response for Get metadata of a filter
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -176,8 +204,9 @@ class SubscriptionFilter:
     Definition: SubscriptionFilter
     """
 
-    correlation_filter: Optional[SubscriptionCorrelationFilter] = field(
+    correlation_filter: Optional[SubscriptionCorrelationFilter] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationFilter"},
     )
 
@@ -188,45 +217,60 @@ class SubscriptionCorrelationFilter:
     Definition: SubscriptionCorrelationFilter
     """
 
-    correlation_id: Optional[str] = field(
+    correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CorrelationId"},
     )
     """Identifier of the correlation"""
-    label: Optional[str] = field(default=None, metadata={"wire_name": "Label"})
-    """Application specific label"""
-    message_id: Optional[str] = field(
+    label: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Label"},
+    )
+    """Application specific label"""
+    message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MessageId"},
     )
     """
     This is a user-defined value that Service Bus can use to identify duplicate
     messages, if enabled.
     """
-    properties: Optional[Dict[str, str]] = field(
+    properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Properties"},
     )
     """Key-value pairs for each brokered property"""
-    reply_to: Optional[str] = field(
+    reply_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """Address of the queue to reply to"""
-    reply_to_session_id: Optional[str] = field(
+    reply_to_session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyToSessionId"},
     )
     """Identifier of the session to reply to"""
-    session_id: Optional[str] = field(
+    session_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionId"},
     )
     """Identifier of the session"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Send to address"""
-    content_type: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Send to address"""
+    content_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Content type of the message content"""
@@ -296,6 +340,45 @@ class ServicebusClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "servicebus"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def send_message(
         self,
@@ -736,7 +819,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_messages_from_queue_with_peek_lock(
+    def list_messages_from_queue_with_peek_lock(
         self,
         queue_name: str,
         *,
@@ -747,12 +830,15 @@ class ServicebusClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages from a queue (peek-lock)
 
         The operation receives messages from a queue with peek-lock. If maximum
         message count is not provided, it reads 20 messages.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -779,27 +865,45 @@ class ServicebusClient(ConnectorClientBase):
             query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def close_session_in_queue(
         self,
@@ -1335,7 +1439,7 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_messages_from_topic_with_peek_lock(
+    def list_messages_from_topic_with_peek_lock(
         self,
         topic_name: str,
         subscription_name: str,
@@ -1347,13 +1451,16 @@ class ServicebusClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get messages from a topic subscription (peek-lock)
 
         The operation receives messages from a topic subscription with
         peek-lock. If maximum message count is not provided, it reads 20
         messages.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1382,27 +1489,45 @@ class ServicebusClient(ConnectorClientBase):
             query_params.append(f"sessionId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def close_session_in_topic(
         self,
@@ -1488,188 +1613,293 @@ class ServicebusClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_entities(
+    def list_entities(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all entities
 
         This operation gets all queues and topics in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/entities"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_system_properties(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_system_properties(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get the list of system properties
 
         This operation gets list of properties.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/systemproperties"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_queues(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_queues(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all queues
 
         This operation gets all queues in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/queues"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_session_options(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_session_options(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get session options
 
         This operation gets the list of options for session handling - None,
         Next available.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/sessionoptions"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_topics(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_topics(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all topics
 
         This operation gets all topics in the Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/topics"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_subscriptions(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_subscriptions(
         self,
         topic_name: str,
         *,
@@ -1677,12 +1907,15 @@ class ServicebusClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get the subscriptions for a topic
 
         This operation gets the list of subscriptions for a topic in the
         Service Bus namespace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1690,27 +1923,45 @@ class ServicebusClient(ConnectorClientBase):
             f"/{quote(quote(str(topic_name), safe=''), safe='')}"
             f"/subscriptions"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_subscription_filter(
         self,

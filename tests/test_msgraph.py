@@ -666,7 +666,7 @@ class TestGetMemberGroups:
 
         mock_response_success.text = '{}'
 
-        input_data = GetMemberGroupsInput()
+        input_data = GetMemberGroupsInput(security_enabled_only=True)
 
         with patch.object(
             client._http_client,
@@ -933,6 +933,6 @@ class TestEdgeCases:
             assert mock_send.call_args[0][0] == "GET"
 
             # POST method
-            input_data = GetMemberGroupsInput()
+            input_data = GetMemberGroupsInput(security_enabled_only=True)
             await client.get_member_groups(input=input_data, member_id="user-123")
             assert mock_send.call_args[0][0] == "POST"

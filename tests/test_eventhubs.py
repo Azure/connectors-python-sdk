@@ -18,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestEventhubsClientInitialization:
@@ -432,8 +433,12 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_partition_keys(event_hub_name="hub1")
-            await client.get_partition_keys(event_hub_name="hub2")
+            await resolve_generated_result(
+                client.list_partition_keys(event_hub_name="hub1")
+            )
+            await resolve_generated_result(
+                client.list_partition_keys(event_hub_name="hub2")
+            )
 
             assert mock_send.call_count == 2
 
@@ -453,8 +458,10 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_partition_keys(
-                event_hub_name="my-event-hub"
+            await resolve_generated_result(
+                client.list_partition_keys(
+                    event_hub_name="my-event-hub"
+                )
             )
 
             call_args = mock_send.call_args
@@ -478,6 +485,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_event_hubs()
+                await resolve_generated_result(client.list_event_hubs())
 
             assert exc_info.value.status_code == 401

@@ -36,7 +36,7 @@ def example_1_get_login_accounts() -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts_response = client.get_login_accounts()
+            accounts_response = client.list_login_accounts()
             accounts = accounts_response.get("accounts", []) if accounts_response else []
 
             print(f"Found {len(accounts)} accounts")

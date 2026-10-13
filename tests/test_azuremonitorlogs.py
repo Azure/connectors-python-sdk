@@ -20,7 +20,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestAzuremonitorlogsClientInitialization:
@@ -301,7 +301,8 @@ class TestQueryDataAsync:
             credential=mock_credential,
         )
 
-        request_body = QueryDataInput(
+        request_body = model_instance(
+            QueryDataInput,
             query="Heartbeat | take 1",
             timerangetype="SetInQuery",
         )
@@ -339,7 +340,7 @@ class TestQueryDataAsync:
             return_value=MockResponse(status=200, text=""),
         ):
             result = await client.query_data(
-                input=QueryDataInput(),
+                input=model_instance(QueryDataInput),
                 subscriptions="sub-id",
                 resourcegroups="rg1",
                 resourcetype="type",
@@ -395,7 +396,8 @@ class TestVisualizeQueryAsync:
             credential=mock_credential,
         )
 
-        body = VisualizeQueryInput(
+        body = model_instance(
+            VisualizeQueryInput,
             query="Heartbeat | summarize count() by bin(TimeGenerated, 1h)",
             timerangetype="SetInQuery",
         )
@@ -439,7 +441,7 @@ class TestVisualizeQueryAsync:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.visualize_query(
-                    input=VisualizeQueryInput(),
+                    input=model_instance(VisualizeQueryInput),
                     subscriptions="sub-id",
                     resourcegroups="rg1",
                     resourcetype="type",

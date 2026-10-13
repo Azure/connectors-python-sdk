@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -192,128 +192,149 @@ class NewMeetingResponse:
     Response for Create a Teams meeting
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier for the event"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp the event was created"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """Timestamp the event was last modified"""
-    categories: Optional[List[Any]] = None
+    categories: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
     """The categories associated with the event"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """Time zone of the event"""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if an alert is set to remind the user of the event"""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasAttachments"},
     )
     """Set to true if the event has attachments"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The text of the event's subject line"""
-    body_preview: Optional[str] = field(
+    body_preview: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bodyPreview"},
     )
     """The preview of the message associated with the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The importance of the event. The possible values are: low, normal, high
     """
-    sensitivity: Optional[str] = None
+    sensitivity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Sensitivity of the event"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day"""
-    is_cancelled: Optional[bool] = field(
+    is_cancelled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isCancelled"},
     )
     """Set to true if the event has been canceled"""
-    is_organizer: Optional[bool] = field(
+    is_organizer: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOrganizer"},
     )
     """Set to true if the calendar owner is the organizer of the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """The organizer would like an invitee to send a response to the event"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """
     The status to show. Possible values are: free, tentative, busy, oof,
     workingElsewhere, unknown.
     """
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The event type. Possible values are: singleInstance, occurrence, exception,
     seriesMaster
     """
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webLink"},
     )
     """The URL to open the event in Outlook on the web."""
-    online_meeting_url: Optional[str] = field(
+    online_meeting_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onlineMeetingUrl"},
     )
     """A URL for an online meeting"""
-    allow_new_time_proposals: Optional[bool] = field(
+    allow_new_time_proposals: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowNewTimeProposals"},
     )
     """
     True if the meeting organizer allows invitees to propose a new time when
     responding
     """
-    recurrence: Optional[Dict[str, Any]] = None
+    recurrence: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The recurrence pattern for the event"""
-    response_status: Optional[Dict[str, Any]] = field(
+    response_status: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseStatus"},
     )
     """Indicates the type of response sent in response to an event message"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The body of the message associated with the event"""
-    start: Optional[Dict[str, Any]] = None
+    start: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The start date, time, and time zone of the event"""
-    end: Optional[Dict[str, Any]] = None
+    end: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The date, time, and time zone that the event ends"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The location of the event"""
-    attendees: Optional[List[Dict[str, Any]]] = None
+    attendees: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of attendees for the event"""
-    organizer: Optional[Dict[str, Any]] = None
+    organizer: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Organizer"""
-    online_meeting: Optional[Dict[str, Any]] = field(
+    online_meeting: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onlineMeeting"},
     )
     """Details for an attendee to join the meeting online."""
@@ -325,11 +346,12 @@ class GetAllTeamsResponse:
     Response for List joined teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of the teams you are a member of"""
 
 
@@ -339,11 +361,12 @@ class GetAllAssociatedTeamsResponse:
     Response for List associated teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AssociatedTeamInfo]] = None
+    value: Optional[List[AssociatedTeamInfo]] = dataclass_field(default=None, kw_only=True)
     """List of the teams you are associated with"""
 
 
@@ -353,11 +376,12 @@ class GetChannelsForGroupResponse:
     Response for List channels
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[GetChannelResponse]] = None
+    value: Optional[List[GetChannelResponse]] = dataclass_field(default=None, kw_only=True)
     """List of one or more channels for a specific team"""
 
 
@@ -367,15 +391,13 @@ class CreateChannelInput:
     Create a channel
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional textual description for the channel"""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Channel name as it appears in Microsoft Teams"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """
@@ -391,17 +413,19 @@ class CreateChannelResponse:
     Response for Create a channel
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional textual description for the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Channel name as it appears in Microsoft Teams"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel's unique identifier"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The type of channel membership"""
@@ -413,39 +437,45 @@ class GetChannelResponse:
     Response for Get details for a specific channel in a team
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the channel"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the channel, optional"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address for sending messages to the channel"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant."""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink for the channel in Microsoft Teams"""
-    files_folder_web_url: Optional[str] = field(
+    files_folder_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filesFolderWebUrl"},
     )
     """The SharePoint folder URL of the channel"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp at which the channel was created. Read only"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The channel membership type"""
@@ -457,12 +487,13 @@ class UpdateChannelPropertiesInput:
     Update channel
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The new display name for the channel."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new description for the channel."""
 
 
@@ -472,8 +503,9 @@ class ArchiveChannelInput:
     Archive a channel
     """
 
-    should_set_spo_site_read_only_for_members: Optional[bool] = field(
+    should_set_spo_site_read_only_for_members: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shouldSetSpoSiteReadOnlyForMembers"},
     )
     """
@@ -488,7 +520,7 @@ class AsyncOperationResponse:
     Response for Archive a channel
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the asynchronous operation"""
 
 
@@ -498,11 +530,12 @@ class GetAllChannelsForTeamResponse:
     Response for List all channels
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ChannelWithOwnerTeamId]] = None
+    value: Optional[List[ChannelWithOwnerTeamId]] = dataclass_field(default=None, kw_only=True)
     """List of one or more channels for a specific team"""
 
 
@@ -512,11 +545,12 @@ class GetChatsResponse:
     Response for List chats
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of one or more chats you are a part of"""
 
 
@@ -526,8 +560,9 @@ class AtMentionTagResponse:
     Response for Get an @mention token for a team tag
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -542,22 +577,25 @@ class GetMessagesFromConversationResponse:
     Response for Get messages in a channel
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """@odata.context"""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """@odata.nextLink"""
-    value: Optional[ChatMessageList] = None
+    value: Optional[ChatMessageList] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -566,7 +604,7 @@ class DynamicGetMessageDetailsResponseSchema:
     Response for Get message details
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -579,7 +617,7 @@ class ListRepliesResponseSchema:
     Response for List replies of a channel message
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List replies response"""
 
 
@@ -589,7 +627,7 @@ class ListMembersResponseSchema:
     Response for List chat or channel members
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List members response"""
 
 
@@ -602,8 +640,9 @@ class WebhookChatMessageTriggerInput:
     When a new chat message is added
     """
 
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
 
@@ -614,48 +653,57 @@ class GetTeamResponse:
     Response for Get a team
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the team"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the team"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the team, optional"""
-    internal_id: Optional[str] = field(
+    internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "internalId"},
     )
     """The internal ID of the team"""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink that will go to the team in the Microsoft Teams client"""
-    is_archived: Optional[bool] = field(
+    is_archived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isArchived"},
     )
     """Whether this team is in read-only mode"""
-    member_settings: Optional[MemberSettings] = field(
+    member_settings: Optional[MemberSettings] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberSettings"},
     )
-    guest_settings: Optional[GuestSettings] = field(
+    guest_settings: Optional[GuestSettings] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "guestSettings"},
     )
-    messaging_settings: Optional[MessagingSettings] = field(
+    messaging_settings: Optional[MessagingSettings] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messagingSettings"},
     )
-    fun_settings: Optional[FunSettings] = field(
+    fun_settings: Optional[FunSettings] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "funSettings"},
     )
-    discovery_settings: Optional[DiscoverySettings] = field(
+    discovery_settings: Optional[DiscoverySettings] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "discoverySettings"},
     )
 
@@ -666,8 +714,9 @@ class AtMentionUser:
     Response for Get an @mention token for a user
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -684,7 +733,7 @@ class NewChatResponse:
     Response for Create a chat
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The chat's unique identifier"""
 
 
@@ -694,61 +743,66 @@ class ChatMessage:
     Response for Post a message to myself
     """
 
-    attachments: Optional[List[Dict[str, Any]]] = None
+    attachments: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """attachments"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Plaintext representation of the content of the message"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp of when the chat message was created"""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """deleted"""
-    etag: Optional[str] = None
+    etag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version number of the chat message."""
-    from_: Optional[Dict[str, Any]] = field(
+    from_: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "from"},
     )
     """The message sender"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The importance of the message. The possible values are: normal, high,
     urgent.
     """
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """
     Timestamp when the chat message is created (initial setting) or modified,
     including when a reaction is added or removed
     """
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Locale of the chat message set by the client."""
-    mentions: Optional[List[Dict[str, Any]]] = None
+    mentions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """
     List of entities mentioned in the chat message. Supported entities are:
     user, bot, team, and channel.
     """
-    message_type: Optional[str] = field(
+    message_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageType"},
     )
     """The type of chat message"""
-    reactions: Optional[List[Dict[str, Any]]] = None
+    reactions: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Reactions for this chat message (for example, Like)"""
-    reply_to_id: Optional[str] = field(
+    reply_to_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyToId"},
     )
     """ID of the parent message of the thread"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the chat message, optional"""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Summary text of the message that could be used for push notifications and
     summary views or fall back views
@@ -761,14 +815,11 @@ class CreateATeamInput:
     Create a team
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name of the team"""
-    description: Optional[str] = None
+    description: str
     """An optional description for the team"""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The visibility of the the team"""
 
 
@@ -778,8 +829,9 @@ class CreateATeamResponse:
     Response for Create a team
     """
 
-    new_team_id: Optional[str] = field(
+    new_team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newTeamId"},
     )
     """Team ID of the team that was just created"""
@@ -791,12 +843,9 @@ class AddMemberToTeamInput:
     Add a member to a team
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a team owner"""
 
 
@@ -806,12 +855,9 @@ class AddMemberToChannelInput:
     Add a member to a channel
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a channel owner"""
 
 
@@ -821,15 +867,17 @@ class PostToConversationResponse:
     Response for Post message in a chat or channel
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique message ID"""
-    message_link: Optional[str] = field(
+    message_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageLink"},
     )
     """Link to the message in Microsoft Teams"""
-    conversation_id: Optional[str] = field(
+    conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "conversationId"},
     )
     """The chat's unique identifier"""
@@ -841,11 +889,10 @@ class PostCardAndWaitForResponseInput:
     Post adaptive card and wait for a response
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
 
 
 @dataclass
@@ -854,7 +901,7 @@ class DynamicPostGatherInputToConversationResponse:
     Response for Post adaptive card and wait for a response
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -867,7 +914,7 @@ class ObjectWithoutType:
     Response for Send a Microsoft Graph HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -880,15 +927,13 @@ class AddMemberToChatInput:
     Add a user to a chat
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """User principal name or Microsoft Entra ID to add"""
-    owner: Optional[bool] = None
+    owner: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True, if the user should be a chat owner"""
-    visible_history_start_date_time: Optional[str] = field(
+    visible_history_start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "visibleHistoryStartDateTime"},
     )
     """
@@ -903,72 +948,84 @@ class GetOnlineMeetingResponse:
     Response for Get an online meeting
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the online meeting"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the online meeting"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start time of the meeting in UTC"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The end time of the meeting in UTC"""
-    creation_date_time: Optional[str] = field(
+    creation_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationDateTime"},
     )
     """The creation time of the meeting in UTC"""
-    join_web_url: Optional[str] = field(
+    join_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinWebUrl"},
     )
     """The URL used to join the meeting online"""
-    join_meeting_id_settings: Optional[Dict[str, Any]] = field(
+    join_meeting_id_settings: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinMeetingIdSettings"},
     )
     """Settings related to the join meeting ID"""
-    participants: Optional[Dict[str, Any]] = None
+    participants: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The participants of the meeting"""
-    audio_conferencing: Optional[Dict[str, Any]] = field(
+    audio_conferencing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "audioConferencing"},
     )
     """Phone call-in information for the meeting"""
-    is_entry_exit_announced: Optional[bool] = field(
+    is_entry_exit_announced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEntryExitAnnounced"},
     )
     """
     Whether announce notifications are enabled for callers joining or leaving
     the meeting
     """
-    allowed_presenters: Optional[str] = field(
+    allowed_presenters: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowedPresenters"},
     )
     """Specifies who can be a presenter in the meeting"""
-    lobby_bypass_settings: Optional[Dict[str, Any]] = field(
+    lobby_bypass_settings: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lobbyBypassSettings"},
     )
     """Specifies which participants can bypass the meeting lobby"""
-    record_automatically: Optional[bool] = field(
+    record_automatically: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordAutomatically"},
     )
     """Indicates whether to record the meeting automatically"""
-    allow_meeting_chat: Optional[str] = field(
+    allow_meeting_chat: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowMeetingChat"},
     )
     """Specifies the mode of meeting chat"""
-    meeting_options_web_url: Optional[str] = field(
+    meeting_options_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOptionsWebUrl"},
     )
     """A URL for the organizer to change settings for the meeting"""
@@ -980,11 +1037,12 @@ class CallTranscriptCollectionResponse:
     Response for List meeting transcripts
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallTranscriptResponse]] = None
+    value: Optional[List[CallTranscriptResponse]] = dataclass_field(default=None, kw_only=True)
     """List of transcripts"""
 
 
@@ -994,30 +1052,35 @@ class CallTranscriptResponse:
     Response for Get meeting transcript
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcript ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the transcript was created"""
-    transcript_content_url: Optional[str] = field(
+    transcript_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptContentUrl"},
     )
     """The URL to access the transcript content"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = field(
+    meeting_organizer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizerId"},
     )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
@@ -1029,11 +1092,12 @@ class CallRecordingCollectionResponse:
     Response for List meeting recordings
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[CallRecordingResponse]] = None
+    value: Optional[List[CallRecordingResponse]] = dataclass_field(default=None, kw_only=True)
     """List of recordings"""
 
 
@@ -1043,30 +1107,35 @@ class CallRecordingResponse:
     Response for Get meeting recording
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The recording ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the recording was created"""
-    recording_content_url: Optional[str] = field(
+    recording_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingContentUrl"},
     )
     """The URL to access the recording content"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """The meeting ID"""
-    meeting_organizer_id: Optional[str] = field(
+    meeting_organizer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizerId"},
     )
     """The meeting organizer's user ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
@@ -1078,19 +1147,21 @@ class ListSectionsResponse:
     Response for List sections
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    microsoft_graph_sections_version: Optional[str] = field(
+    microsoft_graph_sections_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@microsoft.graph.sectionsVersion"},
     )
     """
     Version identifier for the sections hierarchy. Pass as If-Match on Create,
     Update, Delete, Add Item, Remove Item, and Move Item operations.
     """
-    value: Optional[List[SectionResponse]] = None
+    value: Optional[List[SectionResponse]] = dataclass_field(default=None, kw_only=True)
     """List of sections"""
 
 
@@ -1100,26 +1171,26 @@ class CreateSectionInput:
     Create a section
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
@@ -1131,48 +1202,56 @@ class SectionResponse:
     Response for Create a section
     """
 
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
     """
     ETag for the sections collection. Pass as If-Match on Create, Update, and
     Delete.
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The section ID"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """The display icon for the section"""
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
-    section_type: Optional[str] = field(
+    section_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sectionType"},
     )
     """The type of section"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the section was created"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """The date and time when the section was last modified"""
@@ -1184,26 +1263,30 @@ class UpdateSectionInput:
     Update a section
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the section"""
-    display_icon: Optional[Dict[str, Any]] = field(
+    display_icon: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayIcon"},
     )
     """
     The display icon for the section. Only iconType is writable; other fields
     are populated by the service.
     """
-    is_expanded: Optional[bool] = field(
+    is_expanded: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isExpanded"},
     )
     """Whether the section is expanded"""
-    sort_type: Optional[str] = field(
+    sort_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortType"},
     )
     """The sort type for the section"""
@@ -1215,11 +1298,12 @@ class ListSectionItemsResponse:
     Response for List section items
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SectionItemResponse]] = None
+    value: Optional[List[SectionItemResponse]] = dataclass_field(default=None, kw_only=True)
     """List of section items"""
 
 
@@ -1229,7 +1313,7 @@ class AddSectionItemInput:
     Add an item to a section
     """
 
-    id: Optional[str] = None
+    id: str
     """
     The conversation ID of the chat, channel, meeting, or community to add to
     the section. For community items, the service automatically normalizes the
@@ -1243,31 +1327,35 @@ class SectionItemResponse:
     Response for Add an item to a section
     """
 
-    etag: Optional[str] = field(
+    etag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.etag"},
     )
     """
     ETag for the section items collection. Pass as If-Match on Add, Remove, and
     Move.
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique identifier of the item. Corresponds to the conversation ID of
     the underlying chat, channel, meeting, or community.
     """
-    item_type: Optional[str] = field(
+    item_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemType"},
     )
     """The type of the item"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the item was added to the section"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """The date and time when the item was last modified"""
@@ -1279,8 +1367,7 @@ class MoveSectionItemInput:
     Move a section item
     """
 
-    target_section_id: Optional[str] = field(
-        default=None,
+    target_section_id: str = dataclass_field(
         metadata={"wire_name": "targetSectionId"},
     )
     """The ID of the section to move the item to"""
@@ -1292,11 +1379,12 @@ class GetTagsResponseSchema:
     Response for List all tags for a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1305,12 +1393,9 @@ class CreateTagInput:
     Create a tag for a team
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name of the tag as it appears to the user in Microsoft Teams."""
-    members: Optional[str] = None
+    members: str
     """
     List of users' IDs separated by semi-colons, identifier must be in a format
     like '550e8400-e29b-41d4-a716-446655440000'.
@@ -1323,24 +1408,28 @@ class CreateTagResponseSchema:
     Response for Create a tag for a team
     """
 
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the tag"""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """ID of the team in which the tag is defined"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the tag as it appears to the user in Microsoft Teams."""
-    member_count: Optional[int] = field(
+    member_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberCount"},
     )
     """The number of users assigned to the tag"""
@@ -1352,10 +1441,7 @@ class UpdateTagInput:
     Update a team tag
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The new name of the tag as it appears to the user in Microsoft Teams."""
 
 
@@ -1365,10 +1451,7 @@ class AddMemberToTagInput:
     Add a member to a team tag
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """
     The user's ID of the member to add to the tag, must be in a format like
     '550e8400-e29b-41d4-a716-446655440000'.
@@ -1381,8 +1464,9 @@ class AddMemberToTagResponseSchema:
     Response for Add a member to a team tag
     """
 
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """User ID of the member added to the tag"""
@@ -1394,7 +1478,7 @@ class GetTagMembersResponseSchema:
     Response for List the members of a team tag
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1403,11 +1487,12 @@ class AiInsightCollectionResponse:
     Response for List AI insights
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[AiInsightResponse]] = None
+    value: Optional[List[AiInsightResponse]] = dataclass_field(default=None, kw_only=True)
     """List of AI insights"""
 
 
@@ -1417,34 +1502,40 @@ class AiInsightDetailResponse:
     Response for Get AI insight
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The AI insight ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """The content correlation ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the AI insight was created"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The date and time when the AI insight ended"""
-    recap_url: Optional[str] = field(
+    recap_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recapUrl"},
     )
     """
@@ -1452,20 +1543,22 @@ class AiInsightDetailResponse:
     the underlying callAiInsight resource returned by the fetch. Present when
     the underlying resource provides it; otherwise absent.
     """
-    meeting_notes: Optional[List[AiInsightMeetingNote]] = field(
+    meeting_notes: Optional[List[AiInsightMeetingNote]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingNotes"},
     )
     """
     Detailed notes of the meeting discussion generated by Microsoft Teams
     Copilot.
     """
-    action_items: Optional[List[AiInsightActionItem]] = field(
+    action_items: Optional[List[AiInsightActionItem]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actionItems"},
     )
     """Action items generated from the meeting conversation."""
-    viewpoint: Optional[AiInsightViewpoint] = None
+    viewpoint: Optional[AiInsightViewpoint] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1474,7 +1567,7 @@ class GetMessageLocationsResponse:
     Response for Conversation location for where to post
     """
 
-    locations: Optional[List[Dict[str, Any]]] = None
+    locations: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """valid locations to post a message or reply, make verbose"""
 
 
@@ -1484,7 +1577,7 @@ class GetMessageDetailsSchema:
     Response for Get message details response schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1493,7 +1586,7 @@ class ListMembersSchema:
     Response for List members input schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1502,7 +1595,7 @@ class PostFeedSchema:
     Response for Get feed notification input metadata
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1511,7 +1604,7 @@ class UnifiedActionSchema:
     Response for Get unified action input metadata
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1520,9 +1613,9 @@ class ConnectorMetadata:
     Response for Get message with options subscription input metadata
     """
 
-    metadatatype: Optional[str] = None
-    activitytype: Optional[str] = None
-    schema: Optional[ObjectEntity] = None
+    metadatatype: Optional[str] = dataclass_field(default=None, kw_only=True)
+    activitytype: Optional[str] = dataclass_field(default=None, kw_only=True)
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1531,7 +1624,7 @@ class WebhookTriggerSchema:
     Response for Input schema for webhook trigger
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1540,7 +1633,7 @@ class DynamicResponseSchema:
     Response for Get response schema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 GetFlowContinuationSubscriptionWithPosterOutputMetadataInput = str
@@ -1552,7 +1645,7 @@ class ObjectEntity:
     Response for Get subscription scope input schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1565,7 +1658,7 @@ class PostMessageSchema:
     Definition: PostMessageSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1574,7 +1667,7 @@ class PostCardSchema:
     Definition: PostCardSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1583,7 +1676,7 @@ class PostCardAndWaitSchema:
     Definition: PostCardAndWaitSchema
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1592,7 +1685,7 @@ class DynamicGetMessageDetailsSchema:
     Definition: DynamicGetMessageDetailsSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1605,7 +1698,7 @@ class DynamicListMembersSchema:
     Definition: DynamicListMembersSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1618,7 +1711,7 @@ class DynamicUserNotificationRequest:
     Definition: DynamicUserNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1631,7 +1724,7 @@ class DynamicPostConversationNotificationRequest:
     Definition: DynamicPostConversationNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1644,7 +1737,7 @@ class DynamicChannelNotificationRequest:
     Definition: DynamicChannelNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1657,7 +1750,7 @@ class DynamicPostFeedNotificationRequest:
     Definition: DynamicPostFeedNotificationRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1670,7 +1763,7 @@ class DynamicPostMessageRequest:
     Definition: DynamicPostMessageRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1683,7 +1776,7 @@ class DynamicReplyMessageRequest:
     Definition: DynamicReplyMessageRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1696,7 +1789,7 @@ class DynamicPostCardRequest:
     Definition: DynamicPostCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1709,7 +1802,7 @@ class DynamicPostCardAndWaitRequest:
     Definition: DynamicPostCardAndWaitRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1722,7 +1815,7 @@ class DynamicReplyCardRequest:
     Definition: DynamicReplyCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1735,7 +1828,7 @@ class DynamicUpdateCardRequest:
     Definition: DynamicUpdateCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1748,7 +1841,7 @@ class DynamicUserAdaptiveCardRequest:
     Definition: DynamicUserAdaptiveCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1761,7 +1854,7 @@ class DynamicChannelAdaptiveCardRequest:
     Definition: DynamicChannelAdaptiveCardRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1774,7 +1867,7 @@ class DynamicUserMessageWithOptionsSubscriptionRequest:
     Definition: DynamicUserMessageWithOptionsSubscriptionRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1787,7 +1880,7 @@ class DynamicUserMessageWithOptionsSubscriptionResult:
     Definition: DynamicUserMessageWithOptionsSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1800,7 +1893,7 @@ class DynamicSelectedMessageTriggerResult:
     Definition: DynamicSelectedMessageTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1813,7 +1906,7 @@ class DynamicComposeMessageTriggerResult:
     Definition: DynamicComposeMessageTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1826,7 +1919,7 @@ class DynamicCardResponseTriggerResult:
     Definition: DynamicCardResponseTriggerResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1839,47 +1932,56 @@ class MessageReactionWebhookResponseSchema:
     Definition: MessageReactionWebhookResponseSchema
     """
 
-    thread_type: Optional[str] = field(
+    thread_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threadType"},
     )
-    chat_id: Optional[str] = field(
+    chat_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "chatId"},
     )
     """The chat's unique identifier"""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team's unique identifier"""
-    channel_id: Optional[str] = field(
+    channel_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "channelId"},
     )
     """The channel's unique identifier"""
-    message_id: Optional[str] = field(
+    message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageId"},
     )
     """Id of the message which was reacted"""
-    reply_to_id: Optional[str] = field(
+    reply_to_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyToId"},
     )
     """ID of the parent message of the thread"""
-    message_link: Optional[str] = field(
+    message_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageLink"},
     )
     """Link to the message which was reacted"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Reacting user's Id"""
-    message_reaction: Optional[str] = field(
+    message_reaction: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "messageReaction"},
     )
     """Message reaction used"""
@@ -1891,11 +1993,11 @@ class TeamsIdentitySet:
     Definition: TeamsIdentitySet
     """
 
-    application: Optional[Dict[str, Any]] = None
+    application: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Application identity (bot or service)"""
-    device: Optional[Dict[str, Any]] = None
+    device: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Device identity"""
-    user: Optional[Dict[str, Any]] = None
+    user: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """User identity"""
 
 
@@ -1905,15 +2007,17 @@ class CallEventWebhookResponseSchema:
     Definition: CallEventWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Event identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
     """
@@ -1921,56 +2025,64 @@ class CallEventWebhookResponseSchema:
     meeting-specific fields are flattened onto the base type by notification
     delivery).
     """
-    call_event_type: Optional[str] = field(
+    call_event_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callEventType"},
     )
     """Type of call event"""
-    event_date_time: Optional[str] = field(
+    event_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventDateTime"},
     )
     """When the event occurred"""
-    call_conversation_id: Optional[str] = field(
+    call_conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callConversationId"},
     )
     """Call conversation identifier"""
-    join_web_url: Optional[str] = field(
+    join_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "joinWebUrl"},
     )
     """
     Meeting join URL (populated when the call is associated with an online
     meeting)
     """
-    chat_info: Optional[Dict[str, Any]] = field(
+    chat_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "chatInfo"},
     )
     """
     Chat information for the meeting (populated when the call is associated
     with an online meeting)
     """
-    organizer_meeting_info: Optional[Dict[str, Any]] = field(
+    organizer_meeting_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizerMeetingInfo"},
     )
     """
     Organizer info (populated when the call is associated with an online
     meeting)
     """
-    transcription_state: Optional[Dict[str, Any]] = field(
+    transcription_state: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptionState"},
     )
     """Transcription state (set on transcriptionStateUpdated events)"""
-    recording_state: Optional[Dict[str, Any]] = field(
+    recording_state: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingState"},
     )
     """Recording state (set on recordingStateUpdated events)"""
-    participants: Optional[List[Dict[str, Any]]] = None
+    participants: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Participants (set on rosterUpdated events)"""
 
 
@@ -1980,44 +2092,52 @@ class TranscriptWebhookResponseSchema:
     Definition: TranscriptWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Transcript identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call transcripts)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call transcripts)"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = field(
+    meeting_organizer: Optional[TeamsIdentitySet] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
     )
-    transcript_content_url: Optional[str] = field(
+    transcript_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptContentUrl"},
     )
     """URL to download the transcript content"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """When the transcript was created (UTC)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """When the transcript ended (UTC)"""
@@ -2029,20 +2149,23 @@ class AiInsightWebhookResponseSchema:
     Definition: AiInsightWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """AI insight identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call AI insights)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call AI insights)"""
@@ -2054,44 +2177,52 @@ class RecordingWebhookResponseSchema:
     Definition: RecordingWebhookResponseSchema
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recording identifier"""
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """OData identifier"""
-    meeting_id: Optional[str] = field(
+    meeting_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingId"},
     )
     """Online meeting identifier (empty for ad-hoc call recordings)"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """Call identifier (set for ad-hoc call recordings)"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """Content correlation identifier"""
-    meeting_organizer: Optional[TeamsIdentitySet] = field(
+    meeting_organizer: Optional[TeamsIdentitySet] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "meetingOrganizer"},
     )
-    recording_content_url: Optional[str] = field(
+    recording_content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recordingContentUrl"},
     )
     """URL to download the recording content"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """When the recording was created (UTC)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """When the recording ended (UTC)"""
@@ -2103,7 +2234,7 @@ class ChatMessageWebhookResponseSchema:
     Definition: ChatMessageWebhookResponseSchema
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Message details response"""
 
 
@@ -2113,7 +2244,7 @@ class DynamicWebhookTriggerRequestSchema:
     Definition: DynamicWebhookTriggerRequestSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2126,7 +2257,7 @@ class DynamicKeywordWebhookTriggerResponseSchema:
     Definition: DynamicKeywordWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2139,7 +2270,7 @@ class DynamicAtMentionWebhookTriggerResponseSchema:
     Definition: DynamicAtMentionWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2152,7 +2283,7 @@ class DynamicNewMessageWebhookTriggerResponseSchema:
     Definition: DynamicNewMessageWebhookTriggerResponseSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2165,7 +2296,7 @@ class DynamicPostToConversationResponse:
     Definition: DynamicPostToConversationResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2178,7 +2309,7 @@ class MessageId:
     Definition: MessageId
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique message identifier"""
 
 
@@ -2188,7 +2319,7 @@ class DynamicUserFlowContinuationSubscriptionResult:
     Definition: DynamicUserFlowContinuationSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2201,7 +2332,7 @@ class DynamicChannelFlowContinuationSubscriptionResult:
     Definition: DynamicChannelFlowContinuationSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2214,7 +2345,7 @@ class DynamicGatherInputSubscriptionResult:
     Definition: DynamicGatherInputSubscriptionResult
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -2227,15 +2358,17 @@ class AssociatedTeamInfo:
     Definition: AssociatedTeamInfo
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the team"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the team"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant this team belongs to"""
@@ -2247,44 +2380,51 @@ class ChannelWithOwnerTeamId:
     Definition: ChannelWithOwnerTeamId
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the channel"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name of the channel"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the channel, optional"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address for sending messages to the channel"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The ID of the Microsoft Entra tenant."""
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A hyperlink for the channel in Microsoft Teams"""
-    files_folder_web_url: Optional[str] = field(
+    files_folder_web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filesFolderWebUrl"},
     )
     """The SharePoint folder URL of the channel"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Timestamp at which the channel was created. Read only"""
-    membership_type: Optional[str] = field(
+    membership_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipType"},
     )
     """The channel membership type"""
-    owner_team_id: Optional[str] = field(
+    owner_team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ownerTeamId"},
     )
     """The ID of the team that owns the channel"""
@@ -2296,8 +2436,7 @@ class WebhookRequest:
     Definition: WebhookRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """
@@ -2311,11 +2450,12 @@ class GetTimeOffReasonsResponse:
     Definition: GetTimeOffReasonsResponse
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The list of time off reasons."""
 
 
@@ -2325,67 +2465,79 @@ class TimeOffRequestResponse:
     Definition: TimeOffRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the TimeOff request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """Start of time requested off"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """The ID of the TimeOff Reason"""
@@ -2397,72 +2549,85 @@ class OfferShiftRequestResponse:
     Definition: OfferShiftRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -2474,77 +2639,91 @@ class SwapShiftsChangeRequestResponse:
     Definition: SwapShiftsChangeRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = field(
+    recipient_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientShiftId"},
     )
     """The ID of the shift from the recipient"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -2556,57 +2735,67 @@ class OpenShiftChangeRequestResponse:
     Definition: OpenShiftChangeRequestResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = field(
+    open_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openShiftId"},
     )
     """The ID of the open shift being requested"""
@@ -2618,13 +2807,15 @@ class EditOpenShiftRequest:
     Definition: EditOpenShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = field(
+    shared_open_shift: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
 
@@ -2635,33 +2826,39 @@ class OpenShiftResponse:
     Definition: OpenShiftResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the open shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = field(
+    last_modified_by: Optional[LastModifiedBy] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = field(
+    shared_open_shift: Optional[SharedOpenShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = field(
+    draft_open_shift: Optional[DraftOpenShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
     )
 
@@ -2672,31 +2869,35 @@ class SharedOpenShift:
     Definition: SharedOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    open_slot_count: Optional[int] = field(
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2705,31 +2906,35 @@ class DraftOpenShift:
     Definition: DraftOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    open_slot_count: Optional[int] = field(
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2738,38 +2943,45 @@ class ShiftResponse:
     Definition: ShiftResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    last_modified_by: Optional[LastModifiedBy] = field(
+    last_modified_by: Optional[LastModifiedBy] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
-    shared_shift: Optional[SharedShift] = field(
+    shared_shift: Optional[SharedShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = field(
+    draft_shift: Optional[DraftShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftShift"},
     )
 
@@ -2780,26 +2992,29 @@ class SharedShift:
     Definition: SharedShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2808,26 +3023,29 @@ class DraftShift:
     Definition: DraftShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -2836,20 +3054,23 @@ class ScheduleResponse:
     Definition: ScheduleResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the schedule."""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """The Time Zone of the schedule."""
-    provision_status: Optional[str] = field(
+    provision_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatus"},
     )
     """The Provision Status of the schedule."""
-    provision_status_code: Optional[str] = field(
+    provision_status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatusCode"},
     )
     """The Provision Status Code of the schedule."""
@@ -2861,7 +3082,7 @@ class PostMessageToSelfRequest:
     Definition: PostMessageToSelfRequest
     """
 
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
 
 
 ThemeEditor = Literal[
@@ -2889,23 +3110,26 @@ class SchedulingGroupResponse:
     Definition: SchedulingGroupResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the scheduling group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the scheduling group."""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """
     Indicates whether the scheduling group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = field(
+    user_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userIds"},
     )
     """List of IDs of users in the scheduling group."""
@@ -2917,17 +3141,11 @@ class BotMentionRequest:
     Definition: BotMentionRequest
     """
 
-    bot_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "botId"},
-    )
+    bot_id: str = dataclass_field(metadata={"wire_name": "botId"})
     """The bot's unique identifier (GUID)"""
-    app_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "appId"},
-    )
+    app_id: str = dataclass_field(metadata={"wire_name": "appId"})
     """The bot's app identifier (GUID)"""
-    name: Optional[str] = None
+    name: str
     """The bot's display name"""
 
 
@@ -2937,8 +3155,9 @@ class AtMentionBotResponse:
     Definition: AtMentionBotResponse
     """
 
-    at_mention: Optional[str] = field(
+    at_mention: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "atMention"},
     )
     """
@@ -2956,7 +3175,7 @@ class ChannelIds:
     Definition: ChannelIds
     """
 
-    channel: Optional[ChannelIdForTeam] = None
+    channel: ChannelIdForTeam
 
 
 ChatId = str
@@ -2971,9 +3190,9 @@ class NewChat:
     Definition: NewChat
     """
 
-    topic: Optional[str] = None
+    topic: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title, displayed only in group chats"""
-    members: Optional[str] = None
+    members: str
     """User's IDs, separated by semicolons"""
 
 
@@ -2983,70 +3202,72 @@ class NewMeeting:
     Definition: NewMeeting
     """
 
-    subject: Optional[str] = None
+    subject: str
     """The text of the event's subject line"""
-    body: Optional[Dict[str, Any]] = None
+    body: Dict[str, Any]
     """The body of the message associated with the event"""
-    time_zone: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "timeZone"},
-    )
+    time_zone: str = dataclass_field(metadata={"wire_name": "timeZone"})
     """Time zone of the event"""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    required_attendees: Optional[str] = field(
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "optionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The location of the event"""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: low, normal or high"""
-    recurrence: Optional[Dict[str, Any]] = None
+    recurrence: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The recurrence pattern for the meeting"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day"""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """
     The number of minutes before the event start time that the reminder alert
     occurs
     """
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if an alert is set to remind the user of the event"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """
     Set to true if the sender would like a response when the event is accepted
     """
-    is_online_meeting: Optional[bool] = field(
-        default=None,
+    is_online_meeting: bool = dataclass_field(
         metadata={"wire_name": "isOnlineMeeting"},
     )
     """Set to true, if the meeting should have an online meeting provider"""
-    online_meeting_provider: Optional[str] = field(
-        default=None,
+    online_meeting_provider: str = dataclass_field(
         metadata={"wire_name": "onlineMeetingProvider"},
     )
     """Represents the online meeting service provider"""
@@ -3058,13 +3279,13 @@ class LastModifiedBy:
     Definition: LastModifiedBy
     """
 
-    application: Optional[str] = None
+    application: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Application"""
-    device: Optional[str] = None
+    device: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Device"""
-    conversation: Optional[str] = None
+    conversation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Conversation"""
-    user: Optional[Dict[str, Any]] = None
+    user: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """User"""
 
 
@@ -3074,28 +3295,33 @@ class MemberSettings:
     Definition: MemberSettings
     """
 
-    allow_create_update_channels: Optional[bool] = field(
+    allow_create_update_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateChannels"},
     )
     """If set to true, members can add and update channels"""
-    allow_delete_channels: Optional[bool] = field(
+    allow_delete_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowDeleteChannels"},
     )
     """If set to true, members can delete channels"""
-    allow_add_remove_apps: Optional[bool] = field(
+    allow_add_remove_apps: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowAddRemoveApps"},
     )
     """If set to true, members can add and remove apps"""
-    allow_create_update_remove_tabs: Optional[bool] = field(
+    allow_create_update_remove_tabs: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateRemoveTabs"},
     )
     """If set to true, members can add, update, and remove tabs"""
-    allow_create_update_remove_connectors: Optional[bool] = field(
+    allow_create_update_remove_connectors: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateRemoveConnectors"},
     )
     """If set to true, members can add, update, and remove connectors"""
@@ -3107,13 +3333,15 @@ class GuestSettings:
     Definition: GuestSettings
     """
 
-    allow_create_update_channels: Optional[bool] = field(
+    allow_create_update_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCreateUpdateChannels"},
     )
     """If set to true, guests can add and update channels"""
-    allow_delete_channels: Optional[bool] = field(
+    allow_delete_channels: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowDeleteChannels"},
     )
     """If set to true, guests can delete channels"""
@@ -3125,28 +3353,33 @@ class MessagingSettings:
     Definition: MessagingSettings
     """
 
-    allow_user_edit_messages: Optional[bool] = field(
+    allow_user_edit_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowUserEditMessages"},
     )
     """If set to true, users can edit their messages"""
-    allow_user_delete_messages: Optional[bool] = field(
+    allow_user_delete_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowUserDeleteMessages"},
     )
     """If set to true, users can delete their messages"""
-    allow_owner_delete_messages: Optional[bool] = field(
+    allow_owner_delete_messages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowOwnerDeleteMessages"},
     )
     """If set to true, owners can delete any message"""
-    allow_team_mentions: Optional[bool] = field(
+    allow_team_mentions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowTeamMentions"},
     )
     """If set to true, @team mentions are allowed"""
-    allow_channel_mentions: Optional[bool] = field(
+    allow_channel_mentions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowChannelMentions"},
     )
     """If set to true, @channel mentions are allowed"""
@@ -3158,23 +3391,27 @@ class FunSettings:
     Definition: FunSettings
     """
 
-    allow_giphy: Optional[bool] = field(
+    allow_giphy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowGiphy"},
     )
     """If set to true, enables Giphy use"""
-    giphy_content_rating: Optional[str] = field(
+    giphy_content_rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "giphyContentRating"},
     )
     """Giphy content rating. Possible values are: moderate, strict"""
-    allow_stickers_and_memes: Optional[bool] = field(
+    allow_stickers_and_memes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowStickersAndMemes"},
     )
     """If set to true, enables users to include stickers and memes"""
-    allow_custom_memes: Optional[bool] = field(
+    allow_custom_memes: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowCustomMemes"},
     )
     """If set to true, enables users to include custom memes"""
@@ -3186,8 +3423,9 @@ class DiscoverySettings:
     Definition: DiscoverySettings
     """
 
-    show_in_teams_search_and_suggestions: Optional[bool] = field(
+    show_in_teams_search_and_suggestions: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showInTeamsSearchAndSuggestions"},
     )
     """
@@ -3202,12 +3440,14 @@ class SelectedMessageTriggerMetadata:
     Definition: SelectedMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3218,12 +3458,14 @@ class ComposeMessageTriggerMetadata:
     Definition: ComposeMessageTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3234,12 +3476,14 @@ class CardResponseTriggerMetadata:
     Definition: CardResponseTriggerMetadata
     """
 
-    teams_flow_run_context: Optional[ObjectEntity] = field(
+    teams_flow_run_context: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TeamsFlowRunContext"},
     )
-    card_outputs: Optional[ObjectEntity] = field(
+    card_outputs: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CardOutputs"},
     )
 
@@ -3250,11 +3494,12 @@ class VirtualAgentBots:
     Definition: VirtualAgentBots
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of the Microsoft Copilot Studio agents"""
 
 
@@ -3264,7 +3509,7 @@ class SectionItemConflictError:
     Definition: SectionItemConflictError
     """
 
-    error: Optional[Dict[str, Any]] = None
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -3273,12 +3518,11 @@ class DynamicCallEventTriggerRequest:
     Definition: DynamicCallEventTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3287,12 +3531,11 @@ class DynamicTranscriptTriggerRequest:
     Definition: DynamicTranscriptTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3301,12 +3544,11 @@ class DynamicAiInsightTriggerRequest:
     Definition: DynamicAiInsightTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3315,12 +3557,11 @@ class DynamicRecordingTriggerRequest:
     Definition: DynamicRecordingTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    scope: Optional[Dict[str, Any]] = None
+    scope: Dict[str, Any]
 
 
 @dataclass
@@ -3329,20 +3570,13 @@ class SingleTagTriggerRequest:
     Definition: SingleTagTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The team that owns the tag to monitor"""
-    tag_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tagId"},
-    )
+    tag_id: str = dataclass_field(metadata={"wire_name": "tagId"})
     """The specific tag to monitor"""
 
 
@@ -3352,20 +3586,13 @@ class SingleTagMemberTriggerRequest:
     Definition: SingleTagMemberTriggerRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Webhook callback URL"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The team that owns the tag whose membership to monitor"""
-    tag_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "tagId"},
-    )
+    tag_id: str = dataclass_field(metadata={"wire_name": "tagId"})
     """The specific tag whose membership to monitor"""
 
 
@@ -3375,42 +3602,49 @@ class TagWebhookResponseSchema:
     Definition: TagWebhookResponseSchema
     """
 
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """The tag lifecycle change: 'created', 'updated', or 'deleted'."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag identifier."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team (group) ID that owns the tag."""
-    tag_id: Optional[str] = field(
+    tag_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagId"},
     )
     """The tag ID."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display name of the tag."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the tag."""
-    member_count: Optional[int] = field(
+    member_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberCount"},
     )
     """Number of members in the tag."""
-    tag_type: Optional[str] = field(
+    tag_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagType"},
     )
     """Tag type."""
-    event_id: Optional[str] = field(
+    event_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventId"},
     )
     """
@@ -3425,38 +3659,44 @@ class TagMemberWebhookResponseSchema:
     Definition: TagMemberWebhookResponseSchema
     """
 
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """
     The membership change: 'created' (member added) or 'deleted' (member
     removed).
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tag member identifier."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The team (group) ID that owns the tag."""
-    tag_id: Optional[str] = field(
+    tag_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tagId"},
     )
     """The tag ID whose membership changed."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """Tenant ID of the tag member."""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """User ID of the tag member."""
-    event_id: Optional[str] = field(
+    event_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventId"},
     )
     """
@@ -3471,25 +3711,29 @@ class AiInsightResponse:
     Definition: AiInsightResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The AI insight ID"""
-    call_id: Optional[str] = field(
+    call_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callId"},
     )
     """The call ID"""
-    content_correlation_id: Optional[str] = field(
+    content_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentCorrelationId"},
     )
     """The content correlation ID"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The date and time when the AI insight was created"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """The date and time when the AI insight ended"""
@@ -3501,11 +3745,16 @@ class AiInsightMeetingNote:
     Definition: AiInsightMeetingNote
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the meeting note."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary text of the meeting note."""
-    subpoints: Optional[List[AiInsightMeetingNoteSubpoint]] = None
+    subpoints: Optional[
+        List[AiInsightMeetingNoteSubpoint]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Detailed subpoints of the discussion."""
 
 
@@ -3515,9 +3764,9 @@ class AiInsightMeetingNoteSubpoint:
     Definition: AiInsightMeetingNoteSubpoint
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the subpoint."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Text of the subpoint."""
 
 
@@ -3527,12 +3776,13 @@ class AiInsightActionItem:
     Definition: AiInsightActionItem
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the action item."""
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the action item."""
-    owner_display_name: Optional[str] = field(
+    owner_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ownerDisplayName"},
     )
     """Display name of the person assigned the action item."""
@@ -3544,8 +3794,9 @@ class AiInsightViewpoint:
     Definition: AiInsightViewpoint
     """
 
-    mention_events: Optional[List[AiInsightMentionEvent]] = field(
+    mention_events: Optional[List[AiInsightMentionEvent]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mentionEvents"},
     )
     """
@@ -3560,17 +3811,19 @@ class AiInsightMentionEvent:
     Definition: AiInsightMentionEvent
     """
 
-    event_date_time: Optional[str] = field(
+    event_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "eventDateTime"},
     )
     """The time during the meeting when the mention occurred (UTC)."""
-    transcript_utterance: Optional[str] = field(
+    transcript_utterance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "transcriptUtterance"},
     )
     """The transcript utterance containing the mention."""
-    speaker: Optional[Dict[str, Any]] = None
+    speaker: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The speaker who made the utterance."""
 
 
@@ -4394,13 +4647,16 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List replies of a channel message
 
         List replies to a message in a channel in a specific team. For shared
         channels, the team ID must refer to the host team, which is the team
         that owns the shared channel.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4421,27 +4677,45 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_members(
         self,
@@ -4453,11 +4727,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List chat or channel members
 
         List direct members of a group chat or a channel
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4475,27 +4752,45 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$filter={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def subscribe_user_message_with_options(
         self,
@@ -4832,11 +5127,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List team members
 
         Lists the members of a team in Microsoft Teams
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4855,27 +5153,45 @@ class TeamsClient(ConnectorClientBase):
             query_params.append(f"$top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def add_member_to_team(
         self,
@@ -6476,7 +6792,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tag_members(
+    def list_tag_members(
         self,
         group_id: str,
         tag_id: str,
@@ -6485,11 +6801,14 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List the members of a team tag
 
         Lists the members of a team tag
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6500,27 +6819,45 @@ class TeamsClient(ConnectorClientBase):
             f"/{quote(str(tag_id), safe='')}"
             f"/members"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def delete_tag_member(
         self,
@@ -7066,7 +7403,7 @@ class TeamsClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_message_locations(
+    def list_message_locations(
         self,
         message_type: str,
         poster: str,
@@ -7075,12 +7412,15 @@ class TeamsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Conversation location for where to post
 
         Returns a list of locations to post a message or reply based on who the
         user is posting as
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7090,27 +7430,45 @@ class TeamsClient(ConnectorClientBase):
             f"/poster"
             f"/{quote(str(poster), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("locations", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_message_details_input_schema(
         self,

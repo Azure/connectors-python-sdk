@@ -37,7 +37,7 @@ SUCCESS_CONTRACTS = {
         "/dashboards/1/contacts/value/conversations/archive",
         False,
     ),
-    "bulk_update_contacts": ("POST", "/dashboards/1/contacts", True),
+    "list_bulk_update_contacts": ("POST", "/dashboards/1/contacts", True),
     "cancel_payment": (
         "POST",
         "/dashboards/1/payments/1/cancel",
@@ -61,7 +61,7 @@ SUCCESS_CONTRACTS = {
         False,
     ),
     "get_conversations": ("GET", "/dashboards/1/conversations", False),
-    "get_custom_fields": ("GET", "/dashboards/1/fields", False),
+    "list_custom_fields": ("GET", "/dashboards/1/fields", False),
     "get_dashboard": ("GET", "/dashboards/1", False),
     "get_dashboards": ("GET", "/dashboards", False),
     "get_group_by_id": ("GET", "/dashboards/1/groups/1", False),
@@ -234,7 +234,17 @@ class TestTextrequestClientOperations:
             client._http_client,
             "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(
+                status=200,
+                text=(
+                    '[{"ok": true}]'
+                    if operation in {
+                        "list_bulk_update_contacts",
+                        "list_custom_fields",
+                    }
+                    else '{"ok": true}'
+                ),
+            ),
         ) as mock_send:
             result = await invoke_generated_operation(
                 client,
@@ -246,7 +256,15 @@ class TestTextrequestClientOperations:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = (
+            [{"ok": True}]
+            if operation in {
+                "list_bulk_update_contacts",
+                "list_custom_fields",
+            }
+            else {"ok": True}
+        )
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_get_messages_by_contact_phone_success(self, mock_credential):
@@ -457,20 +475,25 @@ class TestTextrequestClientOperations:
             assert result == {"id": 3}
 
     @pytest.mark.asyncio
-    async def test_get_custom_fields_success(self, mock_credential):
-        """Test get_custom_fields issues a GET to the fields route."""
+    async def test_list_custom_fields_success(self, mock_credential):
+        """Test list_custom_fields issues a GET to the fields route."""
         client = self._make_client(mock_credential)
-        mock_response = MockResponse(status=200, text='[]')
+        mock_response = MockResponse(status=200, text='[{"id": "field-1"}]')
 
         with patch.object(
             client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_custom_fields(dashboard_id="7")
+            result = await invoke_generated_operation(
+                client,
+                "list_custom_fields",
+                textrequest_module,
+                request_controls={"dashboard_id": "7"},
+            )
 
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards/7/fields" in mock_send.call_args[0][1]
-            assert result == []
+            assert result == [{"id": "field-1"}]
 
     @pytest.mark.asyncio
     async def test_mark_payment_paid_success(self, mock_credential):
@@ -590,14 +613,14 @@ class TestTextrequestClientErrorHandling:
             "delete_contact",
             "create_contact",
             "get_contacts",
-            "bulk_update_contacts",
+            "list_bulk_update_contacts",
             "get_group_by_id",
             "delete_group",
             "update_group",
             "get_groups",
             "create_group",
             "get_tags",
-            "get_custom_fields",
+            "list_custom_fields",
             "get_payment",
             "mark_payment_paid",
             "send_payment_reminder",
@@ -651,8 +674,12 @@ class TestTextrequestClientErrorHandling:
                     await client.get_contacts(
                         dashboard_id="7", page="1", page_size="20"
                     )
-                elif operation == "bulk_update_contacts":
-                    await client.bulk_update_contacts(input=[], dashboard_id="7")
+                elif operation == "list_bulk_update_contacts":
+                    await invoke_generated_operation(
+                        client,
+                        operation,
+                        textrequest_module,
+                    )
                 elif operation == "get_group_by_id":
                     await client.get_group_by_id(dashboard_id="7", group_id="3")
                 elif operation == "delete_group":
@@ -667,8 +694,12 @@ class TestTextrequestClientErrorHandling:
                     await client.create_group(input=CreateGroupInput(), dashboard_id="7")
                 elif operation == "get_tags":
                     await client.get_tags(dashboard_id="7", page="1", page_size="20")
-                elif operation == "get_custom_fields":
-                    await client.get_custom_fields(dashboard_id="7")
+                elif operation == "list_custom_fields":
+                    await invoke_generated_operation(
+                        client,
+                        operation,
+                        textrequest_module,
+                    )
                 elif operation == "get_payment":
                     await client.get_payment(dashboard_id="7", payment_id="9")
                 elif operation == "mark_payment_paid":

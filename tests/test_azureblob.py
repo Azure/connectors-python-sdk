@@ -415,7 +415,7 @@ class TestExtractFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"extractedFiles": ["file1.txt", "file2.txt"]}'
+            text='["file1.txt", "file2.txt"]'
         )
 
         with patch.object(
@@ -424,17 +424,19 @@ class TestExtractFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.extract_folder(
-                dataset="mycontainer",
-                source="/archive.zip",
-                destination="/extracted"
+            result = await resolve_generated_result(
+                client.list_extract_folder(
+                    dataset="mycontainer",
+                    source="/archive.zip",
+                    destination="/extracted"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "extractFolderV2" in call_args[0][1]
-            assert "extractedFiles" in result
+            assert result == ["file1.txt", "file2.txt"]
 
     @pytest.mark.asyncio
     async def test_with_overwrite_parameter(self, mock_credential):
@@ -452,11 +454,13 @@ class TestExtractFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.extract_folder(
-                dataset="mycontainer",
-                source="/archive.zip",
-                destination="/extracted",
-                overwrite="true"
+            await resolve_generated_result(
+                client.list_extract_folder(
+                    dataset="mycontainer",
+                    source="/archive.zip",
+                    destination="/extracted",
+                    overwrite="true"
+                )
             )
 
             call_args = mock_send.call_args
@@ -479,10 +483,12 @@ class TestExtractFolder:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.extract_folder(
-                    dataset="mycontainer",
-                    source="/archive.zip",
-                    destination="/extracted"
+                await resolve_generated_result(
+                    client.list_extract_folder(
+                        dataset="mycontainer",
+                        source="/archive.zip",
+                        destination="/extracted"
+                    )
                 )
 
             assert exc_info.value.status_code == 400
@@ -501,7 +507,7 @@ class TestGetAccessPolicies:
 
         mock_response = MockResponse(
             status=200,
-            text='{"policies": [{"id": "policy1", "permissions": "rwd"}]}'
+            text='[{"id": "policy1", "permissions": "rwd"}]'
         )
 
         with patch.object(
@@ -510,20 +516,22 @@ class TestGetAccessPolicies:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_access_policies(
-                storage_account_name="mystorageaccount",
-                path="/container/file.txt"
+            result = await resolve_generated_result(
+                client.list_access_policies(
+                    storage_account_name="mystorageaccount",
+                    path="/container/file.txt"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/policies" in call_args[0][1]
-            assert "policies" in result
+            assert result == [{"id": "policy1", "permissions": "rwd"}]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that an empty response returns an empty page."""
         client = AzureblobClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -537,11 +545,13 @@ class TestGetAccessPolicies:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_access_policies(
-                storage_account_name="mystorageaccount",
-                path="/container/file.txt"
+            result = await resolve_generated_result(
+                client.list_access_policies(
+                    storage_account_name="mystorageaccount",
+                    path="/container/file.txt"
+                )
             )
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -560,9 +570,11 @@ class TestGetAccessPolicies:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_access_policies(
-                    storage_account_name="mystorageaccount",
-                    path="/container/file.txt"
+                await resolve_generated_result(
+                    client.list_access_policies(
+                        storage_account_name="mystorageaccount",
+                        path="/container/file.txt"
+                    )
                 )
 
             assert exc_info.value.status_code == 404

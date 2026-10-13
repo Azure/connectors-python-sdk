@@ -5,10 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -16,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -43,7 +46,7 @@ class CreateAppointmentInput:
     When a appointment is Created
     """
 
-    webhook: Optional[Dict[str, Any]] = None
+    webhook: Dict[str, Any]
 
 
 @dataclass
@@ -52,8 +55,9 @@ class WebhookResponse:
     Response for When a appointment is Created
     """
 
-    webhook_id: Optional[str] = field(
+    webhook_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webhookId"},
     )
     """Webhook ID."""
@@ -65,7 +69,7 @@ class UpdateAppointmentInput:
     When an appointment is Updated
     """
 
-    webhook: Optional[Dict[str, Any]] = None
+    webhook: Dict[str, Any]
 
 
 @dataclass
@@ -74,7 +78,7 @@ class CancelAppointmentInput:
     When an appointment is Cancelled
     """
 
-    webhook: Optional[Dict[str, Any]] = None
+    webhook: Dict[str, Any]
 
 
 @dataclass
@@ -83,7 +87,7 @@ class ListMailboxResponse:
     Response for List Booking Businesses where user is an admin
     """
 
-    mailboxes: Optional[List[MailboxEntity]] = None
+    mailboxes: Optional[List[MailboxEntity]] = dataclass_field(default=None, kw_only=True)
     """All mailbox entities."""
 
 
@@ -96,12 +100,13 @@ class MailboxEntity:
     Definition: MailboxEntity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Mailbox Display name."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SMTP of the Booking mailbox."""
 
 
@@ -111,128 +116,156 @@ class AppointmentData:
     Definition: AppointmentData
     """
 
-    additional_info: Optional[str] = field(
+    additional_info: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalInfo"},
     )
     """Additional Info about the booking."""
-    customer_email: Optional[str] = field(
+    customer_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerEmail"},
     )
     """Customer Email address in case of 1:1 bookings."""
-    customer_id: Optional[str] = field(
+    customer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerId"},
     )
     """Customer Id in case of 1:1 bookings."""
-    customer_location: Optional[Dict[str, Any]] = field(
+    customer_location: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerLocation"},
     )
     """Location of customer in 1:1 booking"""
-    customer_name: Optional[str] = field(
+    customer_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerName"},
     )
     """Customer Name for 1:1 booking."""
-    customer_notes: Optional[str] = field(
+    customer_notes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerNotes"},
     )
     """Customer Notes for 1:1 booking."""
-    custom_question_answers: Optional[List[CustomQuestion]] = field(
+    custom_question_answers: Optional[List[CustomQuestion]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomQuestionAnswers"},
     )
     """All the custom questions and answers for 1:1 booking."""
-    customer_phone: Optional[str] = field(
+    customer_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerPhone"},
     )
     """Customer phone for 1:1 booking."""
-    customer_time_zone: Optional[str] = field(
+    customer_time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomerTimeZone"},
     )
     """Customer Time Zone for 1:1 booking."""
-    customers: Optional[List[CustomerData]] = field(
+    customers: Optional[List[CustomerData]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Customers"},
     )
     """List of customers in the 1:N booking"""
-    duration: Optional[int] = field(
+    duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Duration"},
     )
     """Duration of the appointment"""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndTime"},
     )
     """End Time of the appointment."""
-    filled_attendees_count: Optional[int] = field(
+    filled_attendees_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FilledAttendeesCount"},
     )
     """Number of attendees who have booked this appoinment slot."""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """
     [Deprecated] - use selfServiceAppointmentId as unique identifier for the
     bookings appointment.
     """
-    is_s_m_s_notifications_enabled: Optional[bool] = field(
+    is_s_m_s_notifications_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsSMSNotificationsEnabled"},
     )
     """Field to check if SMS notification is enabled for the appointment."""
-    join_web_u_r_l: Optional[str] = field(
+    join_web_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JoinWebURL"},
     )
     """URL for joining this online appointment."""
-    max_attendees_count: Optional[int] = field(
+    max_attendees_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MaxAttendeesCount"},
     )
     """Max number of attendees allowed in this appoinment."""
-    self_service_appointment_id: Optional[str] = field(
+    self_service_appointment_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SelfServiceAppointmentId"},
     )
     """Appointment id for the booking appointment."""
-    service_id: Optional[str] = field(
+    service_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceId"},
     )
     """Unique Service Identifier."""
-    service_name: Optional[str] = field(
+    service_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceName"},
     )
     """Name of the bookings service."""
-    service_notes: Optional[str] = field(
+    service_notes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceNotes"},
     )
     """Service level notes for the staff and admin."""
-    staff_members: Optional[List[StaffMemberData]] = field(
+    staff_members: Optional[List[StaffMemberData]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StaffMembers"},
     )
     """List of staff members"""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartTime"},
     )
     """Start Time of the appointment."""
-    tracking_data: Optional[str] = field(
+    tracking_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TrackingData"},
     )
     """Campaign tracking Data."""
-    cancel_reason: Optional[str] = field(
+    cancel_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelReason"},
     )
     """Reason for cancellation of this booking appointment"""
@@ -244,26 +277,45 @@ class CustomerData:
     Definition: CustomerData
     """
 
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """Email of the customer in the group booking."""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Unique ID of the customer in the group booking."""
-    location: Optional[Dict[str, Any]] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """Email of the customer in the group booking."""
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Unique ID of the customer in the group booking."""
+    location: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of customer in a group booking."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Display Name of the customer in the group booking."""
-    notes: Optional[str] = field(default=None, metadata={"wire_name": "Notes"})
-    """Notes of the customer in the group booking."""
-    time_zone: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Display Name of the customer in the group booking."""
+    notes: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Notes"},
+    )
+    """Notes of the customer in the group booking."""
+    time_zone: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Timezone of the customer in the group booking."""
-    answers: Optional[List[CustomQuestion]] = field(
+    answers: Optional[List[CustomQuestion]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Answers"},
     )
     """All the custom questions and answers."""
@@ -275,17 +327,23 @@ class StaffMemberData:
     Definition: StaffMemberData
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Display Name of the staff assigned for this appointment."""
-    email_address: Optional[str] = field(
+    email_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddress"},
     )
     """Email Address of the staff assigned to this appointment."""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """Unique Staff identifier."""
 
 
@@ -295,33 +353,39 @@ class CustomQuestion:
     Definition: CustomQuestion
     """
 
-    answer: Optional[str] = field(
+    answer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Answer"},
     )
     """Answer to this custom question."""
-    answer_options: Optional[List[str]] = field(
+    answer_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AnswerOptions"},
     )
     """All the answer options."""
-    is_required: Optional[bool] = field(
+    is_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRequired"},
     )
     """Tells if answering this question is mandatory."""
-    question: Optional[str] = field(
+    question: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Question"},
     )
     """Question to be answered."""
-    question_id: Optional[str] = field(
+    question_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "QuestionID"},
     )
     """Unique Identifier of the Question to be answered."""
-    selected_options: Optional[List[int]] = field(
+    selected_options: Optional[List[int]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SelectedOptions"},
     )
     """All the selected answer options."""
@@ -392,6 +456,45 @@ class MicrosoftbookingsClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "microsoftbookings"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     def list_bookings_business_user_as_admin(
         self,
         *,
@@ -399,38 +502,59 @@ class MicrosoftbookingsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Booking Businesses where user is an admin
 
         Operation used to list all mailboxes for which the accessing user is an
         Administrator.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/BookingsService/api/V1/bookingBusinessesUserAsAdmin"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("mailboxes", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

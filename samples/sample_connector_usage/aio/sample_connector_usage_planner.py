@@ -67,11 +67,11 @@ async def example_2_list_group_plans(group_id: str):
         client = PlannerClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            plans = await client.list_group_plans(group_id=group_id)
+            plans = [plan async for plan in client.list_group_plans(group_id=group_id)]
 
-            if plans and plans.get('value'):
-                print(f"Found {len(plans.get('value', []))} plans in group")
-                for plan in plans.get('value', [])[:5]:  # Show first 5
+            if plans:
+                print(f"Found {len(plans)} plans in group")
+                for plan in plans[:5]:  # Show first 5
                     print(f"  - {plan.get('title')} ({plan.get('id')})")
             else:
                 print("No plans found in group")
@@ -141,7 +141,7 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
                 plan_id=plan_id,
                 bucket_id=bucket_id,
                 title="Sample Task from SDK",
-                priority=5  # Medium priority
+                priority=5,  # Medium priority
             )
 
             task = await client.create_task(input=task_input)
@@ -153,7 +153,7 @@ async def example_5_create_and_update_task(group_id: str, plan_id: str, bucket_i
                 # Update the task
                 update_input = UpdateTaskRequest(
                     title="Updated Sample Task",
-                    percent_complete=50
+                    percent_complete=50,
                 )
 
                 updated = await client.update_task(input=update_input, id=task_id)

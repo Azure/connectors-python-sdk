@@ -20,6 +20,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestTodoClientInitialization:
@@ -121,8 +122,8 @@ class TestTodoModelSerialization:
         assert payload["@odata.id"] == "odata-id"
 
 
-class TestGetAllTodoListsAsync:
-    """Tests for get_all_todo_lists_async method."""
+class TestListAllTodoListsAsync:
+    """Tests for list_all_todo_lists method."""
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -131,7 +132,7 @@ class TestGetAllTodoListsAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"value": [{"id": "list-1"}]}')
+        mock_response = MockResponse(status=200, text='[{"id": "list-1"}]')
 
         with patch.object(
             client._http_client,
@@ -139,14 +140,13 @@ class TestGetAllTodoListsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_todo_lists()
+            result = await resolve_generated_result(client.list_all_todo_lists())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert path.endswith("/lists")
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "list-1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -164,7 +164,7 @@ class TestGetAllTodoListsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_all_todo_lists()
+                await resolve_generated_result(client.list_all_todo_lists())
 
 
 class TestGetTodoListAsync:
@@ -572,7 +572,7 @@ class TestListTodosByFolderAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"value": [{"id": "task-1"}]}')
+        mock_response = MockResponse(status=200, text='[{"id": "task-1"}]')
 
         with patch.object(
             client._http_client,
@@ -580,14 +580,16 @@ class TestListTodosByFolderAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_to_dos_by_folder(folder_id="list-1", top="10")
+            result = await resolve_generated_result(
+                client.list_to_dos_by_folder(folder_id="list-1", top=10)
+            )
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/lists/list-1/tasks" in path
             assert "$top=10" in path
-            assert result is not None
+            assert result == [{"id": "task-1"}]
 
 
 class TestTodoTriggerOperations:

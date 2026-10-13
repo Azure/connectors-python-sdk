@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -36,13 +36,13 @@ class FormstackFormSubmittedInput:
     Triggers when a form is submitted
     """
 
-    url: Optional[str] = None
+    url: str
     """url"""
-    content_type: Optional[str] = None
+    content_type: str
     """content type"""
-    file_transfer_type: Optional[str] = None
+    file_transfer_type: str
     """file transfer type"""
-    standardize_field_values: Optional[bool] = None
+    standardize_field_values: bool
     """standardize field values"""
 
 
@@ -52,7 +52,7 @@ class FormstackFormSubmittedResponse:
     Response for Triggers when a form is submitted
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -61,9 +61,9 @@ class GetAvailableFormsResponse:
     Response for Get Available Forms
     """
 
-    forms: Optional[List[Dict[str, Any]]] = None
+    forms: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """forms"""
-    total: Optional[int] = None
+    total: Optional[int] = dataclass_field(default=None, kw_only=True)
     """total"""
 
 

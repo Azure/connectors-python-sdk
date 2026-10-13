@@ -19,6 +19,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestGithubClientInitialization:
@@ -277,8 +278,8 @@ class TestCreateIssueAsync:
                 )
 
 
-class TestGetIssuesAsync:
-    """Tests for get_issues_async method."""
+class TestListIssuesAsync:
+    """Tests for list_issues method."""
 
     @pytest.mark.asyncio
     async def test_success(self, mock_credential):
@@ -298,11 +299,13 @@ class TestGetIssuesAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_issues(
-                repository_owner="octocat",
-                repository_name="hello-world",
-                state="open",
-                per_page="10",
+            result = await resolve_generated_result(
+                client.list_issues(
+                    repository_owner="octocat",
+                    repository_name="hello-world",
+                    state="open",
+                    per_page=10,
+                )
             )
 
             mock_send.assert_called_once()
@@ -333,9 +336,11 @@ class TestGetIssuesAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_issues(
-                    repository_owner="octocat",
-                    repository_name="hello-world",
+                await resolve_generated_result(
+                    client.list_issues(
+                        repository_owner="octocat",
+                        repository_name="hello-world",
+                    )
                 )
 
 

@@ -46,7 +46,7 @@ async def example_1_get_networks():
 
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                networks = await client.get_networks()
+                networks = [item async for item in client.list_networks()]
 
                 if networks:
                     print(f"Found {len(networks)} network(s):")
@@ -70,7 +70,7 @@ async def example_2_get_groups():
         async with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get only groups the user belongs to
-                groups = await client.get_groups(mine=1)
+                groups = [item async for item in client.list_groups(mine=1)]
 
                 if groups:
                     print(f"Found {len(groups)} group(s):")
@@ -156,9 +156,9 @@ async def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                result = await client.post_message(input=message)
+                items = [item async for item in client.list_post_message(input=message)]
 
-                if result:
+                if items:
                     print("Message posted successfully!")
                     print(f"  Message ID: {result.get('id')}")
                     print(f"  Web URL: {result.get('web_url')}")

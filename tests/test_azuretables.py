@@ -1143,7 +1143,7 @@ class TestGetStorageAccounts:
                 text='{"value": [{"name": "account1"}]}'
             )
         ) as mock_send:
-            result = await client.get_storage_accounts()
+            result = await resolve_generated_result(client.list_storage_accounts())
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -1154,7 +1154,7 @@ class TestGetStorageAccounts:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result["value"][0]["name"] == "account1"
+            assert result == [{"name": "account1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -1171,7 +1171,7 @@ class TestGetStorageAccounts:
             return_value=MockResponse(status=500, text="Server error")
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_storage_accounts()
+                await resolve_generated_result(client.list_storage_accounts())
 
             assert exc_info.value.status_code == 500
 

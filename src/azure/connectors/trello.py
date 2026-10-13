@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List as TypingList, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List as TypingList, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -63,88 +65,99 @@ class Card:
     Response for List the cards in a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique id of the card."""
-    check_item_states: Optional[TypingList[CheckItemState]] = field(
+    check_item_states: Optional[TypingList[CheckItemState]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "checkItemStates"},
     )
     """The check item states in the card."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the card is
     closed.
     """
-    date_last_activity: Optional[str] = field(
+    date_last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastActivity"},
     )
     """The datetime of last activity on the card."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the card."""
-    id_board: Optional[str] = field(
+    id_board: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoard"},
     )
     """The unique Id of the board which the card belongs to."""
-    id_list: Optional[str] = field(
+    id_list: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idList"},
     )
     """The unique Id of the list which the card belongs to."""
-    id_members_voted: Optional[TypingList[str]] = field(
+    id_members_voted: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMembersVoted"},
     )
     """The unique Ids of the voting members."""
-    id_short: Optional[int] = field(
+    id_short: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idShort"},
     )
     """The short Id of the card."""
-    id_attachment_cover: Optional[str] = field(
+    id_attachment_cover: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idAttachmentCover"},
     )
     """The unique Id of the attachment cover."""
-    manual_cover_attachment: Optional[bool] = field(
+    manual_cover_attachment: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "manualCoverAttachment"},
     )
     """
     A boolean value (true, false) determining whether or not the card has a
     manual cover attachment.
     """
-    id_labels: Optional[TypingList[str]] = field(
+    id_labels: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idLabels"},
     )
     """A list of label Ids on the card."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the card."""
-    pos: Optional[float] = None
+    pos: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The position of the card."""
-    short_link: Optional[str] = field(
+    short_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortLink"},
     )
     """A short link to the card."""
-    badges: Optional[Badges] = None
-    due: Optional[str] = None
+    badges: Optional[Badges] = dataclass_field(default=None, kw_only=True)
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
-    short_url: Optional[str] = field(
+    short_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortUrl"},
     )
     """The short url link to the card."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the card is
     subscribed to.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url to the card."""
-    checklists: Optional[TypingList[Checklist]] = None
+    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
     """The set of board checklists."""
 
 
@@ -154,88 +167,99 @@ class CardWithChecklists:
     Response for Get a card by id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique id of the card."""
-    check_item_states: Optional[TypingList[CheckItemState]] = field(
+    check_item_states: Optional[TypingList[CheckItemState]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "checkItemStates"},
     )
     """The check item states in the card."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the card is
     closed.
     """
-    date_last_activity: Optional[str] = field(
+    date_last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastActivity"},
     )
     """The datetime of last activity on the card."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the card."""
-    id_board: Optional[str] = field(
+    id_board: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoard"},
     )
     """The unique Id of the board which the card belongs to."""
-    id_list: Optional[str] = field(
+    id_list: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idList"},
     )
     """The unique Id of the list which the card belongs to."""
-    id_members_voted: Optional[TypingList[str]] = field(
+    id_members_voted: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMembersVoted"},
     )
     """The unique Ids of the voting members."""
-    id_short: Optional[int] = field(
+    id_short: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idShort"},
     )
     """The short Id of the card."""
-    id_attachment_cover: Optional[str] = field(
+    id_attachment_cover: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idAttachmentCover"},
     )
     """The unique Id of the attachment cover."""
-    manual_cover_attachment: Optional[bool] = field(
+    manual_cover_attachment: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "manualCoverAttachment"},
     )
     """
     A boolean value (true, false) determining whether or not the card has a
     manual cover attachment.
     """
-    id_labels: Optional[TypingList[str]] = field(
+    id_labels: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idLabels"},
     )
     """A list of label Ids on the card."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the card."""
-    pos: Optional[float] = None
+    pos: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The position of the card."""
-    short_link: Optional[str] = field(
+    short_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortLink"},
     )
     """A short link to the card."""
-    badges: Optional[Badges] = None
-    due: Optional[str] = None
+    badges: Optional[Badges] = dataclass_field(default=None, kw_only=True)
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
-    short_url: Optional[str] = field(
+    short_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortUrl"},
     )
     """The short url link to the card."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the card is
     subscribed to.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url to the card."""
-    checklists: Optional[TypingList[Checklist]] = None
+    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
     """The set of card checklists."""
 
 
@@ -245,7 +269,7 @@ class ObjectEntity:
     Response for Delete a card
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -258,73 +282,80 @@ class Board:
     Response for List boards
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the board."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the board is
     closed.
     """
-    date_last_activity: Optional[str] = field(
+    date_last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastActivity"},
     )
     """Date of the last activity on the board."""
-    date_last_view: Optional[str] = field(
+    date_last_view: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastView"},
     )
     """Date of the last time the board is viewed."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the board."""
-    id_organization: Optional[str] = field(
+    id_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idOrganization"},
     )
     """The id of the organization."""
-    invitations: Optional[TypingList[str]] = None
+    invitations: Optional[TypingList[str]] = dataclass_field(default=None, kw_only=True)
     """The list of invitations on the board."""
-    invited: Optional[bool] = None
+    invited: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the account is
     invited to the board.
     """
-    label_names: Optional[Label] = field(
+    label_names: Optional[Label] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "labelNames"},
     )
-    memberships: Optional[TypingList[Membership]] = None
+    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
     """The set of board memberships."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board."""
-    pinned: Optional[bool] = None
+    pinned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the board is
     pinned.
     """
-    power_ups: Optional[TypingList[str]] = field(
+    power_ups: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "powerUps"},
     )
     """The set of power ups on the board."""
-    perfs: Optional[Perfs] = None
-    short_link: Optional[str] = field(
+    perfs: Optional[Perfs] = dataclass_field(default=None, kw_only=True)
+    short_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortLink"},
     )
     """The short link of the board."""
-    short_url: Optional[str] = field(
+    short_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortUrl"},
     )
     """The short url to the board."""
-    starred: Optional[bool] = None
+    starred: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """A value determining whether or not the board is starred."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A value determining whether or not the account is subscribed to the board.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url of the board."""
 
 
@@ -334,75 +365,82 @@ class BoardWithChecklists:
     Response for Get a board by Id
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the board."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the board is
     closed.
     """
-    date_last_activity: Optional[str] = field(
+    date_last_activity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastActivity"},
     )
     """Date of the last activity on the board."""
-    date_last_view: Optional[str] = field(
+    date_last_view: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dateLastView"},
     )
     """Date of the last time the board is viewed."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the board."""
-    id_organization: Optional[str] = field(
+    id_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idOrganization"},
     )
     """The id of the organization."""
-    invitations: Optional[TypingList[str]] = None
+    invitations: Optional[TypingList[str]] = dataclass_field(default=None, kw_only=True)
     """The list of invitations on the board."""
-    invited: Optional[bool] = None
+    invited: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the account is
     invited to the board.
     """
-    label_names: Optional[Label] = field(
+    label_names: Optional[Label] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "labelNames"},
     )
-    memberships: Optional[TypingList[Membership]] = None
+    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
     """The set of board memberships."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board."""
-    pinned: Optional[bool] = None
+    pinned: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the board is
     pinned.
     """
-    power_ups: Optional[TypingList[str]] = field(
+    power_ups: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "powerUps"},
     )
     """The set of power ups on the board."""
-    perfs: Optional[Perfs] = None
-    short_link: Optional[str] = field(
+    perfs: Optional[Perfs] = dataclass_field(default=None, kw_only=True)
+    short_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortLink"},
     )
     """The short link of the board."""
-    short_url: Optional[str] = field(
+    short_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortUrl"},
     )
     """The short url to the board."""
-    starred: Optional[bool] = None
+    starred: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """A value determining whether or not the board is starred."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A value determining whether or not the account is subscribed to the board.
     """
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full url of the board."""
-    checklists: Optional[TypingList[Checklist]] = None
+    checklists: Optional[TypingList[Checklist]] = dataclass_field(default=None, kw_only=True)
     """The set of board checklists."""
 
 
@@ -412,30 +450,31 @@ class List:
     Response for List the card lists in a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the list."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the list."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the list is
     closed.
     """
-    id_board: Optional[str] = field(
+    id_board: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoard"},
     )
     """The unique Id of the board which the list belongs to."""
-    pos: Optional[float] = None
+    pos: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The position of the list."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not to the account is
     subscribed to the list.
     """
-    cards: Optional[TypingList[Card]] = None
+    cards: Optional[TypingList[Card]] = dataclass_field(default=None, kw_only=True)
     """The cards inside the list."""
-    board: Optional[Board] = None
+    board: Optional[Board] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -444,16 +483,13 @@ class CreateListResponse:
     Response for Update a list
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the list."""
-    name: Optional[str] = None
+    name: str
     """The name of the list."""
-    id_board: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "idBoard"},
-    )
+    id_board: str = dataclass_field(metadata={"wire_name": "idBoard"})
     """The unique Id of the board the list belongs to."""
-    pos: Optional[float] = None
+    pos: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The position of the list."""
 
 
@@ -463,33 +499,37 @@ class Team:
     Response for List teams you are a member of
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the team."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the team."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the team."""
-    id_boards: Optional[TypingList[str]] = field(
+    id_boards: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoards"},
     )
     """The boards assigned to this team."""
-    billable_member_count: Optional[int] = field(
+    billable_member_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "billableMemberCount"},
     )
     """The number of members in this team."""
-    memberships: Optional[TypingList[Membership]] = None
+    memberships: Optional[TypingList[Membership]] = dataclass_field(default=None, kw_only=True)
     """The memberships for this team."""
-    web_site: Optional[str] = field(
+    web_site: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebSite"},
     )
     """The team website."""
-    prefs: Optional[TeamPreferences] = None
+    prefs: Optional[TeamPreferences] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -498,16 +538,17 @@ class Member:
     Response for List members of a team
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the member."""
-    full_name: Optional[str] = field(
+    full_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fullName"},
     )
     """The full name of the member."""
-    username: Optional[str] = None
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The username of the member."""
-    initials: Optional[str] = None
+    initials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The initials of the member."""
 
 
@@ -517,11 +558,11 @@ class BoardLabel:
     Response for List labels of a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Label Id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Label name."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Label color."""
 
 
@@ -531,13 +572,14 @@ class Comment:
     Response for List comments for a card
     """
 
-    member_creator: Optional[Member] = field(
+    member_creator: Optional[Member] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberCreator"},
     )
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The text of the comment."""
-    date: Optional[str] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The datetime the comment was left."""
 
 
@@ -547,21 +589,23 @@ class CardInAction:
     Response for When a new card is added to a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique id of the card."""
-    id_short: Optional[int] = field(
+    id_short: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idShort"},
     )
     """The short Id of the card."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the card."""
-    short_link: Optional[str] = field(
+    short_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortLink"},
     )
     """A short link to the card."""
-    due: Optional[str] = None
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
 
 
@@ -571,12 +615,13 @@ class CheckItemState:
     Definition: CheckItemState
     """
 
-    id_check_item: Optional[str] = field(
+    id_check_item: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idCheckItem"},
     )
     """ID of the check item."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State of the check item."""
 
 
@@ -586,55 +631,71 @@ class Badges:
     Definition: Badges
     """
 
-    votes: Optional[int] = field(default=None, metadata={"wire_name": "Votes"})
-    """The number of votes on the card badges."""
-    viewing_member_voted: Optional[bool] = field(
+    votes: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Votes"},
+    )
+    """The number of votes on the card badges."""
+    viewing_member_voted: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewingMemberVoted"},
     )
     """
     A boolean value (true, false) determining whether or not viewing members
     voted on the badge.
     """
-    subscribed: Optional[bool] = field(
+    subscribed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subscribed"},
     )
     """
     A boolean value (true, false) determining whether or not the account is
     subscribed to the card badges.
     """
-    fogbugz: Optional[str] = field(
+    fogbugz: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fogbugz"},
     )
     """The fogbugz of the badges."""
-    check_items: Optional[int] = field(
+    check_items: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckItems"},
     )
     """The number of check items in the badge."""
-    check_items_checked: Optional[int] = field(
+    check_items_checked: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckItemsChecked"},
     )
     """The number of checked check items in the badge."""
-    comments: Optional[int] = field(
+    comments: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """The comments on the badge."""
-    attachments: Optional[int] = field(
+    attachments: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """The attachments on the badge."""
-    description: Optional[bool] = field(
+    description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """The description of the badge."""
-    due: Optional[str] = field(default=None, metadata={"wire_name": "Due"})
+    due: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Due"},
+    )
     """The due date of the badge."""
 
 
@@ -644,44 +705,48 @@ class UpdateCard:
     Definition: UpdateCard
     """
 
-    name: Optional[str] = None
+    name: str
     """The updated name of the new card."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The updated description of the new card."""
-    closed: Optional[bool] = None
+    closed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the card is
     closed.
     """
-    id_members_array: Optional[TypingList[str]] = field(
+    id_members_array: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMembersArray"},
     )
     """An array of member Ids to attach to the card."""
-    id_attachment_cover: Optional[str] = field(
+    id_attachment_cover: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idAttachmentCover"},
     )
     """The id of the attachment to attach to the card."""
-    id_board: Optional[str] = field(
+    id_board: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoard"},
     )
     """The id of the board to attach the card to."""
-    id_list: Optional[str] = field(
+    id_list: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idList"},
     )
     """The id of the list to attach the card to."""
-    pos: Optional[str] = None
+    pos: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The position of the card on the page. Specify top, bottom, or a positive
     number. Note this is used in relation to existing card locations so the
     resulting location may not match the exact value provided.
     """
-    due: Optional[str] = None
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
-    subscribed: Optional[bool] = None
+    subscribed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not to subscribe to
     the card.
@@ -694,55 +759,58 @@ class CreateCard:
     Definition: CreateCard
     """
 
-    id_list: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "idList"},
-    )
+    id_list: str = dataclass_field(metadata={"wire_name": "idList"})
     """The id of the list that the card should be added to."""
-    name: Optional[str] = None
+    name: str
     """The name of the new card."""
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the new card."""
-    pos: Optional[str] = None
+    pos: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The position of the card. Specify top, bottom, or a positive number. Note
     this is used in relation to existing card locations so the resulting
     location may not match the exact value provided.
     """
-    id_members_array: Optional[TypingList[str]] = field(
+    id_members_array: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMembersArray"},
     )
     """An array of member Ids to attach to the card."""
-    id_labels_array: Optional[TypingList[str]] = field(
+    id_labels_array: Optional[TypingList[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idLabelsArray"},
     )
     """An array of label Ids to attach to the card."""
-    url_source: Optional[str] = field(
+    url_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlSource"},
     )
     """
     Source url of the card. Has to be a URL starting with http:// or https://
     or null.
     """
-    file_source: Optional[str] = field(
+    file_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileSource"},
     )
     """Source file of the card."""
-    id_card_source: Optional[str] = field(
+    id_card_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idCardSource"},
     )
     """The Id of the card to copy into a new card."""
-    keep_from_source: Optional[str] = field(
+    keep_from_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "keepFromSource"},
     )
     """Properties of the card to copy over from the source."""
-    due: Optional[str] = None
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card."""
 
 
@@ -752,25 +820,25 @@ class Label:
     Definition: Label
     """
 
-    green: Optional[str] = None
+    green: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the green label."""
-    yellow: Optional[str] = None
+    yellow: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the yellow label."""
-    orange: Optional[str] = None
+    orange: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the orange label."""
-    red: Optional[str] = None
+    red: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the red label."""
-    purple: Optional[str] = None
+    purple: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the purple label."""
-    blue: Optional[str] = None
+    blue: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the blue label."""
-    sky: Optional[str] = None
+    sky: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the sky blue label."""
-    lime: Optional[str] = None
+    lime: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the lime green label."""
-    pink: Optional[str] = None
+    pink: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the pink label."""
-    black: Optional[str] = None
+    black: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The value of the black label."""
 
 
@@ -780,19 +848,21 @@ class Membership:
     Definition: Membership
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the membership."""
-    id_member: Optional[str] = field(
+    id_member: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMember"},
     )
     """The unique Id of the member."""
-    member_type: Optional[str] = field(
+    member_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "memberType"},
     )
     """The type of member."""
-    unconfirmed: Optional[bool] = None
+    unconfirmed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     A boolean value (true, false) determining whether or not the membership is
     unconfirmed.
@@ -805,94 +875,107 @@ class Perfs:
     Definition: Perfs
     """
 
-    permission_level: Optional[str] = field(
+    permission_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "permissionLevel"},
     )
     """The permission level of the object."""
-    voting: Optional[str] = None
+    voting: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Who can vote on the object."""
-    comments: Optional[str] = None
+    comments: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Who can comment on the object."""
-    invitations: Optional[str] = None
+    invitations: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Who can invite people to the object."""
-    self_join: Optional[bool] = field(
+    self_join: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selfJoin"},
     )
     """
     A boolean value (true, false) determining whether or not the object can
     self join.
     """
-    card_covers: Optional[bool] = field(
+    card_covers: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "cardCovers"},
     )
     """
     A boolean value (true, false) determining whether or not the object has
     access to card covers.
     """
-    calendar_feed_enabled: Optional[bool] = field(
+    calendar_feed_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "calendarFeedEnabled"},
     )
     """
     A boolean value (true, false) determining whether or not the calendar feed
     enabled.
     """
-    background: Optional[str] = None
+    background: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The background of the object."""
-    background_color: Optional[str] = field(
+    background_color: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "backgroundColor"},
     )
     """The background color of the object, in hex notation."""
-    background_image: Optional[str] = field(
+    background_image: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "backgroundImage"},
     )
     """The background image of the object."""
-    background_image_scaled: Optional[str] = field(
+    background_image_scaled: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "backgroundImageScaled"},
     )
     """The scaled version of the background image."""
-    background_tile: Optional[bool] = field(
+    background_tile: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "backgroundTile"},
     )
     """The background tile of the object."""
-    background_brightness: Optional[str] = field(
+    background_brightness: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "backgroundBrightness"},
     )
     """The brightness of the object background."""
-    can_be_public: Optional[bool] = field(
+    can_be_public: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canBePublic"},
     )
     """
     A boolean value (true, false) determining whether or not the object can be
     public.
     """
-    can_be_org: Optional[bool] = field(
+    can_be_org: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canBeOrg"},
     )
     """
     A boolean value (true, false) determining whether or not the object can be
     part of the organization
     """
-    can_be_private: Optional[bool] = field(
+    can_be_private: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canBePrivate"},
     )
     """
     A boolean value (true, false) determining whether or not the object can be
     private.
     """
-    can_invite: Optional[bool] = field(
+    can_invite: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "canInvite"},
     )
     """
@@ -907,52 +990,57 @@ class UpdateBoard:
     Definition: UpdateBoard
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board."""
-    default_lists: Optional[str] = field(
+    default_lists: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "defaultLists"},
     )
     """
     A string (true, false) determining whether or not to create default lists.
     """
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the board."""
-    id_organization: Optional[str] = field(
+    id_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idOrganization"},
     )
     """The id of the team."""
-    prefs_permission_level: Optional[str] = field(
+    prefs_permission_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_permissionLevel"},
     )
     """The permission level of the board."""
-    prefs_comments: Optional[str] = None
+    prefs_comments: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The comment preferences on the board. Valid options are 'disabled',
     'members', 'observers', 'org' or 'public'.
     """
-    prefs_invitations: Optional[str] = None
+    prefs_invitations: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The invitation preferences of the board. Valid options are 'admins' or
     'members'.
     """
-    prefs_card_covers: Optional[str] = field(
+    prefs_card_covers: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_cardCovers"},
     )
     """A string (true, false) determining whether or not to use card covers."""
-    prefs_background: Optional[str] = None
+    prefs_background: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The background color of the board."""
-    prefs_voting: Optional[str] = None
+    prefs_voting: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The voting power-up preferences of the board."""
-    prefs_card_aging: Optional[str] = field(
+    prefs_card_aging: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_cardAging"},
     )
     """The card aging power-up preferences of the board."""
-    enable_calendar: Optional[str] = None
+    enable_calendar: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string (true, false) determining whether or not to enable calendar
     power-up
@@ -965,8 +1053,9 @@ class TeamPreferences:
     Definition: TeamPreferences
     """
 
-    permission_level: Optional[str] = field(
+    permission_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "permissionLevel"},
     )
     """The permission level of the team."""
@@ -978,29 +1067,33 @@ class Webhook:
     Definition: Webhook
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the webhook."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Brief Description of the webhook"""
-    id_model: Optional[str] = field(
+    id_model: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idModel"},
     )
     """ID of the model to be monitored (i.e. card,board, etc.)"""
-    callback_u_r_l: Optional[str] = field(
+    callback_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callbackURL"},
     )
     """The callbackURL to receive webhook notifications"""
-    active: Optional[bool] = None
+    active: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Determines whether the webhook is active and sending POST requests."""
-    consecutive_failures: Optional[float] = field(
+    consecutive_failures: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "consecutiveFailures"},
     )
     """The number of consecutive Failures in posting webhook notifications."""
-    first_consecutive_fail_date: Optional[str] = field(
+    first_consecutive_fail_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstConsecutiveFailDate"},
     )
     """The date of First Consecutive Failure."""
@@ -1012,7 +1105,7 @@ class CommentPost:
     Definition: CommentPost
     """
 
-    text: Optional[str] = None
+    text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The text of the comment."""
 
 
@@ -1022,49 +1115,54 @@ class CreateBoard:
     Definition: CreateBoard
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the board."""
-    default_lists: Optional[str] = field(
+    default_lists: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "defaultLists"},
     )
     """
     A string (true, false) determining whether or not to create default lists.
     """
-    desc: Optional[str] = None
+    desc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the board."""
-    id_organization: Optional[str] = field(
+    id_organization: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idOrganization"},
     )
     """The id of the team."""
-    prefs_permission_level: Optional[str] = field(
+    prefs_permission_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_permissionLevel"},
     )
     """
     The permission level of the board. Valid options are 'org', 'private', or
     'public'.
     """
-    prefs_comments: Optional[str] = None
+    prefs_comments: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The comment preferences of the board."""
-    prefs_invitations: Optional[str] = None
+    prefs_invitations: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The invitation preferences of the board."""
-    prefs_card_covers: Optional[str] = field(
+    prefs_card_covers: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_cardCovers"},
     )
     """A string (true, false) determining whether or not to use card covers."""
-    prefs_background: Optional[str] = None
+    prefs_background: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The background color of the board."""
-    prefs_voting: Optional[str] = None
+    prefs_voting: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The voting power-up preferences of the board."""
-    prefs_card_aging: Optional[str] = field(
+    prefs_card_aging: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "prefs_cardAging"},
     )
     """The card aging power-up preferences of the board."""
-    enable_calendar: Optional[str] = None
+    enable_calendar: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string (true, false) determining whether or not to enable calendar
     power-up.
@@ -1077,17 +1175,15 @@ class CreateList:
     Definition: CreateList
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the list."""
-    id_board: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "idBoard"},
-    )
+    id_board: str = dataclass_field(metadata={"wire_name": "idBoard"})
     """The unique Id of the board to create the list in."""
-    pos: Optional[str] = None
+    pos: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The position of the list. Specify top, bottom, or a positive number."""
-    id_list_source: Optional[str] = field(
+    id_list_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idListSource"},
     )
     """The id of the list to copy into the new list."""
@@ -1099,24 +1195,27 @@ class Checklist:
     Definition: Checklist
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the checklist."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the checklist."""
-    pos: Optional[int] = None
+    pos: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The position of the checklist."""
-    id_board: Optional[str] = field(
+    id_board: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idBoard"},
     )
     """The unique Id of the board."""
-    id_card: Optional[str] = field(
+    id_card: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idCard"},
     )
     """The unique Id of the card."""
-    check_items: Optional[TypingList[Checkitem]] = field(
+    check_items: Optional[TypingList[Checkitem]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "checkItems"},
     )
     """The list of the checklist items"""
@@ -1128,28 +1227,31 @@ class Checkitem:
     Definition: Checkitem
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique Id of the checkitem."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of them checkitem."""
-    name_data: Optional[Dict[str, Any]] = field(
+    name_data: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nameData"},
     )
     """The nameData of them checkitem."""
-    pos: Optional[float] = None
+    pos: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The position of the checkitem."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The state of the checkitem."""
-    due: Optional[str] = None
+    due: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the checkitem."""
-    id_member: Optional[str] = field(
+    id_member: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idMember"},
     )
     """The unique Id of the member."""
-    id_checklist: Optional[str] = field(
+    id_checklist: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "idChecklist"},
     )
     """The unique Id of the checklist."""
@@ -1161,8 +1263,7 @@ class ClientSubscription:
     Definition: ClientSubscription
     """
 
-    notification_u_r_l: Optional[str] = field(
-        default=None,
+    notification_u_r_l: str = dataclass_field(
         metadata={"wire_name": "NotificationURL"},
     )
     """
@@ -1177,17 +1278,19 @@ class SubscriptionResponse:
     Definition: SubscriptionResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the subscription"""
-    notification_u_r_l: Optional[str] = field(
+    notification_u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NotificationURL"},
     )
     """Notification Url"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource of the subscription request"""
-    notification_type: Optional[str] = field(
+    notification_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationType"},
     )
     """Notification Type"""
@@ -1199,7 +1302,7 @@ class SubscriptionPayload:
     Definition: SubscriptionPayload
     """
 
-    action: Optional[Dict[str, Any]] = None
+    action: Dict[str, Any]
     """webhook action"""
 
 
@@ -1268,6 +1371,45 @@ class TrelloClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "trello"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     def list_cards(
         self,
         board_id: str,
@@ -1289,11 +1431,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List the cards in a board
 
         List the cards matching the query parameters in a specific board.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1367,27 +1512,45 @@ class TrelloClient(ConnectorClientBase):
             query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_cards_simple(
         self,
@@ -1397,37 +1560,58 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         A simple version of the list cards
 
         A simple version of the list cards API method used by dynamic values.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/simple/boards/{quote(str(board_id), safe='')}/cards"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_card(
         self,
@@ -1682,11 +1866,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List boards
 
         List the boards matching the specified query parameters.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/member/me/boards"
         query_params = []
@@ -1752,27 +1939,45 @@ class TrelloClient(ConnectorClientBase):
             query_params.append(f"lists={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_boards_simple(
         self,
@@ -1781,35 +1986,56 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         A simple version of the list boards
 
         A simple version of the list boards API call with no parameters to be
         used by dynamic values.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/simple/member/me/boards"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_board(
         self,
@@ -2129,11 +2355,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List the card lists in a board
 
         List the card lists and the cards within the list in a specific board.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2162,27 +2391,45 @@ class TrelloClient(ConnectorClientBase):
             query_params.append(f"fields={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_lists_simple(
         self,
@@ -2192,37 +2439,58 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         A simple version of list lists
 
         A simple version of list lists to be used by dynamic values.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/simple/boards/{quote(str(board_id), safe='')}/lists"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_list(
         self,
@@ -2433,36 +2701,57 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List teams you are a member of
 
         The list of teams or organizations the account is a member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/members/me/organizations"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_team_members(
         self,
@@ -2472,37 +2761,58 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List members of a team
 
         List the members in a specific team.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/organizations/{quote(str(team_id), safe='')}/members"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_board_members(
         self,
@@ -2512,37 +2822,58 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List members of a board
 
         List the members of a specific board.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/boards/{quote(str(board_id), safe='')}/members"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_board_labels(
         self,
@@ -2552,11 +2883,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List labels of a board
 
         List the labels of a specific board.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2566,27 +2900,45 @@ class TrelloClient(ConnectorClientBase):
         query_params.append("limit=" + quote("1000", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_team_for_board(
         self,
@@ -2637,11 +2989,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List members for a card
 
         List the members for a specific card.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2654,27 +3009,45 @@ class TrelloClient(ConnectorClientBase):
         query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_card_comments(
         self,
@@ -2685,11 +3058,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List comments for a card
 
         List the comments for a specific card.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2702,27 +3078,45 @@ class TrelloClient(ConnectorClientBase):
         query_params.append(f"board_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def add_comment_to_card(
         self,
@@ -2773,7 +3167,7 @@ class TrelloClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def add_member_to_card(
+    def list_add_member_to_card(
         self,
         card_id: str,
         board_id: str,
@@ -2783,11 +3177,14 @@ class TrelloClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Add member to a card
 
         Add a member to a specific card.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2804,27 +3201,45 @@ class TrelloClient(ConnectorClientBase):
         query_params.append(f"memberId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "POST", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_board(
         self,

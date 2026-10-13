@@ -39,7 +39,7 @@ async def example_1_list_boards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TrelloClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = await client.list_boards_simple()
+            boards = [item async for item in client.list_boards_simple()]
             print(f"Boards: {boards}")
 
 

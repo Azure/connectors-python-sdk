@@ -65,7 +65,7 @@ async def example_1_create_office365_group():
 
                 result = await client.create_office365_group(input=input_data)
 
-                if result:
+                if items:
                     print("Office 365 group created:")
                     print(f"  ID: {result.get('id', 'N/A')}")
                     print(f"  Display Name: {result.get('displayName', 'N/A')}")
@@ -104,7 +104,7 @@ async def example_2_create_security_group():
 
                 result = await client.create_security_group(input=input_data)
 
-                if result:
+                if items:
                     print("Security group created:")
                     print(f"  ID: {result.get('id', 'N/A')}")
                     print(f"  Display Name: {result.get('displayName', 'N/A')}")
@@ -147,7 +147,7 @@ async def example_3_create_group():
 
                 result = await client.create_group(input=input_data)
 
-                if result:
+                if items:
                     print("Group created:")
                     print(f"  ID: {result.get('id', 'N/A')}")
                     print(f"  Display Name: {result.get('displayName', 'N/A')}")
@@ -195,7 +195,7 @@ async def example_4_create_user():
 
                 result = await client.create_user(input=input_data)
 
-                if result:
+                if items:
                     print("User created:")
                     print(f"  ID: {result.get('id', 'N/A')}")
                     print(f"  Display Name: {result.get('displayName', 'N/A')}")

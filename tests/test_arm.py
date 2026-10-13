@@ -1127,8 +1127,10 @@ class TestSubscriptionsListLocationsAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await arm_client.subscriptions_list_locations(
-                subscription_id="sub-1"
+            result = await resolve_generated_result(
+                arm_client.list_subscriptions_list_locations(
+                    subscription_id="sub-1"
+                )
             )
 
             mock_send.assert_called_once_with(
@@ -1141,8 +1143,7 @@ class TestSubscriptionsListLocationsAsync:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result is not None
-            assert len(result["value"]) == 2
+            assert result == mock_response_data["value"]
 
 
 class TestSubscriptionsGetAsync:

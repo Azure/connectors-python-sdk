@@ -21,6 +21,7 @@ from azure.connectors.sdk import ConnectorClientBase, ConnectorException
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
     get_generated_operations,
     invoke_sync_generated_operation,
 )
@@ -30,7 +31,7 @@ assert connectors_package.__file__ is not None
 CONNECTOR_MODULE_NAMES = [
     path.stem
     for path in sorted(Path(connectors_package.__file__).parent.glob("*.py"))
-    if path.name != "__init__.py"
+    if not path.name.startswith("_")
 ]
 
 
@@ -73,11 +74,9 @@ def test_all_generated_operations_succeed_with_request_controls(
             if get_origin(return_type) is LROPoller
             else return_type
         )
-        response_text = (
-            '{"value": [{"ok": true}]}'
-            if is_pageable
-            else '{"ok": true}'
-        )
+        response_text = '{"ok": true}'
+        if is_pageable:
+            response_text = generated_pager_response_text(generated_method)
         response_hook = MagicMock()
 
         with patch.object(

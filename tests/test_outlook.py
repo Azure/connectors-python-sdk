@@ -25,6 +25,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestOutlookClientInitialization:
@@ -574,13 +575,13 @@ class TestGetEmails:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_emails()
+            result = await resolve_generated_result(client.list_emails())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/v2/Mail" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_with_query_parameters(self, mock_credential):
@@ -598,11 +599,13 @@ class TestGetEmails:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_emails(
-                folder_path="Inbox",
-                fetch_only_unread="true",
-                importance="High",
-                top="10"
+            await resolve_generated_result(
+                client.list_emails(
+                    folder_path="Inbox",
+                    fetch_only_unread=True,
+                    importance="High",
+                    top=10
+                )
             )
 
             call_args = mock_send.call_args
@@ -635,13 +638,15 @@ class TestCalendarGetTables:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.calendar_get_tables()
+            result = await resolve_generated_result(
+                client.list_calendar_get_tables()
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/datasets/calendars/tables" in call_args[0][1]
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestCalendarGetItem:
@@ -766,7 +771,9 @@ class TestContactGetTables:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.contact_get_tables()
+            _ = await resolve_generated_result(
+                client.list_contact_get_tables()
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -796,7 +803,9 @@ class TestContactGetItems:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            _ = await client.contact_get_items(table="Contacts")
+            _ = await resolve_generated_result(
+                client.list_contact_get_items(table="Contacts")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -812,18 +821,18 @@ class TestOutlookApiSurface:
         expected_signatures = {
             "calendar_delete_item": ("self", "table", "id"),
             "calendar_get_item": ("self", "table", "id"),
-            "calendar_get_items": (
+            "list_calendar_get_items": (
                 "self", "table", "filter", "orderby", "top", "skip"
             ),
-            "calendar_get_tables": ("self",),
+            "list_calendar_get_tables": ("self",),
             "calendar_patch_item": ("self", "input", "table", "id"),
             "calendar_post_item": ("self", "input", "table"),
             "contact_delete_item": ("self", "table", "id"),
             "contact_get_item": ("self", "table", "id"),
-            "contact_get_items": (
+            "list_contact_get_items": (
                 "self", "table", "filter", "orderby", "top", "skip"
             ),
-            "contact_get_tables": ("self",),
+            "list_contact_get_tables": ("self",),
             "contact_patch_item": ("self", "input", "table", "id"),
             "contact_post_item": ("self", "input", "table"),
             "delete_email": ("self", "message_id"),
@@ -833,12 +842,12 @@ class TestOutlookApiSurface:
             "get_email": (
                 "self", "message_id", "include_attachments", "internet_message_id"
             ),
-            "get_emails": (
+            "list_emails": (
                 "self", "folder_path", "to", "cc", "to_or_cc", "from_",
                 "importance", "fetch_only_with_attachment", "subject_filter",
                 "fetch_only_unread", "include_attachments", "search_query", "top"
             ),
-            "get_events_calendar_view": (
+            "list_events_calendar_view": (
                 "self", "calendar_id", "start_date_time_offset",
                 "end_date_time_offset", "filter", "orderby", "top", "skip", "search"
             ),
@@ -863,10 +872,7 @@ class TestOutlookApiSurface:
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(OutlookClient).items()
-            if (
-                inspect.iscoroutinefunction(method)
-                or inspect.isasyncgenfunction(method)
-            )
+            if callable(method) and not name.startswith("_")
         }
 
         assert actual_signatures == expected_signatures
@@ -1068,8 +1074,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_emails()
-            await client.calendar_get_tables()
+            await resolve_generated_result(client.list_emails())
+            await resolve_generated_result(client.list_calendar_get_tables())
 
             assert mock_send.call_count == 2
 
@@ -1089,8 +1095,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_emails()
-            assert result is None
+            result = await resolve_generated_result(client.list_emails())
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_unauthorized_raises_exception(self, mock_credential):

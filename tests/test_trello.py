@@ -22,31 +22,35 @@ from azure.connectors.trello import (
     UpdateCard,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import get_generated_operations
+from tests.generated_connector_test_utils import (
+    get_generated_operations,
+    model_instance,
+    resolve_generated_result,
+)
 
 
 async def _invoke_operation(client: TrelloClient, operation: str):
     """Invoke a Trello operation by name for shared tests."""
     if operation == "list_cards":
-        return await client.list_cards(board_id="board")
+        return await resolve_generated_result(client.list_cards(board_id="board"))
     if operation == "list_cards_simple":
-        return await client.list_cards_simple(board_id="board")
+        return await resolve_generated_result(client.list_cards_simple(board_id="board"))
     if operation == "get_card":
         return await client.get_card(card_id="card", board_id="board")
     if operation == "delete_card":
         return await client.delete_card(card_id="card", board_id="board")
     if operation == "list_boards":
-        return await client.list_boards()
+        return await resolve_generated_result(client.list_boards())
     if operation == "list_boards_simple":
-        return await client.list_boards_simple()
+        return await resolve_generated_result(client.list_boards_simple())
     if operation == "get_board":
         return await client.get_board(board_id="board")
     if operation == "update_board":
         return await client.update_board(input=UpdateBoard(), board_id="board")
     if operation == "list_lists":
-        return await client.list_lists(board_id="board")
+        return await resolve_generated_result(client.list_lists(board_id="board"))
     if operation == "list_lists_simple":
-        return await client.list_lists_simple(board_id="board")
+        return await resolve_generated_result(client.list_lists_simple(board_id="board"))
     if operation == "get_list":
         return await client.get_list(list_id="list", board_id="board")
     if operation == "update_list":
@@ -54,42 +58,51 @@ async def _invoke_operation(client: TrelloClient, operation: str):
     if operation == "get_user_profile":
         return await client.get_user_profile()
     if operation == "list_teams":
-        return await client.list_teams()
+        return await resolve_generated_result(client.list_teams())
     if operation == "list_team_members":
-        return await client.list_team_members(team_id="team")
+        return await resolve_generated_result(client.list_team_members(team_id="team"))
     if operation == "list_board_members":
-        return await client.list_board_members(board_id="board")
+        return await resolve_generated_result(client.list_board_members(board_id="board"))
     if operation == "list_board_labels":
-        return await client.list_board_labels(board_id="board")
+        return await resolve_generated_result(client.list_board_labels(board_id="board"))
     if operation == "get_team_for_board":
         return await client.get_team_for_board(board_id="board")
     if operation == "list_card_members":
-        return await client.list_card_members(card_id="card", board_id="board")
+        return await resolve_generated_result(
+            client.list_card_members(card_id="card", board_id="board")
+        )
     if operation == "list_card_comments":
-        return await client.list_card_comments(card_id="card", board_id="board")
+        return await resolve_generated_result(
+            client.list_card_comments(card_id="card", board_id="board")
+        )
     if operation == "add_comment_to_card":
         return await client.add_comment_to_card(
             input=CommentPost(),
             card_id="card",
             board_id="board",
         )
-    if operation == "add_member_to_card":
-        return await client.add_member_to_card(
-            card_id="card",
-            board_id="board",
-            member_id="member",
+    if operation == "list_add_member_to_card":
+        return await resolve_generated_result(
+            client.list_add_member_to_card(
+                card_id="card",
+                board_id="board",
+                member_id="member",
+            )
         )
     if operation == "create_board":
-        return await client.create_board(input=CreateBoard())
+        return await client.create_board(input=model_instance(CreateBoard))
     if operation == "create_list":
-        return await client.create_list(input=CreateList())
+        return await client.create_list(input=model_instance(CreateList))
     if operation == "close_board":
         return await client.close_board(board_id="board")
     if operation == "create_card":
-        return await client.create_card(input=CreateCard(), board_id="board")
+        return await client.create_card(
+            input=model_instance(CreateCard),
+            board_id="board",
+        )
     if operation == "update_card":
         return await client.update_card(
-            input=UpdateCard(),
+            input=model_instance(UpdateCard),
             card_id="card",
             board_id="board",
         )
@@ -119,7 +132,7 @@ ALL_OPERATIONS = [
     "list_card_members",
     "list_card_comments",
     "add_comment_to_card",
-    "add_member_to_card",
+    "list_add_member_to_card",
     "create_board",
     "create_list",
     "close_board",
@@ -236,10 +249,12 @@ class TestTrelloClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_cards(
-                board_id="board/one",
-                actions="comment card",
-                limit="10",
+            result = await resolve_generated_result(
+                client.list_cards(
+                    board_id="board/one",
+                    actions="comment card",
+                    limit=10,
+                )
             )
 
             assert result == [{"id": "card"}]
@@ -353,7 +368,7 @@ class TestTrelloTypeSerialization:
         assert Card().checklists is None
 
     def test_request_dataclasses_instantiate(self):
-        """Test representative request dataclasses instantiate without arguments."""
-        assert CreateBoard().name is None
-        assert CreateCard().name is None
-        assert CreateList().name is None
+        """Test representative request dataclasses instantiate with required fields."""
+        assert model_instance(CreateBoard).name is not None
+        assert model_instance(CreateCard).name is not None
+        assert model_instance(CreateList).name is not None

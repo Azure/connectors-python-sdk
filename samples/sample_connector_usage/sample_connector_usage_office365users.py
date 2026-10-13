@@ -136,7 +136,7 @@ def example_4_get_direct_reports():
 
         with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                reports = client.direct_reports(id=user_id)
+                reports = client.list_direct_reports(id=user_id)
 
                 if reports and "value" in reports:
                     print(f"Direct reports for '{user_id}':")

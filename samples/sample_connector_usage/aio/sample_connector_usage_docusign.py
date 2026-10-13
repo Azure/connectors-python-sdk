@@ -38,8 +38,8 @@ async def example_1_get_login_accounts() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with DocusignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts_response = await client.get_login_accounts()
-            accounts = accounts_response.get("accounts", []) if accounts_response else []
+            accounts_response = [item async for item in client.list_login_accounts()]
+            accounts = accounts_response
 
             print(f"Found {len(accounts)} accounts")
             for account in accounts[:10]:
@@ -59,7 +59,7 @@ async def example_2_search_envelopes(account_id: str) -> None:
                 top=5,
             )
 
-            envelopes = envelopes_response.get("value", []) if envelopes_response else []
+            envelopes = envelopes_response
             print(f"Found {len(envelopes)} envelopes")
             for envelope in envelopes[:5]:
                 print(f"  - {envelope.get('envelopeId')} ({envelope.get('status')})")

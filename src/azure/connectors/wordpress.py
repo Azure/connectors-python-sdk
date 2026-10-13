@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -46,7 +48,7 @@ class ListPostsResponse:
     Response for When a post is created
     """
 
-    posts: Optional[List[PostResponse]] = None
+    posts: Optional[List[PostResponse]] = dataclass_field(default=None, kw_only=True)
     """Posts"""
 
 
@@ -56,29 +58,30 @@ class SiteStatsModel:
     Response for Get site statistics
     """
 
-    visitors_today: Optional[int] = None
-    visitors_yesterday: Optional[int] = None
-    visitors: Optional[int] = None
-    views_today: Optional[int] = None
-    views_yesterday: Optional[int] = None
-    views_best_day: Optional[str] = None
-    views_best_day_total: Optional[int] = None
-    views: Optional[int] = None
-    comments: Optional[int] = None
-    posts: Optional[int] = None
-    followers_blog: Optional[int] = None
-    followers_comments: Optional[int] = None
-    comments_per_month: Optional[int] = None
-    comments_most_active_recent_day: Optional[str] = None
-    comments_most_active_time: Optional[str] = None
-    comments_spam: Optional[int] = None
-    categories: Optional[int] = None
-    tags: Optional[int] = None
-    shares: Optional[int] = None
-    shares_twitter: Optional[int] = None
-    shares_facebook: Optional[int] = None
-    shares_press_this: Optional[int] = field(
+    visitors_today: Optional[int] = dataclass_field(default=None, kw_only=True)
+    visitors_yesterday: Optional[int] = dataclass_field(default=None, kw_only=True)
+    visitors: Optional[int] = dataclass_field(default=None, kw_only=True)
+    views_today: Optional[int] = dataclass_field(default=None, kw_only=True)
+    views_yesterday: Optional[int] = dataclass_field(default=None, kw_only=True)
+    views_best_day: Optional[str] = dataclass_field(default=None, kw_only=True)
+    views_best_day_total: Optional[int] = dataclass_field(default=None, kw_only=True)
+    views: Optional[int] = dataclass_field(default=None, kw_only=True)
+    comments: Optional[int] = dataclass_field(default=None, kw_only=True)
+    posts: Optional[int] = dataclass_field(default=None, kw_only=True)
+    followers_blog: Optional[int] = dataclass_field(default=None, kw_only=True)
+    followers_comments: Optional[int] = dataclass_field(default=None, kw_only=True)
+    comments_per_month: Optional[int] = dataclass_field(default=None, kw_only=True)
+    comments_most_active_recent_day: Optional[str] = dataclass_field(default=None, kw_only=True)
+    comments_most_active_time: Optional[str] = dataclass_field(default=None, kw_only=True)
+    comments_spam: Optional[int] = dataclass_field(default=None, kw_only=True)
+    categories: Optional[int] = dataclass_field(default=None, kw_only=True)
+    tags: Optional[int] = dataclass_field(default=None, kw_only=True)
+    shares: Optional[int] = dataclass_field(default=None, kw_only=True)
+    shares_twitter: Optional[int] = dataclass_field(default=None, kw_only=True)
+    shares_facebook: Optional[int] = dataclass_field(default=None, kw_only=True)
+    shares_press_this: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shares_press-this"},
     )
 
@@ -89,42 +92,57 @@ class PostModel:
     Response for Get post
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
-    site_id: Optional[int] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    site_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "site_ID"},
     )
-    date: Optional[str] = None
-    modified: Optional[str] = None
-    title: Optional[str] = None
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
-    short_u_r_l: Optional[str] = field(
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
+    modified: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    u_r_l: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
+    short_u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "short_URL"},
     )
-    content: Optional[str] = None
-    excerpt: Optional[str] = None
-    slug: Optional[str] = None
-    guid: Optional[str] = None
-    status: Optional[str] = None
-    sticky: Optional[bool] = None
-    password: Optional[str] = None
-    parent: Optional[Any] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    likes_enabled: Optional[bool] = None
-    sharing_enabled: Optional[bool] = None
-    like_count: Optional[int] = None
-    i_like: Optional[bool] = None
-    is_reblogged: Optional[bool] = None
-    is_following: Optional[bool] = None
-    global_id: Optional[str] = field(
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
+    excerpt: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    guid: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    sticky: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
+    parent: Optional[Any] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    likes_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    sharing_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    like_count: Optional[int] = dataclass_field(default=None, kw_only=True)
+    i_like: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    is_reblogged: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    is_following: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    global_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "global_ID"},
     )
-    featured_image: Optional[str] = None
-    post_thumbnail: Optional[Dict[str, Any]] = None
-    format: Optional[str] = None
-    geo: Optional[bool] = None
+    featured_image: Optional[str] = dataclass_field(default=None, kw_only=True)
+    post_thumbnail: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
+    geo: Optional[bool] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -133,7 +151,7 @@ class SiteList:
     Response for List sites
     """
 
-    sites: Optional[List[Site]] = None
+    sites: Optional[List[Site]] = dataclass_field(default=None, kw_only=True)
     """List of sites"""
 
 
@@ -143,33 +161,41 @@ class Site:
     Definition: Site
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
     """Site ID"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Site Name"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Site Description"""
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
     """Site URL"""
-    is_multisite: Optional[bool] = None
+    is_multisite: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the site is a Multisite site or not. Always true for WP.com sites.
     """
-    post_count: Optional[int] = None
+    post_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of posts the site has"""
-    subscribers_count: Optional[int] = None
+    subscribers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of subscribers the site has"""
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Language"""
-    visible: Optional[bool] = None
+    visible: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Site visibility"""
-    is_private: Optional[bool] = None
+    is_private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is site private"""
-    single_user_site: Optional[bool] = None
+    single_user_site: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is single user site"""
-    is_vip: Optional[bool] = None
+    is_vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is VIP"""
-    is_following: Optional[bool] = None
+    is_following: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is Following"""
 
 
@@ -185,10 +211,10 @@ class SiteInsightsModel:
     Definition: SiteInsightsModel
     """
 
-    highest_hour: Optional[int] = None
-    highest_hour_percent: Optional[float] = None
-    highest_day_of_week: Optional[int] = None
-    highest_day_percent: Optional[float] = None
+    highest_hour: Optional[int] = dataclass_field(default=None, kw_only=True)
+    highest_hour_percent: Optional[float] = dataclass_field(default=None, kw_only=True)
+    highest_day_of_week: Optional[int] = dataclass_field(default=None, kw_only=True)
+    highest_day_percent: Optional[float] = dataclass_field(default=None, kw_only=True)
 
 
 TopPostModel = List[Dict[str, Any]]
@@ -200,20 +226,33 @@ class PostResponse:
     Definition: PostResponse
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
-    comment_count: Optional[int] = None
-    site_id: Optional[int] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    comment_count: Optional[int] = dataclass_field(default=None, kw_only=True)
+    site_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "site_ID"},
     )
-    date: Optional[str] = None
-    modified: Optional[str] = None
-    title: Optional[str] = None
-    u_r_l: Optional[str] = field(default=None, metadata={"wire_name": "URL"})
-    slug: Optional[str] = None
-    guid: Optional[str] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    like_count: Optional[int] = None
+    date: Optional[str] = dataclass_field(default=None, kw_only=True)
+    modified: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    u_r_l: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "URL"},
+    )
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    guid: Optional[str] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    like_count: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 PostsModel = List[Dict[str, Any]]
@@ -225,13 +264,13 @@ class CreatePostModel:
     Definition: CreatePostModel
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the post"""
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The content of the post"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the post"""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags for post"""
 
 
@@ -241,9 +280,9 @@ class Error:
     Definition: Error
     """
 
-    code: Optional[int] = None
-    message: Optional[str] = None
-    fields: Optional[str] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
+    fields: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -310,6 +349,45 @@ class WordpressClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "wordpress"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def site_stats(
         self,
@@ -447,11 +525,14 @@ class WordpressClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List sites
 
         List sites
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/me/sites"
         query_params = []
@@ -464,27 +545,45 @@ class WordpressClient(ConnectorClientBase):
         )
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("sites", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 
@@ -37,7 +37,7 @@ class CreateTransactionInput:
     Create Transaction
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -50,18 +50,12 @@ class CommunicationChannelInput:
     Listen to Communication Channel
     """
 
-    is_active: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isActive"},
-    )
-    name: Optional[str] = None
+    is_active: bool = dataclass_field(metadata={"wire_name": "isActive"})
+    name: str
     """Communication Channel Name."""
-    config: Optional[Dict[str, Any]] = None
+    config: Dict[str, Any]
     """Configuration of the Trigger"""
-    owner_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "ownerId"},
-    )
+    owner_id: int = dataclass_field(metadata={"wire_name": "ownerId"})
     """Owner of the Orderful account."""
 
 
@@ -71,7 +65,7 @@ class CommunicationChannelCreationResponse:
     Response for Listen to Communication Channel
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -80,7 +74,7 @@ class CommunicationChannelEventResponse:
     Definition: CommunicationChannelEventResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -93,19 +87,13 @@ class CommunicationChannelRequestBody:
     Definition: CommunicationChannelRequestBody
     """
 
-    is_active: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "isActive"},
-    )
+    is_active: bool = dataclass_field(metadata={"wire_name": "isActive"})
     """If the State of the Trigger is active."""
-    name: Optional[str] = None
+    name: str
     """Communication Channel Name."""
-    config: Optional[Dict[str, Any]] = None
+    config: Dict[str, Any]
     """Configuration of the Trigger."""
-    owner_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "ownerId"},
-    )
+    owner_id: int = dataclass_field(metadata={"wire_name": "ownerId"})
     """Owner of the Orderful account."""
 
 

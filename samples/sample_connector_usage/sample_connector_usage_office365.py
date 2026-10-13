@@ -46,7 +46,7 @@ def example_1_get_outlook_categories():
 
         with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                categories = client.get_outlook_category_names()
+                categories = client.list_outlook_category_names()
 
                 if categories and 'value' in categories:
                     print(f"Found {len(categories['value'])} Outlook categories:")
@@ -100,7 +100,7 @@ def example_3_get_emails():
 
         with Office365Client(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                emails = client.get_emails()
+                emails = client.list_emails()
 
                 if emails and 'value' in emails:
                     print(f"Found {len(emails['value'])} emails:")

@@ -102,11 +102,11 @@ async def example_2_receive_message_from_queue():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     message = messages[0]
@@ -137,11 +137,11 @@ async def example_3_receive_with_peek_lock():
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Receive message with peek-lock (message is locked, not removed)
-                result = await client.get_messages_from_queue_with_peek_lock(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     message = messages[0]
@@ -181,11 +181,11 @@ async def example_4_receive_and_abandon():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     message = messages[0]
@@ -258,12 +258,12 @@ async def example_6_receive_from_topic_subscription():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_topic_with_peek_lock(
+                items = [item async for item in client.list_messages_from_topic_with_peek_lock(
                     topic_name=TOPIC_NAME,
                     subscription_name=SUBSCRIPTION_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     message = messages[0]
@@ -291,11 +291,11 @@ async def example_7_dead_letter_message():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     message = messages[0]
@@ -333,11 +333,11 @@ async def example_8_batch_receive():
 
         async with ServicebusClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_messages_from_queue_with_peek_lock(
+                items = [item async for item in client.list_messages_from_queue_with_peek_lock(
                     queue_name=QUEUE_NAME,
                     max_message_count=5,
-                )
-                messages = result.get("value", []) if result else []
+                )]
+                messages = result
 
                 if messages:
                     print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")

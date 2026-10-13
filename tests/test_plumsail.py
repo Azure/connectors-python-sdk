@@ -164,7 +164,7 @@ class TestExtractTextFromPdfAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = Pdf2TextRequest()
+        request = Pdf2TextRequest(document_content="base64-document-content")
         mock_response = MockResponse(status=200, text='{"text": "hello"}')
 
         with patch.object(
@@ -203,7 +203,7 @@ class TestExtractTextFromPdfAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.begin_flow_v1_documents_jobs_extract_text_from_pdf(
-                    input=Pdf2TextRequest()
+                    input=Pdf2TextRequest(document_content="base64-document-content")
                 )
 
 

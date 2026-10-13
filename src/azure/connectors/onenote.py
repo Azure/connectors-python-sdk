@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -55,47 +55,54 @@ class CreateSectionInNotebookResponse:
     Response for Create section in a notebook
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """This section created by name."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """This section created time."""
-    id: Optional[str] = None
-    is_default: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """A flag to indication if this is the default section."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """Last modified by name."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The time this section was last modified."""
-    links: Optional[Dict[str, Any]] = None
+    links: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """OneNote client links."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """The url of the pages."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to create section in notebook group."""
 
 
@@ -108,25 +115,28 @@ class Page:
     Response for Create page in a section
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the page."""
-    links: Optional[Link] = None
-    content_url: Optional[str] = field(
+    links: Optional[Link] = dataclass_field(default=None, kw_only=True)
+    content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentUrl"},
     )
     """A url to the page content."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modified date of the page."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The date the page was created."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the page."""
 
 
@@ -136,15 +146,17 @@ class GetPagesInSectionResponse:
     Response for Get pages for a specific section
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -159,11 +171,16 @@ class Notebook:
     Response for Get recent notebooks
     """
 
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
-    key: Optional[str] = field(default=None, metadata={"wire_name": "Key"})
+    key: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Key"},
+    )
 
 
 @dataclass
@@ -172,7 +189,7 @@ class GetSectionsInNotebookResponse:
     Response for Get sections in notebook
     """
 
-    value: Optional[List[SectionListItem]] = None
+    value: Optional[List[SectionListItem]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -181,7 +198,7 @@ class NewSectionResponse:
     Response for When a new section is created
     """
 
-    value: Optional[List[SectionResponse]] = None
+    value: Optional[List[SectionResponse]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a specific section."""
 
 
@@ -191,7 +208,7 @@ class NewSectionGroupResponse:
     Response for When a new section group is created
     """
 
-    value: Optional[List[SectionGroupResponse]] = None
+    value: Optional[List[SectionGroupResponse]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a specific section group."""
 
 
@@ -201,7 +218,7 @@ class NewPageResponse:
     Response for When a new page is created in a section
     """
 
-    value: Optional[List[Page]] = None
+    value: Optional[List[Page]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a specific page."""
 
 
@@ -211,7 +228,7 @@ class CreateSectionRequest:
     Definition: CreateSectionRequest
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the new section."""
 
 
@@ -224,12 +241,13 @@ class GetPageResponse:
     Definition: GetPageResponse
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """This page response value."""
 
 
@@ -239,11 +257,11 @@ class ParentNotebook:
     Definition: ParentNotebook
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier of the parent notebook."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the parent notebook."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A url link to the parent notebook."""
 
 
@@ -253,12 +271,10 @@ class Link:
     Definition: Link
     """
 
-    one_note_client_url: Optional[OneNoteClientUrl] = field(
-        default=None,
+    one_note_client_url: OneNoteClientUrl = dataclass_field(
         metadata={"wire_name": "oneNoteClientUrl"},
     )
-    one_note_web_url: Optional[OneNoteWebUrl] = field(
-        default=None,
+    one_note_web_url: OneNoteWebUrl = dataclass_field(
         metadata={"wire_name": "oneNoteWebUrl"},
     )
 
@@ -269,7 +285,7 @@ class OneNoteClientUrl:
     Definition: OneNoteClientUrl
     """
 
-    href: Optional[str] = None
+    href: str
     """A link to the notebook using the OneNote windows client."""
 
 
@@ -279,7 +295,7 @@ class OneNoteWebUrl:
     Definition: OneNoteWebUrl
     """
 
-    href: Optional[str] = None
+    href: str
     """A link to the notebook using the OneNote web client."""
 
 
@@ -289,14 +305,15 @@ class SectionListItem:
     Definition: SectionListItem
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """The key used to reference this section; also a url to the pages."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section."""
 
 
@@ -306,45 +323,52 @@ class SectionResponse:
     Definition: SectionResponse
     """
 
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The creator of the section."""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The creation date and time of the section."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section."""
-    is_default: Optional[bool] = field(
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """Indicates whether it is the default section."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """The user who last modified the section."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modified date and time of the section."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section."""
-    pages_url: Optional[str] = field(
+    pages_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pagesUrl"},
     )
     """Url to the pages in this section."""
-    parent_notebook: Optional[ParentNotebook] = field(
+    parent_notebook: Optional[ParentNotebook] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentNotebook"},
     )
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to this section."""
 
 
@@ -354,36 +378,41 @@ class SectionGroupResponse:
     Definition: SectionGroupResponse
     """
 
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """The creation date and time of the section group."""
-    created_by: Optional[str] = field(
+    created_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
     """The creator of the section group."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the section group."""
-    last_modified_by: Optional[str] = field(
+    last_modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedBy"},
     )
     """The user who last modified the section group."""
-    last_modified_time: Optional[str] = field(
+    last_modified_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedTime"},
     )
     """The last modification date and time of the section group."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the section group."""
-    sections_url: Optional[str] = field(
+    sections_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sectionsUrl"},
     )
     """Url of the sections within this section group."""
-    self: Optional[str] = None
+    self: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url to this section group."""
 
 
@@ -860,43 +889,64 @@ class OnenoteClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_notebooks(
+    def list_notebooks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get recent notebooks
 
         Get recent notebooks.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/notebooks"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_sections_in_notebook(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_sections_in_notebook(
         self,
         notebook_key: str,
         *,
@@ -904,11 +954,14 @@ class OnenoteClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get sections in notebook
 
         Get sections in a specific notebook.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/notebooks/notebookKey/sections"
@@ -920,27 +973,45 @@ class OnenoteClient(ConnectorClientBase):
         query_params.append(f"notebookKey={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

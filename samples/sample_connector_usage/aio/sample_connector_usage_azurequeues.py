@@ -57,11 +57,11 @@ async def example_1_list_queues():
 
         async with AzurequeuesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_queues(
+                items = [item async for item in client.list_queues(
                     storage_account_name=STORAGE_ACCOUNT
-                )
+                )]
 
-                if result:
+                if items:
                     print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
                     # Result may be a list or dict with queue names
                     if isinstance(result, list):
@@ -102,7 +102,7 @@ async def example_2_create_queue():
                 )
 
                 print(f"Queue '{new_queue_name}' created successfully.")
-                if result:
+                if items:
                     print(f"Response: {result}")
 
             except ConnectorException as ex:
@@ -163,7 +163,7 @@ async def example_4_get_messages():
                     visibilitytimeout="30"  # Hide messages for 30 seconds
                 )
 
-                if result:
+                if items:
                     queue_messages_list = result.get("QueueMessagesList", {})
                     messages = queue_messages_list.get("QueueMessage", [])
                     if isinstance(messages, list):

@@ -18,6 +18,8 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestSigninghubClientInitialization:
@@ -99,7 +101,8 @@ class TestSigninghubModelSerialization:
 
     def test_upload_document_preserves_colliding_document_ids(self):
         """Test that all three document ID wire names survive serialization."""
-        model = UploadDocument(
+        model = model_instance(
+            UploadDocument,
             document_id_2=101,
             documentid=102,
             document_id=103,
@@ -153,7 +156,7 @@ class TestDocumentsUploadStreamAsync:
 
 
 class TestContactsGetAsync:
-    """Tests for contacts_get_async method (GET with query parameters)."""
+    """Tests for list_contacts_get method (GET with query parameters)."""
 
     @pytest.mark.asyncio
     async def test_success_serializes_path_and_query(self, mock_credential):
@@ -170,11 +173,13 @@ class TestContactsGetAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.contacts_get(
-                record_per_page="10",
-                page_no="1",
-                sort_by="name",
-                asc="true",
+            result = await resolve_generated_result(
+                client.list_contacts_get(
+                    record_per_page="10",
+                    page_no="1",
+                    sort_by="name",
+                    asc="true",
+                )
             )
 
             mock_send.assert_called_once()
@@ -202,7 +207,9 @@ class TestContactsGetAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.contacts_get(record_per_page="10", page_no="1")
+                await resolve_generated_result(
+                    client.list_contacts_get(record_per_page="10", page_no="1")
+                )
 
             assert exc_info.value.status_code == 404
 
@@ -217,7 +224,7 @@ class TestCheckboxAddCheckBoxAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = CheckBoxFieldRequest()
+        request = model_instance(CheckBoxFieldRequest)
         mock_response = MockResponse(status=200, text='{"field_id": "cb-1"}')
 
         with patch.object(
@@ -256,7 +263,7 @@ class TestCheckboxAddCheckBoxAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.checkbox_add_check_box(
-                    input=CheckBoxFieldRequest(),
+                    input=model_instance(CheckBoxFieldRequest),
                     package_id="pkg-1",
                     document_id="doc-1",
                 )
@@ -272,7 +279,7 @@ class TestCheckboxUpdateCheckBoxAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = UpdateCheckBoxFieldRequest()
+        request = model_instance(UpdateCheckBoxFieldRequest)
         mock_response = MockResponse(status=200, text='{"field_id": "cb-1"}')
 
         with patch.object(
@@ -309,7 +316,7 @@ class TestCheckboxUpdateCheckBoxAsync:
         ):
             with pytest.raises(ConnectorException):
                 await client.checkbox_update_check_box(
-                    input=UpdateCheckBoxFieldRequest(),
+                    input=model_instance(UpdateCheckBoxFieldRequest),
                     package_id="pkg-1",
                     document_id="doc-1",
                 )
@@ -407,7 +414,10 @@ OPERATION_ARGS = {
         "document_id": "doc-1",
         "attachment_id": "att-1",
     },
-    "attachment_get_attachments": {"package_id": "package-1", "document_id": "doc-1"},
+    "list_attachment_get_attachments": {
+        "package_id": "package-1",
+        "document_id": "doc-1",
+    },
     "attachment_upload_attachment": {
         "input": b"raw-attachment-bytes",
         "package_id": "package-1",
@@ -423,7 +433,7 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "contacts_get": {"record_per_page": "10", "page_no": "1"},
+    "list_contacts_get": {"record_per_page": "10", "page_no": "1"},
     "documents_delete_document": {"package_id": "package-1", "document_id": "doc-1"},
     "documents_download_document_bytes": {
         "package_id": "package-1",
@@ -457,7 +467,7 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "fields_auto_place": {
+    "list_fields_auto_place": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",
@@ -507,7 +517,7 @@ OPERATION_ARGS = {
     "package_finish": {"package_id": "package-1"},
     "package_gatekeeper_approve": {"input": {}, "package_id": "package-1"},
     "package_gatekeeper_decline": {"input": {}, "package_id": "package-1"},
-    "package_get_all_packages": {
+    "list_package_get_all_packages": {
         "document_status": "PENDING",
         "page_no": "1",
         "record_per_page": "10",
@@ -535,7 +545,7 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "settings_get_templates": {"record_per_page": "10", "page_no": "1"},
+    "list_settings_get_templates": {"record_per_page": "10", "page_no": "1"},
     "signature_add_signature": {
         "input": {},
         "package_id": "package-1",
@@ -556,7 +566,10 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "template_get_enterprise_templates": {"record_per_page": "10", "page_no": "1"},
+    "list_template_get_enterprise_templates": {
+        "record_per_page": "10",
+        "page_no": "1",
+    },
     "text_box_add_text_box": {
         "input": {},
         "package_id": "package-1",
@@ -580,7 +593,7 @@ OPERATION_ARGS = {
         "records_per_page": "10",
     },
     "workflow_get_workflow_reminder": {"package_id": "package-1", "order": "1"},
-    "workflow_get_workflow_users": {"package_id": "package-1"},
+    "list_workflow_get_workflow_users": {"package_id": "package-1"},
     "workflow_mark_workflow_completed": {"package_id": "package-1"},
     "workflow_permission_get_workflow_permissions": {
         "package_id": "package-1",
@@ -592,7 +605,7 @@ OPERATION_ARGS = {
         "order": "1",
     },
     "workflow_recall_workflow": {"package_id": "package-1"},
-    "workflow_start_workflow": {"package_id": "package-1"},
+    "list_workflow_start_workflow": {"package_id": "package-1"},
     "workflow_update_workflow": {"input": {}, "package_id": "package-1"},
     "workflow_update_workflow_post_process": {"input": {}, "package_id": "package-1"},
     "workflow_update_workflow_reminder": {
@@ -600,9 +613,12 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "order": "1",
     },
-    "workflow_workflow_add_group": {"input": {}, "package_id": "package-1"},
-    "workflow_workflow_add_placeholder": {"input": {}, "package_id": "package-1"},
-    "workflow_workflow_add_user": {"input": {}, "package_id": "package-1"},
+    "list_workflow_workflow_add_group": {"input": {}, "package_id": "package-1"},
+    "list_workflow_workflow_add_placeholder": {
+        "input": {},
+        "package_id": "package-1",
+    },
+    "list_workflow_workflow_add_user": {"input": {}, "package_id": "package-1"},
     "workflow_workflow_delete_user": {"package_id": "package-1", "order": "1"},
     "workflow_workflow_update_placeholder": {
         "input": {},
@@ -630,7 +646,7 @@ ALL_OPERATIONS = sorted(OPERATION_ARGS.keys())
 async def _invoke_operation(client: SigninghubClient, operation: str):
     """Invoke a SigningHub operation by name for shared method tests."""
     method = getattr(client, f"{operation}")
-    return await method(**OPERATION_ARGS[operation])
+    return await resolve_generated_result(method(**OPERATION_ARGS[operation]))
 
 
 class TestSigninghubClientAllOperations:

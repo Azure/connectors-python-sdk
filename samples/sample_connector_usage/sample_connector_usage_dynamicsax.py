@@ -49,7 +49,7 @@ def example_1_list_instances():
     with DefaultAzureCredential() as credential:
 
         with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.get_data_sets()
+            result = client.list_data_sets()
             datasets = result.get("value", []) if result else []
 
             print(f"Found {len(datasets)} instance(s).")
@@ -68,7 +68,7 @@ def example_2_list_tables():
     with DefaultAzureCredential() as credential:
 
         with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.get_tables(dataset=DATASET)
+            result = client.list_tables(dataset=DATASET)
             tables = result.get("value", []) if result else []
 
             print(f"Found {len(tables)} table(s).")

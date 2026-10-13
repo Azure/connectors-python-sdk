@@ -25,14 +25,18 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 async def _invoke_operation(client: FreshserviceClient, operation: str):
     """Invoke a Freshservice operation by name for shared tests."""
     if operation == "add_note":
-        return await client.add_note(input=AddNoteRequest(), ticket_id="1")
+        return await client.add_note(
+            input=model_instance(AddNoteRequest),
+            ticket_id="1",
+        )
     if operation == "create_ticket":
-        return await client.create_ticket(input=CreateTicketRequest())
+        return await client.create_ticket(input=model_instance(CreateTicketRequest))
     if operation == "update_ticket":
         return await client.update_ticket(input=UpdateTicketRequest(), ticket_id="1")
 
@@ -150,7 +154,9 @@ class TestFreshserviceClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.create_ticket(input=CreateTicketRequest())
+            result = await client.create_ticket(
+                input=model_instance(CreateTicketRequest)
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -196,7 +202,10 @@ class TestFreshserviceClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.add_note(input=AddNoteRequest(), ticket_id="7")
+            result = await client.add_note(
+                input=model_instance(AddNoteRequest),
+                ticket_id="7",
+            )
 
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "POST"
@@ -219,7 +228,9 @@ class TestFreshserviceClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.create_ticket(input=CreateTicketRequest())
+            result = await client.create_ticket(
+                input=model_instance(CreateTicketRequest)
+            )
 
             assert result is None
 
@@ -292,7 +303,12 @@ class TestFreshserviceTypeSerialization:
         assert get_origin(ListUsersResponse) is list
 
     def test_request_dataclasses_instantiate(self):
-        """Test generated request dataclasses instantiate without arguments."""
-        assert CreateTicketRequest().email is None
+        """Test generated request dataclasses honor required and optional fields."""
+        create_ticket = model_instance(CreateTicketRequest)
+        add_note = model_instance(AddNoteRequest)
+
+        assert create_ticket.subject == "value"
+        assert create_ticket.email is None
         assert UpdateTicketRequest().priority is None
-        assert AddNoteRequest().body is None
+        assert add_note.body == "value"
+        assert add_note.private is None

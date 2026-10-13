@@ -26,6 +26,7 @@ def submit_transcription() -> None:
                 input=TranscriptionInput(
                     source_config={"url": "https://example.com/audio.wav"},
                     metadata="connector-sdk-sample",
+                    notification_config={"url": "https://example.com/webhook"},
                 ),
             )
             print(f"Transcription job: {job}")

@@ -77,16 +77,18 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await client.post_item(
             input=PostItemInput(), server="srv", database="db", table="tbl"
         )
-    if operation == "get_servers":
-        return await client.get_servers()
-    if operation == "get_databases":
-        return await client.get_databases(server="srv")
+    if operation == "list_servers":
+        return await resolve_generated_result(client.list_servers())
+    if operation == "list_databases":
+        return await resolve_generated_result(client.list_databases(server="srv"))
     if operation == "list_tables_for_delete_item":
         return await resolve_generated_result(
             client.list_tables_for_delete_item(server="srv", database="db")
         )
-    if operation == "get_procedures_v2":
-        return await client.get_procedures_v2(server="srv", database="db")
+    if operation == "list_procedures_v2":
+        return await resolve_generated_result(
+            client.list_procedures_v2(server="srv", database="db")
+        )
     if operation == "get_procedure_v2":
         return await client.get_procedure_v2(
             server="srv", database="db", procedure="proc"
@@ -125,8 +127,8 @@ async def _invoke_operation(client: SqlClient, operation: str):
         )
     if operation == "get_procedure":
         return await client.get_procedure(procedure="proc")
-    if operation == "get_procedures":
-        return await client.get_procedures()
+    if operation == "list_procedures":
+        return await resolve_generated_result(client.list_procedures())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -140,10 +142,10 @@ ALL_OPERATIONS = [
     "get_tables",
     "patch_item",
     "post_item",
-    "get_servers",
-    "get_databases",
+    "list_servers",
+    "list_databases",
     "list_tables_for_delete_item",
-    "get_procedures_v2",
+    "list_procedures_v2",
     "get_procedure_v2",
     "list_tables_for_get_item",
     "list_tables_for_get_on_new_items",
@@ -154,7 +156,7 @@ ALL_OPERATIONS = [
     "get_table",
     "get_pass_through_native_query_metadata",
     "get_procedure",
-    "get_procedures",
+    "list_procedures",
 ]
 
 
@@ -248,8 +250,8 @@ class TestSqlClientMethods:
     """Success path tests for representative SQL methods."""
 
     @pytest.mark.asyncio
-    async def test_get_servers_success(self, mock_credential):
-        """Test get_servers_async returns parsed JSON and targets /servers."""
+    async def test_list_servers_success(self, mock_credential):
+        """Test list_servers returns parsed items and targets /servers."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -262,14 +264,14 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_servers()
+            result = await resolve_generated_result(client.list_servers())
 
-            assert result["value"][0]["name"] == "srv1"
+            assert result[0]["name"] == "srv1"
             assert mock_send.call_args[0][1].endswith("/servers")
 
     @pytest.mark.asyncio
-    async def test_get_databases_sends_server_query(self, mock_credential):
-        """Test get_databases_async appends the server query parameter."""
+    async def test_list_databases_sends_server_query(self, mock_credential):
+        """Test list_databases appends the server query parameter."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -282,7 +284,7 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_databases(server="srv1")
+            await resolve_generated_result(client.list_databases(server="srv1"))
 
             request_url = mock_send.call_args[0][1]
             assert "/databases" in request_url
@@ -464,8 +466,8 @@ class TestSqlClientMethods:
             assert "/v2/datasets/srv,db/query/sql" in mock_send.call_args[0][1]
 
     @pytest.mark.asyncio
-    async def test_get_procedures_v2_success(self, mock_credential):
-        """Test get_procedures_v2_async targets the v2 procedures endpoint."""
+    async def test_list_procedures_v2_success(self, mock_credential):
+        """Test list_procedures_v2 targets the v2 procedures endpoint."""
         client = SqlClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -478,7 +480,9 @@ class TestSqlClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.get_procedures_v2(server="srv", database="db")
+            await resolve_generated_result(
+                client.list_procedures_v2(server="srv", database="db")
+            )
 
             assert "/v2/datasets/srv,db/procedures" in mock_send.call_args[0][1]
 
@@ -625,7 +629,7 @@ class TestSqlTriggerOperations:
             "execute_procedure": (
                 "self", "input", "server", "database", "procedure"
             ),
-            "get_databases": ("self", "server"),
+            "list_databases": ("self", "server"),
             "get_item": ("self", "server", "database", "table", "id"),
             "list_items": (
                 "self", "server", "database", "table", "apply", "filter",
@@ -639,9 +643,9 @@ class TestSqlTriggerOperations:
             "get_procedure_v2": (
                 "self", "server", "database", "procedure"
             ),
-            "get_procedures": ("self",),
-            "get_procedures_v2": ("self", "server", "database"),
-            "get_servers": ("self",),
+            "list_procedures": ("self",),
+            "list_procedures_v2": ("self", "server", "database"),
+            "list_servers": ("self",),
             "get_table": (
                 "self", "server", "database", "table",
                 "extract_sensitivity_label", "purview_account_name"

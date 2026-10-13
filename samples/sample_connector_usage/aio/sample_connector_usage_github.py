@@ -49,14 +49,14 @@ async def example_2_list_issues(repository_owner: str, repository_name: str) -> 
 
     async with DefaultAzureCredential() as credential:
         async with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issues = await client.get_issues(
+            issues = [item async for item in client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",
                 per_page=5,
-            )
+            )]
 
-            issue_list = issues if isinstance(issues, list) else []
+            issue_list = issues
             print(f"Found {len(issue_list)} issues")
             for issue in issue_list[:5]:
                 print(f"  - #{issue.get('number')}: {issue.get('title')}")

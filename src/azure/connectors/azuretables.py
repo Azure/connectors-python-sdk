@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -49,7 +49,7 @@ class CreateEntityInput:
     Insert Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -62,23 +62,27 @@ class InsertEntityResponse:
     Response for Insert Entity
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Entity Metadata location"""
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -93,13 +97,15 @@ class GetTableResponse:
     Response for Create table
     """
 
-    odata_id: Optional[str] = field(
+    odata_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.id"},
     )
     """URL to the Table data"""
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Table Name"""
@@ -111,15 +117,17 @@ class GetEntitiesResponse:
     Response for Get entities
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Table Metadata location"""
-    value: Optional[List[EntityItem]] = None
+    value: Optional[List[EntityItem]] = dataclass_field(default=None, kw_only=True)
     """List of Entities"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -131,23 +139,27 @@ class GetEntityResponse:
     Response for Get entity
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """Table Metadata location"""
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -159,12 +171,13 @@ class GetTablesResponse:
     Response for List tables
     """
 
-    odata_metadata: Optional[str] = field(
+    odata_metadata: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "odata.metadata"},
     )
     """URL to the account metadata"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of tables"""
 
 
@@ -174,7 +187,7 @@ class InsertMergeEntityInput:
     Insert or Merge Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -187,7 +200,7 @@ class InsertReplaceEntityInput:
     Insert or Replace Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -200,7 +213,7 @@ class MergeEntityInput:
     Merge Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -213,7 +226,7 @@ class ReplaceEntityInput:
     Replace Entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -226,7 +239,7 @@ class StorageAccountList:
     Response for Get storage accounts
     """
 
-    value: Optional[List[StorageAccount]] = None
+    value: Optional[List[StorageAccount]] = dataclass_field(default=None, kw_only=True)
     """List of storage account names"""
 
 
@@ -236,10 +249,15 @@ class StorageAccount:
     Definition: StorageAccount
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the storage account."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the storage account."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the storage account."""
@@ -251,18 +269,21 @@ class EntityItem:
     Definition: Item
     """
 
-    partition_key: Optional[str] = field(
+    partition_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PartitionKey"},
     )
     """Partition Key"""
-    row_key: Optional[str] = field(
+    row_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RowKey"},
     )
     """Row Key"""
-    additional_properties: Optional[str] = field(
+    additional_properties: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalProperties"},
     )
     """Dynamic entity columns returned by the service."""
@@ -1049,38 +1070,59 @@ class AzuretablesClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_storage_accounts(
+    def list_storage_accounts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get storage accounts
 
         This operation list the user's Azure Storage Account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

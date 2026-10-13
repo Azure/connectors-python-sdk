@@ -30,6 +30,7 @@ from azure.connectors import ConnectorException
 from azure.connectors.aio.signinghub import SigninghubClient
 from azure.connectors.signinghub import (
     CheckBoxFieldRequest,
+    FieldDimension,
 )
 
 # Connection runtime URL format:
@@ -45,12 +46,12 @@ async def example_1_get_contacts():
 
         async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.contacts_get(
+                items = [item async for item in client.list_contacts_get(
                     record_per_page=10,
                     page_no=1,
-                )
+                )]
 
-                print(f"Contacts result: {result}")
+                print(f"Contacts result: {items}")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")
@@ -66,7 +67,14 @@ async def example_2_add_check_box_field():
 
         async with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                request = CheckBoxFieldRequest()
+                request = CheckBoxFieldRequest(
+                    order=1,
+                    page_no=1,
+                    dimensions=FieldDimension(x=120.0, y=220.0, width=18.0, height=18.0),
+                    field_name="Approve",
+                    value="false",
+                    validation_rule="none",
+                )
 
                 result = await client.checkbox_add_check_box(
                     input=request,

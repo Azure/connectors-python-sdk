@@ -42,9 +42,9 @@ async def example_1_list_root_folder():
     async with DefaultAzureCredential() as credential:
 
         async with DropboxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder()
+            items = [item async for item in client.list_root_folder()]
 
-            if result and "value" in result:
+            if items:
                 print(f"Found {len(result['value'])} items in root folder:")
                 for item in result["value"][:10]:
                     icon = "[DIR]" if item.get("IsFolder") else "[FILE]"
@@ -95,7 +95,7 @@ async def example_3_create_file():
                     name=destination_name,
                 )
 
-                if result:
+                if items:
                     print(f"Created file id: {result.get('Id', 'N/A')}")
                 else:
                     print("Create operation completed with no response body.")
@@ -116,8 +116,8 @@ async def example_4_list_folder_for_polling():
 
         async with DropboxClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_folder(id=folder_id)
-                items = result.get("value", []) if result else []
+                items = [item async for item in client.list_folder(id=folder_id)]
+                items = result
                 print(f"Folder listing returned {len(items)} item(s).")
                 print("Persist item IDs or timestamps to implement polling with this action client.")
             except ConnectorException as ex:

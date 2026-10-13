@@ -18,7 +18,7 @@ from azure.connectors.office365 import (
     MarkAsReadInput,
     MCPQueryRequest,
     ResponseToEventInvite,
-    CalendarEventBackend,
+    GraphCalendarEventClient,
     GetAttachmentResponse,
     SensitivityLabelMetadata,
     SendEmailInput,
@@ -27,7 +27,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestOffice365ClientInitialization:
@@ -188,7 +188,7 @@ class TestGetOutlookCategoryNames:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"displayName": "Red category"}, {"displayName": "Blue category"}]}'
+            text='[{"displayName": "Red category"}, {"displayName": "Blue category"}]'
         )
 
         with patch.object(
@@ -197,7 +197,9 @@ class TestGetOutlookCategoryNames:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_outlook_category_names()
+            result = await resolve_generated_result(
+                client.list_outlook_category_names()
+            )
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -208,8 +210,7 @@ class TestGetOutlookCategoryNames:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert "value" in result
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -227,8 +228,10 @@ class TestGetOutlookCategoryNames:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_outlook_category_names()
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_outlook_category_names()
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -250,7 +253,9 @@ class TestGetOutlookCategoryNames:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_outlook_category_names()
+                await resolve_generated_result(
+                    client.list_outlook_category_names()
+                )
 
             assert exc_info.value.status_code == 401
 
@@ -277,7 +282,11 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = DraftEmailInput()
+            input_message = DraftEmailInput(
+                to="recipient@example.com",
+                subject="Test Email",
+                body="Hello",
+            )
             result = await client.draft_email(input_message)
 
             mock_send.assert_called_once_with(
@@ -310,7 +319,11 @@ class TestDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = DraftEmailInput()
+            input_message = DraftEmailInput(
+                to="recipient@example.com",
+                subject="Test Email",
+                body="Hello",
+            )
             await client.draft_email(
                 input_message,
                 message_id="original123",
@@ -344,7 +357,11 @@ class TestDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.draft_email(DraftEmailInput())
+                await client.draft_email(DraftEmailInput(
+                    to="recipient@example.com",
+                    subject="Test Email",
+                    body="Hello",
+                ))
 
             assert exc_info.value.status_code == 400
 
@@ -368,7 +385,11 @@ class TestUpdateDraftEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_message = DraftEmailInput()
+            input_message = DraftEmailInput(
+                to="recipient@example.com",
+                subject="Test Email",
+                body="Hello",
+            )
             result = await client.update_draft_email(input_message, "message123")
 
             call_args = mock_send.call_args
@@ -394,7 +415,11 @@ class TestUpdateDraftEmail:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                input_message = DraftEmailInput()
+                input_message = DraftEmailInput(
+                    to="recipient@example.com",
+                    subject="Test Email",
+                    body="Hello",
+                )
                 await client.update_draft_email(input_message, "nonexistent")
 
             assert exc_info.value.status_code == 404
@@ -605,10 +630,12 @@ class TestGetEmails:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_emails(
-                folder_path="Inbox",
-                top="10",
-                search_query="subject:Important"
+            await resolve_generated_result(
+                client.list_emails(
+                    folder_path="Inbox",
+                    top=10,
+                    search_query="subject:Important"
+                )
             )
 
             call_args = mock_send.call_args
@@ -637,7 +664,11 @@ class TestSendEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            email_message = SendEmailInput()
+            email_message = SendEmailInput(
+                to="recipient@example.com",
+                subject="Test Email",
+                body="Hello",
+            )
             result = await client.send_email(email_message)
 
             call_args = mock_send.call_args
@@ -799,9 +830,10 @@ class TestCalendarMethods:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.calendar_get_tables()
-            assert "value" in result
-            assert len(result["value"]) == 1
+            result = await resolve_generated_result(
+                client.list_calendar_get_tables()
+            )
+            assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_create_calendar_event(self, mock_credential):
@@ -822,7 +854,7 @@ class TestCalendarMethods:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            event = CalendarEventBackend()
+            event = model_instance(GraphCalendarEventClient)
             result = await client.calendar_post_item("Calendar", event)
 
             call_args = mock_send.call_args

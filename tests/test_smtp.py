@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 class TestSmtpClientInitialization:
@@ -343,14 +344,14 @@ class TestDataClasses:
             from_="sender@contoso.com",
             to="recipient@contoso.com",
             c_c="copy@contoso.com",
-            attachments=[Attachment(content_data="filedata")],
+            attachments=[model_instance(Attachment, content_data="filedata")],
         )
 
         assert to_wire(email) == {
             "From": "sender@contoso.com",
             "To": "recipient@contoso.com",
             "CC": "copy@contoso.com",
-            "Attachments": [{"ContentData": "filedata"}],
+            "Attachments": [{"ContentData": "filedata", "ContentType": "value"}],
         }
 
     def test_email_with_defaults(self):

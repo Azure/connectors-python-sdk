@@ -41,9 +41,9 @@ async def example_1_list_root_folder():
     async with DefaultAzureCredential() as credential:
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_root_folder()
+            items = [item async for item in client.list_root_folder()]
 
-            if result and "value" in result:
+            if items:
                 print(f"Found {len(result['value'])} items in root folder:")
                 for item in result["value"][:10]:  # Show first 10
                     item_type = "📁" if item.get("IsFolder") else "📄"
@@ -155,13 +155,13 @@ async def example_5_search_files():
 
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.find_files(
+                items = [item async for item in client.list_find_files(
                     id=folder_id,
                     query=search_query,
                     find_mode="search"
-                )
+                )]
 
-                if result and "value" in result:
+                if items:
                     print(f"Found {len(result['value'])} files matching '{search_query}':")
                     for item in result["value"]:
                         print(f"  📄 {item.get('Name', 'N/A')}")
@@ -212,21 +212,23 @@ async def example_7_file_tags():
         async with OnedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get existing tags
-                tags_result = await client.get_file_tags(id=file_id)
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
 
-                if tags_result and "tags" in tags_result:
-                    print(f"Current tags: {', '.join(tags_result['tags'])}")
+                if tags_items:
+                    print(f"Current tags: {tags_items}")
                 else:
                     print("No tags found on file.")
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                await client.add_file_tag(id=file_id, tag="sdk-sample")
+                added_tags = [item async for item in client.list_add_file_tag(id=file_id, tag="sdk-sample")]
+                if added_tags:
+                    print(f"Add tag result: {added_tags}")
 
                 # Get updated tags
-                tags_result = await client.get_file_tags(id=file_id)
-                if tags_result and "tags" in tags_result:
-                    print(f"Updated tags: {', '.join(tags_result['tags'])}")
+                tags_items = [item async for item in client.list_file_tags(id=file_id)]
+                if tags_items:
+                    print(f"Updated tags: {tags_items}")
             except ConnectorException as e:
                 print(f"Error managing tags: {e}")
 
@@ -252,7 +254,7 @@ async def example_8_copy_file():
                     overwrite=False
                 )
 
-                if result:
+                if items:
                     print("File copied successfully:")
                     print(f"  New ID: {result.get('Id', 'N/A')}")
                     print(f"  New Name: {result.get('Name', 'N/A')}")

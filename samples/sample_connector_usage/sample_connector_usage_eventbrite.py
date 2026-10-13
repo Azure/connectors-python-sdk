@@ -19,7 +19,7 @@ def main() -> None:
     with DefaultAzureCredential() as credential:
         try:
             with EventbriteClient(CONNECTION_RUNTIME_URL, credential) as client:
-                categories = client.get_categories()
+                categories = client.list_categories()
                 print(f"Categories: {categories}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

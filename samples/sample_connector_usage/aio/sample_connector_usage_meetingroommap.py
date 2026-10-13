@@ -24,7 +24,7 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                categories = await client.get_categories()
+                categories = [item async for item in client.list_categories()]
                 print(f"Categories: {categories}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

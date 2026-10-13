@@ -38,8 +38,8 @@ async def example_1_list_groups() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            groups_response = await client.list_groups()
-            groups = groups_response.get("value", []) if groups_response else []
+            groups_response = [item async for item in client.list_groups()]
+            groups = groups_response
 
             print(f"Found {len(groups)} groups")
             for group in groups[:5]:
@@ -54,8 +54,8 @@ async def example_2_list_datasets(group_id: str) -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with PowerbiClient(CONNECTION_RUNTIME_URL, credential) as client:
-            datasets_response = await client.list_datasets(groupid=group_id)
-            datasets = datasets_response.get("value", []) if datasets_response else []
+            datasets_response = [item async for item in client.list_datasets(groupid=group_id)]
+            datasets = datasets_response
 
             print(f"Found {len(datasets)} datasets in group '{group_id}'")
             for dataset in datasets[:5]:

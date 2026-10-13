@@ -138,7 +138,7 @@ async def example_4_get_direct_reports():
 
         async with Office365usersClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                reports = await client.direct_reports(id=user_id)
+                reports = [item async for item in client.list_direct_reports(id=user_id)]
 
                 if reports and "value" in reports:
                     print(f"Direct reports for '{user_id}':")

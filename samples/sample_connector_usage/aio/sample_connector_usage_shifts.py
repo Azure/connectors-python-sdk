@@ -39,7 +39,7 @@ async def example_1_list_teams() -> list[dict]:
     async with DefaultAzureCredential() as credential:
         async with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
             teams_response = await client.get_all_teams()
-            teams = teams_response.get("value", []) if teams_response else []
+            teams = teams_response
 
             print(f"Found {len(teams)} teams")
             for team in teams[:10]:

@@ -22,7 +22,10 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import (
+    model_instance,
+    resolve_generated_result,
+)
 
 
 class TestWdatpClientInitialization:
@@ -352,7 +355,10 @@ class TestIsolateMachine:
         with patch.object(
             client._http_client, 'send', new_callable=AsyncMock, return_value=mock_response
         ) as mock_send:
-            input_data = IsolateMachineInput(comment="Security investigation")
+            input_data = model_instance(
+                IsolateMachineInput,
+                comment="Security investigation",
+            )
             result = await client.isolate_machine(
                 input=input_data,
                 machine_id="machine-123"

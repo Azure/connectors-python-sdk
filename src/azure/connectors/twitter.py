@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -41,69 +43,72 @@ class TweetModel:
     Response for Get user timeline
     """
 
-    tweet_text: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "TweetText"},
-    )
+    tweet_text: str = dataclass_field(metadata={"wire_name": "TweetText"})
     """Text content of the tweet"""
-    tweet_id: Optional[str] = field(
+    tweet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetId"},
     )
     """Id of the tweet"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedAt"},
     )
     """Time at which the tweet was posted"""
-    created_at_iso: Optional[str] = field(
+    created_at_iso: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedAtIso"},
     )
     """Time at which the tweet was posted"""
-    retweet_count: Optional[int] = field(
-        default=None,
+    retweet_count: int = dataclass_field(
         metadata={"wire_name": "RetweetCount"},
     )
     """Total number of re-tweets for the tweet"""
-    tweeted_by: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "TweetedBy"},
-    )
+    tweeted_by: str = dataclass_field(metadata={"wire_name": "TweetedBy"})
     """Name of the user who has posted the tweet"""
-    media_urls: Optional[List[str]] = field(
+    media_urls: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaUrls"},
     )
     """Url of the media posted along with the tweet"""
-    tweet_language_code: Optional[str] = field(
+    tweet_language_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetLanguageCode"},
     )
     """Language code of the tweet"""
-    tweet_in_reply_to_user_id: Optional[str] = field(
+    tweet_in_reply_to_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetInReplyToUserId"},
     )
     """
     User Id of the author of the tweet that the current tweet is a reply to
     """
-    favorited: Optional[bool] = field(
+    favorited: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Favorited"},
     )
     """Indicates whether the tweet is marked as favorited or not"""
-    user_mentions: Optional[List[UserMentionsModel]] = field(
+    user_mentions: Optional[List[UserMentionsModel]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserMentions"},
     )
     """List of users mentioned in the tweet"""
-    original_tweet: Optional[OriginalTweetModel] = field(
+    original_tweet: Optional[OriginalTweetModel] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OriginalTweet"},
     )
-    user_details: Optional[UserDetailsModel] = field(
+    user_details: Optional[UserDetailsModel] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserDetails"},
     )
 
@@ -114,50 +119,47 @@ class UserDetailsModel:
     Response for Get followers
     """
 
-    full_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "FullName"},
-    )
+    full_name: str = dataclass_field(metadata={"wire_name": "FullName"})
     """Name of the user"""
-    location: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Location"},
-    )
+    location: str = dataclass_field(metadata={"wire_name": "Location"})
     """Location of the user"""
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    """X id (handle) of the user"""
-    user_name: Optional[str] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
-        metadata={"wire_name": "UserName"},
+        kw_only=True,
+        metadata={"wire_name": "Id"},
     )
+    """X id (handle) of the user"""
+    user_name: str = dataclass_field(metadata={"wire_name": "UserName"})
     """Screen name of the user"""
-    followers_count: Optional[int] = field(
+    followers_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FollowersCount"},
     )
     """Number of followers"""
-    description: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Description"},
-    )
+    description: str = dataclass_field(metadata={"wire_name": "Description"})
     """User description"""
-    statuses_count: Optional[int] = field(
+    statuses_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StatusesCount"},
     )
     """User status count"""
-    friends_count: Optional[int] = field(
+    friends_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FriendsCount"},
     )
     """Number of friends"""
-    favourites_count: Optional[int] = field(
+    favourites_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FavouritesCount"},
     )
     """Number of tweets that the user has favorited"""
-    profile_image_url: Optional[str] = field(
+    profile_image_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProfileImageUrl"},
     )
     """Url of the profile image"""
@@ -169,10 +171,7 @@ class TweetResponseModel:
     Response for Post a tweet
     """
 
-    tweet_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "TweetId"},
-    )
+    tweet_id: str = dataclass_field(metadata={"wire_name": "TweetId"})
     """ID of the tweet posted"""
 
 
@@ -182,7 +181,7 @@ class TriggerBatchResponseTweetModel:
     Response for When a new tweet is posted
     """
 
-    value: Optional[List[TweetModel]] = None
+    value: Optional[List[TweetModel]] = dataclass_field(default=None, kw_only=True)
     """A list of the response objects"""
 
 
@@ -192,15 +191,17 @@ class UserMentionsModel:
     Definition: UserMentionsModel
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
+    id: int = dataclass_field(metadata={"wire_name": "Id"})
     """X id (handle) of the user"""
-    full_name: Optional[str] = field(
+    full_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullName"},
     )
     """Full name of the user"""
-    user_name: Optional[str] = field(
+    user_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserName"},
     )
     """Screen name of the user"""
@@ -212,66 +213,68 @@ class OriginalTweetModel:
     Definition: OriginalTweetModel
     """
 
-    tweet_text: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "TweetText"},
-    )
+    tweet_text: str = dataclass_field(metadata={"wire_name": "TweetText"})
     """Text content of the original retrieved tweet"""
-    tweet_id: Optional[str] = field(
+    tweet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetId"},
     )
     """Id of the original tweet"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedAt"},
     )
     """Time at which original tweet was posted"""
-    created_at_iso: Optional[str] = field(
+    created_at_iso: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedAtIso"},
     )
     """Time at which original tweet was posted"""
-    retweet_count: Optional[int] = field(
-        default=None,
+    retweet_count: int = dataclass_field(
         metadata={"wire_name": "RetweetCount"},
     )
     """Total number of re-tweets for this original tweet"""
-    tweeted_by: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "TweetedBy"},
-    )
+    tweeted_by: str = dataclass_field(metadata={"wire_name": "TweetedBy"})
     """User name of the person who posted the original tweet"""
-    media_urls: Optional[List[str]] = field(
+    media_urls: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaUrls"},
     )
     """Url of the media posted along with the original tweet"""
-    tweet_language_code: Optional[str] = field(
+    tweet_language_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetLanguageCode"},
     )
     """Language code for the original tweet"""
-    tweet_in_reply_to_user_id: Optional[str] = field(
+    tweet_in_reply_to_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TweetInReplyToUserId"},
     )
     """
     User Id of the author of the tweet that the current original tweet is a
     reply to
     """
-    favorited: Optional[bool] = field(
+    favorited: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Favorited"},
     )
     """Indicates whether the original tweet is marked as favorited"""
-    user_mentions: Optional[List[OriginalTweetUserMentionsModel]] = field(
+    user_mentions: Optional[List[OriginalTweetUserMentionsModel]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserMentions"},
     )
     """The list of user mentioned in the tweet"""
-    user_details: Optional[OriginalTweetUserDetailsModel] = field(
+    user_details: Optional[OriginalTweetUserDetailsModel] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserDetails"},
     )
 
@@ -282,15 +285,17 @@ class OriginalTweetUserMentionsModel:
     Definition: OriginalTweetUserMentionsModel
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
+    id: int = dataclass_field(metadata={"wire_name": "Id"})
     """X id (handle) of the user"""
-    full_name: Optional[str] = field(
+    full_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullName"},
     )
     """Full name of the user"""
-    user_name: Optional[str] = field(
+    user_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UserName"},
     )
     """Screen name of the user"""
@@ -302,50 +307,47 @@ class OriginalTweetUserDetailsModel:
     Definition: OriginalTweetUserDetailsModel
     """
 
-    full_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "FullName"},
-    )
+    full_name: str = dataclass_field(metadata={"wire_name": "FullName"})
     """Name of the user"""
-    location: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Location"},
-    )
+    location: str = dataclass_field(metadata={"wire_name": "Location"})
     """Location of the user"""
-    id: Optional[int] = field(default=None, metadata={"wire_name": "Id"})
-    """X id (handle) of the user"""
-    user_name: Optional[str] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
-        metadata={"wire_name": "UserName"},
+        kw_only=True,
+        metadata={"wire_name": "Id"},
     )
+    """X id (handle) of the user"""
+    user_name: str = dataclass_field(metadata={"wire_name": "UserName"})
     """Screen name of the user"""
-    followers_count: Optional[int] = field(
+    followers_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FollowersCount"},
     )
     """Number of followers"""
-    description: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Description"},
-    )
+    description: str = dataclass_field(metadata={"wire_name": "Description"})
     """User description"""
-    statuses_count: Optional[int] = field(
+    statuses_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StatusesCount"},
     )
     """User status count"""
-    friends_count: Optional[int] = field(
+    friends_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FriendsCount"},
     )
     """Number of friends"""
-    favourites_count: Optional[int] = field(
+    favourites_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FavouritesCount"},
     )
     """Number of tweets that the user has favorited"""
-    profile_image_url: Optional[str] = field(
+    profile_image_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProfileImageUrl"},
     )
     """Url of the profile image"""
@@ -416,7 +418,46 @@ class TwitterClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "twitter"
 
-    def user_timeline(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_user_timeline(
         self,
         user_name: str,
         *,
@@ -425,12 +466,15 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get user timeline
 
         This operation gets a list of the most recent tweets posted by a given
         user.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/usertimeline"
         query_params = []
@@ -445,29 +489,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def home_timeline(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_home_timeline(
         self,
         *,
         max_results: Optional[int] = None,
@@ -475,12 +537,15 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get home timeline
 
         This operation gets the most recent tweets and re-tweets posted by me
         and my followers.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/hometimeline"
         query_params = []
@@ -491,29 +556,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def search_tweet(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_search_tweet(
         self,
         search_query: str,
         *,
@@ -523,12 +606,15 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Search tweets
 
         This operation gets a list of relevant tweets matching the search
         query.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/searchtweets"
         query_params = []
@@ -548,29 +634,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"sinceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def followers(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_followers(
         self,
         user_name: str,
         *,
@@ -579,11 +683,14 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get followers
 
         This operation gets the list of users that follow a given user.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/followers"
         query_params = []
@@ -598,29 +705,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def my_followers(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_my_followers(
         self,
         *,
         max_results: Optional[int] = None,
@@ -628,11 +753,14 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get my followers
 
         This operation gets the list of users who are following me.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/myfollowers"
         query_params = []
@@ -643,29 +771,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def following(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_following(
         self,
         user_name: str,
         *,
@@ -674,11 +820,14 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get following
 
         The operation gets the list of people the given user follows.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/friends"
         query_params = []
@@ -693,29 +842,47 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def my_following(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_my_following(
         self,
         *,
         max_results: Optional[int] = None,
@@ -723,11 +890,14 @@ class TwitterClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get my following
 
         This operation gets the list of users that I am following.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/myfriends"
         query_params = []
@@ -738,27 +908,45 @@ class TwitterClient(ConnectorClientBase):
             query_params.append(f"maxResults={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def user(
         self,

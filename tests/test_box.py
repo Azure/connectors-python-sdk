@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: BoxClient, operation: str):
@@ -43,13 +44,15 @@ async def _invoke_operation(client: BoxClient, operation: str):
             destination="/Documents/copy.txt",
         )
     if operation == "list_folder":
-        return await client.list_folder(id="folder123")
+        return await resolve_generated_result(client.list_folder(id="folder123"))
     if operation == "list_root_folder":
-        return await client.list_root_folder()
+        return await resolve_generated_result(client.list_root_folder())
     if operation == "extract_folder":
-        return await client.extract_folder(
-            source="/Documents/archive.zip",
-            destination="/Documents/extracted",
+        return await resolve_generated_result(
+            client.list_extract_folder(
+                source="/Documents/archive.zip",
+                destination="/Documents/extracted",
+            )
         )
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -264,7 +267,7 @@ class TestBoxClientMethods:
         )
         mock_response = MockResponse(
             status=200,
-            text='{"value":[{"id":"1","name":"Docs"}]}'
+            text='[{"id":"1","name":"Docs"}]'
         )
 
         with patch.object(
@@ -273,10 +276,9 @@ class TestBoxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_root_folder()
+            result = await resolve_generated_result(client.list_root_folder())
 
-            assert len(result["value"]) == 1
-            assert result["value"][0]["name"] == "Docs"
+            assert result == [{"id": "1", "name": "Docs"}]
 
 
 class TestBoxClientErrorHandling:

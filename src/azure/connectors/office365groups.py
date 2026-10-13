@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -45,20 +45,22 @@ class ListGroupMembersResponse:
     Response for List group members
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
     """
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -71,20 +73,22 @@ class ListGroupsResponse:
     Response for List groups
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
     Only used in Power Apps Canvas to genereate the `$skipToken` for
     pagination. Power Automate and Logic Apps must use the pagination setting.
     """
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -94,44 +98,49 @@ class CreateCalendarEventResponse:
     Response for Update a group event
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique id of the event."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event starts to remind."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the event."""
-    importance: Optional[str] = None
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """True if the event is an all day event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """True if a response was requested for the event."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    start: Optional[Dict[str, Any]] = None
+    start: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """start"""
-    end: Optional[Dict[str, Any]] = None
+    end: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """end"""
-    location: Optional[Dict[str, Any]] = None
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """location"""
 
 
@@ -144,7 +153,7 @@ class ObjectWithoutType:
     Response for Send an HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -157,12 +166,13 @@ class ListOwnedGroupsResponse:
     Response for List groups that I own and belong to
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The OData context."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -172,41 +182,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -218,36 +234,41 @@ class UpdateCalendarEventRequest:
     Definition: UpdateCalendarEvent_Request
     """
 
-    subject: Optional[str] = None
+    subject: str
     """Title of the event."""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    body: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    importance: Optional[str] = None
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """
@@ -262,36 +283,41 @@ class UpdateCalendarEventHTMLRequest:
     Definition: UpdateCalendarEvent_HTMLRequest
     """
 
-    subject: Optional[str] = None
+    subject: str
     """Title of the event."""
-    start: Optional[Dict[str, Any]] = None
-    end: Optional[Dict[str, Any]] = None
-    body: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    importance: Optional[str] = None
+    start: Dict[str, Any]
+    end: Dict[str, Any]
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    importance: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The importance of the event: Low, Normal, or High."""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Set to true if the event lasts all day."""
-    is_reminder_on: Optional[bool] = field(
+    is_reminder_on: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isReminderOn"},
     )
     """Set to true if the event has a reminder."""
-    reminder_minutes_before_start: Optional[int] = field(
+    reminder_minutes_before_start: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "reminderMinutesBeforeStart"},
     )
     """Time in minutes before event start to remind."""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "showAs"},
     )
     """Status to show during the event."""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "responseRequested"},
     )
     """

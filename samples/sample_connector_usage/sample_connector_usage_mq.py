@@ -123,7 +123,7 @@ def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                result = client.read_all(input=options)
+                result = client.list_read_all(input=options)
 
                 if result and isinstance(result, list):
                     print(f"Browsed {len(result)} messages:")

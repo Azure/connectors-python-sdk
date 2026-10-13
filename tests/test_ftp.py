@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: FtpClient, operation: str):
@@ -44,15 +45,17 @@ async def _invoke_operation(client: FtpClient, operation: str):
     if operation == "get_file_content":
         return await client.get_file_content(id="file123")
     if operation == "list_folder":
-        return await client.list_folder(id="folder123")
+        return await resolve_generated_result(client.list_folder(id="folder123"))
     if operation == "list_root_folder":
-        return await client.list_root_folder()
+        return await resolve_generated_result(client.list_root_folder())
     if operation == "extract_folder":
-        return await client.extract_folder(
-            source="/inbound/archive.zip",
-            destination="/expanded",
-            overwrite="true",
-            create_folders="true",
+        return await resolve_generated_result(
+            client.list_extract_folder(
+                source="/inbound/archive.zip",
+                destination="/expanded",
+                overwrite=True,
+                create_folders=True,
+            )
         )
 
     raise ValueError(f"Unsupported operation '{operation}'.")
@@ -220,7 +223,7 @@ class TestFtpClientMethods:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"value":[{"name":"inbound"}]}')
+        mock_response = MockResponse(status=200, text='[{"name":"inbound"}]')
 
         with patch.object(
             client._http_client,
@@ -228,10 +231,10 @@ class TestFtpClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_root_folder()
+            result = await resolve_generated_result(client.list_root_folder())
 
-            assert len(result["value"]) == 1
-            assert result["value"][0]["name"] == "inbound"
+            assert len(result) == 1
+            assert result[0]["name"] == "inbound"
 
     @pytest.mark.asyncio
     async def test_extract_folder_success(self, mock_credential):
@@ -240,7 +243,7 @@ class TestFtpClientMethods:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"status":"ok"}')
+        mock_response = MockResponse(status=200, text='[{"status":"ok"}]')
 
         with patch.object(
             client._http_client,
@@ -248,17 +251,19 @@ class TestFtpClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.extract_folder(
-                source="/inbound/archive.zip",
-                destination="/expanded",
-                overwrite="true",
-                create_folders="true",
+            result = await resolve_generated_result(
+                client.list_extract_folder(
+                    source="/inbound/archive.zip",
+                    destination="/expanded",
+                    overwrite=True,
+                    create_folders=True,
+                )
             )
 
             call_path = mock_send.call_args[0][1]
             assert "source=%2Finbound%2Farchive.zip" in call_path
             assert "destination=%2Fexpanded" in call_path
-            assert result["status"] == "ok"
+            assert result[0]["status"] == "ok"
 
 
 class TestFtpClientErrorHandling:

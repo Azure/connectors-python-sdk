@@ -63,11 +63,11 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
     ("get_file_thumbnail", {"id": "file123", "size": "small"}),
     ("list_root_folder", {}),
     (
-        "find_files",
+        "list_find_files",
         {"id": "folder123", "query": "report", "find_mode": "search"},
     ),
     (
-        "find_files_by_path",
+        "list_find_files_by_path",
         {
             "query": "report",
             "path": "/Documents",
@@ -80,7 +80,7 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
         {"path": "/Documents/file.txt", "type_": "view"},
     ),
     (
-        "extract_folder",
+        "list_extract_folder",
         {"source": "/Documents/archive.zip", "destination": "/Documents/extracted"},
     ),
     ("list_folder", {"id": "folder123"}),

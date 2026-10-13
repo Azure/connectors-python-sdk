@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Optional, Dict, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -40,11 +42,11 @@ class SetWebhookCardCreateInput:
     When a card is created
     """
 
-    card_create: Optional[bool] = None
+    card_create: bool
     """Triggers when a card is created on the defined board"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -54,24 +56,24 @@ class SetWebhookPropertiesChangeInput:
     When a card's properties are changed
     """
 
-    card_blocked: Optional[bool] = None
+    card_blocked: bool
     """Triggers when a card is blocked"""
-    card_unblock: Optional[bool] = None
+    card_unblock: bool
     """Triggers when a card block is removed"""
-    status_change: Optional[bool] = None
+    status_change: bool
     """Triggers when a card is moved to another column on the"""
-    card_done: Optional[bool] = None
+    card_done: bool
     """
     Triggers when a card is set to done by moving it to the rightmost column on
     the board
     """
-    description_changed: Optional[bool] = None
+    description_changed: bool
     """Triggers when the description of a card changes"""
-    due_date_changed: Optional[bool] = None
+    due_date_changed: bool
     """Triggers when the due date of a card changes"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -81,11 +83,11 @@ class SetWebhookCardDueDateInput:
     When a card is due
     """
 
-    due_today: Optional[bool] = None
+    due_today: bool
     """Triggers on the date that the card is due"""
-    webhook: Optional[str] = None
+    webhook: str
     """webhook"""
-    board_id: Optional[int] = None
+    board_id: int
     """The id of the Board that the card belongs to"""
 
 
@@ -95,19 +97,19 @@ class CreateCardInput:
     Create Card
     """
 
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The column where the card should be created"""
-    title: Optional[str] = None
+    title: str
     """The title of the created card"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the created card"""
-    assignee_email: Optional[str] = None
+    assignee_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person that will be assigned to the created card"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The activity the Card should be associated with"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the created card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The label of the created card"""
 
 
@@ -117,39 +119,39 @@ class CreateCardResponse:
     Response for Create Card
     """
 
-    access: Optional[str] = None
+    access: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Access rights"""
-    assignee: Optional[Dict[str, Any]] = None
+    assignee: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """The person who is assigned to the card"""
-    assignee_id: Optional[int] = None
+    assignee_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the person who is assigned the card"""
-    board_id: Optional[int] = None
+    board_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the board"""
-    board_name: Optional[str] = None
+    board_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board"""
-    direct_url: Optional[str] = None
+    direct_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The card's direct URL"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card"""
-    estimated_time: Optional[str] = None
+    estimated_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Estimated time for completion"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the card"""
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card is"""
-    is_blocked_reason: Optional[str] = None
+    is_blocked_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The blocking reason - if blocked"""
-    is_done: Optional[bool] = None
+    is_done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card done"""
-    is_template: Optional[bool] = None
+    is_template: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is a template card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the label"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the activity"""
-    reported_time: Optional[str] = None
+    reported_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """How much time was reported for the card"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The card's title"""
 
 
@@ -159,11 +161,11 @@ class MoveCardInput:
     Move card to another column
     """
 
-    card_id: Optional[int] = None
+    card_id: int
     """The card to be moved"""
-    card_title: Optional[str] = None
+    card_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the card to be moved"""
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The column where the card should be moved to"""
 
 
@@ -173,45 +175,45 @@ class MoveCardResponse:
     Response for Move card to another column
     """
 
-    access: Optional[str] = None
+    access: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Access rights"""
-    assignee_id: Optional[int] = None
+    assignee_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the person the card assigned to"""
-    board_id: Optional[int] = None
+    board_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the board"""
-    board_name: Optional[str] = None
+    board_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the board"""
-    column_id: Optional[int] = None
+    column_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the column the card is on"""
-    column_name: Optional[str] = None
+    column_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the column"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description on the card"""
-    direct_url: Optional[str] = None
+    direct_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The direct URL of the card"""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The due date of the card"""
-    estimated_time: Optional[str] = None
+    estimated_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The estimated time of the card"""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the card"""
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card blocked"""
-    is_blocked_reason: Optional[str] = None
+    is_blocked_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The reason the card is blocked"""
-    is_done: Optional[bool] = None
+    is_done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is the card done"""
-    is_template: Optional[bool] = None
+    is_template: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Is a template card"""
-    label_id: Optional[int] = None
+    label_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the card's label"""
-    label_name: Optional[str] = None
+    label_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the label"""
-    planlet_id: Optional[int] = None
+    planlet_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id of the activity"""
-    reported_time: Optional[str] = None
+    reported_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time reported for this card"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the card"""
 
 
@@ -279,6 +281,45 @@ class ProjectplaceClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "projectplace"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def create_card(
         self,
@@ -375,37 +416,58 @@ class ProjectplaceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Lists the boards the user have access to
 
         Lists the boards that are part of the projects the user have access to
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1/external_notifications/lists/list_boards"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -45,6 +45,7 @@ def example_1_send_email() -> None:
                     to="recipient@example.com",
                     subject="Hello from the SDK sample",
                     text="This message was sent via the SendGrid client from the Azure Connectors Python SDK.",
+                    ishtml=False,
                 ),
             )
             print(f"Send result: {result}")
@@ -76,7 +77,7 @@ def example_4_get_bounce() -> None:
 
     with DefaultAzureCredential() as credential:
         with SendgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            bounce = client.get_bounce(email="recipient@example.com")
+            bounce = client.list_bounce(email="recipient@example.com")
             print(f"Bounce: {bounce}")
 
 

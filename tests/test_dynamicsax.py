@@ -31,7 +31,10 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    resolve_generated_result,
+)
 
 BASE_URL = "https://example.azure.com/connections/test"
 
@@ -56,16 +59,16 @@ OPERATION_ARGS = {
         "table": "tbl",
         "id": "1",
     },
-    "get_tables": {"dataset": "ds"},
-    "get_data_sets": {},
-    "get_business_event_categories": {"dataset": "ds"},
-    "get_business_events": {"dataset": "ds", "businesseventcategory": "cat"},
-    "get_legal_entities": {
+    "list_tables": {"dataset": "ds"},
+    "list_data_sets": {},
+    "list_business_event_categories": {"dataset": "ds"},
+    "list_business_events": {"dataset": "ds", "businesseventcategory": "cat"},
+    "list_legal_entities": {
         "dataset": "ds",
         "businesseventcategory": "cat",
         "businessevent": "evt",
     },
-    "get_procedures": {"dataset": "ds"},
+    "list_procedures": {"dataset": "ds"},
     "get_procedure": {"dataset": "ds", "procedure": "proc"},
     "get_table": {"dataset": "ds", "table": "tbl"},
 }
@@ -175,9 +178,9 @@ class TestDynamicsaxClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_data_sets()
+            result = await resolve_generated_result(client.list_data_sets())
 
-            assert result["value"][0]["name"] == "instance-1"
+            assert result == [{"name": "instance-1"}]
             assert mock_send.call_args[0][0] == "GET"
             assert mock_send.call_args[0][1].endswith("/datasets")
 
@@ -303,9 +306,10 @@ class TestDynamicsaxClientMethods:
     async def test_all_operations_success(self, mock_credential, operation):
         """Test every operation returns the expected success result."""
         client = _make_client(credential=mock_credential)
+        method = getattr(client, operation)
         response_text = (
-            '{"value":[{"value":"ok"}]}'
-            if operation == "list_items"
+            generated_pager_response_text(method)
+            if operation.startswith("list_")
             else '{"value":"ok"}'
         )
         mock_response = MockResponse(status=200, text=response_text)
@@ -320,8 +324,8 @@ class TestDynamicsaxClientMethods:
 
             if operation in NO_JSON_OPERATIONS:
                 assert result is None
-            elif operation == "list_items":
-                assert result == [{"value": "ok"}]
+            elif operation.startswith("list_"):
+                assert result == [{"ok": True}]
             else:
                 assert result == {"value": "ok"}
 
@@ -374,7 +378,9 @@ class TestDynamicsaxTypeSerialization:
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
-        assert BusinessEventSubscription().notification_url is None
+        assert BusinessEventSubscription(
+            notification_url="https://example.com/callback"
+        ).notification_url == "https://example.com/callback"
         assert BusinessEventSubscriptionResponse().id is None
         assert ExecuteProcedureInput().additional_properties == {}
         assert AxOnlineProcedureResult().value is None

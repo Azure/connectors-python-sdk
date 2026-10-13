@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -70,15 +72,15 @@ class CommentQueryResponse:
     Response for Get comments
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[Comment]] = None
+    items: Optional[List[Comment]] = dataclass_field(default=None, kw_only=True)
     """List of items in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -87,67 +89,80 @@ class Comment:
     Response for Create comment
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of date created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of the creator"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Comment ID"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the comment"""
-    page_index: Optional[str] = field(
+    page_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageIndex"},
     )
     """Number page index"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Parent comment ID"""
-    reply_count: Optional[int] = field(
+    reply_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replyCount"},
     )
     """Number of replies"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date string of updated date"""
@@ -159,15 +174,15 @@ class PlannerProjectQueryResponse:
     Response for Get projects
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerProject]] = None
+    items: Optional[List[PlannerProject]] = dataclass_field(default=None, kw_only=True)
     """List of project items in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -176,8 +191,9 @@ class AsyncOperationResponse:
     Response for Delete projects
     """
 
-    async_operation_ids: Optional[List[str]] = field(
+    async_operation_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "asyncOperationIds"},
     )
     """List of async action IDs"""
@@ -189,110 +205,129 @@ class PlannerProject:
     Response for Create project
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Calculated end date from when the project actually ended"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Calculated start date from when the project actually started"""
-    associated_nodes: Optional[List[ProjectAssociatedNodes]] = field(
+    associated_nodes: Optional[List[ProjectAssociatedNodes]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "associatedNodes"},
     )
     """List of association data"""
-    associations: Optional[List[Association]] = None
+    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
     """List of associations (Library content)"""
-    copy_from: Optional[str] = field(
+    copy_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Project ID the project is copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of project"""
-    followers: Optional[List[Follower]] = None
+    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
     """List of followers"""
-    id: Optional[str] = None
-    is_active: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """Indicator on if a project is active or not"""
-    is_template: Optional[bool] = field(
+    is_template: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicator on if the project is a template or not"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of project manager"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank number"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank number"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID the the project was created from"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date project was last updated"""
-    works: Optional[List[PlannerTask]] = None
+    works: Optional[List[PlannerTask]] = dataclass_field(default=None, kw_only=True)
     """List of tasks and requests"""
 
 
@@ -302,15 +337,15 @@ class PlannerRequestQueryResponse:
     Response for Get requests
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerRequest]] = None
+    items: Optional[List[PlannerRequest]] = dataclass_field(default=None, kw_only=True)
     """List of request objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -319,93 +354,109 @@ class PlannerRequest:
     Response for Create request
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the assigner"""
-    associations: Optional[List[Association]] = None
+    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
     """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = field(
+    content_refs: Optional[List[ContentRef]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (WorkSpace and DocCenter content)"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string for created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of the creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    followers: Optional[List[Follower]] = None
+    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
     """List of followers"""
-    form_ref: Optional[Any] = field(
+    form_ref: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    id: Optional[str] = None
-    note: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Note for notifications on status changes"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID of the project the request is associated with"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of request in request list"""
-    request_form_custom_property_option: Optional[RequestFormCustomProperties] = field(
+    request_form_custom_property_option: Optional[RequestFormCustomProperties] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestFormCustomPropertyOption"},
     )
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating the status value"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the request"""
-    updated_at: Optional[str] = field(
+    updated_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the request was last updated"""
@@ -417,15 +468,15 @@ class StatusSchemaQueryResponse:
     Response for Get status schemas
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[StatusSchema]] = None
+    items: Optional[List[StatusSchema]] = dataclass_field(default=None, kw_only=True)
     """List of status schema objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -434,36 +485,45 @@ class StatusSchema:
     Response for Get status schema
     """
 
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    id: Optional[str] = None
-    is_default: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_default: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isDefault"},
     )
     """Indicator on if the status schema is the default schema"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of status schema"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    steps: Optional[List[str]] = None
+    steps: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of steps and their values"""
-    transitions: Optional[List[List[int]]] = None
+    transitions: Optional[List[List[int]]] = dataclass_field(default=None, kw_only=True)
     """List of transition rules"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Node type the status schema can be used for"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Node type the status schema can be used for"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the status schema was last updated"""
@@ -475,15 +535,15 @@ class PlannerTaskQueryResponse:
     Response for Get tasks
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    cursor: Optional[str] = None
+    cursor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Cursor used for pagination"""
-    items: Optional[List[PlannerTask]] = None
+    items: Optional[List[PlannerTask]] = dataclass_field(default=None, kw_only=True)
     """List of task objects in the response"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to limit records"""
-    meta: Optional[Meta] = None
+    meta: Optional[Meta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -492,136 +552,164 @@ class PlannerTask:
     Response for Create task
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Date when work on the task was completed"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Date when work on the task started"""
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = None
+    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
     """List of associations on a task"""
-    copy_from: Optional[str] = field(
+    copy_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Task ID that task was copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date the task was created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties on a task"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = None
+    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
     """List of followers on a task"""
-    id: Optional[str] = None
-    is_template: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_template: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicates if a task is part of a template"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent if task is a subtask"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID the task belongs to"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of task in a task list"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Id of step in status schema"""
-    sub_task_ids: Optional[List[str]] = field(
+    sub_task_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subTaskIds"},
     )
     """List of subtask IDs"""
-    sub_tasks: Optional[List[PlannerSubTask]] = field(
+    sub_tasks: Optional[List[PlannerSubTask]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subTasks"},
     )
     """List of subtasks on the task"""
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID of the template the task belongs to"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type of task"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type of task"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the task was last updated"""
@@ -633,32 +721,37 @@ class Association:
     Definition: Association
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of association"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of association"""
-    node_guid: Optional[str] = field(
+    node_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeGuid"},
     )
     """Longer GUID format"""
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_guid: Optional[str] = field(
+    space_guid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceGuid"},
     )
     """Longer GUID format"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
@@ -670,18 +763,21 @@ class AssociationReq:
     Definition: AssociationReq
     """
 
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
     """Node ID"""
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
     """Space ID"""
@@ -693,60 +789,71 @@ class ContentRef:
     Definition: ContentRef
     """
 
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentId"},
     )
     """Content ID"""
-    doc_center_full_path: Optional[str] = field(
+    doc_center_full_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "docCenterFullPath"},
     )
     """Full location path of where content exists in DocCenter"""
-    major_version: Optional[int] = field(
+    major_version: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "majorVersion"},
     )
     """Number of major version"""
-    minor_version: Optional[int] = field(
+    minor_version: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minorVersion"},
     )
     """Number of minor version"""
-    modified_date: Optional[str] = field(
+    modified_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "modifiedDate"},
     )
     """Date the content reference was last updated"""
-    order_no: Optional[int] = field(
+    order_no: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orderNo"},
     )
     """Number to indicate order"""
-    profile_id: Optional[str] = field(
+    profile_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "profileId"},
     )
     """Profile ID"""
-    profile_version_id: Optional[str] = field(
+    profile_version_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "profileVersionId"},
     )
     """Version ID of profile"""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Source of content"""
-    team_site_id: Optional[str] = field(
+    team_site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamSiteId"},
     )
     """TeamSite ID"""
-    thumbnail_id: Optional[str] = field(
+    thumbnail_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "thumbnailId"},
     )
     """ID for image thumbnail"""
-    version_id: Optional[str] = field(
+    version_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "versionId"},
     )
     """Version ID of content"""
@@ -758,22 +865,26 @@ class CreateCommentModel:
     Definition: CreateCommentModel
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
     """Annotation type"""
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
     """Content of the comment"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
@@ -785,36 +896,41 @@ class CreateProject:
     Definition: CreateProject
     """
 
-    associations: Optional[List[AssociationReq]] = None
+    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
     """List of association objects"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of description"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of manager"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
 
 
@@ -824,55 +940,64 @@ class CreateRequest:
     Definition: CreateRequest
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = None
+    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
     """List of associations (Library content)"""
-    content_refs: Optional[List[ContentRef]] = field(
+    content_refs: Optional[List[ContentRef]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (DocCenter and Workspace associations)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    form_ref: Optional[Any] = field(
+    form_ref: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """ID of project the request belongs to"""
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of request"""
 
 
@@ -882,48 +1007,55 @@ class CreateTask:
     Definition: CreateTask
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    associations: Optional[List[AssociationReq]] = None
+    associations: Optional[List[AssociationReq]] = dataclass_field(default=None, kw_only=True)
     """List of associations (Library content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority values"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """ID of project the task is associated with"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
 
 
@@ -933,73 +1065,84 @@ class CustomProperty:
     Definition: CustomProperty
     """
 
-    allow_multiple_values: Optional[bool] = field(
+    allow_multiple_values: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowMultipleValues"},
     )
     """Indicates if custom property allows for multiple values"""
-    created_by_id: Optional[str] = field(
+    created_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdById"},
     )
     """User ID of the creator"""
-    has_domain_of_values: Optional[bool] = field(
+    has_domain_of_values: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDomainOfValues"},
     )
     """Indicates if custom property has possible values"""
-    hint: Optional[str] = None
+    hint: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Value that describes the hint displayed under the custom property name
     """
-    id: Optional[str] = None
-    is_required: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isRequired"},
     )
     """Indicates whether the custom property is required or not"""
-    last_modified_by_id: Optional[str] = field(
+    last_modified_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedById"},
     )
     """User ID of the user that last updated the custom property"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
-    operation_setting: Optional[str] = field(
+    operation_setting: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "operationSetting"},
     )
     """
     Object that describes settings for different operations on a custom
     property
     """
-    order: Optional[int] = None
+    order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number indicating order within custom property list"""
-    possible_values: Optional[List[PossibleValuesItem]] = field(
+    possible_values: Optional[List[PossibleValuesItem]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "possibleValues"},
     )
     """List of possible values for the custom property (if applicable)"""
-    scope_settings: Optional[List[ScopeSettingsItemDefinition]] = field(
+    scope_settings: Optional[List[ScopeSettingsItemDefinition]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "scopeSettings"},
     )
     """
     Object that describes settings for different scopes on a custom property
     """
-    scopes: Optional[List[str]] = None
+    scopes: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of scopes"""
-    value_schema_name: Optional[str] = field(
+    value_schema_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueSchemaName"},
     )
     """Name of custom property value schema"""
-    value_schema_property: Optional[ValueSchemaPropertyDefinition] = field(
+    value_schema_property: Optional[ValueSchemaPropertyDefinition] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueSchemaProperty"},
     )
-    value_type: Optional[str] = field(
+    value_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "valueType"},
     )
     """Type of custom property value"""
@@ -1011,7 +1154,7 @@ class CustomPropertyDataDisplay:
     Definition: CustomPropertyDataDisplay
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
 
 
@@ -1021,17 +1164,23 @@ class CustomPropertyValues:
     Definition: CustomPropertyValues
     """
 
-    id: Optional[str] = None
-    localizations: Optional[Dict[str, CustomPropertyDataDisplay]] = None
-    """Localization object"""
-    multiple_value: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    localizations: Optional[
+        Dict[str, CustomPropertyDataDisplay]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """Localization object"""
+    multiple_value: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "multipleValue"},
     )
     """Indicate if the custom property allows multiple values"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of custom property"""
-    values: Optional[List[CustomPropertyValuesValues]] = None
+    values: Optional[List[CustomPropertyValuesValues]] = dataclass_field(default=None, kw_only=True)
     """List of custom property values"""
 
 
@@ -1041,8 +1190,8 @@ class CustomPropertyValuesInput:
     Definition: CustomPropertyValuesInput
     """
 
-    id: Optional[str] = None
-    values: Optional[List[CustomPropertyValuesValues]] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    values: Optional[List[CustomPropertyValuesValues]] = dataclass_field(default=None, kw_only=True)
     """List of custom property values"""
 
 
@@ -1052,8 +1201,8 @@ class CustomPropertyValuesValues:
     Definition: CustomPropertyValuesValues
     """
 
-    id: Optional[str] = None
-    value: Optional[Any] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """Value data for custom property value"""
 
 
@@ -1063,7 +1212,7 @@ class DeleteRequest:
     Definition: DeleteRequest
     """
 
-    ids: Optional[List[str]] = None
+    ids: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of Request IDs to delete"""
 
 
@@ -1073,9 +1222,13 @@ class Follower:
     Definition: Follower
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User/User group ID of follower"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Either user or user group follower type"""
 
 
@@ -1085,9 +1238,9 @@ class Meta:
     Definition: Meta
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of records returned"""
-    query: Optional[List[MetaQueryInfo]] = None
+    query: Optional[List[MetaQueryInfo]] = dataclass_field(default=None, kw_only=True)
     """Query object"""
 
 
@@ -1097,7 +1250,7 @@ class MetaQueryInfo:
     Definition: MetaQueryInfo
     """
 
-    sort: Optional[List[str]] = None
+    sort: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Sort query"""
 
 
@@ -1107,126 +1260,152 @@ class PlannerSubTask:
     Definition: PlannerSubTask
     """
 
-    actual_duration: Optional[int] = field(
+    actual_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualDuration"},
     )
     """Calculated actual duration in days"""
-    actual_end_date: Optional[str] = field(
+    actual_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualEndDate"},
     )
     """Date when work on the task was completed"""
-    actual_start_date: Optional[str] = field(
+    actual_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actualStartDate"},
     )
     """Date when work on the task started"""
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of assignee"""
-    assigner_id: Optional[str] = field(
+    assigner_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignerId"},
     )
     """User ID of the last user to add an assignee"""
-    associations: Optional[List[Association]] = None
+    associations: Optional[List[Association]] = dataclass_field(default=None, kw_only=True)
     """List of associations on a task"""
-    copy_from: Optional[str] = field(
+    copy_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "copyFrom"},
     )
     """Task ID that task was copied from"""
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date the task was created"""
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """User ID of creator"""
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties on a task"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    followers: Optional[List[Follower]] = None
+    followers: Optional[List[Follower]] = dataclass_field(default=None, kw_only=True)
     """List of followers on a task"""
-    id: Optional[str] = None
-    is_template: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_template: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isTemplate"},
     )
     """Indicates if a task is part of a template"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent if task is a subtask"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID the task belongs to"""
-    rank: Optional[str] = None
+    rank: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rank of task in a task list"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
-    status_schema_id: Optional[str] = field(
+    status_schema_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusSchemaId"},
     )
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Id of step in status schema"""
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """Template ID of the template the task belongs to"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """Type of task"""
-    updated_at: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """Type of task"""
+    updated_at: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "updatedAt"},
     )
     """Date the task was last updated"""
@@ -1238,10 +1417,10 @@ class PossibleValuesItem:
     Definition: PossibleValuesItem
     """
 
-    id: Optional[str] = None
-    order: Optional[int] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    order: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number to indicate order"""
-    value: Optional[Any] = None
+    value: Optional[Any] = dataclass_field(default=None, kw_only=True)
     """Actual value data"""
 
 
@@ -1251,11 +1430,15 @@ class ProblemDetails:
     Definition: ProblemDetails
     """
 
-    detail: Optional[str] = None
-    instance: Optional[str] = None
-    status: Optional[int] = None
-    title: Optional[str] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    detail: Optional[str] = dataclass_field(default=None, kw_only=True)
+    instance: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
 
 
 @dataclass
@@ -1264,17 +1447,20 @@ class ProjectAssociatedNodes:
     Definition: ProjectAssociatedNodes
     """
 
-    node_id: Optional[str] = field(
+    node_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeId"},
     )
-    node_type: Optional[str] = field(
+    node_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nodeType"},
     )
     """Node type of the association"""
-    space_id: Optional[str] = field(
+    space_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "spaceId"},
     )
 
@@ -1285,13 +1471,15 @@ class RequestFormCustomProperties:
     Definition: RequestFormCustomProperties
     """
 
-    created_at: Optional[str] = field(
+    created_at: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdAt"},
     )
     """Date string of created date"""
-    custom_properties: Optional[List[CustomProperty]] = field(
+    custom_properties: Optional[List[CustomProperty]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
@@ -1303,12 +1491,13 @@ class ScopeSettingsItemDefinition:
     Definition: ScopeSettingsItemDefinition
     """
 
-    is_required: Optional[bool] = field(
+    is_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isRequired"},
     )
     """Indicator on whether a field is required or not"""
-    scope: Optional[str] = None
+    scope: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Type list of node types that the custom property definition belongs to
     """
@@ -1320,21 +1509,25 @@ class UpdateCommentModel:
     Definition: UpdateCommentModel
     """
 
-    annotation_payload: Optional[str] = field(
+    annotation_payload: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationPayload"},
     )
-    annotation_type: Optional[str] = field(
+    annotation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationType"},
     )
-    comment_content: Optional[str] = field(
+    comment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commentContent"},
     )
     """Content of the comment"""
-    is_resolved: Optional[bool] = field(
+    is_resolved: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isResolved"},
     )
     """True/false on whether the comment is resolved"""
@@ -1346,49 +1539,57 @@ class UpdateProject:
     Definition: UpdateProject
     """
 
-    custom_properties: Optional[List[CustomPropertyValues]] = field(
+    custom_properties: Optional[List[CustomPropertyValues]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of project"""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """Indicator on whether a project is active?"""
-    manager_id: Optional[str] = field(
+    manager_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerId"},
     )
     """User ID of project manager"""
-    max_rank: Optional[str] = field(
+    max_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "maxRank"},
     )
     """Maximum rank number"""
-    min_rank: Optional[str] = field(
+    min_rank: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "minRank"},
     )
     """Minimum rank number"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of project"""
 
 
@@ -1398,56 +1599,65 @@ class UpdateRequest:
     Definition: UpdateRequest
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    content_refs: Optional[List[ContentRef]] = field(
+    content_refs: Optional[List[ContentRef]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentRefs"},
     )
     """List of content references (WorkSpace and DocCenter content)"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    form_ref: Optional[Any] = field(
+    form_ref: Optional[Any] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "formRef"},
     )
     """Form reference object"""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Note used for notifications on status changes"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date (due date)"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID of the project the request belongs to"""
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating status"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the request"""
 
 
@@ -1457,51 +1667,59 @@ class UpdateTask:
     Definition: UpdateTask
     """
 
-    assignee_id: Optional[str] = field(
+    assignee_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assigneeId"},
     )
     """User ID of the assignee"""
-    custom_properties: Optional[List[CustomPropertyValuesInput]] = field(
+    custom_properties: Optional[List[CustomPropertyValuesInput]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """List of custom properties"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of task"""
-    parent_id: Optional[str] = field(
+    parent_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentId"},
     )
     """Task ID of parent task"""
-    planned_duration: Optional[int] = field(
+    planned_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedDuration"},
     )
     """Planned duration in days"""
-    planned_end_date: Optional[str] = field(
+    planned_end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedEndDate"},
     )
     """Date string of planned end date"""
-    planned_start_date: Optional[str] = field(
+    planned_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "plannedStartDate"},
     )
     """Date string of planned start date"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority value"""
-    project_id: Optional[str] = field(
+    project_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "projectId"},
     )
     """Project ID that the task belongs to"""
-    step_id: Optional[int] = field(
+    step_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepId"},
     )
     """Step ID indicating the task status"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of task"""
 
 
@@ -1511,8 +1729,8 @@ class ValueSchemaPropertyDefinition:
     Definition: ValueSchemaPropertyDefinition
     """
 
-    max: Optional[str] = None
-    min: Optional[str] = None
+    max: Optional[str] = dataclass_field(default=None, kw_only=True)
+    min: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -1579,6 +1797,45 @@ class SeismicplannerClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "seismicplanner"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def get_comments(
         self,
@@ -2065,7 +2322,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_projects(
+    def list_delete_projects(
         self,
         space_id: str,
         ids: List[str],
@@ -2075,11 +2332,14 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Delete projects
 
         Delete one or more projects.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2108,27 +2368,45 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "DELETE", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "DELETE", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "DELETE",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("asyncOperationIds", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_project(
         self,
@@ -2232,7 +2510,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_project(
+    def list_delete_project(
         self,
         space_id: str,
         project_id: str,
@@ -2242,11 +2520,14 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Delete project
 
         Delete a project.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2265,27 +2546,45 @@ class SeismicplannerClient(ConnectorClientBase):
             query_params.append(f"deleteTasks={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "DELETE", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "DELETE", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "DELETE",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("asyncOperationIds", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_project(
         self,
@@ -2640,7 +2939,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_requests(
+    def list_delete_requests(
         self,
         input: DeleteRequest,
         space_id: str,
@@ -2649,37 +2948,58 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Delete requests
 
         Bulk delete requests.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/planner/v2/spaces/{quote(str(space_id), safe='')}/requests"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "DELETE", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "DELETE", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "DELETE",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("asyncOperationIds", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_request(
         self,
@@ -3401,7 +3721,7 @@ class SeismicplannerClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def delete_task(
+    def list_delete_task(
         self,
         space_id: str,
         task_id: str,
@@ -3410,11 +3730,14 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Delete task
 
         Delete a task.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3425,27 +3748,45 @@ class SeismicplannerClient(ConnectorClientBase):
             f"/tasks"
             f"/{quote(str(task_id), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "DELETE", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "DELETE",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "DELETE", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "DELETE",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("asyncOperationIds", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_task(
         self,

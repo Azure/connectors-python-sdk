@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -70,7 +72,7 @@ class GetCampaignsResponse:
     Response for List campaigns
     """
 
-    campaigns: Optional[List[CampaignResponseModel]] = None
+    campaigns: Optional[List[CampaignResponseModel]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a campaign"""
 
 
@@ -80,9 +82,9 @@ class GetListsResponseModel:
     Response for Get all the lists
     """
 
-    lists: Optional[List[CreateNewListResponseModel]] = None
+    lists: Optional[List[CreateNewListResponseModel]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a list"""
-    total_items: Optional[int] = None
+    total_items: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of items matching the query regardless of pagination"""
 
 
@@ -92,46 +94,47 @@ class CreateNewListResponseModel:
     Response for New List
     """
 
-    id: Optional[str] = None
+    id: str
     """A string that uniquely identifies this list"""
-    name: Optional[str] = None
+    name: str
     """The name of the list"""
-    contact: Optional[Contact] = None
-    permission_reminder: Optional[str] = None
+    contact: Contact
+    permission_reminder: str
     """The permission reminder for the list"""
-    use_archive_bar: Optional[bool] = None
+    use_archive_bar: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether campaigns for this list use the Archive Bar in archives by default
     """
-    campaign_defaults: Optional[CampaignDefaults] = None
-    notify_on_subscribe: Optional[str] = None
+    campaign_defaults: CampaignDefaults
+    notify_on_subscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send subscribe notifications to"""
-    notify_on_unsubscribe: Optional[str] = None
+    notify_on_unsubscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send unsubscribe notifications to"""
-    date_created: Optional[str] = None
+    date_created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time that this list was created"""
-    list_rating: Optional[int] = None
+    list_rating: Optional[int] = dataclass_field(default=None, kw_only=True)
     """An auto-generated activity score for the list (0-5)"""
-    email_type_option: Optional[bool] = None
+    email_type_option: bool
     """
     Whether the list supports multiple formats for emails.When set to true,
     subscribers can choose whether they want to receive HTML or plain-text
     emails.When set to false, subscribers will receive HTML emails, with a
     plain-text alternative backup
     """
-    subscribe_url_short: Optional[str] = None
+    subscribe_url_short: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Our EepURL shortened version of this list's subscribe form"""
-    subscribe_url_long: Optional[str] = None
+    subscribe_url_long: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The full version of this list's subscribe form (host will vary)"""
-    beamer_address: Optional[str] = None
+    beamer_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list's Email Beamer address"""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Whether this list is public or private"""
-    modules: Optional[List[str]] = None
+    modules: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Any list-specific modules installed for this list"""
-    stats: Optional[Stats] = None
-    links: Optional[List[Link]] = field(
+    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
+    links: Optional[List[Link]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
     """A list of link types and descriptions for the API schema documents"""
@@ -143,14 +146,14 @@ class GetAddMembersBatchResponseModel:
     Response for Subscribe or unsubscribe list members
     """
 
-    total_created: Optional[int] = None
+    total_created: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of members that were added to the list"""
-    total_updated: Optional[int] = None
+    total_updated: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The total number of an existing list members whose subscription status was
     updated
     """
-    error_count: Optional[int] = None
+    error_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The number email addresses that could not be added to the list or updated
     """
@@ -162,11 +165,11 @@ class GetAllMembersResponseModel:
     Response for Show list members
     """
 
-    members: Optional[List[MemberResponseModel]] = None
+    members: Optional[List[MemberResponseModel]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a specific list member"""
-    list_id: Optional[str] = None
+    list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    total_items: Optional[int] = None
+    total_items: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of items matching the query regardless of pagination"""
 
 
@@ -176,47 +179,48 @@ class MemberResponseModel:
     Response for Add member to list
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The MD5 hash of the lowercase version of the list member's email address
     """
-    email_address: Optional[str] = None
+    email_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address for a subscriber"""
-    unique_email_id: Optional[str] = None
+    unique_email_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An identifier for the address across all of MailChimp"""
-    email_type: Optional[str] = None
+    email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = None
-    stats: Optional[Stats] = None
-    ip_signup: Optional[str] = None
+    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
+    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
+    ip_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """IP address the subscriber signed up from"""
-    timestamp_signup: Optional[str] = None
+    timestamp_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the subscriber signed up for the list"""
-    ip_opt: Optional[str] = None
+    ip_opt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The IP address the subscriber used to confirm their opt-in status"""
-    timestamp_opt: Optional[str] = None
+    timestamp_opt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the subscribe confirmed their opt-in status"""
-    member_rating: Optional[int] = None
+    member_rating: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Star rating for this member, between 1 and 5"""
-    last_changed: Optional[str] = None
+    last_changed: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the member's info was last changed"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
-    vip: Optional[bool] = None
+    vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    email_client: Optional[str] = None
+    email_client: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list member's email client"""
-    location: Optional[Location] = None
-    last_note: Optional[LastNote] = None
-    list_id: Optional[str] = None
+    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
+    last_note: Optional[LastNote] = dataclass_field(default=None, kw_only=True)
+    list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    links: Optional[List[Link]] = field(
+    links: Optional[List[Link]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
     """A list of link types and descriptions for the API schema documents"""
@@ -228,11 +232,11 @@ class GetMembersResponseModel:
     Response for When a Member has been added to a list
     """
 
-    members: Optional[List[AddUserResponseModel]] = None
+    members: Optional[List[AddUserResponseModel]] = dataclass_field(default=None, kw_only=True)
     """An array of objects, each representing a specific list member"""
-    list_id: Optional[str] = None
+    list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    total_items: Optional[int] = None
+    total_items: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of items matching the query regardless of pagination"""
 
 
@@ -242,40 +246,45 @@ class CampaignResponseModel:
     Response for New Campaign
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A string that uniquely identifies this campaign"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     There are four types of campaigns you can create in MailChimp. A/B Split
     campaigns have been deprecated and variate campaigns should be used instead
     """
-    create_time: Optional[str] = None
+    create_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the campaign was created"""
-    archive_url: Optional[str] = None
+    archive_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The link to the campaign's archive version"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The current status of the campaign."""
-    emails_sent: Optional[int] = None
+    emails_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of emails sent for this campaign"""
-    send_time: Optional[str] = None
+    send_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time and date a campaign was sent"""
-    content_type: Optional[str] = None
+    content_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     How the campaign's content is put together ('template', 'drag_and_drop',
     'html', 'url')
     """
-    recipient: Optional[List[Recipient]] = None
+    recipient: Optional[List[Recipient]] = dataclass_field(default=None, kw_only=True)
     """List settings for the campaign"""
-    settings: Optional[Settings] = None
-    variate_settings: Optional[VariateSettings] = None
-    tracking: Optional[Tracking] = None
-    rss_opts: Optional[RSSOpts] = None
-    ab_split_opts: Optional[ABSplitOpts] = None
-    social_card: Optional[SocialCard] = None
-    report_summary: Optional[ReportSummary] = None
-    delivery_status: Optional[DeliveryStatus] = None
-    links: Optional[List[Link]] = field(
+    settings: Optional[Settings] = dataclass_field(default=None, kw_only=True)
+    variate_settings: Optional[VariateSettings] = dataclass_field(default=None, kw_only=True)
+    tracking: Optional[Tracking] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RSSOpts] = dataclass_field(default=None, kw_only=True)
+    ab_split_opts: Optional[ABSplitOpts] = dataclass_field(default=None, kw_only=True)
+    social_card: Optional[SocialCard] = dataclass_field(default=None, kw_only=True)
+    report_summary: Optional[ReportSummary] = dataclass_field(default=None, kw_only=True)
+    delivery_status: Optional[DeliveryStatus] = dataclass_field(default=None, kw_only=True)
+    links: Optional[List[Link]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
     """A list of link types and descriptions for the API schema documents"""
@@ -287,9 +296,9 @@ class Recipient:
     Definition: Recipient
     """
 
-    list_id: Optional[str] = None
+    list_id: str
     """The unique list id"""
-    segment_opts: Optional[SegmentOpts] = None
+    segment_opts: Optional[SegmentOpts] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -298,7 +307,7 @@ class VariateSettings:
     Definition: Variate_Settings
     """
 
-    winner_criteria: Optional[str] = None
+    winner_criteria: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The combination that performs the best. This may be determined
     automatically by click rate, open rate, or total revenue-or you may choose
@@ -307,35 +316,35 @@ class VariateSettings:
     Multivariate Campaigns with 'manual' as the winner_criteria, the winner
     must be chosen in the MailChimp web application
     """
-    wait_time: Optional[int] = None
+    wait_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The number of minutes to wait before choosing the winning campaign. The
     value of wait_time must be greater than 0 and in whole hours, specified in
     minutes
     """
-    test_size: Optional[int] = None
+    test_size: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The percentage of recipients to send the test combinations to, must be a
     value between 10 and 100
     """
-    subject_lines: Optional[List[str]] = None
+    subject_lines: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The possible subject lines to test. If no subject lines are provided,
     settings.subject_line will be used
     """
-    send_times: Optional[List[str]] = None
+    send_times: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The possible send times to test. The times provided should be in the format
     YYYY-MM-DD HH:MM:SS. If send_times are provided to test, the test_size will
     be set to 100% and winner_criteria will be ignored
     """
-    from_names: Optional[List[str]] = None
+    from_names: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The possible from names. The number of from_names provided must match the
     number of reply_to_addresses. If no from_names are provided,
     settings.from_name will be used
     """
-    reply_to_addresses: Optional[List[str]] = None
+    reply_to_addresses: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     The possible from names. The number of from_names provided must match the
     number of reply_to_addresses. If no from_names are provided,
@@ -349,32 +358,32 @@ class Tracking:
     Definition: Tracking
     """
 
-    opens: Optional[bool] = None
+    opens: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether to track opens. Defaults to true. Cannot be set to false for
     variate campaigns
     """
-    html_clicks: Optional[bool] = None
+    html_clicks: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether to track clicks in the HTML version of the campaign. Defaults to
     true. Cannot be set to false for variate campaigns
     """
-    text_clicks: Optional[bool] = None
+    text_clicks: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether to track clicks in the plain-text version of the campaign. Defaults
     to true. Cannot be set to false for variate campaigns
     """
-    goal_tracking: Optional[bool] = None
+    goal_tracking: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to enable Goal tracking"""
-    ecomm360: Optional[bool] = None
+    ecomm360: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to enable eCommerce360 tracking"""
-    google_analytics: Optional[str] = None
+    google_analytics: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The custom slug for Google Analytics tracking (max of 50 bytes)"""
-    clicktale: Optional[str] = None
+    clicktale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The custom slug for ClickTale tracking (max of 50 bytes)"""
-    salesforce: Optional[Salesforce] = None
-    highrise: Optional[Highrise] = None
-    capsule: Optional[Capsule] = None
+    salesforce: Optional[Salesforce] = dataclass_field(default=None, kw_only=True)
+    highrise: Optional[Highrise] = dataclass_field(default=None, kw_only=True)
+    capsule: Optional[Capsule] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -383,16 +392,16 @@ class RSSOpts:
     Definition: RSS_Opts
     """
 
-    feed_url: Optional[str] = None
+    feed_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL for the RSS feed"""
-    frequency: Optional[str] = None
+    frequency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The frequency of the RSS Campaign"""
-    constrain_rss_img: Optional[str] = None
+    constrain_rss_img: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Whether to add CSS to images in the RSS feed to constrain their width in
     campaigns
     """
-    schedule: Optional[Schedule] = None
+    schedule: Optional[Schedule] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -401,11 +410,11 @@ class SocialCard:
     Definition: Social_Card
     """
 
-    image_url: Optional[str] = None
+    image_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url for the header image for the card"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A short summary of the campaign to display"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title for the card. Typically the subject line of the campaign"""
 
 
@@ -415,10 +424,11 @@ class SegmentOpts:
     Definition: Segment_Opts
     """
 
-    saved_segment_id: Optional[int] = None
+    saved_segment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The id for an existing saved segment"""
-    match_: Optional[str] = field(
+    match_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "match"},
     )
     """Segment match type: Possible Values: any, all"""
@@ -430,9 +440,9 @@ class Salesforce:
     Definition: Salesforce
     """
 
-    campaign: Optional[bool] = None
+    campaign: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Create a campaign in a connected Salesforce account"""
-    notes: Optional[bool] = None
+    notes: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Update contact notes for a campaign based on subscriber email addresses
     """
@@ -444,9 +454,9 @@ class Highrise:
     Definition: Highrise
     """
 
-    campaign: Optional[bool] = None
+    campaign: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Create a campaign in a connected Highrise account"""
-    notes: Optional[bool] = None
+    notes: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Update contact notes for a campaign based on subscriber email addresses
     """
@@ -458,7 +468,7 @@ class Capsule:
     Definition: Capsule
     """
 
-    notes: Optional[bool] = None
+    notes: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Update contact notes for a campaign based on subscriber email addresses
     """
@@ -470,15 +480,15 @@ class Schedule:
     Definition: Schedule
     """
 
-    hour: Optional[int] = None
+    hour: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The hour to send the campaign in local time. Acceptable hours are 0-23. For
     example, '4' would be 4am in your account's default time zone
     """
-    daily_send: Optional[DailySend] = None
-    weekly_send_day: Optional[str] = None
+    daily_send: Optional[DailySend] = dataclass_field(default=None, kw_only=True)
+    weekly_send_day: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The day of the week to send a weekly RSS Campaign"""
-    monthly_send_date: Optional[float] = None
+    monthly_send_date: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The day of the month to send a monthly RSS Campaign. Acceptable days are
     1-32, where '0' is always the last day of a month. Months with fewer than
@@ -494,19 +504,19 @@ class DailySend:
     Definition: Daily_Send
     """
 
-    sunday: Optional[bool] = None
+    sunday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Sundays"""
-    monday: Optional[bool] = None
+    monday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Mondays"""
-    tuesday: Optional[bool] = None
+    tuesday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Tuesdays"""
-    wednesday: Optional[bool] = None
+    wednesday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Wednesdays"""
-    thursday: Optional[bool] = None
+    thursday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Thursdays"""
-    friday: Optional[bool] = None
+    friday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Fridays"""
-    saturday: Optional[bool] = None
+    saturday: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Sends the daily RSS Campaign on Saturdays"""
 
 
@@ -516,34 +526,34 @@ class Settings:
     Definition: Settings
     """
 
-    subject_line: Optional[str] = None
+    subject_line: str
     """The subject line for the campaign"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the campaign"""
-    from_name: Optional[str] = None
+    from_name: str
     """The 'from' name on the campaign (not an email address)"""
-    reply_to: Optional[str] = None
+    reply_to: str
     """The reply-to email address for the campaign"""
-    use_conversation: Optional[bool] = None
+    use_conversation: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Use MailChimp Conversation feature to manage out-of-office replies"""
-    to_name: Optional[str] = None
+    to_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The campaign's custom 'To' name. Typically the first name merge field"""
-    folder_id: Optional[str] = None
+    folder_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If the campaign is listed in a folder, the id for that folder"""
-    authenticate: Optional[bool] = None
+    authenticate: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether MailChimp authenticated the campaign. Defaults to true"""
-    auto_footer: Optional[bool] = None
+    auto_footer: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Automatically append MailChimp's default footer to the campaign"""
-    inline_css: Optional[bool] = None
+    inline_css: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Automatically inline the CSS included with the campaign content"""
-    auto_tweet: Optional[bool] = None
+    auto_tweet: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Automatically tweet a link to the campaign archive page when the campaign
     is sent
     """
-    auto_fb_post: Optional[List[int]] = None
+    auto_fb_post: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """An array of Facebook page ids to auto-post to"""
-    fb_comments: Optional[bool] = None
+    fb_comments: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Allows Facebook comments on the campaign (also force-enables the Campaign
     Archive toolbar). Defaults to true
@@ -556,44 +566,44 @@ class ABSplitOpts:
     Definition: AB_Split_Opts
     """
 
-    split_test: Optional[str] = None
+    split_test: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The type of AB split to run"""
-    pick_winner: Optional[str] = None
+    pick_winner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     How we should evaluate a winner. Based on 'opens', 'clicks', or 'manual'
     """
-    wait_units: Optional[str] = None
+    wait_units: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     How unit of time for measuring the winner ('hours' or 'days'). This cannot
     be changed after a campaign is sent
     """
-    wait_time: Optional[int] = None
+    wait_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The amount of time to wait before picking a winner. This cannot be changed
     after a campaign is sent
     """
-    split_size: Optional[int] = None
+    split_size: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The size of the split groups. Campaigns split based on 'schedule' are
     forced to have a 50/50 split. Valid split integers are between 1-50
     """
-    from_name_a: Optional[str] = None
+    from_name_a: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'From Name', the name for Group A"""
-    from_name_b: Optional[str] = None
+    from_name_b: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'From Name', the name for Group B"""
-    reply_email_a: Optional[str] = None
+    reply_email_a: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'From Name', the reply-to address for Group A"""
-    reply_email_b: Optional[str] = None
+    reply_email_b: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'From Name', the reply-to address for Group B"""
-    subject_a: Optional[str] = None
+    subject_a: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'Subject Line', the subject line for Group A"""
-    subject_b: Optional[str] = None
+    subject_b: Optional[str] = dataclass_field(default=None, kw_only=True)
     """For campaigns split on 'Subject Line', the subject line for Group B"""
-    send_time_a: Optional[str] = None
+    send_time_a: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The send time for Group A"""
-    send_time_b: Optional[str] = None
+    send_time_b: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The send time for Group B"""
-    send_time_winner: Optional[str] = None
+    send_time_winner: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The send time for the winning version"""
 
 
@@ -603,20 +613,20 @@ class ReportSummary:
     Definition: Report_Summary
     """
 
-    opens: Optional[int] = None
+    opens: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of opens for a campaign"""
-    unique_opens: Optional[int] = None
+    unique_opens: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of unique opens"""
-    open_rate: Optional[float] = None
+    open_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The number of unique opens divided by the total number of successful
     deliveries
     """
-    clicks: Optional[int] = None
+    clicks: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of clicks for an campaign"""
-    subscriber_clicks: Optional[float] = None
+    subscriber_clicks: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The number of unique clicks"""
-    click_rate: Optional[float] = None
+    click_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The number of unique clicks divided by the total number of successful
     deliveries
@@ -629,17 +639,17 @@ class DeliveryStatus:
     Definition: Delivery_Status
     """
 
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether Campaign Delivery Status is enabled for this account and campaign
     """
-    can_cancel: Optional[bool] = None
+    can_cancel: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a campaign send can be canceled"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The current state of a campaign delivery"""
-    emails_sent: Optional[int] = None
+    emails_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of emails confirmed sent for this campaign so far"""
-    emails_canceled: Optional[int] = None
+    emails_canceled: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of emails canceled for this campaign"""
 
 
@@ -649,27 +659,28 @@ class Link:
     Definition: Link
     """
 
-    rel: Optional[str] = None
+    rel: Optional[str] = dataclass_field(default=None, kw_only=True)
     """As with an HTML 'rel' attribute, this describes the type of link"""
-    href: Optional[str] = None
+    href: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This property contains a fully-qualified URL that can be called to retrieve
     the linked resource or perform the linked action
     """
-    method: Optional[str] = None
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The HTTP method that should be used when accessing the URL defined in
     'href'. (GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD)
     """
-    target_schema: Optional[str] = field(
+    target_schema: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetSchema"},
     )
     """
     For GETs, this is a URL representing the schema that the response should
     conform to
     """
-    schema: Optional[str] = None
+    schema: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     For HTTP methods that can receive bodies (POST and PUT), this is a URL
     representing the schema that the body should conform to
@@ -682,18 +693,18 @@ class NewCampaignRequest:
     Definition: NewCampaignRequest
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """
     There are four types of campaigns you can create in MailChimp. A/B Split
     campaigns have been deprecated and variate campaigns should be used
     instead. Possible Values: regular, plaintext, absplit, rss, variate
     """
-    recipients: Optional[Recipient] = None
-    settings: Optional[Settings] = None
-    variate_settings: Optional[VariateSettings] = None
-    tracking: Optional[Tracking] = None
-    rss_opts: Optional[RSSOpts] = None
-    social_card: Optional[SocialCard] = None
+    recipients: Recipient
+    settings: Settings
+    variate_settings: Optional[VariateSettings] = dataclass_field(default=None, kw_only=True)
+    tracking: Optional[Tracking] = dataclass_field(default=None, kw_only=True)
+    rss_opts: Optional[RSSOpts] = dataclass_field(default=None, kw_only=True)
+    social_card: Optional[SocialCard] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -702,27 +713,27 @@ class NewListRequest:
     Definition: NewListRequest
     """
 
-    name: Optional[str] = None
+    name: str
     """The name of the list"""
-    contact: Optional[Contact] = None
-    permission_reminder: Optional[str] = None
+    contact: Contact
+    permission_reminder: str
     """Text to remind people how they signed up to this list"""
-    use_archive_bar: Optional[bool] = None
+    use_archive_bar: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether campaigns for this list use the Archive Bar in archives by default
     """
-    campaign_defaults: Optional[CampaignDefaults] = None
-    notify_on_subscribe: Optional[str] = None
+    campaign_defaults: CampaignDefaults
+    notify_on_subscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send subscribe notifications to"""
-    notify_on_unsubscribe: Optional[str] = None
+    notify_on_unsubscribe: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to send unsubscribe notifications to"""
-    email_type_option: Optional[bool] = None
+    email_type_option: bool
     """
     When set to true, subscribers can choose whether they want to receive HTML
     or plain-text emails. When set to false, subscribers will receive HTML
     emails, with a plain-text alternative backup
     """
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Whether this list is public or private"""
 
 
@@ -732,21 +743,21 @@ class Contact:
     Definition: Contact
     """
 
-    company: Optional[str] = None
+    company: str
     """The company name for the list"""
-    address1: Optional[str] = None
+    address1: str
     """The street address for the list contact"""
-    address2: Optional[str] = None
+    address2: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The street address for the list contact"""
-    city: Optional[str] = None
+    city: str
     """The city for the list contact"""
-    state: Optional[str] = None
+    state: str
     """The state for the list contact"""
-    zip: Optional[str] = None
+    zip: str
     """The postal or zip code for the list contact"""
-    country: Optional[str] = None
+    country: str
     """A two-character ISO3166 country code. Defaults to US if invalid"""
-    phone: Optional[str] = None
+    phone: str
     """The phone number for the list contact"""
 
 
@@ -756,13 +767,13 @@ class CampaignDefaults:
     Definition: Campaign_Defaults
     """
 
-    from_name: Optional[str] = None
+    from_name: str
     """The default from name for campaigns sent to this list"""
-    from_email: Optional[str] = None
+    from_email: str
     """The default from email for campaigns sent to this list"""
-    subject: Optional[str] = None
+    subject: str
     """The default subject line for campaigns sent to this list"""
-    language: Optional[str] = None
+    language: str
     """The default language for this list's forms"""
 
 
@@ -772,62 +783,62 @@ class Stats:
     Definition: Stats
     """
 
-    member_count: Optional[int] = None
+    member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of active members in the list"""
-    unsubscribe_count: Optional[int] = None
+    unsubscribe_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members who have unsubscribed from the list"""
-    cleaned_count: Optional[int] = None
+    cleaned_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members cleaned from the list"""
-    member_count_since_send: Optional[int] = None
+    member_count_since_send: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The number of active members in the list since the last campaign was sent
     """
-    unsubscribe_count_since_send: Optional[int] = None
+    unsubscribe_count_since_send: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The number of members who have unsubscribed since the last campaign was
     sent
     """
-    cleaned_count_since_send: Optional[int] = None
+    cleaned_count_since_send: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The number of members cleaned from the list since the last campaign was
     sent
     """
-    campaign_count: Optional[int] = None
+    campaign_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of campaigns in any status that use this list"""
-    campaign_last_sent: Optional[str] = None
+    campaign_last_sent: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time the last campaign was sent to this list"""
-    merge_field_count: Optional[int] = None
+    merge_field_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of merge vars for this list (not EMAIL, which is required)"""
-    avg_sub_rate: Optional[float] = None
+    avg_sub_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The average number of subscriptions per month for the list(not returned if
     we haven't calculated it yet)
     """
-    avg_unsub_rate: Optional[float] = None
+    avg_unsub_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The average number of unsubscriptions per month for the list(not returned
     if we haven't calculated it yet)
     """
-    target_sub_rate: Optional[float] = None
+    target_sub_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The target number of subscriptions per month for the list to keep it
     growing(not returned if we haven't calculated it yet)
     """
-    open_rate: Optional[float] = None
+    open_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The average open rate(a percentage represented as a number between 0 and
     100) per campaign for the list(not returned if we haven't calculated it
     yet)
     """
-    click_rate: Optional[float] = None
+    click_rate: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The average click rate(a percentage represented as a number between 0 and
     100) per campaign for the list(not returned if we haven't calculated it
     yet)
     """
-    last_sub_date: Optional[str] = None
+    last_sub_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date and time of the last time someone subscribed to this list"""
-    last_unsub_date: Optional[str] = None
+    last_unsub_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The date and time of the last time someone unsubscribed from this list
     """
@@ -839,13 +850,13 @@ class NewMembersInListRequest:
     Definition: NewMembersInListRequest
     """
 
-    members: Optional[List[NewMemberInListRequest]] = None
+    members: List[NewMemberInListRequest]
     """
     An array of objects, each representing an email address and the
     subscription status for a specific list. Up to 500 members may be added or
     updated with each API call.
     """
-    update_existing: Optional[bool] = None
+    update_existing: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether this batch operation will change existing members' subscription
     status.
@@ -858,20 +869,20 @@ class NewMemberInListRequest:
     Definition: NewMemberInListRequest
     """
 
-    email_type: Optional[str] = None
+    email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')"""
-    status: Optional[str] = None
+    status: str
     """
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = None
-    language: Optional[str] = None
+    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
-    vip: Optional[bool] = None
+    vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    location: Optional[Location] = None
-    email_address: Optional[str] = None
+    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
+    email_address: str
     """Email address for a subscriber"""
 
 
@@ -881,13 +892,15 @@ class FirstAndLastName:
     Definition: FirstAndLastName
     """
 
-    f_n_a_m_e: Optional[str] = field(
+    f_n_a_m_e: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FNAME"},
     )
     """First name of the subscriber"""
-    l_n_a_m_e: Optional[str] = field(
+    l_n_a_m_e: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LNAME"},
     )
     """Last name of the subscriber"""
@@ -899,9 +912,9 @@ class Location:
     Definition: Location
     """
 
-    latitude: Optional[float] = None
+    latitude: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The location latitude"""
-    longitude: Optional[float] = None
+    longitude: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The location longitude"""
 
 
@@ -911,13 +924,13 @@ class LastNote:
     Definition: Last_Note
     """
 
-    note_id: Optional[int] = None
+    note_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The note id"""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The date the note was created"""
-    created_by: Optional[str] = None
+    created_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The author of the note"""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The content of the note"""
 
 
@@ -927,7 +940,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -940,19 +953,19 @@ class UpdateMemberInListRequest:
     Definition: UpdateMemberInListRequest
     """
 
-    email_type: Optional[str] = None
+    email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')"""
-    status: Optional[str] = None
+    status: str
     """
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = None
-    language: Optional[str] = None
+    merge_fields: Optional[FirstAndLastName] = dataclass_field(default=None, kw_only=True)
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
-    vip: Optional[bool] = None
+    vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    location: Optional[Location] = None
+    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -961,47 +974,48 @@ class AddUserResponseModel:
     Definition: AddUserResponseModel
     """
 
-    id: Optional[str] = None
+    id: str
     """
     The MD5 hash of the lowercase version of the list member's email address
     """
-    email_address: Optional[str] = None
+    email_address: str
     """Email address for a subscriber"""
-    unique_email_id: Optional[str] = None
+    unique_email_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An identifier for the address across all of MailChimp"""
-    email_type: Optional[str] = None
+    email_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of email this member asked to get ('html' or 'text')."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Subscriber's current status. Possible Values: subscribed, unsubscribed,
     cleaned, pending
     """
-    merge_fields: Optional[FirstAndLastName] = None
-    stats: Optional[Stats] = None
-    ip_signup: Optional[str] = None
+    merge_fields: FirstAndLastName
+    stats: Optional[Stats] = dataclass_field(default=None, kw_only=True)
+    ip_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """IP address the subscriber signed up from"""
-    timestamp_signup: Optional[str] = None
+    timestamp_signup: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the subscriber signed up for the list"""
-    ip_opt: Optional[str] = None
+    ip_opt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The IP address the subscriber used to confirm their opt-in status"""
-    timestamp_opt: Optional[str] = None
+    timestamp_opt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the subscribe confirmed their opt-in status"""
-    member_rating: Optional[int] = None
+    member_rating: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Star rating for this member, between 1 and 5"""
-    last_changed: Optional[str] = None
+    last_changed: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Date and time the member's info was last changed"""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """If set/detected, the subscriber's language"""
-    vip: Optional[bool] = None
+    vip: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """VIP status for subscriber"""
-    email_client: Optional[str] = None
+    email_client: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list member's email client"""
-    location: Optional[Location] = None
-    last_note: Optional[LastNote] = None
-    list_id: Optional[str] = None
+    location: Optional[Location] = dataclass_field(default=None, kw_only=True)
+    last_note: Optional[LastNote] = dataclass_field(default=None, kw_only=True)
+    list_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The list id"""
-    links: Optional[List[Link]] = field(
+    links: Optional[List[Link]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
     """A list of link types and descriptions for the API schema documents"""
@@ -1072,41 +1086,101 @@ class MailchimpClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "mailchimp"
 
-    def get_campaigns(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_campaigns(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List campaigns
 
         This operation retrieves a list of campaigns in an account
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/campaigns"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("campaigns", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def sendcampaign(
         self,

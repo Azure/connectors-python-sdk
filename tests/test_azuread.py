@@ -26,7 +26,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestAzureadClientInitialization:
@@ -163,7 +163,10 @@ class TestCreateOffice365Group:
         )
 
         mock_response = MockResponse(status=201, text="")
-        group_input = CreateOffice365GroupInput(display_name="Test Group")
+        group_input = model_instance(
+            CreateOffice365GroupInput,
+            display_name="Test Group",
+        )
 
         with patch.object(
             client._http_client,
@@ -183,7 +186,7 @@ class TestCreateOffice365Group:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid group configuration"}')
-        group_input = CreateOffice365GroupInput(display_name="")
+        group_input = model_instance(CreateOffice365GroupInput, display_name="")
 
         with patch.object(
             client._http_client,
@@ -244,7 +247,10 @@ class TestCreateSecurityGroup:
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Insufficient permissions"}')
-        group_input = CreateSecurityGroupInput(display_name="Test Security Group")
+        group_input = model_instance(
+            CreateSecurityGroupInput,
+            display_name="Test Security Group",
+        )
 
         with patch.object(
             client._http_client,
@@ -266,7 +272,10 @@ class TestCreateSecurityGroup:
         )
 
         mock_response = MockResponse(status=201, text="")
-        group_input = CreateSecurityGroupInput(display_name="Empty Response Group")
+        group_input = model_instance(
+            CreateSecurityGroupInput,
+            display_name="Empty Response Group",
+        )
 
         with patch.object(
             client._http_client,
@@ -334,6 +343,7 @@ class TestCreateUser:
             account_enabled=True,
             display_name="Jane Smith",
             mail_nickname="janesmith",
+            password_profile={"password": "SecurePass123!"},
             user_principal_name="jane.smith@contoso.com",
             given_name="Jane",
             surname="Smith",
@@ -363,7 +373,8 @@ class TestCreateUser:
         )
 
         mock_response = MockResponse(status=409, text='{"error": "User already exists"}')
-        user_input = CreateUserRequest(
+        user_input = model_instance(
+            CreateUserRequest,
             display_name="Existing User",
             user_principal_name="existing@contoso.com"
         )
@@ -388,7 +399,10 @@ class TestCreateUser:
         )
 
         mock_response = MockResponse(status=201, text="")
-        user_input = CreateUserRequest(display_name="Empty Response User")
+        user_input = model_instance(
+            CreateUserRequest,
+            display_name="Empty Response User",
+        )
 
         with patch.object(
             client._http_client,
@@ -528,7 +542,7 @@ class TestCreateGroup:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid request"}')
-        group_input = CreateGroupInput(display_name="")
+        group_input = model_instance(CreateGroupInput, display_name="")
 
         with patch.object(
             client._http_client,
@@ -550,7 +564,10 @@ class TestCreateGroup:
         )
 
         mock_response = MockResponse(status=201, text="")
-        group_input = CreateGroupInput(display_name="Empty Response Group")
+        group_input = model_instance(
+            CreateGroupInput,
+            display_name="Empty Response Group",
+        )
 
         with patch.object(
             client._http_client,
@@ -603,6 +620,7 @@ class TestDataClasses:
             account_enabled=True,
             display_name="Test User",
             mail_nickname="testuser",
+            password_profile={"password": "SecurePass123!"},
             user_principal_name="test@contoso.com",
             given_name="Test",
             surname="User",
@@ -748,10 +766,10 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            group_input = CreateGroupInput(display_name="Group 1")
+            group_input = model_instance(CreateGroupInput, display_name="Group 1")
             await client.create_group(input=group_input)
 
-            group_input2 = CreateGroupInput(display_name="Group 2")
+            group_input2 = model_instance(CreateGroupInput, display_name="Group 2")
             await client.create_group(input=group_input2)
 
             assert mock_send.call_count == 2
@@ -1275,13 +1293,15 @@ class TestCheckMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.check_member_groups(input=check_input, id="user-123")
+            result = await resolve_generated_result(
+                client.list_check_member_groups(input=check_input, id="user-123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/v1.0/users/user-123/checkMemberGroups" in call_args[0][1]
-            assert "group-123" in result["value"]
+            assert result == ["group-123"]
 
     @pytest.mark.asyncio
     async def test_success_user_is_not_member(self, mock_credential):
@@ -1300,12 +1320,14 @@ class TestCheckMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.check_member_groups(input=check_input, id="user-123")
-            assert result["value"] == []
+            result = await resolve_generated_result(
+                client.list_check_member_groups(input=check_input, id="user-123")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that an empty response returns an empty page."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -1320,8 +1342,10 @@ class TestCheckMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.check_member_groups(input=check_input, id="user-123")
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_check_member_groups(input=check_input, id="user-123")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -1341,7 +1365,12 @@ class TestCheckMemberGroups:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.check_member_groups(input=check_input, id="nonexistent-user")
+                await resolve_generated_result(
+                    client.list_check_member_groups(
+                        input=check_input,
+                        id="nonexistent-user",
+                    )
+                )
 
             assert exc_info.value.status_code == 404
 
@@ -1369,13 +1398,15 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_member_groups(input=member_input, id="user-123")
+            result = await resolve_generated_result(
+                client.list_member_groups(input=member_input, id="user-123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/v1.0/users/user-123/getMemberGroups" in call_args[0][1]
-            assert len(result["value"]) == 3
+            assert result == ["group-1", "group-2", "group-3"]
 
     @pytest.mark.asyncio
     async def test_with_security_enabled_only(self, mock_credential):
@@ -1394,19 +1425,21 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_member_groups(input=member_input, id="user-123")
-            assert len(result["value"]) == 1
+            result = await resolve_generated_result(
+                client.list_member_groups(input=member_input, id="user-123")
+            )
+            assert result == ["sec-group-1"]
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that an empty response returns an empty page."""
         client = AzureadClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
         )
 
         mock_response = MockResponse(status=200, text="")
-        member_input = GetMemberGroupsRequest()
+        member_input = model_instance(GetMemberGroupsRequest)
 
         with patch.object(
             client._http_client,
@@ -1414,8 +1447,10 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_member_groups(input=member_input, id="user-123")
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_member_groups(input=member_input, id="user-123")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -1426,7 +1461,7 @@ class TestGetMemberGroups:
         )
 
         mock_response = MockResponse(status=403, text='{"error": "Insufficient permissions"}')
-        member_input = GetMemberGroupsRequest()
+        member_input = model_instance(GetMemberGroupsRequest)
 
         with patch.object(
             client._http_client,
@@ -1435,7 +1470,9 @@ class TestGetMemberGroups:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_member_groups(input=member_input, id="user-123")
+                await resolve_generated_result(
+                    client.list_member_groups(input=member_input, id="user-123")
+                )
 
             assert exc_info.value.status_code == 403
 

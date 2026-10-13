@@ -99,9 +99,9 @@ async def example_3_list_owned_groups():
 
         async with Office365groupsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_owned_groups()
+                items = await client.list_owned_groups()
 
-                if result and "value" in result:
+                if items:
                     groups = result["value"]
                     print(f"You own or belong to {len(groups)} groups:")
                     for group in groups[:5]:
@@ -151,7 +151,7 @@ async def example_4_create_group_event():
                     group_id=GROUP_ID
                 )
 
-                if result:
+                if items:
                     print("Event created successfully!")
                     print(f"Event ID: {result.get('id')}")
                     print(f"Subject: {result.get('subject')}")

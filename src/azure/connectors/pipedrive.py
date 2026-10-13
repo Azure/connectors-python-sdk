@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -53,81 +55,81 @@ class DealResponse:
     Response for Get deal by id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the deal."""
-    creator_user_id: Optional[Dict[str, Any]] = None
-    user_id: Optional[Dict[str, Any]] = None
-    person_id: Optional[Dict[str, Any]] = None
-    org_id: Optional[Dict[str, Any]] = None
-    status: Optional[str] = None
+    creator_user_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    user_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    person_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    org_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Open, won, lost or deleted."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the deal."""
-    value: Optional[float] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Monetary value of the deal."""
-    currency: Optional[str] = None
+    currency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Currency associated with the deal value."""
-    add_time: Optional[str] = None
+    add_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    update_time: Optional[str] = None
+    update_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    stage_id: Optional[int] = None
+    stage_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of stage the deal is placed in a pipeline."""
-    stage_name: Optional[str] = None
+    stage_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of stage the deal is placed in a pipeline"""
-    stage_change_time: Optional[str] = None
+    stage_change_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    active: Optional[bool] = None
+    active: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the deal is active."""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the deal has been deleted."""
-    next_activity_date: Optional[str] = None
+    next_activity_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    next_activity_time: Optional[str] = None
+    next_activity_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    next_activity_id: Optional[int] = None
+    next_activity_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the next activity."""
-    last_activity_id: Optional[int] = None
+    last_activity_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the last activity."""
-    last_activity_date: Optional[str] = None
+    last_activity_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    lost_reason: Optional[str] = None
+    lost_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message about why the deal was lost (to be used when status=lost)."""
-    visible_to: Optional[str] = None
+    visible_to: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Owner, followers or entire company."""
-    close_time: Optional[str] = None
+    close_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    pipeline_id: Optional[int] = None
+    pipeline_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of pipeline the deal is associated with."""
-    products_count: Optional[int] = None
+    products_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of products associated with the deal."""
-    files_count: Optional[int] = None
+    files_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of files associated with the deal."""
-    notes_count: Optional[int] = None
+    notes_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of notes associated with the deal."""
-    followers_count: Optional[int] = None
+    followers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of followers associated with the deal."""
-    email_messages_count: Optional[int] = None
+    email_messages_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of email messages associated with the deal."""
-    activities_count: Optional[int] = None
+    activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of activities associated with the deal."""
-    done_activities_count: Optional[int] = None
+    done_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of done activities associated with the deal."""
-    undone_activities_count: Optional[int] = None
+    undone_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of undone activities associated with the deals."""
-    reference_activities_count: Optional[int] = None
+    reference_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of referenced activities associated with the deal."""
-    participants_count: Optional[int] = None
+    participants_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of participants associated with the deal."""
-    expected_close_date: Optional[str] = None
+    expected_close_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    next_activity_subject: Optional[str] = None
+    next_activity_subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Subject of next activity associated with the deal."""
-    next_activity_type: Optional[str] = None
+    next_activity_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of next activity associated with the deal."""
-    next_activity_duration: Optional[str] = None
+    next_activity_duration: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Duration of next activity associated with the deal."""
-    next_activity_note: Optional[str] = None
+    next_activity_note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes for next activity associated with the deal"""
 
 
@@ -137,51 +139,55 @@ class ActivityResponse:
     Response for Add activity
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique id of the activity."""
-    user_id: Optional[int] = None
+    user_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the user whom the activity is assigned to."""
-    done: Optional[bool] = None
+    done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """0 = Not done, 1 = Done"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type of the activity."""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """YYYY-MM-DD"""
-    due_time: Optional[str] = None
+    due_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HH:MM"""
-    duration: Optional[str] = None
+    duration: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HH:MM"""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Subject of the activity."""
-    deal_id: Optional[int] = None
+    deal_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of deal the activity is associated with."""
-    deal_title: Optional[str] = None
+    deal_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of deal the activity is associated with."""
-    org_id: Optional[int] = None
+    org_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of organization the activity is associated with."""
-    org_name: Optional[str] = None
+    org_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of organization the activity is associated with."""
-    person_id: Optional[int] = None
+    person_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of person the activity is associated with."""
-    person_name: Optional[str] = None
+    person_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of person the activity is associated with."""
-    add_time: Optional[str] = None
+    add_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    update_time: Optional[str] = None
+    update_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    marked_as_done_time: Optional[str] = None
+    marked_as_done_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    gcal_event_id: Optional[str] = None
+    gcal_event_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the google calendar event."""
-    google_calendar_id: Optional[str] = None
+    google_calendar_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the google calendar."""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Note of the activity (HTML format)."""
-    assigned_to_user_id: Optional[int] = None
+    assigned_to_user_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User id of user whom the activity is assigned to."""
-    created_by_user_id: Optional[int] = None
+    created_by_user_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """User id of user that created the activity."""
-    owner_name: Optional[str] = None
+    owner_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the activity owner."""
 
 
@@ -191,9 +197,9 @@ class StageResponse:
     Response for Get stage by id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Stage Id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Stage name"""
 
 
@@ -203,79 +209,79 @@ class DealResponseV2:
     Response for Add deal (V2)
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the deal."""
-    creator_user_id: Optional[Dict[str, Any]] = None
-    user_id: Optional[Dict[str, Any]] = None
-    person_id: Optional[Dict[str, Any]] = None
-    org_id: Optional[Dict[str, Any]] = None
-    status: Optional[str] = None
+    creator_user_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    user_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    person_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    org_id: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Open, won, lost or deleted."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the deal."""
-    value: Optional[float] = None
+    value: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Monetary value of the deal."""
-    currency: Optional[str] = None
+    currency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Currency associated with the deal value."""
-    add_time: Optional[str] = None
+    add_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    update_time: Optional[str] = None
+    update_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    stage_id: Optional[int] = None
+    stage_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of stage the deal is placed in a pipeline."""
-    stage_change_time: Optional[str] = None
+    stage_change_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    active: Optional[bool] = None
+    active: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the deal is active."""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the deal has been deleted."""
-    next_activity_date: Optional[str] = None
+    next_activity_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    next_activity_time: Optional[str] = None
+    next_activity_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    next_activity_id: Optional[int] = None
+    next_activity_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the next activity."""
-    last_activity_id: Optional[int] = None
+    last_activity_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the last activity."""
-    last_activity_date: Optional[str] = None
+    last_activity_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    lost_reason: Optional[str] = None
+    lost_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message about why the deal was lost (to be used when status=lost)."""
-    visible_to: Optional[str] = None
+    visible_to: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Owner, followers or entire company."""
-    close_time: Optional[str] = None
+    close_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    pipeline_id: Optional[int] = None
+    pipeline_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of pipeline the deal is associated with."""
-    products_count: Optional[int] = None
+    products_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of products associated with the deal."""
-    files_count: Optional[int] = None
+    files_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of files associated with the deal."""
-    notes_count: Optional[int] = None
+    notes_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of notes associated with the deal."""
-    followers_count: Optional[int] = None
+    followers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of followers associated with the deal."""
-    email_messages_count: Optional[int] = None
+    email_messages_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of email messages associated with the deal."""
-    activities_count: Optional[int] = None
+    activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of activities associated with the deal."""
-    done_activities_count: Optional[int] = None
+    done_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of done activities associated with the deal."""
-    undone_activities_count: Optional[int] = None
+    undone_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of undone activities associated with the deals."""
-    reference_activities_count: Optional[int] = None
+    reference_activities_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of referenced activities associated with the deal."""
-    participants_count: Optional[int] = None
+    participants_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of participants associated with the deal."""
-    expected_close_date: Optional[str] = None
+    expected_close_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    next_activity_subject: Optional[str] = None
+    next_activity_subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Subject of next activity associated with the deal."""
-    next_activity_type: Optional[str] = None
+    next_activity_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of next activity associated with the deal."""
-    next_activity_duration: Optional[str] = None
+    next_activity_duration: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Duration of next activity associated with the deal."""
-    next_activity_note: Optional[str] = None
+    next_activity_note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes for next activity associated with the deal"""
 
 
@@ -288,7 +294,7 @@ class ListDealsResponse:
     Response for List deals
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -298,24 +304,24 @@ class AddActivityRequest:
     Definition: AddActivityRequest
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Activity type."""
-    subject: Optional[str] = None
+    subject: str
     """Subject of the activity."""
-    due_date: Optional[str] = None
+    due_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """YYYY-MM-DD"""
-    due_time: Optional[str] = None
+    due_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HH:MM"""
-    duration: Optional[str] = None
+    duration: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HH:MM"""
-    note: Optional[str] = None
-    user_id: Optional[int] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
+    user_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the user whom the activity will be assigned to."""
-    deal_id: Optional[int] = None
+    deal_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of deal the activity will be associated with."""
-    person_id: Optional[int] = None
+    person_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of person the activity will be associated with."""
-    org_id: Optional[int] = None
+    org_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of the organization the activity will be associated with."""
 
 
@@ -325,25 +331,25 @@ class AddDealRequest:
     Definition: AddDealRequest
     """
 
-    title: Optional[str] = None
+    title: str
     """Title of the deal."""
-    pipeline_id: Optional[str] = None
+    pipeline_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the pipeline to fetch stages from."""
-    stage_id: Optional[str] = None
+    stage_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Stage of the deal."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the deal."""
-    value: Optional[int] = None
+    value: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Monetary value of the deal."""
-    currency: Optional[str] = None
+    currency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Currency of the deal."""
-    person_id: Optional[str] = None
+    person_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User id of person the deal is associated with."""
-    org_id: Optional[str] = None
+    org_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the organization associated with the deal."""
-    expected_close_date: Optional[str] = None
+    expected_close_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
-    visible_to: Optional[str] = None
+    visible_to: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Owner, followers or entire company."""
 
 
@@ -353,11 +359,11 @@ class UpdateDealStageRequest:
     Definition: UpdateDealStageRequest
     """
 
-    pipeline_id: Optional[str] = None
+    pipeline_id: str
     """The id of the pipeline to fetch stages from."""
-    stage_id: Optional[str] = None
+    stage_id: str
     """Stage of the deal."""
-    expected_close_date: Optional[str] = None
+    expected_close_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-dd"""
 
 
@@ -367,9 +373,9 @@ class UpdateDealStatusRequest:
     Definition: UpdateDealStatusRequest
     """
 
-    status: Optional[str] = None
+    status: str
     """Status of the deal."""
-    lost_reason: Optional[str] = None
+    lost_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message about why the deal was lost."""
 
 
@@ -379,9 +385,9 @@ class ListActivityTypesResponse:
     Definition: ListActivityTypesResponse
     """
 
-    success: Optional[bool] = None
+    success: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """success"""
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -391,7 +397,7 @@ class ListCurrenciesResponse:
     Definition: ListCurrenciesResponse
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -401,7 +407,7 @@ class ListPipelinesResponse:
     Definition: ListPipelinesResponse
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -411,7 +417,7 @@ class ListStagesResponse:
     Definition: ListStagesResponse
     """
 
-    data: Optional[List[StageResponse]] = None
+    data: Optional[List[StageResponse]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -421,7 +427,7 @@ class ListPersonsResponse:
     Definition: ListPersonsResponse
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -431,7 +437,7 @@ class ListOrganizationsResponse:
     Definition: ListOrganizationsResponse
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -499,6 +505,45 @@ class PipedriveClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "pipedrive"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def get_deal(
         self,
@@ -750,34 +795,55 @@ class PipedriveClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List deals
 
         List deals
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v1/deals"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("data", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestExcelonlinebusinessClientInitialization:
@@ -162,7 +162,7 @@ class TestCreateTable:
         )
 
         mock_response = MockResponse(status=400, text='{"error": "Invalid range"}')
-        table_input = TableToCreate(table_name="Table1")
+        table_input = model_instance(TableToCreate, table_name="Table1")
 
         with patch.object(
             client._http_client,
@@ -337,8 +337,8 @@ class TestGetItems:
             assert exc_info.value.status_code == 404
 
 
-class TestGetComments:
-    """Tests for get_comments_async method."""
+class TestListComments:
+    """Tests for list_comments method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -359,16 +359,18 @@ class TestGetComments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_comments(
-                drive="drive-id",
-                file="file-id"
+            result = await resolve_generated_result(
+                client.list_comments(
+                    drive="drive-id",
+                    file="file-id"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/workbook/comments" in call_args[0][1]
-            assert result["value"][0]["id"] == "comment1"
+            assert result[0]["id"] == "comment1"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -387,9 +389,11 @@ class TestGetComments:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_comments(
-                    drive="drive-id",
-                    file="nonexistent-file"
+                await resolve_generated_result(
+                    client.list_comments(
+                        drive="drive-id",
+                        file="nonexistent-file"
+                    )
                 )
 
             assert exc_info.value.status_code == 404

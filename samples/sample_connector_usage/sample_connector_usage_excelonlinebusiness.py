@@ -149,7 +149,7 @@ def example_3_list_workbook_comments():
 
         with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_comments(
+                result = client.list_comments(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     source=SOURCE_URL if SOURCE_URL else None,

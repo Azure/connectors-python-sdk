@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -113,7 +113,7 @@ class CreateAgreementsSolutionDocumentInput:
     Agreements Solution - Generate document within Agreements Solution workspace
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -126,48 +126,74 @@ class SPBlobMetadataResponse:
     Response for Agreements Solution - Generate document within Agreements Solution workspace
     """
 
-    item_id: Optional[int] = field(
+    item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemId"},
     )
     """
     The value that can be used to Get or Update file properties in libraries.
     """
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -179,7 +205,7 @@ class TablesList:
     Response for Get all lists and libraries
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
     """List of Tables"""
 
 
@@ -189,8 +215,9 @@ class ApproveHubSiteJoinResponse:
     Response for Approve hub site join request
     """
 
-    approval_token: Optional[str] = field(
+    approval_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalToken"},
     )
     """Approval Token"""
@@ -202,7 +229,7 @@ class SharingLinkPermission:
     Response for Create sharing link for a file or folder
     """
 
-    link: Optional[SharingLink] = None
+    link: Optional[SharingLink] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -211,41 +238,66 @@ class BlobMetadata:
     Response for Copy file (deprecated)
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -257,41 +309,66 @@ class BlobMetadataResponse:
     Response for Update file
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique id of the file or folder."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the file or folder."""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique id of the file or folder."""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the file or folder."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the file or folder."""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
-    """The path of the file or folder."""
-    last_modified: Optional[str] = field(
+    path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
+    """The path of the file or folder."""
+    last_modified: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModified"},
     )
     """The date and time the file or folder was last modified."""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size of the file or folder."""
-    media_type: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size of the file or folder."""
+    media_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MediaType"},
     )
     """The media type of the file or folder."""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """
     A boolean value (true, false) to indicate whether or not the blob is a
     folder.
     """
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """The etag of the file or folder."""
-    file_locator: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """The etag of the file or folder."""
+    file_locator: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FileLocator"},
     )
     """The filelocator of the file or folder."""
@@ -303,7 +380,7 @@ class CreateNewDocumentSetResponse:
     Response for Create new document set
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -316,7 +393,7 @@ class CreateNewFolderResponse:
     Response for Create new folder
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -329,35 +406,45 @@ class SPListExpandedUser:
     Response for Resolve person
     """
 
-    claims: Optional[str] = field(
+    claims: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Claims"},
     )
     """user claims"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """user title"""
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """user email"""
-    picture: Optional[str] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """user email"""
+    picture: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Picture"},
     )
     """user picture"""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """user department"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobTitle"},
     )
     """user job title"""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
 
@@ -368,50 +455,66 @@ class TableForm:
     Response for Get form metadata (preview)
     """
 
-    form_id: Optional[str] = field(
+    form_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FormID"},
     )
     """Gets or sets the form ID"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Gets or sets the form display name"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    """Gets or sets the form type"""
-    link: Optional[str] = field(default=None, metadata={"wire_name": "Link"})
-    """Gets or sets the form link/URL"""
-    created_by: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    """Gets or sets the form type"""
+    link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Link"},
+    )
+    """Gets or sets the form link/URL"""
+    created_by: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy"},
     )
     """Gets or sets the user who created the form"""
-    created: Optional[str] = field(
+    created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Created"},
     )
     """Gets or sets the date the form was created"""
-    modified: Optional[str] = field(
+    modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Modified"},
     )
     """Gets or sets the date the form was last modified"""
-    modified_by: Optional[str] = field(
+    modified_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ModifiedBy"},
     )
     """Gets or sets the user who last modified the form"""
-    output_format: Optional[str] = field(
+    output_format: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OutputFormat"},
     )
     """
     Gets or sets the output format (e.g. \"Word document\", \"PDF document\",
     \"None\")
     """
-    fields_metadata: Optional[List[FormFieldMetadata]] = field(
+    fields_metadata: Optional[List[FormFieldMetadata]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldsMetadata"},
     )
     """Gets or sets Form Fields"""
@@ -423,7 +526,7 @@ class SubmitDocGenFormInput:
     Generate a document from a form (preview)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -436,10 +539,11 @@ class ItemsList:
     Response for Get files (properties only)
     """
 
-    value: Optional[List[Item]] = None
+    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
     """List of Items"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -451,7 +555,7 @@ class PostItemInput:
     Create item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -464,7 +568,7 @@ class PostItemResponse:
     Response for Create item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -477,7 +581,7 @@ class GetItemResponse:
     Response for Get item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -490,7 +594,7 @@ class PatchItemInput:
     Update item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -503,7 +607,7 @@ class PatchItemResponse:
     Response for Update item
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -516,7 +620,7 @@ class CreateApprovalRequestInput:
     Create an approval request for an item or file
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -529,10 +633,7 @@ class ApprovalData:
     Response for Create an approval request for an item or file
     """
 
-    approval_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ApprovalId"},
-    )
+    approval_id: str = dataclass_field(metadata={"wire_name": "ApprovalId"})
     """The ID of the approval request created"""
 
 
@@ -542,7 +643,7 @@ class GetItemChangesResponse:
     Response for Get changes for an item or a file (properties only)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -555,8 +656,9 @@ class Item:
     Response for Get file properties
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -567,7 +669,7 @@ class PatchFileItemInput:
     Update file properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -580,7 +682,7 @@ class PatchFileItemResponse:
     Response for Update file properties
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -593,25 +695,33 @@ class SetApprovalStatusOutput:
     Response for Set content approval status
     """
 
-    e_tag: Optional[str] = field(default=None, metadata={"wire_name": "ETag"})
-    """ETag of the item after the approval status was set"""
-    approval_link: Optional[str] = field(
+    e_tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETag"},
+    )
+    """ETag of the item after the approval status was set"""
+    approval_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalLink"},
     )
     """A link to the item that needs approval"""
-    publish_start_date: Optional[str] = field(
+    publish_start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PublishStartDate"},
     )
     """Date time at which the item will be Published"""
-    content_approval_status: Optional[str] = field(
+    content_approval_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentApprovalStatus"},
     )
     """The content approval status of the list item"""
-    scheduled_version: Optional[str] = field(
+    scheduled_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ScheduledVersion"},
     )
     """The version of the item that has been scheduled"""
@@ -623,15 +733,21 @@ class SPListItemAttachment:
     Response for Get attachments
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """File identifier"""
-    absolute_uri: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """File identifier"""
+    absolute_uri: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "AbsoluteUri"},
     )
     """Link to attachment"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Name"""
@@ -643,7 +759,7 @@ class DeletedItemList:
     Response for When a file is deleted
     """
 
-    value: Optional[List[DeletedItem]] = None
+    value: Optional[List[DeletedItem]] = dataclass_field(default=None, kw_only=True)
     """List of Deleted Items"""
 
 
@@ -653,7 +769,7 @@ class CreateContentAssemblyDocumentInput:
     Generate document using Microsoft Syntex (preview)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -666,15 +782,21 @@ class Table:
     Response for Get list views
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -686,7 +808,7 @@ class DataSetsList:
     Response for Get datasets
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
     """List of datasets"""
 
 
@@ -696,26 +818,30 @@ class TableMetadata:
     Response for Agreements Solution - Get template fields
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """URL link"""
@@ -727,7 +853,7 @@ class ObjectEntity:
     Response for Get thumbnail size options
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -740,10 +866,15 @@ class SPListEntity:
     Response for Returns User fields for a list
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The Id of the SPField"""
-    entity_type: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The Id of the SPField"""
+    entity_type: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntityType"},
     )
     """What type of entity (field) this is"""
@@ -755,7 +886,7 @@ class GetItemChangesMetadataResponse:
     Response for Get metadata about the return type of the GetItemChanges operation
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -764,8 +895,9 @@ class ApplicationPermissionIdentity:
     Definition: ApplicationPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Application display name"""
@@ -777,15 +909,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -797,7 +931,7 @@ class BlobMetadataPage:
     Definition: BlobMetadataPage
     """
 
-    value: Optional[List[BlobMetadata]] = None
+    value: Optional[List[BlobMetadata]] = dataclass_field(default=None, kw_only=True)
     """Blob metadata collection."""
 
 
@@ -807,23 +941,19 @@ class CopyFileParameters:
     Definition: CopyFileParameters
     """
 
-    source_file_id: Optional[str] = field(
-        default=None,
+    source_file_id: str = dataclass_field(
         metadata={"wire_name": "sourceFileId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -835,23 +965,19 @@ class CopyFolderParameters:
     Definition: CopyFolderParameters
     """
 
-    source_folder_id: Optional[str] = field(
-        default=None,
+    source_folder_id: str = dataclass_field(
         metadata={"wire_name": "sourceFolderId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -863,15 +989,15 @@ class CreateNewDocumentSetParameters:
     Definition: CreateNewDocumentSetParameters
     """
 
-    path: Optional[str] = None
+    path: str
     """Example: folder1/folder2/dsName"""
-    content_type_id: Optional[str] = field(
-        default=None,
+    content_type_id: str = dataclass_field(
         metadata={"wire_name": "contentTypeId"},
     )
     """Example: 0x0120D520"""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
 
@@ -882,7 +1008,7 @@ class CreateNewFolderParameters:
     Definition: CreateNewFolderParameters
     """
 
-    path: Optional[str] = None
+    path: str
     """Example: folder1/folder2/folder3"""
 
 
@@ -892,14 +1018,19 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
     """Pass-through Native Queries"""
 
 
@@ -909,8 +1040,8 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -919,33 +1050,45 @@ class DeletedItem:
     Definition: DeletedItem
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
+    id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
     """List item id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """
     File name of the item in document libraries, display name of the item in
     lists
     """
-    file_name_with_extension: Optional[str] = field(
+    file_name_with_extension: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileNameWithExtension"},
     )
     """
     File name with extension of the item in document libraries, same as Name of
     the item in lists
     """
-    deleted_by_user_name: Optional[str] = field(
+    deleted_by_user_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeletedByUserName"},
     )
     """The name of the user who deleted this item"""
-    time_deleted: Optional[str] = field(
+    time_deleted: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeDeleted"},
     )
     """When this item was deleted"""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """A true/false value to indicate if the item is a folder"""
@@ -957,12 +1100,9 @@ class FileCheckInParameters:
     Definition: FileCheckInParameters
     """
 
-    comment: Optional[str] = None
+    comment: str
     """Type comments describing what has changed in this version"""
-    checkin_type: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "checkinType"},
-    )
+    checkin_type: int = dataclass_field(metadata={"wire_name": "checkinType"})
     """Select the type of version you would like to check in"""
 
 
@@ -972,22 +1112,33 @@ class FormFieldMetadata:
     Definition: FormFieldMetadata
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "ID"})
-    """Gets or sets the field ID"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Gets or sets the field Name"""
-    is_required: Optional[bool] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    """Gets or sets the field ID"""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Gets or sets the field Name"""
+    is_required: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRequired"},
     )
     """Gets or sets a value indicating whether the field is required"""
-    data_type: Optional[str] = field(
+    data_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DataType"},
     )
     """Gets or sets the field data type"""
-    default_value: Optional[str] = field(
+    default_value: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DefaultValue"},
     )
     """Gets or sets the default value"""
@@ -999,8 +1150,9 @@ class GroupPermissionIdentity:
     Definition: GroupPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Group display name"""
@@ -1012,23 +1164,27 @@ class HubSiteJoinApprovalOutput:
     Definition: HubSiteJoinApprovalOutput
     """
 
-    requesting_site_url: Optional[str] = field(
+    requesting_site_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteUrl"},
     )
     """Requesting Site Url"""
-    requesting_site_id: Optional[str] = field(
+    requesting_site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteId"},
     )
     """Requesting Site Id"""
-    requesting_site_title: Optional[str] = field(
+    requesting_site_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestingSiteTitle"},
     )
     """Requesting Site Title"""
-    approval_correlation_id: Optional[str] = field(
+    approval_correlation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApprovalCorrelationId"},
     )
     """Approval Correlation Id"""
@@ -1040,22 +1196,21 @@ class ItemGrantAccessBody:
     Definition: ItemGrantAccessBody
     """
 
-    recipients: Optional[str] = None
+    recipients: str
     """A collection of recipients who will receive the sharing invitation"""
-    role_value: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "roleValue"},
-    )
+    role_value: str = dataclass_field(metadata={"wire_name": "roleValue"})
     """Specify a role that is to be granted to the recipients"""
-    email_body: Optional[str] = field(
+    email_body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailBody"},
     )
     """
     A plain text formatted message that is included in the sharing invitation
     """
-    send_email: Optional[bool] = field(
+    send_email: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sendEmail"},
     )
     """
@@ -1069,33 +1224,31 @@ class ItemPermissionAddBody:
     Definition: ItemPermissionAddBody
     """
 
-    recipients: Optional[List[ItemPermissionRecipient]] = None
+    recipients: List[ItemPermissionRecipient]
     """
     A collection of recipients who will receive access and the sharing
     invitation.
     """
-    roles: Optional[List[str]] = None
+    roles: List[str]
     """
     Specify the roles that are be granted to the recipients of the sharing
     invitation.
     """
-    require_sign_in: Optional[bool] = field(
-        default=None,
+    require_sign_in: bool = dataclass_field(
         metadata={"wire_name": "requireSignIn"},
     )
     """
     Specifies where the recipient of the invitation is required to sign-in to
     view the shared item.
     """
-    send_invitation: Optional[bool] = field(
-        default=None,
+    send_invitation: bool = dataclass_field(
         metadata={"wire_name": "sendInvitation"},
     )
     """
     Specifies if an email or post is generated (true) or if the permission is
     just created (false).
     """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A plain text formatted message that is included in the sharing invitation.
     Maximum length 2000 characters.
@@ -1108,15 +1261,16 @@ class ItemPermissionCreateLinkBody:
     Definition: ItemPermissionCreateLinkBody
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of sharing link to create"""
-    scope: Optional[str] = None
+    scope: str
     """
     Choose who your sharing link gives access to. \"Anyone\" option will only
     work if your administrator has enabled it.
     """
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """
@@ -1131,7 +1285,7 @@ class ItemPermissionRecipient:
     Definition: ItemPermissionRecipient
     """
 
-    email: Optional[str] = None
+    email: str
     """
     The email address for the recipient, if the recipient has an associated
     email address.
@@ -1144,7 +1298,7 @@ class ItemPermissionUpdateBody:
     Definition: ItemPermissionUpdateBody
     """
 
-    roles: Optional[List[str]] = None
+    roles: List[str]
     """Specify updated roles for this permission."""
 
 
@@ -1154,12 +1308,13 @@ class ItemReference:
     Definition: ItemReference
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the parent item"""
-    path: Optional[str] = None
+    path: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Path that can be used to navigate to the parent item"""
-    sharepoint_ids: Optional[SharePointIds] = field(
+    sharepoint_ids: Optional[SharePointIds] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharepointIds"},
     )
 
@@ -1170,23 +1325,19 @@ class MoveFileParameters:
     Definition: MoveFileParameters
     """
 
-    source_file_id: Optional[str] = field(
-        default=None,
+    source_file_id: str = dataclass_field(
         metadata={"wire_name": "sourceFileId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -1198,23 +1349,19 @@ class MoveFolderParameters:
     Definition: MoveFolderParameters
     """
 
-    source_folder_id: Optional[str] = field(
-        default=None,
+    source_folder_id: str = dataclass_field(
         metadata={"wire_name": "sourceFolderId"},
     )
     """File Identifier"""
-    destination_dataset: Optional[str] = field(
-        default=None,
+    destination_dataset: str = dataclass_field(
         metadata={"wire_name": "destinationDataset"},
     )
     """Example: https://contoso.sharepoint.com/sites/sitename"""
-    destination_folder_path: Optional[str] = field(
-        default=None,
+    destination_folder_path: str = dataclass_field(
         metadata={"wire_name": "destinationFolderPath"},
     )
     """Destination Folder"""
-    name_conflict_behavior: Optional[int] = field(
-        default=None,
+    name_conflict_behavior: int = dataclass_field(
         metadata={"wire_name": "nameConflictBehavior"},
     )
     """Pick one of the options available"""
@@ -1226,8 +1373,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -1239,13 +1387,15 @@ class PatchFileItemWithPredictedValuesParameters:
     Definition: PatchFileItemWithPredictedValuesParameters
     """
 
-    model_id: Optional[str] = field(
+    model_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "modelId"},
     )
     """Enter modelId of the Model which is used for prediction"""
-    predict_result: Optional[str] = field(
+    predict_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "predictResult"},
     )
     """Enter request content in JSON"""
@@ -1257,27 +1407,30 @@ class Permission:
     Definition: Permission
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Permission id"""
-    granted_to: Optional[PermissionIdentitySet] = field(
+    granted_to: Optional[PermissionIdentitySet] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "grantedTo"},
     )
-    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = field(
+    granted_to_identities: Optional[List[SharingLinkPermissionIdentitySet]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "grantedToIdentities"},
     )
     """
     For link type permissions, the details of the users to whom permission was
     granted
     """
-    invitation: Optional[SharingInvitation] = None
-    inherited_from: Optional[ItemReference] = field(
+    invitation: Optional[SharingInvitation] = dataclass_field(default=None, kw_only=True)
+    inherited_from: Optional[ItemReference] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "inheritedFrom"},
     )
-    link: Optional[SharingLink] = None
-    roles: Optional[List[str]] = None
+    link: Optional[SharingLink] = dataclass_field(default=None, kw_only=True)
+    roles: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The type of permission - read, write, owner, member"""
 
 
@@ -1287,9 +1440,14 @@ class PermissionIdentitySet:
     Definition: PermissionIdentitySet
     """
 
-    application: Optional[ApplicationPermissionIdentity] = None
-    group: Optional[GroupPermissionIdentity] = None
-    user: Optional[UserPermissionIdentity] = None
+    application: Optional[
+        ApplicationPermissionIdentity
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    group: Optional[GroupPermissionIdentity] = dataclass_field(default=None, kw_only=True)
+    user: Optional[UserPermissionIdentity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1298,7 +1456,7 @@ class PermissionsList:
     Definition: PermissionsList
     """
 
-    value: Optional[List[Permission]] = None
+    value: Optional[List[Permission]] = dataclass_field(default=None, kw_only=True)
     """List of Permissions"""
 
 
@@ -1308,10 +1466,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -1323,8 +1486,7 @@ class PublishedResult:
     Definition: PublishedResult
     """
 
-    is_file_published: Optional[bool] = field(
-        default=None,
+    is_file_published: bool = dataclass_field(
         metadata={"wire_name": "IsFilePublished"},
     )
     """
@@ -1339,13 +1501,13 @@ class SharePointHttpRequestBodyParameters:
     Definition: SharePointHttpRequestBodyParameters
     """
 
-    method: Optional[str] = None
+    method: str
     """Http Method"""
-    uri: Optional[str] = None
+    uri: str
     """Example: _api/web/lists/getbytitle('Documents')"""
-    headers: Optional[Dict[str, str]] = None
+    headers: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """Enter JSON object of request headers"""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Enter request content in JSON"""
 
 
@@ -1355,41 +1517,48 @@ class SharePointIds:
     Definition: SharePointIds
     """
 
-    list_id: Optional[str] = field(
+    list_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listId"},
     )
     """The unique identifier (guid) for the item's list in SharePoint"""
-    list_item_id: Optional[str] = field(
+    list_item_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listItemId"},
     )
     """An integer identifier for the item within the containing list"""
-    list_item_unique_id: Optional[str] = field(
+    list_item_unique_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "listItemUniqueId"},
     )
     """
     The unique identifier (guid) for the item within OneDrive for Business or a
     SharePoint site
     """
-    site_id: Optional[str] = field(
+    site_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "siteId"},
     )
     """The unique identifier (guid) for the item's site collection (SPSite)"""
-    site_url: Optional[str] = field(
+    site_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "siteUrl"},
     )
     """The SharePoint URL for the site that contains the item"""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The unique identifier (guid) for the tenancy"""
-    web_id: Optional[str] = field(
+    web_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webId"},
     )
     """The unique identifier (guid) for the item's site (SPWeb)"""
@@ -1401,12 +1570,13 @@ class SharingInvitation:
     Definition: SharingInvitation
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The email address provided for the recipient of the sharing invitation
     """
-    sign_in_required: Optional[bool] = field(
+    sign_in_required: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "signInRequired"},
     )
     """
@@ -1421,8 +1591,9 @@ class SharingLink:
     Definition: SharingLink
     """
 
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """A link to the item"""
@@ -1434,7 +1605,7 @@ class SharingLinkPermissionIdentitySet:
     Definition: SharingLinkPermissionIdentitySet
     """
 
-    user: Optional[SharingLinkUserPermissionIdentity] = None
+    user: Optional[SharingLinkUserPermissionIdentity] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1443,12 +1614,13 @@ class SharingLinkUserPermissionIdentity:
     Definition: SharingLinkUserPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """User display name"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
 
 
@@ -1458,9 +1630,17 @@ class SPContentType:
     Definition: SPContentType
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """Content type Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Content type name"""
 
 
@@ -1470,15 +1650,21 @@ class SPForASelectedFileResponse:
     Definition: SPForASelectedFileResponse
     """
 
-    id: Optional[int] = field(default=None, metadata={"wire_name": "ID"})
-    """File Identifier"""
-    item_url: Optional[str] = field(
+    id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID"},
+    )
+    """File Identifier"""
+    item_url: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "itemUrl"},
     )
     """File Url"""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileName"},
     )
     """File Name"""
@@ -1490,34 +1676,41 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    count_restrictions: Optional[TableCountRestrictionsMetadata] = field(
+    count_restrictions: Optional[TableCountRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "countRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -1529,7 +1722,7 @@ class TableCountRestrictionsMetadata:
     Definition: TableCountRestrictionsMetadata
     """
 
-    countable: Optional[bool] = None
+    countable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has countable columns"""
 
 
@@ -1539,15 +1732,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -1559,7 +1754,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -1569,15 +1764,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -1589,25 +1786,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -1619,12 +1820,13 @@ class UserPermissionIdentity:
     Definition: UserPermissionIdentity
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """User display name"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email"""
 
 
@@ -1791,7 +1993,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_all_tables(
+    def list_all_tables(
         self,
         dataset: str,
         *,
@@ -1799,11 +2001,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get all lists and libraries
 
         Get all lists and libraries.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1811,27 +2016,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/alltables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def approve_hub_site_join(
         self,
@@ -2442,37 +2665,58 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List root folder
 
         Returns files in the root SharePoint folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/folders"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_folder(
         self,
@@ -2483,11 +2727,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List folder
 
         Returns files contained in a SharePoint folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2496,27 +2743,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/folders"
             f"/{quote(str(id), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_file_metadata_by_path(
         self,
@@ -2967,7 +3232,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_tables(
+    def list_tables(
         self,
         dataset: str,
         *,
@@ -2975,37 +3240,58 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists
 
         Gets SharePoint lists from a site.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/datasets/{quote(quote(str(dataset), safe=''), safe='')}/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_new_document_set(
         self,
@@ -4325,7 +4611,7 @@ class SharepointonlineClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_item_attachments(
+    def list_item_attachments(
         self,
         dataset: str,
         table: str,
@@ -4335,13 +4621,16 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get attachments
 
         Returns the list of attachments for the specified list item. You can
         add a \"Get attachment content\" step and use the \"File identifier\"
         property returned by this action to get to the contents of the file.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4353,27 +4642,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(item_id), safe=''), safe='')}"
             f"/attachments"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_attachment(
         self,
@@ -4602,7 +4909,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_table_views(
+    def list_table_views(
         self,
         dataset: str,
         table: str,
@@ -4611,11 +4918,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list views
 
         Gets views from a SharePoint list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4625,29 +4935,47 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/views"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def extract_folder(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_extract_folder(
         self,
         dataset: str,
         source: str,
@@ -4658,11 +4986,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Extract folder
 
         Extracts an archive file into a SharePoint folder (example: .zip).
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4687,65 +5018,104 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "POST", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_data_sets(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_data_sets(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get datasets
 
         Gets the most recently used SharePoint sites.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/datasets"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_agreements_solution_templates(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_agreements_solution_templates(
         self,
         dataset: str,
         *,
@@ -4753,11 +5123,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Agreements Solution - Get Templates
 
         Gets templates from a Agreements Solution workspace.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4766,27 +5139,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/agreements"
             f"/templates"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_agreements_solution_template_fields(
         self,
@@ -4834,7 +5225,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_libraries(
+    def list_tables_for_libraries(
         self,
         dataset: str,
         *,
@@ -4842,11 +5233,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get libraries
 
         Get libraries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4855,27 +5249,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/libraries"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_thumbnail_size_options(
         self,
@@ -4973,7 +5385,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_lists_and_libraries(
+    def list_tables_for_lists_and_libraries(
         self,
         dataset: str,
         *,
@@ -4981,11 +5393,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists and libraries
 
         Get lists and libraries
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4994,29 +5409,47 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/listsandlibraries"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_entities_for_user(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_entities_for_user(
         self,
         dataset: str,
         table: str,
@@ -5026,11 +5459,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Returns User fields for a list
 
         Returns User fields for a list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5049,29 +5485,47 @@ class SharepointonlineClient(ConnectorClientBase):
             query_params.append(f"view={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_table_forms(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_table_forms(
         self,
         dataset: str,
         table: str,
@@ -5080,11 +5534,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list forms
 
         Gets forms from a SharePoint list.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5094,29 +5551,47 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/forms"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_doc_gen_forms(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_doc_gen_forms(
         self,
         dataset: str,
         table: str,
@@ -5125,12 +5600,15 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get document generation forms
 
         Gets published document generation forms from a SharePoint document
         library.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5140,27 +5618,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/docgenforms"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_doc_gen_form_fields(
         self,
@@ -5210,45 +5706,66 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_view_scope_options(
+    def list_view_scope_options(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get SPViewScope options to use for folder querying behavior
 
         Default - Only query current folder (non-recursive). Return both Files
         and Folders. RecursiveAll - Recursively query the folder. Return both
         Files and Folders.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/getViewScopeOptions"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_tables_for_lightweight_approval(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_tables_for_lightweight_approval(
         self,
         dataset: str,
         *,
@@ -5256,11 +5773,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get lists and libraries where lightweight approvals is enabled
 
         Get lists and libraries where lightweight approvals is enabled
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5269,27 +5789,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/lightweightapproval"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_approval_types(
         self,
@@ -5419,7 +5957,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables_for_approval(
+    def list_tables_for_approval(
         self,
         dataset: str,
         *,
@@ -5427,11 +5965,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get libraries where Content Approval is supported
 
         Get libraries where Content Approval is supported
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5440,27 +5981,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/tablesfor"
             f"/approval"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_day_of_week_options(
         self,
@@ -5498,7 +6057,7 @@ class SharepointonlineClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_content_assembly_templates(
+    def list_content_assembly_templates(
         self,
         dataset: str,
         table: str,
@@ -5507,11 +6066,14 @@ class SharepointonlineClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get document library templates
 
         Gets templates from a SharePoint document library.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5521,27 +6083,45 @@ class SharepointonlineClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/templates"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_content_assembly_placeholders(
         self,

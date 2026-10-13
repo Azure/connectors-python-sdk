@@ -15,6 +15,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
     invoke_generated_operation,
+    model_instance,
 )
 
 
@@ -47,7 +48,7 @@ SUCCESS_CONTRACTS = {
         "/processes/micro-functions/organizations/value/tasks/value/edit-deadline",
         True,
     ),
-    "get_organization_users": ("GET", "/organizations/value/users", False),
+    "list_organization_users": ("GET", "/organizations/value/users", False),
     "get_user_organizations": ("GET", "/me/organizations", False),
     "get_user_tasks": (
         "GET",
@@ -143,7 +144,14 @@ class TestTallyfyClient:
             client._http_client,
             "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(
+                status=200,
+                text=(
+                    '{"data": [{"ok": true}]}'
+                    if operation == "list_organization_users"
+                    else '{"ok": true}'
+                ),
+            ),
         ) as mock_send:
             result = await invoke_generated_operation(client, operation, tallyfy_module)
 
@@ -151,7 +159,12 @@ class TestTallyfyClient:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = (
+            [{"ok": True}]
+            if operation == "list_organization_users"
+            else {"ok": True}
+        )
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_create_run_success(self, mock_credential):
@@ -193,7 +206,11 @@ class TestTallyfyClient:
             return_value=MockResponse(status=201, text='{"id": "task-1"}'),
         ) as mock_send:
             await client.create_task(
-                input=CreateTaskInput(name="Review document", description="Check details"),
+                input=model_instance(
+                    CreateTaskInput,
+                    name="Review document",
+                    description="Check details",
+                ),
                 org="organization",
             )
 

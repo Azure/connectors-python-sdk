@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -75,7 +75,7 @@ class AdvancedHuntingInput:
     Advanced Hunting (Deprecated)
     """
 
-    query: Optional[str] = field(default=None, metadata={"wire_name": "Query"})
+    query: str = dataclass_field(metadata={"wire_name": "Query"})
     """The query to run"""
 
 
@@ -85,13 +85,15 @@ class AdvancedHuntingResponse:
     Response for Advanced Hunting (Deprecated)
     """
 
-    stats: Optional[Dict[str, Any]] = field(
+    stats: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Stats"},
     )
     """Stats"""
-    results: Optional[List[Dict[str, Any]]] = field(
+    results: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Results"},
     )
 
@@ -102,31 +104,21 @@ class CreateAlertByReferenceInput:
     Alerts - Create alert
     """
 
-    machine_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "machineId"},
-    )
+    machine_id: str = dataclass_field(metadata={"wire_name": "machineId"})
     """ID of the machine on which the event was identified"""
-    report_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "reportId"},
-    )
+    report_id: str = dataclass_field(metadata={"wire_name": "reportId"})
     """Report Id of the event"""
-    event_time: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "eventTime"},
-    )
+    event_time: str = dataclass_field(metadata={"wire_name": "eventTime"})
     """Time of the event as string, e.g. 2018-08-03T16:45:21.7115183Z"""
-    severity: Optional[str] = None
+    severity: str
     """Severity of the alert."""
-    category: Optional[str] = None
+    category: str
     """Category of the alert"""
-    title: Optional[str] = None
+    title: str
     """Title of the Alert"""
-    description: Optional[str] = None
+    description: str
     """Description of the Alert"""
-    recommended_action: Optional[str] = field(
-        default=None,
+    recommended_action: str = dataclass_field(
         metadata={"wire_name": "recommendedAction"},
     )
     """Recommended action for the Alert"""
@@ -138,69 +130,79 @@ class Alert:
     Response for Alerts - Create alert
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert identifier"""
-    incident_id: Optional[int] = field(
+    incident_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "incidentId"},
     )
     """The ID of the incident"""
-    investigation_id: Optional[int] = field(
+    investigation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "investigationId"},
     )
     """The Id of the investigation"""
-    severity: Optional[str] = None
+    severity: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert severity"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the alert"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert description"""
-    alert_creation_time: Optional[str] = field(
+    alert_creation_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "alertCreationTime"},
     )
     """The time at which the alert was created"""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert category"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert title"""
-    threat_family_name: Optional[str] = field(
+    threat_family_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threatFamilyName"},
     )
     """Threat family name"""
-    detection_source: Optional[str] = field(
+    detection_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "detectionSource"},
     )
     """Detection source"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert classification"""
-    determination: Optional[str] = None
+    determination: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Alert determination"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """Person to whom the alert was assigned"""
-    resolved_time: Optional[str] = field(
+    resolved_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resolvedTime"},
     )
     """The time at which the alert was resolved"""
-    last_event_time: Optional[str] = field(
+    last_event_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastEventTime"},
     )
     """The time of the last event related to the alert"""
-    first_event_time: Optional[str] = field(
+    first_event_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstEventTime"},
     )
     """The time of the first event related to the alert"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The identifier of the machine related to the alert"""
@@ -212,15 +214,17 @@ class GetAlertsResponse:
     Response for Alerts - Get list of alerts
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available alerts by this query"""
-    value: Optional[List[Alert]] = None
+    value: Optional[List[Alert]] = dataclass_field(default=None, kw_only=True)
     """The alerts returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -235,19 +239,20 @@ class PatchAlertInput:
     Alerts - Update alert
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the alert. One of 'New', 'InProgress' and 'Resolved'"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """Person to assign the alert to"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Classification of the alert. One of 'Unknown', 'FalsePositive',
     'TruePositive'
     """
-    determination: Optional[str] = None
+    determination: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The determination of the alert. One of 'NotAvailable', 'Apt', 'Malware',
     'SecurityPersonnel', 'SecurityTesting', 'UnwantedSoftware', 'Other'
@@ -260,10 +265,7 @@ class InitiateInvestigationInput:
     Actions - Initiate investigation on a machine (to be deprecated)
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the investigation"""
 
 
@@ -273,7 +275,7 @@ class InitiateInvestigationResponse:
     Response for Actions - Initiate investigation on a machine (to be deprecated)
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the investigation"""
 
 
@@ -283,10 +285,7 @@ class StartInvestigationInput:
     Actions - Start automated investigation on a machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the investigation"""
 
 
@@ -296,32 +295,37 @@ class Investigation:
     Response for Actions - Start automated investigation on a machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the investigation"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The state of the investigation (e.g. 'Benign', 'Running', etc..)"""
-    status_details: Optional[str] = field(
+    status_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusDetails"},
     )
     """Details on the status"""
-    computer_dns_name: Optional[str] = field(
+    computer_dns_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "computerDnsName"},
     )
     """The computer name"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The machine ID"""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startTime"},
     )
     """The UTC time at which investigation was started"""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTime"},
     )
     """The UTC time at which investigation was completed"""
@@ -333,42 +337,56 @@ class MachineAction:
     Response for Actions - Get single machine action
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the machine action"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """
     The type of the action (e.g. 'Isolate', 'CollectInvestigationPackage', ...)
     """
-    requestor: Optional[str] = None
+    requestor: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The person that requested the machine action"""
-    requestor_comment: Optional[str] = field(
+    requestor_comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requestorComment"},
     )
     """The comment associated to the machine action"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the machine action (e.g., 'InProgress')"""
-    machine_id: Optional[str] = field(
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
     """The ID of the machine on which the action has been performed"""
-    creation_date_time_utc: Optional[str] = field(
+    creation_date_time_utc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationDateTimeUtc"},
     )
     """The UTC time at which the action has been requested"""
-    last_update_date_time_utc: Optional[str] = field(
+    last_update_date_time_utc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdateDateTimeUtc"},
     )
     """The last UTC time at which the action has been updated"""
-    related_file_info: Optional[Dict[str, Any]] = field(
+    related_file_info: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedFileInfo"},
     )
     """relatedFileInfo"""
-    commands: Optional[List[LiveResponseCommandStatus]] = None
+    commands: Optional[
+        List[LiveResponseCommandStatus]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """Live response machine action commands"""
 
 
@@ -378,10 +396,7 @@ class CancelSingleMachineActionInput:
     Actions - Cancel a single machine action
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the machine action cancellation"""
 
 
@@ -391,7 +406,7 @@ class GetLiveResponseDownloadLinkResponse:
     Response for Actions - Get live response command result download URI
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The live response command download URI"""
 
 
@@ -401,15 +416,17 @@ class GetMachineActionsResponse:
     Response for Actions - Get list of machine actions
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machine actions by this query"""
-    value: Optional[List[MachineAction]] = None
+    value: Optional[List[MachineAction]] = dataclass_field(default=None, kw_only=True)
     """The machine actions returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -424,40 +441,47 @@ class FileStats:
     Response for Files - Get the statistics for the given file
     """
 
-    sha1: Optional[str] = None
+    sha1: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The sha1 of the file"""
-    globally_prevalence: Optional[int] = field(
+    globally_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globallyPrevalence"},
     )
     """The file global prevalence."""
-    global_first_observed: Optional[str] = field(
+    global_first_observed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globalFirstObserved"},
     )
     """The first time the file was observed globally."""
-    global_last_observed: Optional[str] = field(
+    global_last_observed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "globalLastObserved"},
     )
     """The Last time the file was observed."""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The file prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the file was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the file was observed in the organization."""
-    top_file_names: Optional[List[str]] = field(
+    top_file_names: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "topFileNames"},
     )
     """The file names that this file has been presented."""
@@ -469,20 +493,23 @@ class DomainStats:
     Response for Domains - Get the statistics for the given domain name
     """
 
-    host: Optional[str] = None
+    host: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The domain host."""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The domain prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the domain was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the domain was observed in the organization."""
@@ -494,23 +521,27 @@ class IpStats:
     Response for Ips - Get the statistics for the given ip address
     """
 
-    ip_address: Optional[str] = field(
+    ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ipAddress"},
     )
     """The ip address"""
-    organization_prevalence: Optional[int] = field(
+    organization_prevalence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "organizationPrevalence"},
     )
     """The ip address prevalence across organization"""
-    org_first_seen: Optional[str] = field(
+    org_first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgFirstSeen"},
     )
     """The first time the ip address was observed in the organization."""
-    org_last_seen: Optional[str] = field(
+    org_last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orgLastSeen"},
     )
     """The last time the ip address was observed in the organization."""
@@ -522,15 +553,17 @@ class GetInvestigationsResponse:
     Response for Actions - Get list of investigation
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available investigations by this query"""
-    value: Optional[List[Investigation]] = None
+    value: Optional[List[Investigation]] = dataclass_field(default=None, kw_only=True)
     """The investigations returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -545,10 +578,7 @@ class CollectInvestigationPackageInput:
     Actions - Collect investigation package
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the collection"""
 
 
@@ -558,7 +588,7 @@ class GetInvestigationPackageUriResponse:
     Response for Actions - Get investigation package download URI
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The investigation package SAS URI"""
 
 
@@ -568,13 +598,9 @@ class IsolateMachineInput:
     Actions - Isolate machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the isolation"""
-    isolation_type: Optional[str] = field(
-        default=None,
+    isolation_type: str = dataclass_field(
         metadata={"wire_name": "IsolationType"},
     )
     """
@@ -590,10 +616,7 @@ class UnisolateMachineInput:
     Actions - Unisolate machine
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the unisolation"""
 
 
@@ -603,10 +626,7 @@ class RestrictAppExecutionInput:
     Actions - Restrict app execution
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the restriction"""
 
 
@@ -616,10 +636,7 @@ class UnrestrictAppExecutionInput:
     Actions - Remove app execution restriction
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the restriction removal"""
 
 
@@ -629,15 +646,9 @@ class RunAntivirusScanInput:
     Actions - Run antivirus scan
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the scan request"""
-    scan_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ScanType"},
-    )
+    scan_type: str = dataclass_field(metadata={"wire_name": "ScanType"})
     """Type of scan to perform. Allowed values are 'Quick' or 'Full'"""
 
 
@@ -647,13 +658,9 @@ class RunLiveResponseInput:
     Actions - Run live response
     """
 
-    comment: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Comment"},
-    )
+    comment: str = dataclass_field(metadata={"wire_name": "Comment"})
     """A comment to associate to the isolation"""
-    commands: Optional[List[LiveResponseCommand]] = field(
-        default=None,
+    commands: List[LiveResponseCommand] = dataclass_field(
         metadata={"wire_name": "Commands"},
     )
     """The live response commands to execute"""
@@ -665,15 +672,17 @@ class GetRemediationActivitiesResponse:
     Response for Remediation tasks - Get list of remediation activities (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = None
+    value: Optional[List[RemediationActivity]] = dataclass_field(default=None, kw_only=True)
     """The remediation activities returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -688,124 +697,149 @@ class RemediationActivity:
     Response for RemediationActivities - Get single remediation activity (Preview)
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity identifier"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the remediation activit"""
-    created_on: Optional[str] = field(
+    created_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdOn"},
     )
     """The time when the remediation activity was created"""
-    status_last_modified_on: Optional[str] = field(
+    status_last_modified_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "statusLastModifiedOn"},
     )
     """The time when the status was last modified"""
-    requester_id: Optional[str] = field(
+    requester_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterId"},
     )
     """The remediation activity creator id"""
-    requester_email: Optional[str] = field(
+    requester_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterEmail"},
     )
     """The remediation activity creator email address"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the remediation activity status"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the remediation activity"""
-    related_component: Optional[str] = field(
+    related_component: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "relatedComponent"},
     )
     """The remediation activity related component"""
-    target_devices: Optional[int] = field(
+    target_devices: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "targetDevices"},
     )
     """The number of the remediation activity target machines"""
-    rbac_group_names: Optional[List[str]] = field(
+    rbac_group_names: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupNames"},
     )
     """The rbac group names associated to the remediation activity"""
-    fixed_devices: Optional[int] = field(
+    fixed_devices: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fixedDevices"},
     )
     """The number of the remediation activity fixed machines"""
-    requester_notes: Optional[str] = field(
+    requester_notes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requesterNotes"},
     )
     """The remediation activity creator notes"""
-    due_on: Optional[str] = field(
+    due_on: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueOn"},
     )
     """The due time for the remediation activity"""
-    category: Optional[str] = None
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the remediation activity category"""
-    productivity_impact_remediation_type: Optional[str] = field(
+    productivity_impact_remediation_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "productivityImpactRemediationType"},
     )
     """the remediation Productivity impact type"""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity priority"""
-    completion_method: Optional[str] = field(
+    completion_method: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completionMethod"},
     )
     """The remediation activity completion method"""
-    completer_id: Optional[str] = field(
+    completer_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completerId"},
     )
     """The remediation activity completer object id"""
-    completer_email: Optional[str] = field(
+    completer_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completerEmail"},
     )
     """The remediation activity completer email address"""
-    scid: Optional[str] = None
+    scid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The remediation activity security configuration id"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The remediation activity type"""
-    product_id: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The remediation activity type"""
+    product_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "productId"},
     )
     """Product Id"""
-    vendor_id: Optional[str] = field(
+    vendor_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "vendorId"},
     )
     """Vendor id"""
-    name_id: Optional[str] = field(
+    name_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nameId"},
     )
     """Name id"""
-    recommended_version: Optional[str] = field(
+    recommended_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedVersion"},
     )
     """Recommended version"""
-    recommended_vendor: Optional[str] = field(
+    recommended_vendor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedVendor"},
     )
     """Recommended vendor"""
-    recommended_program: Optional[str] = field(
+    recommended_program: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recommendedProgram"},
     )
     """Recommended program"""
-    recommendation_reference: Optional[str] = field(
+    recommendation_reference: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecommendationReference"},
     )
     """Recommendation reference"""
@@ -817,15 +851,17 @@ class GetRemediationActivityMachineListResponse:
     Response for Remediation activities - Get list of related machines (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = None
+    value: Optional[List[Machine]] = dataclass_field(default=None, kw_only=True)
     """The machines returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -840,15 +876,17 @@ class GetMachinesResponse:
     Response for Machines - Get list of machines
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of available machines by this query"""
-    value: Optional[List[Machine]] = None
+    value: Optional[List[Machine]] = dataclass_field(default=None, kw_only=True)
     """The machines returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -863,90 +901,107 @@ class Machine:
     Response for Machines - Get single machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The machine identifier"""
-    computer_dns_name: Optional[str] = field(
+    computer_dns_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "computerDnsName"},
     )
     """The computer name"""
-    first_seen: Optional[str] = field(
+    first_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "firstSeen"},
     )
     """The time of the first event received by the machine"""
-    last_seen: Optional[str] = field(
+    last_seen: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastSeen"},
     )
     """The time of the last event received by the machine"""
-    os_platform: Optional[str] = field(
+    os_platform: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osPlatform"},
     )
     """The OS platform of the machine"""
-    os_version: Optional[str] = field(
+    os_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osVersion"},
     )
     """The OS version of the machine"""
-    system_product_name: Optional[str] = field(
+    system_product_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "systemProductName"},
     )
     """systemProductName"""
-    last_ip_address: Optional[str] = field(
+    last_ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastIpAddress"},
     )
     """The last IP address of the machine"""
-    last_external_ip_address: Optional[str] = field(
+    last_external_ip_address: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastExternalIpAddress"},
     )
     """The last external IP address of the machine"""
-    agent_version: Optional[str] = field(
+    agent_version: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "agentVersion"},
     )
     """The agent version"""
-    os_build: Optional[int] = field(
+    os_build: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "osBuild"},
     )
     """The OS build of the machine"""
-    health_status: Optional[str] = field(
+    health_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "healthStatus"},
     )
     """The health status of the machine"""
-    is_aad_joined: Optional[bool] = field(
+    is_aad_joined: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAadJoined"},
     )
     """A flag indicating whether the machine is joined to Microsoft Entra ID"""
-    machine_tags: Optional[List[str]] = field(
+    machine_tags: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineTags"},
     )
     """The tags associated to the machine"""
-    rbac_group_id: Optional[int] = field(
+    rbac_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupId"},
     )
     """The ID of the RBAC group to which the machine belongs"""
-    rbac_group_name: Optional[str] = field(
+    rbac_group_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rbacGroupName"},
     )
     """The name of the RBAC group to which the machine belongs"""
-    risk_score: Optional[str] = field(
+    risk_score: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "riskScore"},
     )
     """A score indicating how much the machine is at risk"""
-    aad_device_id: Optional[str] = field(
+    aad_device_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "aadDeviceId"},
     )
     """aadDeviceId"""
@@ -958,12 +1013,9 @@ class MachineTagInput:
     Machines - Tag machine
     """
 
-    value: Optional[str] = field(default=None, metadata={"wire_name": "Value"})
+    value: str = dataclass_field(metadata={"wire_name": "Value"})
     """The tag to add or remove"""
-    action: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Action"},
-    )
+    action: str = dataclass_field(metadata={"wire_name": "Action"})
     """
     The action to perform. Value should be one of 'Add' (to add a tag) or
     'Remove' (to remove a tag)
@@ -976,14 +1028,16 @@ class WebHookSubscriptionTableEntity:
     Response for Triggers - Trigger when new WDATP alert occurs
     """
 
-    id: Optional[str] = None
-    notification_url: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """Gets or sets the web hook subscription notification URL."""
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "clientState"},
     )
 
@@ -994,15 +1048,17 @@ class OnNewRemediationActivityResponse:
     Response for Triggers when a new remediation activity is created (Preview)
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """The number of remediation activities by this query"""
-    value: Optional[List[RemediationActivity]] = None
+    value: Optional[List[RemediationActivity]] = dataclass_field(default=None, kw_only=True)
     """The remediation activities returned"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """
@@ -1017,7 +1073,7 @@ class AdvancedHuntingSchemaInput:
     Advanced Hunting Schema
     """
 
-    query: Optional[str] = field(default=None, metadata={"wire_name": "Query"})
+    query: str = dataclass_field(metadata={"wire_name": "Query"})
     """The query to run"""
 
 
@@ -1027,7 +1083,7 @@ class AdvancedHuntingSchemaResponse:
     Response for Advanced Hunting Schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1040,29 +1096,32 @@ class LiveResponseCommandStatus:
     Definition: LiveResponseCommandStatus
     """
 
-    index: Optional[int] = None
+    index: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The index of the command"""
-    start_time: Optional[str] = field(
+    start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startTime"},
     )
     """The command execution start time UTC"""
-    end_time: Optional[str] = field(
+    end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTime"},
     )
     """The command execution end time UTC"""
-    command_status: Optional[str] = field(
+    command_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "commandStatus"},
     )
     """The status of the command execution (e.g., 'Completed')"""
-    errors: Optional[List[str]] = None
+    errors: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of command execution errors. In case no errors reported this will be
     an empty list.
     """
-    command: Optional[LiveResponseCommand] = None
+    command: Optional[LiveResponseCommand] = dataclass_field(default=None, kw_only=True)
     """The live response command"""
 
 
@@ -1072,9 +1131,9 @@ class LiveResponseCommand:
     Definition: LiveResponseCommand
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of the command"""
-    params: Optional[List[Dict[str, Any]]] = None
+    params: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of command parameters."""
 
 
@@ -1084,28 +1143,20 @@ class WebHookSubscriptionRequest:
     Definition: WebHookSubscriptionRequest
     """
 
-    client_state: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "clientState"},
-    )
+    client_state: str = dataclass_field(metadata={"wire_name": "clientState"})
     """Gets or sets the client state."""
-    change_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "changeType"},
-    )
+    change_type: str = dataclass_field(metadata={"wire_name": "changeType"})
     """
     Indicates the type of change in the subscribed resource that will raise a
     notification.
     """
-    resource: Optional[str] = None
+    resource: str
     """Specifies the resource that will be monitored for changes."""
-    expiration_date_time: Optional[str] = field(
-        default=None,
+    expiration_date_time: str = dataclass_field(
         metadata={"wire_name": "expirationDateTime"},
     )
     """Specifies the date and time when the webhook subscription expires."""
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """Gets or sets the web hook callback URL."""
@@ -1117,9 +1168,10 @@ class WebHookNotification:
     Definition: WebHookNotification
     """
 
-    id: Optional[str] = None
-    machine_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    machine_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "machineId"},
     )
 

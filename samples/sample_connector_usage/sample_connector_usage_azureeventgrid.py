@@ -44,7 +44,7 @@ def example_1_list_subscriptions():
     with DefaultAzureCredential() as credential:
 
         with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.subscriptions_list()
+            result = client.list_subscriptions()
             subscriptions = result.get("value", []) if result else []
 
             print(f"Found {len(subscriptions)} subscription(s).")
@@ -61,7 +61,7 @@ def example_2_list_topic_types():
     with DefaultAzureCredential() as credential:
 
         with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = client.topic_types_list()
+            result = client.list_topic_types()
             topic_types = result.get("value", []) if result else []
 
             print(f"Found {len(topic_types)} topic type(s).")

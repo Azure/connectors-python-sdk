@@ -21,7 +21,7 @@ async def main() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with FtpClient(connection_url, credential) as client:
-            root_listing = await client.list_root_folder()
+            root_listing = [item async for item in client.list_root_folder()]
             print("root listing", root_listing)
 
             created = await client.create_file(
@@ -31,7 +31,7 @@ async def main() -> None:
             )
             print("created file", created)
 
-            folder_items = await client.list_folder(id=folder_path)
+            folder_items = [item async for item in client.list_folder(id=folder_path)]
             print("folder items available for polling", folder_items)
 
 

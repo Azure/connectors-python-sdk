@@ -47,9 +47,9 @@ async def example_1_list_calendars():
     async with DefaultAzureCredential() as credential:
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_calendars(min_access_role="reader")
+            items = [item async for item in client.list_calendars(min_access_role="reader")]
 
-            items = result.get("items", []) if result else []
+            items = result
             print(f"Found {len(items)} calendar(s).")
             for calendar in items[:10]:
                 print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
@@ -67,9 +67,9 @@ async def example_2_list_events():
     async with DefaultAzureCredential() as credential:
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_events(calendar_id=calendar_id)
+            items = [item async for item in client.list_events(calendar_id=calendar_id)]
 
-            events = result.get("items", []) if result else []
+            events = result
             print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
             for event in events[:10]:
                 print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
@@ -119,13 +119,13 @@ async def example_4_list_events_for_polling():
 
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_events(
+                items = [item async for item in client.list_events(
                     calendar_id=calendar_id,
                     time_min="2026-07-09T00:00:00Z",
                     time_max="2026-07-10T00:00:00Z",
-                )
-                events = result.get("items", []) if result else []
-                print(f"Time-window query returned {len(events)} event(s).")
+                )]
+                events = result
+                print(f"Time-window query returned {len(items)} event(s).")
                 print("Persist event IDs and update times to implement change polling.")
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

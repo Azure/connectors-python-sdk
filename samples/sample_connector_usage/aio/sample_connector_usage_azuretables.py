@@ -61,14 +61,14 @@ async def example_1_list_tables():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables(
+                tables_response = await client.get_tables(
                     storage_account_name=STORAGE_ACCOUNT
                 )
 
-                if result:
+                if tables_response:
                     print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
                     # Response contains 'value' with list of tables
-                    tables = result.get("value", [])
+                    tables = tables_response.get("value", [])
                     if tables:
                         for table in tables:
                             table_name = table.get("TableName", table)
@@ -110,7 +110,7 @@ async def example_2_create_table():
                 )
 
                 print(f"Table '{new_table_name}' created successfully.")
-                if result:
+                if items:
                     print(f"  OData ID: {result.get('odata.id', 'N/A')}")
                     print(f"  Table Name: {result.get('TableName', 'N/A')}")
 
@@ -153,7 +153,7 @@ async def example_3_create_entity():
                 )
 
                 print(f"Entity created in table '{TABLE_NAME}':")
-                if result:
+                if items:
                     print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
                     print(f"  Row Key: {result.get('RowKey', 'N/A')}")
                 else:
@@ -233,7 +233,7 @@ async def example_5_get_entity():
                     row_key=row_key
                 )
 
-                if result:
+                if items:
                     print(f"Entity found in '{TABLE_NAME}':")
                     print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
                     print(f"  Row Key: {result.get('RowKey', 'N/A')}")

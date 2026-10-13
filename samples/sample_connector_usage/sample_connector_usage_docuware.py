@@ -43,7 +43,7 @@ def example_1_get_file_cabinets():
 
         with DocuwareClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_file_cabinets(
+                result = client.list_file_cabinets(
                     file_cabinet_type="<file-cabinet-type>",
                 )
 

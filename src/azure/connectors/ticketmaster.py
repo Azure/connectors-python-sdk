@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -45,15 +45,17 @@ class EventsGetResponse:
     Response for Event search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -62,39 +64,47 @@ class EventGetResponse:
     Response for Get event details
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    classifications: Optional[List[Dict[str, Any]]] = None
-    dates: Optional[Dict[str, Any]] = None
-    id: Optional[str] = None
+    classifications: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    dates: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    images: Optional[List[Dict[str, Any]]] = None
-    locale: Optional[str] = None
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    please_note: Optional[str] = field(
+    please_note: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pleaseNote"},
     )
     """The please note."""
-    price_ranges: Optional[List[Dict[str, Any]]] = field(
+    price_ranges: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "priceRanges"},
     )
-    promoter: Optional[Dict[str, Any]] = None
-    sales: Optional[Dict[str, Any]] = None
-    test: Optional[bool] = None
+    promoter: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    sales: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether test."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The URL address."""
 
 
@@ -104,13 +114,18 @@ class EventImagesGetResponse:
     Response for Get event images
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    images: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -121,15 +136,17 @@ class AttractionsGetResponse:
     Response for Attraction search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -138,20 +155,25 @@ class AttractionGetResponse:
     Response for Get attraction details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    test: Optional[bool] = None
-    """Whether test."""
-    locale: Optional[str] = None
-    """The locale."""
-    images: Optional[List[Dict[str, Any]]] = None
-    classifications: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    """Whether test."""
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The locale."""
+    images: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    classifications: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -162,15 +184,17 @@ class ClassificationsGetResponse:
     Response for Classification search
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -179,11 +203,12 @@ class ClassificationGetResponse:
     Response for Get classification details
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    segment: Optional[Dict[str, Any]] = None
+    segment: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -192,17 +217,19 @@ class GenreGetResponse:
     Response for Get genre details
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
 
 
@@ -212,16 +239,18 @@ class SegmentGetResponse:
     Response for Get segment details
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
 
@@ -232,15 +261,16 @@ class SubGenreGetResponse:
     Response for Get sub-genre details
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale."""
 
 
@@ -250,15 +280,17 @@ class VenuesGetResponse:
     Response for Venue search
     """
 
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    page: Optional[Dict[str, Any]] = None
+    page: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -267,31 +299,37 @@ class VenueGetResponse:
     Response for Get venue details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
-    """The type."""
-    id: Optional[str] = None
-    """The identifier."""
-    test: Optional[bool] = None
-    """Whether test."""
-    locale: Optional[str] = None
-    """The locale."""
-    postal_code: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    """The type."""
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The identifier."""
+    test: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    """Whether test."""
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    """The locale."""
+    postal_code: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "postalCode"},
     )
     """The postal code."""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timezone."""
-    city: Optional[Dict[str, Any]] = None
-    state: Optional[Dict[str, Any]] = None
-    country: Optional[Dict[str, Any]] = None
-    address: Optional[Dict[str, Any]] = None
-    location: Optional[Dict[str, Any]] = None
-    markets: Optional[List[Dict[str, Any]]] = None
-    links: Optional[Dict[str, Any]] = field(
+    city: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    state: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    country: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    address: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    location: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    markets: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
 
@@ -302,12 +340,14 @@ class SuggestionsGetResponse:
     Response for Find suggestions
     """
 
-    links: Optional[Dict[str, Any]] = field(
+    links: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_links"},
     )
-    embedded: Optional[Dict[str, Any]] = field(
+    embedded: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_embedded"},
     )
 

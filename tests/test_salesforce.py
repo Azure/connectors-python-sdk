@@ -560,7 +560,7 @@ class TestSalesforceDiscoveryOperations:
         ("method_name", "path_suffix"),
         [
             (
-                "get_external_id_fields",
+                "list_external_id_fields",
                 "/datasets/default/tables/account/externalIdFields",
             ),
             (
@@ -592,7 +592,12 @@ class TestSalesforceDiscoveryOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"name": "account"}')
+        response_text = (
+            '{"value": [{"name": "account"}]}'
+            if method_name == "list_external_id_fields"
+            else '{"name": "account"}'
+        )
+        mock_response = MockResponse(status=200, text=response_text)
 
         with patch.object(
             client._http_client,
@@ -600,7 +605,9 @@ class TestSalesforceDiscoveryOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await getattr(client, method_name)(table="account")
+            result = await resolve_generated_result(
+                getattr(client, method_name)(table="account")
+            )
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -611,13 +618,18 @@ class TestSalesforceDiscoveryOperations:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result == {"name": "account"}
+            expected_result = (
+                [{"name": "account"}]
+                if method_name == "list_external_id_fields"
+                else {"name": "account"}
+            )
+            assert result == expected_result
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
         "method_name",
         [
-            "get_external_id_fields",
+            "list_external_id_fields",
             "get_metadata_for_get_item",
             "get_metadata_for_patch_item",
             "get_metadata_for_post_item",
@@ -643,7 +655,9 @@ class TestSalesforceDiscoveryOperations:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await getattr(client, method_name)(table="account")
+                await resolve_generated_result(
+                    getattr(client, method_name)(table="account")
+                )
 
             assert exc_info.value.status_code == 404
 

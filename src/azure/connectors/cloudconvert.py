@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, Any, Mapping
 from urllib.parse import quote
 import json
@@ -41,7 +41,7 @@ class ConvertFileInput:
     Convert File
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -51,7 +51,7 @@ class OptimizeFileInput:
     Compress File
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -61,7 +61,7 @@ class CaptureWebsiteInput:
     Create Website Screenshot
     """
 
-    tasks: Optional[Dict[str, Any]] = None
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -71,10 +71,10 @@ class MergeFilesInput:
     Merge Files
     """
 
-    number_of_inputs: Optional[int] = None
+    number_of_inputs: int
     """Number of input files to merge."""
-    additional_inputs: Optional[Dict[str, Any]] = None
-    tasks: Optional[Dict[str, Any]] = None
+    additional_inputs: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    tasks: Dict[str, Any]
     """tasks"""
 
 
@@ -84,7 +84,7 @@ class GetConvertOptionsResponse:
     Response for Get Convert Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -93,7 +93,7 @@ class GetOptimizeOptionsResponse:
     Response for Get Optimize Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -102,7 +102,7 @@ class GetCaptureWebsiteOptionsResponse:
     Response for Get Capture Website Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -111,7 +111,7 @@ class GetMergeInputsResponse:
     Response for Get Merge Inputs
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -120,7 +120,7 @@ class GetMergeOptionsResponse:
     Response for Get Merge Options
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class

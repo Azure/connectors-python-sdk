@@ -49,8 +49,8 @@ async def example_1_list_task_lists():
     async with DefaultAzureCredential() as credential:
 
         async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.list_task_lists()
-            items = result.get("items", []) if result else []
+            items = [item async for item in client.list_task_lists()]
+            items = result
 
             print(f"Found {len(items)} task list(s).")
             for task_list in items[:10]:

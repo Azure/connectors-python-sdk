@@ -123,7 +123,7 @@ async def example_2_get_specific_row():
                     id_column=id_column if id_column else None,
                 )
 
-                if result:
+                if items:
                     print(f"Row with ID '{row_id}':")
                     for key, value in result.items():
                         if not key.startswith("@"):
@@ -151,13 +151,13 @@ async def example_3_list_workbook_comments():
 
         async with ExcelonlinebusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_comments(
+                items = [item async for item in client.list_comments(
                     drive=DRIVE_ID,
                     file=FILE_ID,
                     source=SOURCE_URL if SOURCE_URL else None,
-                )
+                )]
 
-                if result and "value" in result:
+                if items:
                     comments = result["value"]
                     print(f"Found {len(comments)} comment(s):")
                     for comment in comments[:5]:
@@ -209,7 +209,7 @@ async def example_4_create_table():
                     source=SOURCE_URL if SOURCE_URL else None,
                 )
 
-                if result:
+                if items:
                     print("Table created:")
                     print(f"  Name: {result.get('name', 'N/A')}")
                     print(f"  Title: {result.get('title', 'N/A')}")
@@ -261,7 +261,7 @@ async def example_5_update_row():
                     id_column=id_column if id_column else None,
                 )
 
-                if result:
+                if items:
                     print(f"Row '{row_id}' updated:")
                     for key, value in result.items():
                         if not key.startswith("@"):

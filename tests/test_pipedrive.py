@@ -18,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: PipedriveClient, operation: str):
@@ -26,22 +27,24 @@ async def _invoke_operation(client: PipedriveClient, operation: str):
         return await client.get_deal(deal_id="1")
     if operation == "update_deal_status":
         return await client.update_deal_status(
-            input=UpdateDealStatusRequest(),
+            input=UpdateDealStatusRequest(status="won"),
             deal_id="1",
         )
     if operation == "add_activity":
-        return await client.add_activity(input=AddActivityRequest())
+        return await client.add_activity(
+            input=AddActivityRequest(type_="call", subject="Customer follow-up")
+        )
     if operation == "get_stage":
         return await client.get_stage(stage_id="1")
     if operation == "add_deal":
-        return await client.add_deal(input=AddDealRequest())
+        return await client.add_deal(input=AddDealRequest(title="New Deal"))
     if operation == "update_deal_stage":
         return await client.update_deal_stage(
-            input=UpdateDealStageRequest(),
+            input=UpdateDealStageRequest(pipeline_id="1", stage_id="2"),
             deal_id="1",
         )
     if operation == "list_deals":
-        return await client.list_deals()
+        return await resolve_generated_result(client.list_deals())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -164,7 +167,7 @@ class TestPipedriveClientMethods:
             credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
-        body = UpdateDealStatusRequest()
+        body = UpdateDealStatusRequest(status="won")
 
         with patch.object(
             client._http_client,
@@ -186,7 +189,7 @@ class TestPipedriveClientMethods:
             credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"data":{"id":7}}')
-        body = AddActivityRequest()
+        body = AddActivityRequest(type_="call", subject="Customer follow-up")
 
         with patch.object(
             client._http_client,
@@ -230,7 +233,7 @@ class TestPipedriveClientMethods:
             credential=mock_credential,
         )
         mock_response = MockResponse(status=201, text='{"data":{"id":99}}')
-        body = AddDealRequest()
+        body = AddDealRequest(title="New Deal")
 
         with patch.object(
             client._http_client,
@@ -253,7 +256,7 @@ class TestPipedriveClientMethods:
             credential=mock_credential,
         )
         mock_response = MockResponse(status=200, text='{"data":{"id":42}}')
-        body = UpdateDealStageRequest()
+        body = UpdateDealStageRequest(pipeline_id="1", stage_id="2")
 
         with patch.object(
             client._http_client,
@@ -282,9 +285,9 @@ class TestPipedriveClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_deals()
+            result = await resolve_generated_result(client.list_deals())
 
-            assert result["data"][0]["id"] == 1
+            assert result[0]["id"] == 1
             assert mock_send.call_args[0][0] == "GET"
             assert "/v1/deals" in mock_send.call_args[0][1]
 
@@ -303,9 +306,9 @@ class TestPipedriveClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_deals()
+            result = await resolve_generated_result(client.list_deals())
 
-            assert result is None
+            assert result == []
 
 
 class TestPipedriveClientErrorHandling:

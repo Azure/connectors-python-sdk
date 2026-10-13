@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -97,20 +99,11 @@ class WebhookCreateItemInput:
     When an item is created
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL"""
 
 
@@ -120,7 +113,7 @@ class WebhookCreateItemResponse:
     Response for When an item is created
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -133,20 +126,11 @@ class WebhookCreateUpdateInput:
     When a new update is posted
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -156,7 +140,7 @@ class WebhookCreateUpdateResponse:
     Response for When a new update is posted
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -169,20 +153,11 @@ class WebhookChangeNameInput:
     When an item's name changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -192,7 +167,7 @@ class WebhookChangeNameResponse:
     Response for When an item's name changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -205,20 +180,11 @@ class WebhookChangeSubitemNameInput:
     When a subitem's name changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -228,7 +194,7 @@ class WebhookChangeSubitemNameResponse:
     Response for When a subitem's name changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -241,20 +207,11 @@ class WebhookCreateSubitemInput:
     When a subitem is created
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -264,7 +221,7 @@ class WebhookCreateSubitemResponse:
     Response for When a subitem is created
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -277,25 +234,13 @@ class WebhookColumnChangesInput:
     When a column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    column_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "columnId"},
-    )
+    column_id: str = dataclass_field(metadata={"wire_name": "columnId"})
     """Select a column from the drop-down."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -305,7 +250,7 @@ class WebhookColumnChangesResponse:
     Response for When a column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -318,20 +263,11 @@ class WebhookAnyColumnChangesInput:
     When any column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -341,7 +277,7 @@ class WebhookAnyColumnChangesResponse:
     Response for When any column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -354,20 +290,11 @@ class WebhookSubitemColumnChangesInput:
     When any subitem column changes
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select a workspace from the drop-down or specify a workspace ID."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
     """Specify the callback URL."""
 
 
@@ -377,7 +304,7 @@ class WebhookSubitemColumnChangesResponse:
     Response for When any subitem column changes
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -390,26 +317,17 @@ class CreateItemInput:
     Create an item
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select a group from the drop-down or specify a group ID."""
-    item_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemName"},
-    )
+    item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify the name of the item you want to create."""
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -420,7 +338,7 @@ class CreateItemResponse:
     Response for Create an item
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -429,38 +347,37 @@ class DuplicateBoardInput:
     Duplicate a board
     """
 
-    source_workspace_id: Optional[str] = field(
-        default=None,
+    source_workspace_id: str = dataclass_field(
         metadata={"wire_name": "sourceWorkspaceId"},
     )
     """Select the workspace for the board you want to duplicate."""
-    source_board_id: Optional[str] = field(
-        default=None,
+    source_board_id: str = dataclass_field(
         metadata={"wire_name": "sourceBoardId"},
     )
     """Select the board to duplicate."""
-    duplicated_board_name: Optional[str] = field(
+    duplicated_board_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "duplicatedBoardName"},
     )
     """Specify the name of the duplicated board."""
-    duplication_type: Optional[str] = field(
-        default=None,
+    duplication_type: str = dataclass_field(
         metadata={"wire_name": "duplicationType"},
     )
     """Select the duplication type from the drop-down."""
-    destination_workspace_id: Optional[str] = field(
+    destination_workspace_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "destinationWorkspaceId"},
     )
     """Select the destination workspace for the duplicated board."""
-    destination_folder: Optional[str] = field(
+    destination_folder: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "destinationFolder"},
     )
     """Select the destination folder for the duplicated board."""
-    keep_board_subscribers: Optional[bool] = field(
-        default=None,
+    keep_board_subscribers: bool = dataclass_field(
         metadata={"wire_name": "keepBoardSubscribers"},
     )
     """Select whether to keep board subscribers."""
@@ -472,7 +389,7 @@ class DuplicateBoardResponse:
     Response for Duplicate a board
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the duplicated board"""
 
 
@@ -482,15 +399,9 @@ class CreateBoardInput:
     Create a board
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Specify the ID of a monday.com workspace."""
-    board_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardName"},
-    )
+    board_name: str = dataclass_field(metadata={"wire_name": "boardName"})
     """Specify the desired name of the board you want to create."""
 
 
@@ -500,7 +411,7 @@ class CreateBoardResponse:
     Response for Create a board
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -509,22 +420,15 @@ class CreateColumnInput:
     Create a column
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    title: Optional[str] = None
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    title: str
     """Specify the title of the column you want to create."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specify the description of the column you want to create."""
-    column_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "columnType"},
-    )
+    column_type: str = dataclass_field(metadata={"wire_name": "columnType"})
     """Select a column type from the drop-down."""
 
 
@@ -534,7 +438,7 @@ class CreateColumnResponse:
     Response for Create a column
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -543,18 +447,11 @@ class CreateGroupInput:
     Create a group
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupName"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_name: str = dataclass_field(metadata={"wire_name": "groupName"})
     """Specify your desired group name."""
 
 
@@ -564,7 +461,7 @@ class CreateGroupResponse:
     Response for Create a group
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -573,27 +470,16 @@ class UpdateItemColumnInput:
     Update an item's column value
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select the workspace the item belongs to from the drop-down."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select the board the item belongs to from the drop-down."""
-    column_id: Optional[FieldColumnsToUpdateSingleColumn] = field(
-        default=None,
+    column_id: FieldColumnsToUpdateSingleColumn = dataclass_field(
         metadata={"wire_name": "columnId"},
     )
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to update."""
-    column_values: Optional[DynamicResponseGetSingleColumnSchema] = field(
-        default=None,
+    column_values: DynamicResponseGetSingleColumnSchema = dataclass_field(
         metadata={"wire_name": "columnValues"},
     )
 
@@ -604,7 +490,7 @@ class UpdateItemColumnResponse:
     Response for Update an item's column value
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -613,30 +499,23 @@ class UpdateMultipleItemColumnsInput:
     Update multiple item column values
     """
 
-    workspace_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "workspaceId"},
-    )
+    workspace_id: str = dataclass_field(metadata={"wire_name": "workspaceId"})
     """Select the workspace the item belongs to from the drop-down."""
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select the board the item belongs to from the drop-down."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to update."""
-    item_name: Optional[str] = field(
+    item_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "itemName"},
     )
     """
     Specify a new name for the item. Leave blank to keep the current name.
     """
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -647,7 +526,7 @@ class UpdateMultipleItemColumnsResponse:
     Response for Update multiple item column values
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -656,23 +535,13 @@ class MoveItemToGroupInput:
     Move an item to a group
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select the group to move the item to from the drop-down."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Specify the ID of the item to move."""
 
 
@@ -682,7 +551,7 @@ class MoveItemToGroupResponse:
     Response for Move an item to a group
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -691,17 +560,11 @@ class CreateNotificationInput:
     Create a notification
     """
 
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Select a user from the drop-down or specify a user ID."""
-    target_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "targetId"},
-    )
+    target_id: str = dataclass_field(metadata={"wire_name": "targetId"})
     """Specify a board ID or item ID the notification will go to."""
-    text: Optional[str] = None
+    text: str
     """Specify the notification text."""
 
 
@@ -711,7 +574,7 @@ class CreateNotificationResponse:
     Response for Create a notification
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Data"""
 
 
@@ -721,27 +584,20 @@ class CreateSubitemInput:
     Create a subitem
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
+    board_id: str = dataclass_field(metadata={"wire_name": "boardId"})
     """Select a board from the drop-down or specify a board ID."""
-    parent_item_id: Optional[str] = field(
-        default=None,
+    parent_item_id: str = dataclass_field(
         metadata={"wire_name": "parentItemId"},
     )
     """Select a parent item from the drop-down or specify a parent item ID."""
-    item_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemName"},
-    )
+    item_name: str = dataclass_field(metadata={"wire_name": "itemName"})
     """Specify a name for the subitem."""
-    column_values: Optional[DynamicResponseGetListSchema] = field(
+    column_values: Optional[DynamicResponseGetListSchema] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnValues"},
     )
 
@@ -752,7 +608,7 @@ class CreateSubitemResponse:
     Response for Create a subitem
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -761,7 +617,7 @@ class GetSubitemColumnNamesForGetSubitems:
     Response for Get subitems
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -774,25 +630,15 @@ class CreateUpdateInput:
     Create an update
     """
 
-    workspace_id: Optional[FieldWorkspace] = field(
-        default=None,
+    workspace_id: FieldWorkspace = dataclass_field(
         metadata={"wire_name": "workspaceId"},
     )
-    board_id: Optional[FieldBoard] = field(
-        default=None,
-        metadata={"wire_name": "boardId"},
-    )
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    board_id: FieldBoard = dataclass_field(metadata={"wire_name": "boardId"})
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """Select a group from the drop-down or specify a group ID."""
-    item_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "itemId"},
-    )
+    item_id: str = dataclass_field(metadata={"wire_name": "itemId"})
     """Select an item from the drop-down or specify an item ID."""
-    body: Optional[str] = None
+    body: str
     """Specify text for the update."""
 
 
@@ -802,7 +648,7 @@ class CreateUpdateResponse:
     Response for Create an update
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -811,7 +657,7 @@ class DynamicResponseGetListSchemaGet:
     Response for Get an item by ID
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -824,9 +670,9 @@ class CreateWorkspaceInput:
     Create a workspace
     """
 
-    name: Optional[str] = None
+    name: str
     """Specify a name for the new workspace."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specify a description for the new workspace."""
 
 
@@ -836,7 +682,7 @@ class CreateWorkspaceResponse:
     Response for Create a workspace
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -845,7 +691,7 @@ class DynamicGetGetItemsSchema:
     Response for Get items
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -858,7 +704,7 @@ class GetTagsResponse:
     Response for Get tags
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -867,7 +713,7 @@ class GetUsersResponse:
     Response for Get users
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -876,7 +722,7 @@ class GetWorkspacesResponse:
     Response for Get workspaces
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -886,7 +732,7 @@ class GetColumnNamesSchemaResponse:
     Response for Get column names for a board ID
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -896,7 +742,7 @@ class GetSingleColumnSchemaResponse:
     Response for Gets single column schema for a board ID
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -906,7 +752,7 @@ class GetColumnNamesSchemaForWebhookResponse:
     Response for Get column names for a board ID for a webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -916,7 +762,7 @@ class GetSchemaForGetItemsActionResponse:
     Response for Get column names for a board ID for a webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -926,7 +772,7 @@ class GetColumnNamesSchemaForUpdateWebhookResponse:
     Response for Get column names for a board ID for an update webhook
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -936,7 +782,7 @@ class GetSubitemColumnNamesResponse:
     Response for Get subitem column names
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -946,7 +792,7 @@ class GetSubitemSchemaResponse:
     Response for Get subitem column names
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -956,7 +802,7 @@ class GetColumnNamesSchemaForItemNameChangeWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -966,7 +812,7 @@ class GetColumnNamesSchemaForSubitemNameChangeWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -976,7 +822,7 @@ class GetColumnNamesSchemaForColumnChangesWebhookResponse:
     Response for Get column names schema for column changes
     """
 
-    schema: Optional[Dict[str, Any]] = None
+    schema: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Schema of the requested schema type"""
 
 
@@ -986,7 +832,7 @@ class DynamicResponseGetListSchema:
     Definition: DynamicResponseGetListSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -999,7 +845,7 @@ class DynamicResponseGetSingleColumnSchema:
     Definition: DynamicResponseGetSingleColumnSchema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1012,7 +858,7 @@ class DynamicGetColumnNamesForWebhook:
     Definition: DynamicGetColumnNamesForWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1025,7 +871,7 @@ class DynamicGetColumnNamesForUpdateWebhook:
     Definition: DynamicGetColumnNamesForUpdateWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1038,7 +884,7 @@ class DynamicGetSubitemColumnNamesForWebhook:
     Definition: DynamicGetSubitemColumnNamesForWebhook
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1118,6 +964,45 @@ class MondayClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "monday"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def create_item(
         self,
@@ -1949,7 +1834,7 @@ class MondayClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_boards(
+    def list_boards(
         self,
         *,
         workspace_id: Optional[str] = None,
@@ -1957,11 +1842,14 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get boards
 
         This operation gets the boards from monday.com.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/getData/getBoards"
         query_params = []
@@ -1972,29 +1860,47 @@ class MondayClient(ConnectorClientBase):
             query_params.append(f"workspaceId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_groups_for_get_items(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_groups_for_get_items(
         self,
         board_id: str,
         *,
@@ -2002,12 +1908,15 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get groups for the Get Items operation
 
         This operation gets the groups from monday.com, which includes the
         option to select all groups.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getGroupsForGetItems"
@@ -2019,29 +1928,47 @@ class MondayClient(ConnectorClientBase):
         query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_columns_for_item_filtering(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_columns_for_item_filtering(
         self,
         board_id: str,
         *,
@@ -2049,11 +1976,14 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get columns for item filtering
 
         This operation gets the columns from monday.com for item filtering.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2066,29 +1996,47 @@ class MondayClient(ConnectorClientBase):
         query_params.append(f"boardId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_column_filter_operator(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_column_filter_operator(
         self,
         board_id: str,
         *,
@@ -2097,12 +2045,15 @@ class MondayClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get column filter operator
 
         This operation gets the available item filter operator for the selected
         monday.com column.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getColumnFilterOperator"
@@ -2119,27 +2070,45 @@ class MondayClient(ConnectorClientBase):
             query_params.append(f"columnId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_column_names_schema(
         self,

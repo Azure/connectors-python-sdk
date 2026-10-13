@@ -46,7 +46,7 @@ async def example_1_list_deals():
 
         async with PipedriveClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_deals()
+                items = [item async for item in client.list_deals()]
 
                 deals = (result or {}).get("data", []) if isinstance(result, dict) else []
                 print(f"Found {len(deals)} deal(s).")

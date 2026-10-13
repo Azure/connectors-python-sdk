@@ -26,6 +26,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 class TestClicksendsmsClientInitialization:
@@ -216,7 +217,11 @@ class TestClicksendsmsClientOperations:
     async def test_create_list_contact_success(self, mock_credential):
         """Test create_list_contact issues a POST to the list contacts route."""
         client = self._make_client(mock_credential)
-        payload = CreateListContactInput(first_name="Ada", phone_number="+61411111111")
+        payload = model_instance(
+            CreateListContactInput,
+            first_name="Ada",
+            phone_number="+61411111111",
+        )
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -340,7 +345,11 @@ class TestClicksendsmsClientOperations:
     async def test_send_letter_success(self, mock_credential):
         """Test send_letter issues a POST to the letters route with the input body."""
         client = self._make_client(mock_credential)
-        payload = SendLetterInput(file_url="url", recipients=[{"address_name": "Ada"}])
+        payload = model_instance(
+            SendLetterInput,
+            file_url="url",
+            recipients=[{"address_name": "Ada"}],
+        )
         mock_response = MockResponse(status=200, text='{"data": {}}')
 
         with patch.object(
@@ -424,35 +433,39 @@ class TestClicksendsmsClientErrorHandling:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 if operation == "sms_send":
-                    await client.sms_send(input=SmsSendInput())
+                    await client.sms_send(input=model_instance(SmsSendInput))
                 elif operation == "create_list":
-                    await client.create_list(input=CreateListInput())
+                    await client.create_list(input=model_instance(CreateListInput))
                 elif operation == "get_contact_lists":
                     await client.get_contact_lists()
                 elif operation == "send_voice":
-                    await client.send_voice(input=SendVoiceInput())
+                    await client.send_voice(input=model_instance(SendVoiceInput))
                 elif operation == "delete_list":
                     await client.delete_list(list_id="123")
                 elif operation == "create_list_contact":
                     await client.create_list_contact(
-                        input=CreateListContactInput(), list_id="123"
+                        input=model_instance(CreateListContactInput),
+                        list_id="123",
                     )
                 elif operation == "view_list_contacts":
                     await client.view_list_contacts(list_id="123")
                 elif operation == "delete_list_contact":
                     await client.delete_list_contact(list_id="123", contact_id="456")
                 elif operation == "send_mms":
-                    await client.send_mms(input=SendMmsInput())
+                    await client.send_mms(input=model_instance(SendMmsInput))
                 elif operation == "send_fax":
-                    await client.send_fax(input=SendFaxInput())
+                    await client.send_fax(input=model_instance(SendFaxInput))
                 elif operation == "upload_media":
-                    await client.upload_media(input=UploadMediaInput(), convert="mms")
+                    await client.upload_media(
+                        input=model_instance(UploadMediaInput),
+                        convert="mms",
+                    )
                 elif operation == "search_contact_list":
                     await client.search_contact_list(q="friends")
                 elif operation == "send_letter":
-                    await client.send_letter(input=SendLetterInput())
+                    await client.send_letter(input=model_instance(SendLetterInput))
                 else:
-                    await client.send_postcard(input=SendPostcardInput())
+                    await client.send_postcard(input=model_instance(SendPostcardInput))
 
             assert exc_info.value.status_code == 500
 
@@ -488,6 +501,11 @@ class TestClicksendsmsTypeSerialization:
         assert SmsSendResponse().http_code is None
         assert SmsSendResponse().response_msg is None
         assert DeleteListResponse().response_msg is None
-        assert CreateListContactInput().first_name is None
-        assert CreateListContactInput().custom1 is None
-        assert CreateListContactInput().address_line1 is None
+        contact = CreateListContactInput(
+            first_name="Ada",
+            last_name="Lovelace",
+            phone_number="+61411111111",
+        )
+        assert contact.first_name == "Ada"
+        assert contact.custom1 is None
+        assert contact.address_line1 is None

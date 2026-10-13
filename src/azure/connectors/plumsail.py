@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -95,22 +95,26 @@ class ProfileInfo:
     Response for Get Profile Info
     """
 
-    name: Optional[str] = None
-    email: Optional[str] = None
-    license_status: Optional[str] = field(
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
+    license_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "licenseStatus"},
     )
-    team_name: Optional[str] = field(
+    team_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamName"},
     )
-    license_info: Optional[LicenseInfo] = field(
+    license_info: Optional[LicenseInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "licenseInfo"},
     )
-    short_user_id: Optional[str] = field(
+    short_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "shortUserId"},
     )
 
@@ -121,8 +125,9 @@ class DocumentProcessingResponse:
     Response for Create document from PPTX template
     """
 
-    file_content: Optional[str] = field(
+    file_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileContent"},
     )
     """The result as a file"""
@@ -134,8 +139,9 @@ class ApplyHtmlTemplateResponse:
     Response for Create HTML from template
     """
 
-    html_result: Optional[str] = field(
+    html_result: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "htmlResult"},
     )
     """Raw HTML result"""
@@ -147,7 +153,7 @@ class FlowDocumentsJobsSplitPdfInput:
     Split PDF
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -160,8 +166,9 @@ class DocumentsWithFilenamesResponse:
     Response for Split PDF
     """
 
-    result_files: Optional[List[DocumentContentWithFilenameResponse]] = field(
+    result_files: Optional[List[DocumentContentWithFilenameResponse]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resultFiles"},
     )
     """Array of raw contents of result files with their filenames"""
@@ -173,7 +180,7 @@ class FlowDocumentsJobsGetPdfFormPostResponse:
     Response for Get Form from PDF
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -186,8 +193,9 @@ class GetPdfProtectionInfoResponse:
     Response for Get information about PDF protection
     """
 
-    is_password_protected: Optional[bool] = field(
+    is_password_protected: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isPasswordProtected"},
     )
 
@@ -198,7 +206,7 @@ class FlowDocumentsJobsAddWatermarkToPdfInput:
     Add a watermark to PDF
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -211,7 +219,7 @@ class ParseCsvSchemaResponse:
     Response for Parse CSV
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -224,7 +232,7 @@ class RegExpMatchSchemaResponseClass:
     Response for Regular Expression Match
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -237,7 +245,7 @@ class StringResultResponse:
     Response for Regular Expression Replace
     """
 
-    result: Optional[str] = None
+    result: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -246,8 +254,9 @@ class BooleanResultResponse:
     Response for Regular Expression Test
     """
 
-    is_success: Optional[bool] = field(
+    is_success: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isSuccess"},
     )
 
@@ -258,10 +267,11 @@ class DocumentContentWithFilenameResponse:
     Response for Create Archive
     """
 
-    filename: Optional[str] = None
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the file"""
-    file_content: Optional[str] = field(
+    file_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileContent"},
     )
     """File content"""
@@ -273,7 +283,7 @@ class FlowProcessesFlowJobsExecuteProcessInput:
     Start document generation process with json
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -286,15 +296,9 @@ class AddPowerAutomateWebhookData:
     Definition: AddPowerAutomateWebhookData
     """
 
-    process_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "processId"},
-    )
+    process_id: str = dataclass_field(metadata={"wire_name": "processId"})
     """Name of the process that, when finished, will trigger the flow"""
-    hook_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "hookUrl"},
-    )
+    hook_url: str = dataclass_field(metadata={"wire_name": "hookUrl"})
     """HookUrl"""
 
 
@@ -304,8 +308,7 @@ class Any2PdfRequest:
     Definition: Any2PdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -317,23 +320,19 @@ class ApplyDocxTemplateRequest:
     Definition: ApplyDocxTemplateRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of the template"""
-    data: Optional[Dict[str, Any]] = None
+    data: Dict[str, Any]
     """JSON data that should be applied to the template"""
-    output_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "outputType"},
-    )
+    output_type: str = dataclass_field(metadata={"wire_name": "outputType"})
     """The required document type"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time zone of the document"""
-    engine: Optional[str] = None
+    engine: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The engine that will process the template"""
 
 
@@ -343,13 +342,13 @@ class ApplyHtmlFlowTemplateRequest:
     Definition: ApplyHtmlFlowTemplateRequest
     """
 
-    html: Optional[str] = None
+    html: str
     """Text HTML template or HTML file template"""
-    data: Optional[Dict[str, Any]] = None
+    data: Dict[str, Any]
     """JSON data that should be applied to the template"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time zone of the document"""
 
 
@@ -359,21 +358,17 @@ class ApplyPptxTemplateRequest:
     Definition: ApplyPptxTemplateRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of the template"""
-    data: Optional[Dict[str, Any]] = None
+    data: Dict[str, Any]
     """JSON data that should be applied to the template"""
-    output_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "outputType"},
-    )
+    output_type: str = dataclass_field(metadata={"wire_name": "outputType"})
     """The required document type"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time zone of the document"""
 
 
@@ -383,21 +378,17 @@ class ApplyXlsxTemplateRequest:
     Definition: ApplyXlsxTemplateRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of the template"""
-    data: Optional[Dict[str, Any]] = None
+    data: Dict[str, Any]
     """JSON data that should be applied to the template"""
-    output_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "outputType"},
-    )
+    output_type: str = dataclass_field(metadata={"wire_name": "outputType"})
     """The required document type"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    timezone: Optional[str] = None
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The time zone of the document"""
 
 
@@ -407,20 +398,20 @@ class CompressPdfRequest:
     Definition: CompressPdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    lossless_mode: Optional[str] = field(
+    lossless_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "losslessMode"},
     )
     """
     When disabled, compresses the PDF file more effectively, but with a slight
     loss of image quality.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to open PDF file"""
 
 
@@ -430,14 +421,11 @@ class CreateArchiveRequest:
     Definition: CreateArchiveRequest
     """
 
-    file_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "fileName"},
-    )
+    file_name: str = dataclass_field(metadata={"wire_name": "fileName"})
     """Name of the archive without the file extension"""
-    data: Optional[List[FileData]] = None
+    data: List[FileData]
     """Array of documents to add to the archive"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Archive password"""
 
 
@@ -447,18 +435,19 @@ class Csv2XlsxColumnMapping:
     Definition: Csv2XlsxColumnMapping
     """
 
-    csv_column_index_or_name: Optional[str] = field(
-        default=None,
+    csv_column_index_or_name: str = dataclass_field(
         metadata={"wire_name": "csvColumnIndexOrName"},
     )
     """CSV column name or column index (1, 2, etc.)"""
-    xlsx_column_type: Optional[str] = field(
+    xlsx_column_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "xlsxColumnType"},
     )
     """Optional. Column type (ShortDateTime, TwoDecimal, etc.)"""
-    xlsx_column_name: Optional[str] = field(
+    xlsx_column_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "xlsxColumnName"},
     )
     """Optional. Rename CSV column to this name"""
@@ -470,20 +459,21 @@ class Csv2XlsxRequest:
     Definition: Csv2XlsxRequest
     """
 
-    content: Optional[str] = None
+    content: str
     """Content of CSV document"""
-    delimiter: Optional[str] = None
+    delimiter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delimiter of columns (by default it is just comma)"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Returns the first \"n\" rows"""
-    has_header_records: Optional[bool] = field(
+    has_header_records: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasHeaderRecords"},
     )
     """If set to \"Yes\" then headers will be read from the first line."""
-    mappings: Optional[List[Csv2XlsxColumnMapping]] = None
+    mappings: Optional[List[Csv2XlsxColumnMapping]] = dataclass_field(default=None, kw_only=True)
     """Rename headers and specify types for columns."""
 
 
@@ -493,8 +483,7 @@ class Doc2DocxRequest:
     Definition: Doc2DocxRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -506,8 +495,9 @@ class DocumentsArrayResponse:
     Definition: DocumentsArrayResponse
     """
 
-    result_files_contents: Optional[List[str]] = field(
+    result_files_contents: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resultFilesContents"},
     )
     """The array of raw content of result files"""
@@ -519,8 +509,7 @@ class Docx2PdfRequest:
     Definition: Docx2PdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -532,13 +521,11 @@ class Email2PdfRequest:
     Definition: Email2PdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of the email that should be converted"""
-    merge_attachments: Optional[bool] = field(
-        default=None,
+    merge_attachments: bool = dataclass_field(
         metadata={"wire_name": "mergeAttachments"},
     )
     """
@@ -553,17 +540,19 @@ class ExtractArchiveRequest:
     Definition: ExtractArchiveRequest
     """
 
-    file_content: Optional[str] = field(
+    file_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileContent"},
     )
     """Content of archive file"""
-    include_folders: Optional[bool] = field(
+    include_folders: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "includeFolders"},
     )
     """If 'true' files contained in the folders will be extracted"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Archive password"""
 
 
@@ -573,12 +562,13 @@ class FileData:
     Definition: FileData
     """
 
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileName"},
     )
     """File name including the file extension"""
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of the document"""
 
 
@@ -588,22 +578,21 @@ class FillInPdfFormRequest:
     Definition: FillInPdfFormRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    json_data: Optional[Dict[str, Any]] = field(
-        default=None,
+    json_data: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "jsonData"},
     )
     """The data that will be used to fill out the form"""
-    lock_form_fields: Optional[bool] = field(
+    lock_form_fields: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lockFormFields"},
     )
     """Disable fields editing after filling them"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to open PDF file"""
 
 
@@ -613,12 +602,11 @@ class GetPdfFormRequest:
     Definition: GetPdfFormRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to decrypt document"""
 
 
@@ -628,34 +616,39 @@ class Html2DocxFlowRequest:
     Definition: Html2DocxFlowRequest
     """
 
-    file_content: Optional[str] = field(
+    file_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fileContent"},
     )
     """Binary content of the HTML file to convert to DOCX"""
-    raw_html: Optional[str] = field(
+    raw_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rawHtml"},
     )
     """HTML Data to convert to DOCX"""
-    html_url: Optional[str] = field(
+    html_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "htmlUrl"},
     )
     """URL to the web page to convert to DOCX"""
-    paper_size: Optional[str] = field(
+    paper_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "paperSize"},
     )
     """Can be A4,A5 etc..."""
-    orientation: Optional[str] = None
+    orientation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Portrait or Landscape"""
-    decode_html: Optional[bool] = field(
+    decode_html: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "decodeHtml"},
     )
     """Whether HTML should be decoded prior to conversion"""
-    margins: Optional[str] = None
+    margins: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Page margins in pt. The syntax is the same as in CSS. Example: 25 50 75
     100.
@@ -668,25 +661,27 @@ class Html2PdfFlowRequest:
     Definition: Html2PdfFlowRequest
     """
 
-    html: Optional[str] = None
+    html: str
     """HTML markup that should be converted to PDF"""
-    engine: Optional[str] = None
+    engine: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Conversion engine"""
-    size: Optional[str] = None
+    size: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Can be A4,A5 etc..."""
-    orientation: Optional[str] = None
+    orientation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Portrait or Landscape"""
-    margins: Optional[str] = None
+    margins: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The page margins. The syntax is the same as in CSS. Example: 25 50 75 100.
     """
-    header_html: Optional[str] = field(
+    header_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "headerHtml"},
     )
     """HTML markup that should be added as a header"""
-    footer_html: Optional[str] = field(
+    footer_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "footerHtml"},
     )
     """HTML markup that should be added as a footer"""
@@ -698,16 +693,16 @@ class Image2PdfRequest:
     Definition: Image2PdfRequest
     """
 
-    image_per_page: Optional[bool] = field(
+    image_per_page: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imagePerPage"},
     )
     """
     Select \"No\" if you don't want each image to be on a separate page.
     Default is \"Yes\"
     """
-    image_content: Optional[List[str]] = field(
-        default=None,
+    image_content: List[str] = dataclass_field(
         metadata={"wire_name": "imageContent"},
     )
     """Raw content of the image"""
@@ -719,24 +714,26 @@ class Json2CsvRequest:
     Definition: Json2CsvRequest
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional. Content of the JSON file"""
-    json_data: Optional[str] = field(
+    json_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jsonData"},
     )
     """Optional. JSON data to process"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    path_to_json_array: Optional[str] = field(
+    path_to_json_array: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pathToJsonArray"},
     )
     """
     Dot separated path to array in JSON. E.g.: \"data\" or
     \"prop1.prop2.prop3\"
     """
-    delimiter: Optional[str] = None
+    delimiter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delimiter of columns in CSV. Default is comma"""
 
 
@@ -746,18 +743,19 @@ class Json2XlsxColumnMapping:
     Definition: Json2XlsxColumnMapping
     """
 
-    json_property: Optional[str] = field(
-        default=None,
+    json_property: str = dataclass_field(
         metadata={"wire_name": "jsonProperty"},
     )
     """Name of the JSON property"""
-    xlsx_column_type: Optional[str] = field(
+    xlsx_column_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "xlsxColumnType"},
     )
     """Optional. Column type (ShortDateTime, TwoDecimal, etc.)"""
-    xlsx_column_name: Optional[str] = field(
+    xlsx_column_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "xlsxColumnName"},
     )
     """Optional. Rename JSON property to this name"""
@@ -769,24 +767,26 @@ class Json2XlsxRequest:
     Definition: Json2XlsxRequest
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Optional. Content of the JSON file"""
-    json_data: Optional[str] = field(
+    json_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jsonData"},
     )
     """Optional. JSON data to process"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    path_to_json_array: Optional[str] = field(
+    path_to_json_array: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pathToJsonArray"},
     )
     """
     Dot separated path to array in JSON. E.g.: \"data\" or
     \"prop1.prop2.prop3\"
     """
-    mappings: Optional[List[Json2XlsxColumnMapping]] = None
+    mappings: Optional[List[Json2XlsxColumnMapping]] = dataclass_field(default=None, kw_only=True)
     """Rename headers and specify types for columns."""
 
 
@@ -796,14 +796,20 @@ class LicenseInfo:
     Definition: LicenseInfo
     """
 
-    type_: Optional[int] = field(default=None, metadata={"wire_name": "type"})
-    credits: Optional[int] = None
-    additional_credits: Optional[int] = field(
+    type_: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
+    additional_credits: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "additionalCredits"},
     )
-    expiration_date: Optional[str] = field(
+    expiration_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDate"},
     )
 
@@ -814,12 +820,9 @@ class MergeAny2PdfFileData:
     Definition: MergeAny2PdfFileData
     """
 
-    file_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "fileName"},
-    )
+    file_name: str = dataclass_field(metadata={"wire_name": "fileName"})
     """Name of the file, including extension"""
-    content: Optional[str] = None
+    content: str
     """Content of the file"""
 
 
@@ -829,18 +832,19 @@ class MergeAny2PdfRequest:
     Definition: MergeAny2PdfRequest
     """
 
-    documents_contents: Optional[List[str]] = field(
-        default=None,
+    documents_contents: List[str] = dataclass_field(
         metadata={"wire_name": "documentsContents"},
     )
     """The array of raw contents of files to merge"""
-    generate_bookmarks: Optional[bool] = field(
+    generate_bookmarks: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "generateBookmarks"},
     )
     """Generate a bookmark for each merged file"""
-    preserve_bookmarks: Optional[bool] = field(
+    preserve_bookmarks: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preserveBookmarks"},
     )
     """Preserve bookmarks from each merged PDF"""
@@ -852,21 +856,20 @@ class MergeDocxRequest:
     Definition: MergeDocxRequest
     """
 
-    documents_contents: Optional[List[str]] = field(
-        default=None,
+    documents_contents: List[str] = dataclass_field(
         metadata={"wire_name": "documentsContents"},
     )
     """The array of raw content of Docx documents"""
-    apply_header_and_footer: Optional[bool] = field(
-        default=None,
+    apply_header_and_footer: bool = dataclass_field(
         metadata={"wire_name": "applyHeaderAndFooter"},
     )
     """
     Applies the header and footer from the first document to all the others.
     Ignored when \"Add page break\" is No (forces Yes).
     """
-    add_page_break: Optional[bool] = field(
+    add_page_break: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "addPageBreak"},
     )
     """Adds page breaks between merged documents."""
@@ -878,15 +881,14 @@ class MergeFieldsTemplateRequest:
     Definition: MergeFieldsTemplateRequest
     """
 
-    docx_document: Optional[str] = field(
-        default=None,
+    docx_document: str = dataclass_field(
         metadata={"wire_name": "docxDocument"},
     )
     """
     Raw content of docx document template. MergeField names should be the same
     as keys in template data
     """
-    data: Optional[Dict[str, Any]] = None
+    data: Dict[str, Any]
     """JSON data that should be applied to the template"""
 
 
@@ -896,8 +898,7 @@ class MergePdfRequest:
     Definition: MergePdfRequest
     """
 
-    documents_contents: Optional[List[str]] = field(
-        default=None,
+    documents_contents: List[str] = dataclass_field(
         metadata={"wire_name": "documentsContents"},
     )
     """The array of raw content of PDF documents"""
@@ -909,8 +910,7 @@ class MergeXlsxRequest:
     Definition: MergeXlsxRequest
     """
 
-    documents_contents: Optional[List[str]] = field(
-        default=None,
+    documents_contents: List[str] = dataclass_field(
         metadata={"wire_name": "documentsContents"},
     )
     """The array of raw content of Xlsx documents"""
@@ -922,18 +922,19 @@ class ParseCsvFlowRequest:
     Definition: ParseCsvFlowRequest
     """
 
-    content: Optional[str] = None
+    content: str
     """Content of CSV document"""
-    delimiter: Optional[str] = None
+    delimiter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delimiter of columns (by default it is just comma)"""
-    locale: Optional[str] = None
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The locale that will be applyed to the document"""
-    limit: Optional[int] = None
+    limit: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Returns the first \"n\" rows"""
-    headers: Optional[str] = None
+    headers: str
     """Comma separated list of headers in the same order as CSV columns"""
-    skip_first_line: Optional[bool] = field(
+    skip_first_line: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "skipFirstLine"},
     )
     """Select \"Yes\" if your CSV has headers as a first line."""
@@ -945,39 +946,41 @@ class Pdf2ImageRequest:
     Definition: Pdf2ImageRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    filename_prefix: Optional[str] = field(
+    filename_prefix: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filenamePrefix"},
     )
     """
     Optional. Output files will have this prefix followed by an index number
     for name
     """
-    start_page: Optional[int] = field(
+    start_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startPage"},
     )
     """The first page to start extraction (1 based)"""
-    end_page: Optional[int] = field(
+    end_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endPage"},
     )
     """The last page to extract (inclusive)"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Page numbers for extraction separated by ';' (only this pages will be
     extracted)
     """
-    format: Optional[str] = None
+    format: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The format of the result image"""
-    dpi: Optional[int] = None
+    dpi: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The resolution of the result image"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to decrypt document"""
 
 
@@ -987,27 +990,29 @@ class Pdf2TextRequest:
     Definition: Pdf2TextRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    start_page: Optional[int] = field(
+    start_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startPage"},
     )
     """The first page to start extraction (1 based)"""
-    end_page: Optional[int] = field(
+    end_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endPage"},
     )
     """The last page to extract (inclusive)"""
-    result_type: Optional[str] = field(
+    result_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resultType"},
     )
     """Raw or HTML"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to decrypt document"""
 
 
@@ -1017,8 +1022,7 @@ class PdfProtectionInfoRequest:
     Definition: PdfProtectionInfoRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
@@ -1030,8 +1034,7 @@ class Ppt2PptxRequest:
     Definition: Ppt2PptxRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -1043,8 +1046,7 @@ class Pptx2PdfRequest:
     Definition: Pptx2PdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -1056,8 +1058,7 @@ class ProcessJsonData:
     Definition: ProcessJsonData
     """
 
-    json_content: Optional[Dict[str, Any]] = field(
-        default=None,
+    json_content: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "jsonContent"},
     )
     """JSON data that should be applied to the template"""
@@ -1069,7 +1070,7 @@ class ProcessSchemaDynamicType:
     Definition: ProcessSchemaDynamicType
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1082,43 +1083,40 @@ class ProtectPdfRequest:
     Definition: ProtectPdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    allow_printing: Optional[bool] = field(
-        default=None,
+    allow_printing: bool = dataclass_field(
         metadata={"wire_name": "allowPrinting"},
     )
     """Protect the PDF file from being printed out"""
-    allow_modification: Optional[bool] = field(
-        default=None,
+    allow_modification: bool = dataclass_field(
         metadata={"wire_name": "allowModification"},
     )
     """Protect the PDF file from being edited"""
-    allow_extract: Optional[bool] = field(
-        default=None,
+    allow_extract: bool = dataclass_field(
         metadata={"wire_name": "allowExtract"},
     )
     """Allows extraction of text, images, and other media from the PDF file"""
-    allow_annotate: Optional[bool] = field(
-        default=None,
+    allow_annotate: bool = dataclass_field(
         metadata={"wire_name": "allowAnnotate"},
     )
     """
     Allows annotation (e.g. comments, form fill-in, signing) of the PDF file
     """
-    new_owner_password: Optional[str] = field(
+    new_owner_password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newOwnerPassword"},
     )
     """
     Enter an optional owner password here. This password can be used to disable
     document restrictions
     """
-    new_user_password: Optional[str] = field(
+    new_user_password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newUserPassword"},
     )
     """
@@ -1126,7 +1124,7 @@ class ProtectPdfRequest:
     will be asked for this password. If you do not want a password prompt then
     leave this field blank
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to decrypt document"""
 
 
@@ -1136,9 +1134,9 @@ class RegExpMatchRequest:
     Definition: RegExpMatchRequest
     """
 
-    pattern: Optional[str] = None
+    pattern: str
     """Regular expression pattern"""
-    text: Optional[str] = None
+    text: str
     """String to search for matches"""
 
 
@@ -1148,11 +1146,11 @@ class RegExpReplaceRequest:
     Definition: RegExpReplaceRequest
     """
 
-    pattern: Optional[str] = None
+    pattern: str
     """Regular expression pattern"""
-    text: Optional[str] = None
+    text: str
     """String to search for matches"""
-    replacement: Optional[str] = None
+    replacement: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Replacement string"""
 
 
@@ -1162,9 +1160,9 @@ class RegExpTestRequest:
     Definition: RegExpTestRequest
     """
 
-    pattern: Optional[str] = None
+    pattern: str
     """Regular expression pattern"""
-    text: Optional[str] = None
+    text: str
     """String to search for matches"""
 
 
@@ -1174,27 +1172,29 @@ class SplitPdfRequest:
     Definition: SplitPdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Raw content of PDF document"""
-    start_page: Optional[int] = field(
+    start_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startPage"},
     )
     """The first page to start split (1 based)"""
-    end_page: Optional[int] = field(
+    end_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endPage"},
     )
     """The last page to split (inclusive)"""
-    split_at_page: Optional[int] = field(
+    split_at_page: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "splitAtPage"},
     )
     """Number of pages per partition"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password to decrypt document"""
 
 
@@ -1204,8 +1204,7 @@ class Xls2XlsxRequest:
     Definition: Xls2XlsxRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""
@@ -1217,8 +1216,7 @@ class Xlsx2PdfRequest:
     Definition: Xlsx2PdfRequest
     """
 
-    document_content: Optional[str] = field(
-        default=None,
+    document_content: str = dataclass_field(
         metadata={"wire_name": "documentContent"},
     )
     """Content of document that should be converted"""

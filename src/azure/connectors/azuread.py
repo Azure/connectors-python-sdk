@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -49,32 +49,23 @@ class CreateOffice365GroupInput:
     Create Office 365 group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = field(
-        default=None,
+    group_types: List[str] = dataclass_field(
         metadata={"wire_name": "groupTypes"},
     )
     """For Office 365, group type is 'Unified'."""
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -84,80 +75,93 @@ class CreateGroupResponse:
     Response for Create Office 365 group
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """@odata.context"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """deletedDateTime"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """classification"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """createdDateTime"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """description"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """displayName"""
-    group_types: Optional[List[str]] = field(
+    group_types: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupTypes"},
     )
     """groupTypes"""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail"""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """mailEnabled"""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """mailNickname"""
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """onPremisesLastSyncDateTime"""
-    on_premises_security_identifier: Optional[str] = field(
+    on_premises_security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSecurityIdentifier"},
     )
     """onPremisesSecurityIdentifier"""
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """onPremisesSyncEnabled"""
-    proxy_addresses: Optional[List[str]] = field(
+    proxy_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "proxyAddresses"},
     )
     """proxyAddresses"""
-    renewed_date_time: Optional[str] = field(
+    renewed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "renewedDateTime"},
     )
     """renewedDateTime"""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """securityEnabled"""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """visibility"""
 
 
@@ -167,27 +171,19 @@ class CreateSecurityGroupInput:
     Create security group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -197,51 +193,58 @@ class GetGroupResponse:
     Response for Get group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique identifier for the group."""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """Date-time the group was deleted."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Date-time the group was created."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """An optional description for the group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the group."""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SMTP address for the group."""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """True if the group is mail-enabled."""
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """
     A date-time indicating the last time at which the group was synced with the
     on-premises directory.
     """
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """True if this group is synced from an on-premises directory."""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the group is a security group."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Visibility of the group (public or private)."""
 
 
@@ -251,51 +254,59 @@ class GetUserResponse:
     Response for Get user
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A unique identifier for the user."""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name displayed in the address book for the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The given name (first name) of the user."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SMTP address for the user."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """The primary cellular telephone number for the user."""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
@@ -307,12 +318,13 @@ class GetGroupMembersResponse:
     Response for Get group members
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[GetUserResponse]] = None
+    value: Optional[List[GetUserResponse]] = dataclass_field(default=None, kw_only=True)
     """Array of users that are members of the group."""
 
 
@@ -322,34 +334,25 @@ class CreateGroupInput:
     Create group
     """
 
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """Display name of the new group."""
-    description: Optional[str] = None
+    description: str
     """Description of the new group."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias of the new group."""
-    group_types: Optional[List[str]] = field(
-        default=None,
+    group_types: List[str] = dataclass_field(
         metadata={"wire_name": "groupTypes"},
     )
     """
     Choose 'Unified' for an O365 group. Choose 'None' for a security group.
     """
-    security_enabled: Optional[bool] = field(
-        default=None,
+    security_enabled: bool = dataclass_field(
         metadata={"wire_name": "securityEnabled"},
     )
     """True if the new group is a security group."""
-    mail_enabled: Optional[bool] = field(
-        default=None,
-        metadata={"wire_name": "mailEnabled"},
-    )
+    mail_enabled: bool = dataclass_field(metadata={"wire_name": "mailEnabled"})
     """True if the new group is a mailing group."""
 
 
@@ -359,7 +362,7 @@ class GetMemberGroupsResponseV2:
     Response for Check group membership (V2)
     """
 
-    value: Optional[GetMemberGroupsResponse] = None
+    value: Optional[GetMemberGroupsResponse] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -368,10 +371,7 @@ class GetGroupRequest:
     Definition: GetGroup_Request
     """
 
-    id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.id"},
-    )
+    id: str = dataclass_field(metadata={"wire_name": "@odata.id"})
     """
     Unique identifier of a user (Ex. '5e6cf5c7-b511-4842-6aae-3f6b8ae5e95b').
     """
@@ -383,10 +383,7 @@ class AssignManagerRequest:
     Definition: AssignManager_Request
     """
 
-    id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.id"},
-    )
+    id: str = dataclass_field(metadata={"wire_name": "@odata.id"})
     """
     Unique identifier of a manager (Ex.
     '5f6cf5c7-a561-4842-9aae-3e6d8ce5e95b').
@@ -399,76 +396,89 @@ class UpdateUserRequest:
     Definition: UpdateUser_Request
     """
 
-    user_principal_name: Optional[str] = field(
+    user_principal_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias for the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The given name (first name) of the user."""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    account_enabled: Optional[bool] = field(
+    account_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "accountEnabled"},
     )
     """True if the new account should be enabled."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name for the department in which the user works."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
     The preferred language for the user. Should follow ISO 639-1 Code; for
     example 'en-US'.
     """
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    other_mails: Optional[List[str]] = field(
+    other_mails: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "otherMails"},
     )
-    custom_properties: Optional[Dict[str, str]] = field(
+    custom_properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "customProperties"},
     )
     """Free form property name and value for this user."""
-    on_premises_extension_attributes: Optional[Dict[str, Any]] = field(
+    on_premises_extension_attributes: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesExtensionAttributes"},
     )
 
@@ -479,8 +489,7 @@ class GetMemberGroupsRequest:
     Definition: GetMemberGroups_Request
     """
 
-    security_enabled_only: Optional[bool] = field(
-        default=None,
+    security_enabled_only: bool = dataclass_field(
         metadata={"wire_name": "securityEnabledOnly"},
     )
     """Determines if only security enabled groups should be fetched."""
@@ -495,64 +504,63 @@ class CreateUserRequest:
     Definition: CreateUser_Request
     """
 
-    account_enabled: Optional[bool] = field(
-        default=None,
+    account_enabled: bool = dataclass_field(
         metadata={"wire_name": "accountEnabled"},
     )
     """True if the new account should be enabled when it is created."""
-    display_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "displayName"},
-    )
+    display_name: str = dataclass_field(metadata={"wire_name": "displayName"})
     """The name displayed in the address book for the user."""
-    mail_nickname: Optional[str] = field(
-        default=None,
+    mail_nickname: str = dataclass_field(
         metadata={"wire_name": "mailNickname"},
     )
     """The mail alias for the user."""
-    password_profile: Optional[Dict[str, Any]] = field(
-        default=None,
+    password_profile: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "passwordProfile"},
     )
     """passwordProfile"""
-    user_principal_name: Optional[str] = field(
-        default=None,
+    user_principal_name: str = dataclass_field(
         metadata={"wire_name": "userPrincipalName"},
     )
     """The user principal name (UPN) of the user."""
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "givenName"},
     )
     """The user's given name (first name)."""
-    surname: Optional[str] = None
+    surname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The user's surname (family name or last name)."""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "businessPhones"},
     )
-    department: Optional[str] = None
+    department: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name for the department in which the user works."""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobTitle"},
     )
     """The user's job title."""
-    mobile_phone: Optional[str] = field(
+    mobile_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mobilePhone"},
     )
     """
     The mobile phone number for the user in any format such as '1 (234)
     567-8910'.
     """
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "officeLocation"},
     )
     """The office location in the user's place of business."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """
@@ -567,10 +575,7 @@ class CheckMemberGroupsRequest:
     Definition: CheckMemberGroups_Request
     """
 
-    group_ids: Optional[List[str]] = field(
-        default=None,
-        metadata={"wire_name": "groupIds"},
-    )
+    group_ids: List[str] = dataclass_field(metadata={"wire_name": "groupIds"})
 
 
 # Client Class
@@ -1170,7 +1175,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def check_member_groups(
+    def list_check_member_groups(
         self,
         input: CheckMemberGroupsRequest,
         id: str,
@@ -1179,40 +1184,61 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Check group membership
 
         If the user is a member of the given group, the result will contain the
         given id. Otherwise the result will be empty.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/users/{quote(str(id), safe='')}/checkMemberGroups"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_member_groups(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_member_groups(
         self,
         input: GetMemberGroupsRequest,
         id: str,
@@ -1221,34 +1247,55 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get groups of a user
 
         Get the groups a user is a member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/users/{quote(str(id), safe='')}/getMemberGroups"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

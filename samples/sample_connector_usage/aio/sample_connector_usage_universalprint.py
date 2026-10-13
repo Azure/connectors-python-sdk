@@ -44,7 +44,7 @@ async def example_1_list_recent_shares():
 
         async with UniversalprintClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_recent_shares()
+                items = [item async for item in client.list_recent_shares()]
 
                 shares = (result or {}).get("value", []) if isinstance(result, dict) else []
                 print(f"Found {len(shares)} recent printer share(s).")

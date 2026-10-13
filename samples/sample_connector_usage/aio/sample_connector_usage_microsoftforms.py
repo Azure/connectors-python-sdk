@@ -40,8 +40,7 @@ async def example_1_list_forms() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with MicrosoftformsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            forms_response = await client.list_forms()
-            forms = forms_response.get("value", []) if forms_response else []
+            forms = [form async for form in client.list_forms()]
 
             print(f"Found {len(forms)} forms")
             for form in forms[:5]:

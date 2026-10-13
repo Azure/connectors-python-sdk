@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -79,8 +79,8 @@ class DataSetsMetadata:
     Response for GetDataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -89,7 +89,7 @@ class AssociateRecordsPatchItemInput:
     Associates one row to another on the provided relationship
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -102,8 +102,9 @@ class Item:
     Response for Associates one row to another on the provided relationship
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -114,10 +115,11 @@ class ItemsList:
     Response for Retrieves all collection valued relationship items as an expand would
     """
 
-    value: Optional[List[Item]] = None
+    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
     """List of Items"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -129,7 +131,7 @@ class DataSetsList:
     Response for GetDataSets
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
     """List of datasets"""
 
 
@@ -139,7 +141,7 @@ class GetItemResponse:
     Response for Get row (legacy)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -152,26 +154,30 @@ class TableMetadata:
     Response for Get table metadata - Patch
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """Url link"""
@@ -183,7 +189,7 @@ class ObjectEntity:
     Response for Retrieves the metadata for multi select column metadata
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -196,7 +202,7 @@ class TablesList:
     Response for GetTables
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
     """List of Tables"""
 
 
@@ -206,7 +212,7 @@ class PatchItemInput:
     Update a row (legacy)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -219,7 +225,7 @@ class PatchItemResponse:
     Response for Update a row (legacy)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -232,7 +238,7 @@ class PostItemInput:
     Add a new row (legacy)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -245,7 +251,7 @@ class PostItemResponse:
     Response for Add a new row (legacy)
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -258,25 +264,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -288,15 +298,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -308,30 +320,36 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -343,15 +361,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -363,15 +383,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -383,7 +405,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -393,8 +415,7 @@ class SubscriptionRequest:
     Definition: SubscriptionRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationUrl"},
     )
     """
@@ -409,17 +430,19 @@ class SubscriptionResponse:
     Definition: SubscriptionResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the subscription"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource of the subscription request"""
-    notification_type: Optional[str] = field(
+    notification_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationType"},
     )
     """Notification Type"""
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """Notification Url"""
@@ -431,13 +454,13 @@ class UpdateTriggerSubscriptionRequest:
     Definition: UpdateTriggerSubscriptionRequest
     """
 
-    attribute_filters: Optional[List[str]] = field(
+    attribute_filters: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AttributeFilters"},
     )
     """Column filters"""
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationUrl"},
     )
     """
@@ -452,14 +475,19 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
     """Pass-through Native Queries"""
 
 
@@ -469,15 +497,21 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, str]] = field(
+    dynamic_properties: Optional[Dict[str, str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -489,10 +523,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -504,8 +543,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -517,8 +557,9 @@ class DisplayCollectionName:
     Definition: DisplayCollectionName
     """
 
-    user_localized_label: Optional[UserLocalizedLabel] = field(
+    user_localized_label: Optional[UserLocalizedLabel] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userLocalizedLabel"},
     )
     """The user localized display name label object."""
@@ -530,7 +571,12 @@ class EntitiesDynamicValuesList:
     Definition: EntitiesDynamicValuesList
     """
 
-    value: Optional[List[EntitiesDynamicValuesListItem]] = None
+    value: Optional[
+        List[EntitiesDynamicValuesListItem]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of tables as dynamic values."""
 
 
@@ -540,23 +586,27 @@ class EntitiesDynamicValuesListItem:
     Definition: EntitiesDynamicValuesListItem
     """
 
-    metadata_id: Optional[str] = field(
+    metadata_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "metadataId"},
     )
     """The metadata id."""
-    entity_set_name: Optional[str] = field(
+    entity_set_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "entitySetName"},
     )
     """The name of the table."""
-    logical_name: Optional[str] = field(
+    logical_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "logicalName"},
     )
     """The logical name of the table."""
-    display_collection_name: Optional[DisplayCollectionName] = field(
+    display_collection_name: Optional[DisplayCollectionName] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayCollectionName"},
     )
     """The display name of the table."""
@@ -568,7 +618,12 @@ class OrganizationsDynamicValuesList:
     Definition: OrganizationsDynamicValuesList
     """
 
-    value: Optional[List[OrganizationsDynamicValuesListItem]] = None
+    value: Optional[
+        List[OrganizationsDynamicValuesListItem]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of organizations as dynamic values."""
 
 
@@ -578,14 +633,23 @@ class OrganizationsDynamicValuesListItem:
     Definition: OrganizationsDynamicValuesListItem
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The organization id."""
-    friendly_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The organization id."""
+    friendly_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "FriendlyName"},
     )
     """The name of the organization."""
-    url: Optional[str] = field(default=None, metadata={"wire_name": "Url"})
+    url: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Url"},
+    )
     """The URL of the organization."""
 
 
@@ -595,7 +659,7 @@ class EntityMetadata:
     Definition: EntityMetadata
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
     """Swagger schema"""
 
 
@@ -605,10 +669,11 @@ class EntityItemList:
     Definition: EntityItemList
     """
 
-    value: Optional[List[EntityItem]] = None
+    value: Optional[List[EntityItem]] = dataclass_field(default=None, kw_only=True)
     """List of Items"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The url to fetch next page data."""
@@ -620,8 +685,9 @@ class EntityItem:
     Definition: EntityItem
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -632,38 +698,38 @@ class CallbackRegistration:
     Definition: CallbackRegistration
     """
 
-    version: Optional[int] = None
+    version: int
     """The callback registration table version"""
-    url: Optional[str] = None
+    url: str
     """
     Callback url to the flow engine. Expected as part of the request and
     provided by Flow.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Callback registration name. Value will be replaced with workflow id"""
-    entityname: Optional[str] = None
+    entityname: str
     """Choose a table"""
-    message: Optional[int] = None
+    message: int
     """Choose when the flow triggers"""
-    sdkmessagename: Optional[str] = None
+    sdkmessagename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Choose an option or add your own"""
-    scope: Optional[int] = None
+    scope: int
     """Choose a scope to limit which rows can trigger the flow"""
-    filteringattributes: Optional[str] = None
+    filteringattributes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Enter a comma-separated list of column unique names. The flow triggers if
     any of them are modified
     """
-    filterexpression: Optional[str] = None
+    filterexpression: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Enter an OData style filter expression to determine which rows can trigger
     the flow
     """
-    postponeuntil: Optional[str] = None
+    postponeuntil: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Enter a time to delay the trigger evaluation, eg. 2020-01-01T10:10:00Z
     """
-    runas: Optional[int] = None
+    runas: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Choose the running user for steps where invoker connections are used"""
 
 
@@ -673,7 +739,7 @@ class UserLocalizedLabel:
     Definition: UserLocalizedLabel
     """
 
-    label: Optional[str] = None
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The display name label of the table."""
 
 
@@ -683,7 +749,7 @@ class WebhookNotificationContent:
     Definition: WebhookNotificationContent
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
     """Swagger schema"""
 
 
@@ -693,7 +759,7 @@ class EntityRelationshipsDynamicValuesList:
     Definition: EntityRelationshipsDynamicValuesList
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of table relationships as dynamic values."""
 
 
@@ -703,10 +769,7 @@ class AssociateEntityRequest:
     Definition: AssociateEntityRequest
     """
 
-    id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.id"},
-    )
+    id: str = dataclass_field(metadata={"wire_name": "@odata.id"})
     """
     Enter the row URL using OData ID from a previous step or typing the full
     URL (eg.
@@ -720,7 +783,7 @@ class ActionsDynamicValuesList:
     Definition: ActionsDynamicValuesList
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of actions as dynamic values"""
 
 
@@ -730,40 +793,40 @@ class SearchRequestBody:
     Definition: SearchRequestBody
     """
 
-    search: Optional[str] = None
+    search: str
     """
     Enter a search term, eg. Contoso. Searches modifiers like boolean
     operators, wildcards, fuzzy search, proximity search etc. require the
     search type full
     """
-    searchtype: Optional[str] = None
+    searchtype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Enter whether simple or full search syntax should be used (default is
     simple)
     """
-    searchmode: Optional[str] = None
+    searchmode: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Enter whether any or all of the search terms must be matched (default is
     any)
     """
-    top: Optional[int] = None
+    top: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Enter the number of search results to be listed (default = 50)"""
-    filter: Optional[str] = None
+    filter: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Enter an OData style filter expression to narrow the search"""
-    entities: Optional[List[str]] = None
+    entities: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Enter a comma-separated list of tables to be searched (default is all
     tables)
     """
-    orderby: Optional[List[str]] = None
+    orderby: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Enter a comma-separated list of column unique names followed by asc or desc
     """
-    facets: Optional[List[str]] = None
+    facets: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Enter a comma-separated list of facet queries to narrow the search"""
-    skip: Optional[int] = None
+    skip: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Enter the number of search results to be skipped"""
-    returntotalrecordcount: Optional[bool] = None
+    returntotalrecordcount: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Choose an option"""
 
 
@@ -773,11 +836,11 @@ class SearchOutput:
     Definition: SearchOutput
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of rows"""
-    totalrecordcount: Optional[int] = None
+    totalrecordcount: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total count of results (-1 if returntotalrecordcount is set to false)"""
-    facets: Optional[Dict[str, Any]] = None
+    facets: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Facet results"""
 
 
@@ -787,20 +850,20 @@ class WhenAnActionIsPerformedSubscriptionRequest:
     Definition: WhenAnActionIsPerformedSubscriptionRequest
     """
 
-    version: Optional[int] = None
+    version: int
     """The callback registration table version."""
-    url: Optional[str] = None
+    url: str
     """
     Callback url to the flow engine. Expected as part of the request and
     provided by Flow.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Callback registration name. Value will be replaced with workflow id."""
-    scope: Optional[int] = None
+    scope: int
     """Choose a scope to limit which rows can trigger the flow."""
-    entityname: Optional[str] = None
+    entityname: str
     """Choose a table to filter actions."""
-    sdkmessagename: Optional[str] = None
+    sdkmessagename: str
     """Choose an action."""
 
 
@@ -810,7 +873,7 @@ class WebhookNotificationContentForWhenAnActionIsPerformed:
     Definition: WebhookNotificationContentForWhenAnActionIsPerformed
     """
 
-    schema: Optional[ObjectEntity] = None
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
     """Swagger schema"""
 
 
@@ -1349,7 +1412,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return response.content
 
-    def get_collection_relationships(
+    def list_collection_relationships(
         self,
         dataset: str,
         table: str,
@@ -1362,11 +1425,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Retrieves all collection valued relationship items as an expand would
 
         Retrieves all collection valued relationship items as an expand would
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1383,61 +1449,100 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/TargetTable"
             f"/{quote(quote(str(target), safe=''), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_data_sets(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_data_sets(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetDataSets
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/datasets"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_item(
         self,
@@ -1487,7 +1592,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_item_attachments(
+    def list_item_attachments(
         self,
         dataset: str,
         table: str,
@@ -1497,11 +1602,14 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Retrieves all Notes (annotations) for the provided table row Id
 
         Retrieves all Notes (annotations) for the provided table row Id.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1514,27 +1622,45 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(id), safe=''), safe='')}"
             f"/attachments"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_items(
         self,
@@ -1882,7 +2008,7 @@ class CommondataserviceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_tables(
+    def list_tables(
         self,
         dataset: str,
         *,
@@ -1890,9 +2016,12 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         GetTables
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1901,27 +2030,45 @@ class CommondataserviceClient(ConnectorClientBase):
             f"/{quote(quote(str(dataset), safe=''), safe='')}"
             f"/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def patch_item(
         self,

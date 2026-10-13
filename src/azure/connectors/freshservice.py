@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -42,7 +42,7 @@ class AddNoteResponse:
     Response for Add a note to a ticket
     """
 
-    conversation: Optional[Dict[str, Any]] = None
+    conversation: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -51,7 +51,7 @@ class CreateUpdateTicketResponse:
     Response for Create a ticket
     """
 
-    ticket: Optional[Dict[str, Any]] = None
+    ticket: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -60,48 +60,52 @@ class ListTicketResponse:
     Response for When a ticket is created
     """
 
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    department_id: Optional[int] = None
-    due_by: Optional[str] = None
+    department_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    due_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of Group to which the ticket is assigned."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique Id of the ticket."""
-    is_escalated: Optional[bool] = None
+    is_escalated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if an escalation was sent."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the priority of the ticket."""
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    responder_id: Optional[int] = None
+    responder_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the ticket is assigned."""
-    source: Optional[int] = None
+    source: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     A number representing the channel through which the ticket was created.
     """
-    spam: Optional[bool] = None
+    spam: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set as true if the ticket is marked as spam."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the status of the ticket."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Ticket subject."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Type property field as defined in ticket fields."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    description_text: Optional[str] = None
+    description_text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the problem."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     HTML content of the ticket. Description and description_html should not be
     passed together.
     """
-    to_emails: Optional[List[str]] = None
+    to_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Email addresses to which the incoming ticket email was sent."""
 
 
@@ -111,39 +115,39 @@ class CreateTicketRequest:
     Definition: CreateTicket_Request
     """
 
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Email of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phone number of the requester. One of the Requester ID, Requester Email and
     Requester Phone is required
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name of the requester. This is a required field only if Requester Phone
     value is provided
     """
-    subject: Optional[str] = None
+    subject: str
     """The subject of the ticket."""
-    status: Optional[str] = None
+    status: str
     """Status of the ticket."""
-    priority: Optional[str] = None
+    priority: str
     """The priority of the ticket (such as Low, Medium, or High)."""
-    description: Optional[str] = None
+    description: str
     """The description of the ticket."""
-    urgency: Optional[str] = None
+    urgency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem (such as Low, Medium or High)."""
-    impact: Optional[str] = None
+    impact: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem (such as Low, Medium or High)."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
 
 
@@ -153,22 +157,22 @@ class UpdateTicketRequest:
     Definition: UpdateTicket_Request
     """
 
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subject of the ticket."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the ticket."""
-    priority: Optional[str] = None
+    priority: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The priority of the ticket (such as Low, Medium, or High)."""
-    urgency: Optional[str] = None
+    urgency: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem (such as Low, Medium or High)."""
-    impact: Optional[str] = None
+    impact: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem (such as Low, Medium or High)."""
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
 
 
@@ -178,9 +182,9 @@ class AddNoteRequest:
     Definition: AddNote_Request
     """
 
-    body: Optional[str] = None
+    body: str
     """The note to be added to the ticket."""
-    private: Optional[bool] = None
+    private: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if message is private."""
 
 
@@ -190,85 +194,85 @@ class TicketResponse:
     Definition: Ticket_Response
     """
 
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    deleted: Optional[bool] = None
+    deleted: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Set as true if the ticket is deleted/trashed. Deleted tickets will not be
     considered in any views except 'deleted' filter.
     """
-    department_id_value: Optional[int] = None
-    display_id: Optional[int] = None
+    department_id_value: Optional[int] = dataclass_field(default=None, kw_only=True)
+    display_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Ticket Id specific to your account."""
-    due_by: Optional[str] = None
+    due_by: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of Group to which the ticket is assigned."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique Id of the ticket."""
-    impact: Optional[int] = None
+    impact: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the impact of the problem."""
-    isescalated: Optional[bool] = None
+    isescalated: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true if an escalation was sent."""
-    owner_id: Optional[str] = None
+    owner_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the problem is assigned."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the priority of the ticket."""
-    requester_id: Optional[int] = None
+    requester_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     User-id of the requester. For existing contacts, requester_id can be passed
     instead of email.
     """
-    responder_id: Optional[int] = None
+    responder_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the agent to whom the ticket is assigned."""
-    source: Optional[int] = None
+    source: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     A number representing the channel through which the ticket was created.
     """
-    spam: Optional[bool] = None
+    spam: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set as true if the ticket is marked as spam."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the status of the ticket."""
-    subject: Optional[str] = None
+    subject: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Ticket subject."""
-    ticket_type: Optional[str] = None
+    ticket_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type property field as defined in ticket fields."""
-    to_email: Optional[str] = None
+    to_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address to which the incoming ticket email was sent."""
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """yyyy-MM-ddTHH:mm:ss.fffZ"""
-    urgency: Optional[int] = None
+    urgency: Optional[int] = dataclass_field(default=None, kw_only=True)
     """A number representing the urgency of the problem."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the problem."""
-    description_html: Optional[str] = None
+    description_html: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     HTML content of the ticket. Description and description_html should not be
     passed together.
     """
-    status_name: Optional[str] = None
+    status_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the ticket."""
-    priority_name: Optional[str] = None
+    priority_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Priority of the ticket."""
-    source_name: Optional[str] = None
+    source_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel through which the ticket was created."""
-    responder_name: Optional[str] = None
+    responder_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the agent to whom the ticket is assigned."""
-    to_emails: Optional[List[str]] = None
+    to_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Email addresses to which the incoming ticket email was sent."""
-    department_name: Optional[str] = None
+    department_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the department."""
-    assoc_problem_id: Optional[int] = None
+    assoc_problem_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the associated problem to the ticket."""
-    assoc_change_id: Optional[int] = None
+    assoc_change_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the associated change to the problem."""
-    assoc_change_cause_id: Optional[int] = None
+    assoc_change_cause_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the change causing the ticket."""
-    assoc_asset_id: Optional[int] = None
+    assoc_asset_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the asset associated to the ticket."""
-    urgency_name: Optional[str] = None
+    urgency_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Urgency of the problem."""
-    impact_name: Optional[str] = None
+    impact_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Impact of the problem."""
 
 
@@ -278,7 +282,7 @@ class UpdateTicketResponse:
     Definition: UpdateTicket_Response
     """
 
-    ticket: Optional[Dict[str, Any]] = None
+    ticket: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 ListUsersResponse = List[Dict[str, Any]]

@@ -46,8 +46,8 @@ async def example_1_list_subscriptions():
     async with DefaultAzureCredential() as credential:
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.subscriptions_list()
-            subscriptions = result.get("value", []) if result else []
+            items = [item async for item in client.list_subscriptions()]
+            subscriptions = result
 
             print(f"Found {len(subscriptions)} subscription(s).")
             for subscription in subscriptions[:10]:
@@ -63,8 +63,8 @@ async def example_2_list_topic_types():
     async with DefaultAzureCredential() as credential:
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.topic_types_list()
-            topic_types = result.get("value", []) if result else []
+            items = [item async for item in client.list_topic_types()]
+            topic_types = result
 
             print(f"Found {len(topic_types)} topic type(s).")
             for topic_type in topic_types[:10]:

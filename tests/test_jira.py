@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestJiraClientInitialization:
@@ -115,7 +116,7 @@ class TestListResourcesAsync:
         )
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "site-1"}]}',
+            text='[{"id": "site-1"}]',
         )
 
         with patch.object(
@@ -124,14 +125,13 @@ class TestListResourcesAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_resources()
+            result = await resolve_generated_result(client.list_resources())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/oauth/token/accessible-resources" in path
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "site-1"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -152,7 +152,7 @@ class TestListResourcesAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.list_resources()
+                await resolve_generated_result(client.list_resources())
 
 
 class TestListIssuesAsync:

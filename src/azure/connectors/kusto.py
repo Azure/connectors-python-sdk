@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
@@ -49,7 +49,7 @@ class Table:
     Response for Run KQL query
     """
 
-    value: Optional[List[Row]] = None
+    value: Optional[List[Row]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -58,25 +58,29 @@ class VisualizeResults:
     Response for Run KQL query and render a chart
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The body of the result in base64 encoding."""
-    body_html: Optional[str] = field(
+    body_html: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bodyHtml"},
     )
     """The body of the result in html encoding."""
-    attachment_content: Optional[str] = field(
+    attachment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentContent"},
     )
     """The content of the attachment."""
-    attachment_name: Optional[str] = field(
+    attachment_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentName"},
     )
     """The name of the attachment file."""
-    kusto_deep_link: Optional[str] = field(
+    kusto_deep_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "kustoDeepLink"},
     )
     """Links to run the query in Kusto tools, for instance in KustoExplorer."""
@@ -88,12 +92,13 @@ class AsyncCommandResult:
     Response for Run async control command
     """
 
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The state of the command."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the command."""
-    operation_id: Optional[str] = field(
+    operation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "operationId"},
     )
     """The operation ID of the control command"""
@@ -105,12 +110,12 @@ class MCPQueryResponse:
     Response for Kusto Query MCP Server
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -119,7 +124,7 @@ class ObjectEntity:
     Response for Query schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -132,7 +137,7 @@ class Row:
     Definition: Row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -145,11 +150,10 @@ class QueryAndVisualizeSchema:
     Definition: QueryAndVisualizeSchema
     """
 
-    cluster: Optional[ClusterName] = None
-    db: Optional[DatabaseName] = None
-    csl: Optional[Query] = None
-    chart_type: Optional[ChartType] = field(
-        default=None,
+    cluster: ClusterName
+    db: DatabaseName
+    csl: Query
+    chart_type: ChartType = dataclass_field(
         metadata={"wire_name": "chartType"},
     )
 
@@ -160,12 +164,11 @@ class CommandAndVisualizeSchema:
     Definition: CommandAndVisualizeSchema
     """
 
-    cluster: Optional[ClusterName] = None
-    db: Optional[DatabaseName] = None
-    csl: Optional[str] = None
+    cluster: ClusterName
+    db: DatabaseName
+    csl: str
     """Specify the control command you would like to run"""
-    chart_type: Optional[ChartType] = field(
-        default=None,
+    chart_type: ChartType = dataclass_field(
         metadata={"wire_name": "chartType"},
     )
 
@@ -176,9 +179,9 @@ class QueryAndListSchema:
     Definition: QueryAndListSchema
     """
 
-    cluster: Optional[ClusterName] = None
-    db: Optional[DatabaseName] = None
-    csl: Optional[Query] = None
+    cluster: ClusterName
+    db: DatabaseName
+    csl: Query
 
 
 @dataclass
@@ -187,9 +190,9 @@ class ControlCommandAndListSchema:
     Definition: ControlCommandAndListSchema
     """
 
-    cluster: Optional[ClusterName] = None
-    db: Optional[DatabaseName] = None
-    csl: Optional[str] = None
+    cluster: ClusterName
+    db: DatabaseName
+    csl: str
     """Specify the show control command you would like to run"""
 
 
@@ -211,14 +214,15 @@ class MCPQueryRequest:
     Definition: MCPQueryRequest
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = field(
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    callback_endpoint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callbackEndpoint"},
     )
 

@@ -99,7 +99,10 @@ async def example_3_create_device_group():
         async with AzureiotcentralClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 result = await client.device_groups_set(
-                    input=DeviceGroup(display_name="SDK sample group"),
+                    input=DeviceGroup(
+                        display_name="SDK sample group",
+                        filter="status = 'registered'",
+                    ),
                     device_group_id=device_group_id,
                     application=APPLICATION,
                 )

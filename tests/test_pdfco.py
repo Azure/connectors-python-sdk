@@ -115,7 +115,7 @@ class TestHtmlToPdfAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = HtmlToPdfInput()
+        request = HtmlToPdfInput(html="<p>Hello</p>")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/out.pdf"}')
 
         with patch.object(
@@ -150,7 +150,7 @@ class TestHtmlToPdfAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.html_to_pdf(input=HtmlToPdfInput())
+                await client.html_to_pdf(input=HtmlToPdfInput(html="<p>Hello</p>"))
 
             assert exc_info.value.status_code == 400
 
@@ -165,7 +165,7 @@ class TestUrlToPdfAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = UrlToPdfInput()
+        request = UrlToPdfInput(url="https://example.com/document")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/out.pdf"}')
 
         with patch.object(
@@ -199,7 +199,9 @@ class TestUrlToPdfAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.url_to_pdf(input=UrlToPdfInput())
+                await client.url_to_pdf(
+                    input=UrlToPdfInput(url="https://example.com/document")
+                )
 
 
 class TestPdfFillerAsync:
@@ -212,7 +214,7 @@ class TestPdfFillerAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        request = PdfFillerInput()
+        request = PdfFillerInput(url="https://example.com/form.pdf")
         mock_response = MockResponse(status=200, text='{"url": "https://example.com/filled.pdf"}')
 
         with patch.object(
@@ -245,7 +247,9 @@ class TestPdfFillerAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.pdf_filler(input=PdfFillerInput())
+            result = await client.pdf_filler(
+                input=PdfFillerInput(url="https://example.com/form.pdf")
+            )
 
             assert result is None
 
@@ -265,7 +269,9 @@ class TestPdfFillerAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.pdf_filler(input=PdfFillerInput())
+                await client.pdf_filler(
+                    input=PdfFillerInput(url="https://example.com/form.pdf")
+                )
 
 
 BASE_URL = "https://example.azure.com/connections/test"

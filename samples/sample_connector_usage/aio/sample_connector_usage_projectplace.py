@@ -42,7 +42,7 @@ async def example_1_list_boards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with ProjectplaceClient(CONNECTION_RUNTIME_URL, credential) as client:
-            boards = await client.list_boards()
+            boards = [item async for item in client.list_boards()]
             print(f"Boards: {boards}")
 
 

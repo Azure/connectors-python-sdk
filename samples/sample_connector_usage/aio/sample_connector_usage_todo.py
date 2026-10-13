@@ -39,8 +39,8 @@ async def example_1_list_lists() -> list[dict]:
 
     async with DefaultAzureCredential() as credential:
         async with TodoClient(CONNECTION_RUNTIME_URL, credential) as client:
-            lists_response = await client.get_all_todo_lists()
-            lists = lists_response.get("value", []) if lists_response else []
+            lists_response = [item async for item in client.list_all_todo_lists()]
+            lists = lists_response
 
             print(f"Found {len(lists)} lists")
             for todo_list in lists[:10]:

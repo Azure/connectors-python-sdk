@@ -27,6 +27,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 class TestAzuredatafactoryClientInitialization:
@@ -576,7 +577,7 @@ class TestDataClasses:
 
     def test_resource_group_list_result(self):
         """Test ResourceGroupListResult dataclass creation."""
-        rg = ResourceGroup(name="rg1")
+        rg = model_instance(ResourceGroup, name="rg1")
         result = ResourceGroupListResult(
             value=[rg],
             next_link=None

@@ -25,12 +25,13 @@ async def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                bookings = await client.select_booking(
+                bookings = [item async for item in client.list_select_booking(
                     input=SelectBookingInput(
                         return_empty_array_on_no_result=True,
                         page_size=10,
+                        page_index=1,
                     )
-                )
+                )]
                 print(f"Bookings: {bookings}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

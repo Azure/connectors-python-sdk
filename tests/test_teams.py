@@ -24,6 +24,7 @@ from azure.connectors.teams import (
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 class TestTeamsClientInitialization:
@@ -158,7 +159,7 @@ class TestTeamsMeetingOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = NewMeeting()
+            input_data = model_instance(NewMeeting)
             result = await client.create_teams_meeting(input_data, "calendar123")
 
             call_args = mock_send.call_args
@@ -182,7 +183,7 @@ class TestTeamsMeetingOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            input_data = NewMeeting()
+            input_data = model_instance(NewMeeting)
             with pytest.raises(ConnectorException) as exc_info:
                 await client.create_teams_meeting(input_data, "calendar123")
 
@@ -357,7 +358,7 @@ class TestChatOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            input_data = NewChat()
+            input_data = model_instance(NewChat)
             result = await client.create_chat(input_data)
 
             call_args = mock_send.call_args
@@ -382,7 +383,7 @@ class TestChatOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_chat(NewChat())
+                await client.create_chat(model_instance(NewChat))
 
             assert exc_info.value.status_code == 400
 
@@ -438,7 +439,7 @@ class TestTeamCreationOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.create_a_team(CreateATeamInput())
+                await client.create_a_team(model_instance(CreateATeamInput))
 
             assert exc_info.value.status_code == 403
 
@@ -572,7 +573,7 @@ class TestDataClasses:
 
     def test_new_meeting_creation(self):
         """Test NewMeeting data class creation."""
-        meeting = NewMeeting()
+        meeting = model_instance(NewMeeting)
         assert meeting is not None
 
     def test_create_channel_input_creation(self):
@@ -586,7 +587,7 @@ class TestDataClasses:
 
     def test_create_tag_input_creation(self):
         """Test CreateTagInput data class creation."""
-        tag = CreateTagInput(display_name="Test Tag")
+        tag = model_instance(CreateTagInput, display_name="Test Tag")
         assert tag.display_name == "Test Tag"
 
     def test_add_member_to_tag_input_creation(self):

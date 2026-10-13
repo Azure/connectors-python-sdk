@@ -18,7 +18,7 @@ OPERATION_CONTRACTS = {
     "get_document": ("GET", False),
     "get_form_data": ("GET", False),
     "get_template_details": ("GET", False),
-    "get_templates": ("GET", False),
+    "list_templates": ("GET", False),
     "invoke_api": ("POST", True),
     "recall_document": ("POST", False),
     "remind_document_recipients": ("POST", False),

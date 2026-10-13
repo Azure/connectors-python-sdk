@@ -63,7 +63,7 @@ async def example_1_get_lists():
 
         async with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                lists = await client.get_tables(dataset=SHAREPOINT_SITE_URL)
+                lists = [item async for item in client.list_tables(dataset=SHAREPOINT_SITE_URL)]
 
                 if lists and 'value' in lists:
                     print(f"Found {len(lists['value'])} lists and libraries:")
@@ -293,7 +293,7 @@ async def example_6_file_operations():
             try:
                 # List root folder
                 print("Listing root folder...")
-                root_folder = await client.list_root_folder(dataset=SHAREPOINT_SITE_URL)
+                root_folder = [item async for item in client.list_root_folder(dataset=SHAREPOINT_SITE_URL)]
 
                 if root_folder and 'value' in root_folder:
                     print(f"Found {len(root_folder['value'])} items in root folder:")
@@ -307,10 +307,10 @@ async def example_6_file_operations():
 
                 # List a specific folder (Shared Documents is common)
                 print("\nListing 'Shared Documents' folder...")
-                folder = await client.list_folder(
+                folder = [item async for item in client.list_folder(
                     dataset=SHAREPOINT_SITE_URL,
                     id='/Shared Documents',
-                )
+                )]
 
                 if folder and 'value' in folder:
                     print(f"Found {len(folder['value'])} items in Shared Documents:")

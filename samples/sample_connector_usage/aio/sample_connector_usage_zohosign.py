@@ -19,7 +19,7 @@ async def list_templates() -> None:
     """List available Zoho Sign templates."""
     async with DefaultAzureCredential() as credential:
         async with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            templates = await client.get_templates()
+            templates = [item async for item in client.list_templates()]
             print(f"Templates: {templates}")
 
 

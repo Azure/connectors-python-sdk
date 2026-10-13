@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -38,11 +38,11 @@ class MakeCallResponse:
     Response for Make a call
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response obtained when the call was made."""
-    request_uuid: Optional[str] = None
+    request_uuid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the call."""
 
 
@@ -52,11 +52,11 @@ class ListMessagesResponse:
     Response for List all messages
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Meta information about the response."""
-    objects: Optional[List[Dict[str, Any]]] = None
+    objects: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Details of all messages."""
 
 
@@ -66,11 +66,11 @@ class SendSMSResponse:
     Response for Send SMS
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response of the sent message."""
-    message_uuid: Optional[List[str]] = None
+    message_uuid: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message."""
 
 
@@ -80,34 +80,34 @@ class GetMessageResponse:
     Response for Get message
     """
 
-    api_id: Optional[str] = None
+    api_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the API request."""
-    error_code: Optional[str] = None
+    error_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Delivery error code if the message isn't delivered."""
-    from_number: Optional[str] = None
+    from_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number from which the message was sent."""
-    message_direction: Optional[str] = None
+    message_direction: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Direction of the message (inbound/outbound)."""
-    message_state: Optional[str] = None
+    message_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status of the message (queued/sent/delivered/failed)."""
-    message_time: Optional[str] = None
+    message_time: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp at which the message was sent or received (yyyy-MM-dd HH:mm:ss
     UTC).
     """
-    message_type: Optional[str] = None
+    message_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the message."""
-    message_uuid: Optional[str] = None
+    message_uuid: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the message."""
-    resource_uri: Optional[str] = None
+    resource_uri: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URI to get details of this single message."""
-    to_number: Optional[str] = None
+    to_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Number to which the message was sent."""
-    total_amount: Optional[str] = None
+    total_amount: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Amount charged for the message."""
-    total_rate: Optional[str] = None
+    total_rate: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rate per unit of the message."""
-    units: Optional[int] = None
+    units: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of units the message was split into."""
 
 
@@ -117,11 +117,11 @@ class SMS:
     Definition: SMS
     """
 
-    src: Optional[str] = None
+    src: str
     """Plivo number from which the message is to be sent."""
-    dst: Optional[str] = None
+    dst: str
     """Phone number to which the message is to be sent."""
-    text: Optional[str] = None
+    text: str
     """Text of the message to be sent."""
 
 
@@ -131,13 +131,13 @@ class Call:
     Definition: Call
     """
 
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    from_: str = dataclass_field(metadata={"wire_name": "from"})
     """Plivo number to be used to make the call."""
-    to: Optional[str] = None
+    to: str
     """The phone number to call."""
-    answer_url: Optional[str] = None
+    answer_url: str
     """URL to be called when the call is made."""
-    answer_method: Optional[str] = None
+    answer_method: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTTP Method (GET/POST) that should be used to call the Answer URL."""
 
 

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -42,7 +44,7 @@ class CalendarList:
     Response for List calendars
     """
 
-    items: Optional[List[CalendarListEntry]] = None
+    items: Optional[List[CalendarListEntry]] = dataclass_field(default=None, kw_only=True)
     """Calendars in the list."""
 
 
@@ -52,7 +54,7 @@ class CalendarEventList:
     Response for List the events on a calendar
     """
 
-    items: Optional[List[ResponseEvent]] = None
+    items: Optional[List[ResponseEvent]] = dataclass_field(default=None, kw_only=True)
     """Events in the calendar."""
 
 
@@ -62,40 +64,42 @@ class ResponseEvent:
     Response for Create an event
     """
 
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A summary of the event."""
-    start: Optional[str] = None
+    start: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (inclusive) start time of the event."""
-    end: Optional[str] = None
+    end: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (exclusive) end time of the event."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the event."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Geographic location of the event as free-form text."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    html_link: Optional[str] = field(
+    html_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "htmlLink"},
     )
     """Unique ID of the list."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Opaque identifier of the event."""
-    attendees: Optional[str] = None
+    attendees: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The event's attendees."""
-    creator: Optional[str] = None
+    creator: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The creator of the event."""
-    organizer: Optional[str] = None
+    organizer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The organizer of the event."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Creation time of the event."""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last modification time of the event."""
-    end_time_unspecified: Optional[bool] = field(
+    end_time_unspecified: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTimeUnspecified"},
     )
     """
@@ -110,7 +114,7 @@ class ObjectEntity:
     Response for Delete an event
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -123,7 +127,7 @@ class CalendarEventChangedList:
     Response for When an event is added, updated or deleted from a calendar
     """
 
-    items: Optional[List[ResponseEventWithActionType]] = None
+    items: Optional[List[ResponseEventWithActionType]] = dataclass_field(default=None, kw_only=True)
     """Changed events in the calendar."""
 
 
@@ -133,16 +137,17 @@ class CalendarListEntry:
     Definition: CalendarListEntry
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Identifier of the calendar."""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the calendar."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the calendar."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Geographic location of the calendar as free-form text."""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """The time zone of the calendar."""
@@ -154,25 +159,26 @@ class RequestEvent:
     Definition: RequestEvent
     """
 
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A summary of the event."""
-    start: Optional[str] = None
+    start: str
     """The (inclusive) start time of the event."""
-    end: Optional[str] = None
+    end: str
     """The (exclusive) end time of the event."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the event."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Geographic location of the event as free-form text."""
-    attendees: Optional[str] = None
+    attendees: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Enter a comma-separated list of attendee emails."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Is all-day event?"""
@@ -184,25 +190,26 @@ class PatchEvent:
     Definition: PatchEvent
     """
 
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A summary of the event."""
-    start: Optional[str] = None
+    start: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (inclusive) start time of the event."""
-    end: Optional[str] = None
+    end: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (exclusive) end time of the event."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the event."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Geographic location of the event as free-form text."""
-    attendees: Optional[str] = None
+    attendees: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Enter a comma-separated list of attendee emails."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled.
     """
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAllDay"},
     )
     """Is all-day event?"""
@@ -214,45 +221,48 @@ class ResponseEventWithActionType:
     Definition: ResponseEventWithActionType
     """
 
-    action_type: Optional[str] = field(
+    action_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "actionType"},
     )
     """Type of action which changed the event in change trigger."""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A summary of the event."""
-    start: Optional[str] = None
+    start: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (inclusive) start time of the event."""
-    end: Optional[str] = None
+    end: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The (exclusive) end time of the event."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the event."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Geographic location of the event as free-form text."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Status of the event. Possible values are \"confirmed\", \"tentative\", or
     \"cancelled\".
     """
-    html_link: Optional[str] = field(
+    html_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "htmlLink"},
     )
     """Unique ID of the list."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Opaque identifier of the event."""
-    attendees: Optional[str] = None
+    attendees: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The event's attendees."""
-    creator: Optional[str] = None
+    creator: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The creator of the event."""
-    organizer: Optional[str] = None
+    organizer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The organizer of the event."""
-    created: Optional[str] = None
+    created: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Creation time of the event."""
-    updated: Optional[str] = None
+    updated: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last modification time of the event."""
-    end_time_unspecified: Optional[bool] = field(
+    end_time_unspecified: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endTimeUnspecified"},
     )
     """
@@ -326,6 +336,45 @@ class GooglecalendarClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "googlecalendar"
 
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
     def list_calendars(
         self,
         *,
@@ -334,11 +383,14 @@ class GooglecalendarClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List calendars
 
         This operation is used to list all calendars in your Google account.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/users/me/calendarList"
         query_params = []
@@ -349,27 +401,45 @@ class GooglecalendarClient(ConnectorClientBase):
             query_params.append(f"minAccessRole={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_events(
         self,
@@ -382,12 +452,15 @@ class GooglecalendarClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List the events on a calendar
 
         This operation is used to return the first page of arbitrarily ordered
         events on the selected calendar.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -411,27 +484,45 @@ class GooglecalendarClient(ConnectorClientBase):
             query_params.append(f"q={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_event(
         self,
@@ -615,39 +706,60 @@ class GooglecalendarClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List writable calendars
 
         This operation is used to list all calendars in your Google account
         that you can write to.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/users/me/calendarList/1"
         query_params = []
         query_params.append("minAccessRole=" + quote("writer", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("items", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

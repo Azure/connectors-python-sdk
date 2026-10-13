@@ -310,6 +310,8 @@ def test_sample_validator_checks_consumer_principles(
          "list_query_documents", "document(s)"),
         ("office365groupsmail", "main", "Office365groupsmailClient",
          "list_conversations", "conversation(s)"),
+        ("planner", "example_2_list_group_plans", "PlannerClient",
+         "list_group_plans", "plans in group"),
         ("zendesk", "example_2_get_items", "ZendeskClient",
          "list_items", "item(s)"),
         ("azuretables", "example_4_get_entities", "AzuretablesClient",
@@ -356,11 +358,7 @@ async def test_pageable_samples_report_collected_items(
     getattr(client, operation_name).return_value = (
         async_items() if surface == "aio" else items
     )
-    client.list_groups = (
-        AsyncMock(return_value={"value": []})
-        if surface == "aio"
-        else MagicMock(return_value={"value": []})
-    )
+    client.list_groups.return_value = async_items() if surface == "aio" else []
     client.__enter__.return_value = client
     client.__aenter__.return_value = client
     monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
@@ -374,7 +372,8 @@ async def test_pageable_samples_report_collected_items(
     monkeypatch.setenv("OFFICE365GROUPSMAIL_CONNECTION_URL", "https://example.com")
     monkeypatch.setenv("OFFICE365GROUPSMAIL_GROUP_ID", "sample-group")
 
-    await invoke_sample(module, function_name)
+    arguments = ["sample-group"] if connector == "planner" else []
+    await invoke_sample(module, function_name, *arguments)
 
     output = capsys.readouterr().out
     assert "Error:" not in output
@@ -388,6 +387,8 @@ async def test_pageable_samples_report_collected_items(
             assert "No entities found" not in output
     elif connector == "documentdb" and item_count == 0:
         assert "No documents found." in output
+    elif connector == "planner" and item_count == 0:
+        assert "No plans found" in output
     elif connector == "documentdb" and function_name.endswith("consistency"):
         assert f"Documents retrieved: {item_count}" in output
     else:
@@ -401,8 +402,6 @@ async def test_pageable_samples_report_collected_items(
     [
         ("azuredigitaltwins", "example_3_query_twins", "AzuredigitaltwinsClient",
          "query_twins", "value", "No twins found matching query"),
-        ("planner", "example_2_list_group_plans", "PlannerClient",
-         "list_group_plans", "value", "No plans found"),
         ("wdatp", "example_3_advanced_hunting", "WdatpClient",
          "advanced_hunting", "results", "No results from query."),
     ],
@@ -441,8 +440,7 @@ async def test_nonpageable_samples_preserve_nullable_responses(
     monkeypatch.setattr(module, client_name, MagicMock(return_value=client))
     monkeypatch.setattr(module, "DefaultAzureCredential", MagicMock())
 
-    arguments = ["sample-group"] if connector == "planner" else []
-    await invoke_sample(module, function_name, *arguments)
+    await invoke_sample(module, function_name)
 
     output = capsys.readouterr().out
     assert "Error:" not in output

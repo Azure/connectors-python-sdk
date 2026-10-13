@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -60,12 +60,13 @@ class ListConversationsResponse:
     Response for List the conversations of a group
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[Conversation]] = None
+    value: Optional[List[Conversation]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -74,19 +75,21 @@ class CreateConversationResponse:
     Response for Create a new conversation in a group
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """New Conversation ID."""
-    threads_odata_context: Optional[str] = field(
+    threads_odata_context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "threads@odata.context"},
     )
     """The threads@odata.context link."""
-    threads: Optional[List[Dict[str, Any]]] = None
+    threads: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Created conversation thread."""
 
 
@@ -96,36 +99,39 @@ class Conversation:
     Response for Get a group conversation
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The conversations's unique identifier."""
-    topic: Optional[str] = None
+    topic: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The topic of the conversation."""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasAttachments"},
     )
     """
     Indicates whether any of the posts within this Conversation has at least
     one attachment.
     """
-    last_delivered_date_time: Optional[str] = field(
+    last_delivered_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastDeliveredDateTime"},
     )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
     """
-    unique_senders: Optional[List[str]] = field(
+    unique_senders: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "uniqueSenders"},
     )
     """All the users that sent a message to this Conversation."""
-    preview: Optional[str] = None
+    preview: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A short summary from the body of the latest post in this Conversation.
     """
-    threads: Optional[List[ConversationThread]] = None
+    threads: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -134,17 +140,19 @@ class ListConversationThreadsResponse:
     Response for List the conversation threads of a conversation
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[ConversationThread]] = None
+    value: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -153,12 +161,13 @@ class NewConversationThreadResponse:
     Response for Create a conversation thread
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """New conversation thread ID."""
 
 
@@ -168,12 +177,13 @@ class ListGroupThreadsResponse:
     Response for List the threads of a group
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    value: Optional[List[ConversationThread]] = None
+    value: Optional[List[ConversationThread]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -182,51 +192,57 @@ class ConversationThread:
     Response for Get a conversation thread
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The conversation thread's unique identifier."""
-    topic: Optional[str] = None
+    topic: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The topic of the conversation."""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasAttachments"},
     )
     """
     Indicates whether any of the posts within this Conversation has at least
     one attachment.
     """
-    last_delivered_date_time: Optional[str] = field(
+    last_delivered_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastDeliveredDateTime"},
     )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
     """
-    unique_senders: Optional[List[str]] = field(
+    unique_senders: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "uniqueSenders"},
     )
     """All the users that sent a message to this Conversation."""
-    preview: Optional[str] = None
+    preview: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A short summary from the body of the latest post in this Conversation.
     """
-    is_locked: Optional[bool] = field(
+    is_locked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isLocked"},
     )
     """Indicates if the thread is locked."""
-    to_recipients: Optional[List[EmailAddress]] = field(
+    to_recipients: Optional[List[EmailAddress]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "toRecipients"},
     )
     """The To: recipients for the thread."""
-    cc_recipients: Optional[List[EmailAddress]] = field(
+    cc_recipients: Optional[List[EmailAddress]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ccRecipients"},
     )
     """The Cc: recipients for the thread."""
-    posts: Optional[List[Post]] = None
+    posts: Optional[List[Post]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -235,17 +251,19 @@ class ListThreadPostsResponse:
     Response for List the posts of a conversation thread
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    value: Optional[List[Post]] = None
+    value: Optional[List[Post]] = dataclass_field(default=None, kw_only=True)
     """Array containing the posts in the specified thread."""
 
 
@@ -255,58 +273,67 @@ class Post:
     Response for Get a thread post
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The post's unique identifier."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
-    change_key: Optional[str] = field(
+    change_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeKey"},
     )
     """Identifies the version of the post."""
-    conversation_id: Optional[str] = field(
+    conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "conversationId"},
     )
     """Unique ID of the conversation the post belongs to."""
-    conversation_thread_id: Optional[str] = field(
+    conversation_thread_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "conversationThreadId"},
     )
     """Unique ID of the conversation thread the post belongs to."""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The categories associated with the post."""
-    received_date_time: Optional[str] = field(
+    received_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "receivedDateTime"},
     )
     """Post received timestamp."""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasAttachments"},
     )
     """Indicates whether the post has at least one attachment."""
-    new_participants: Optional[List[EmailAddress]] = field(
+    new_participants: Optional[List[EmailAddress]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newParticipants"},
     )
     """
     Conversation participants that were added to the thread as part of this
     post.
     """
-    body: Optional[ItemBody] = None
-    from_: Optional[EmailAddress] = field(
+    body: Optional[ItemBody] = dataclass_field(default=None, kw_only=True)
+    from_: Optional[EmailAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "from"},
     )
-    sender: Optional[EmailAddress] = None
-    attachments: Optional[List[Attachment]] = None
+    sender: Optional[EmailAddress] = dataclass_field(default=None, kw_only=True)
+    attachments: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -315,17 +342,19 @@ class GetAttachmentsResponse:
     Response for List the attachments of a post
     """
 
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The @odata.context link."""
-    value: Optional[List[Attachment]] = None
+    value: Optional[List[Attachment]] = dataclass_field(default=None, kw_only=True)
     """Array containing the attachments of the post."""
 
 
@@ -335,7 +364,7 @@ class OnNewEmailInGroupResponse:
     Response for When a new email arrives to a group
     """
 
-    value: Optional[List[ConversationTriggerResponse]] = None
+    value: Optional[List[ConversationTriggerResponse]] = dataclass_field(default=None, kw_only=True)
     """Response of the trigger."""
 
 
@@ -345,7 +374,7 @@ class ObjectWithoutType:
     Response for Send an HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -358,7 +387,7 @@ class ListGroupsResponse:
     Response for List user groups
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array with the groups the user is part of."""
 
 
@@ -368,19 +397,21 @@ class Attachment:
     Definition: Attachment
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the attachment."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of attachment."""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of attachment."""
-    size: Optional[int] = None
+    size: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Size of attachment."""
-    content_bytes: Optional[str] = field(
+    content_bytes: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentBytes"},
     )
     """Content of attachment."""
@@ -392,8 +423,9 @@ class EmailAddress:
     Definition: EmailAddress
     """
 
-    email_address: Optional[Dict[str, Any]] = field(
+    email_address: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "emailAddress"},
     )
     """
@@ -408,12 +440,13 @@ class ItemBody:
     Definition: ItemBody
     """
 
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of the body."""
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of the body."""
 
 
@@ -423,7 +456,7 @@ class ReplyConversationThreadBody:
     Definition: ReplyConversationThreadBody
     """
 
-    post: Optional[NewPostBody] = None
+    post: Optional[NewPostBody] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -432,13 +465,13 @@ class ForwardPostBody:
     Definition: ForwardPost_V2Body
     """
 
-    comment: Optional[str] = field(
+    comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comment"},
     )
     """Comment to forward with the post."""
-    to_recipients: Optional[List[GetUsersGraphAction]] = field(
-        default=None,
+    to_recipients: List[GetUsersGraphAction] = dataclass_field(
         metadata={"wire_name": "ToRecipients"},
     )
     """The recipients to whom the threaded is forwarded to."""
@@ -450,9 +483,9 @@ class CreateConversationBody:
     Definition: CreateConversationBody
     """
 
-    topic: Optional[str] = None
+    topic: str
     """Topic of the new conversation."""
-    post: Optional[NewPostBody] = None
+    post: Optional[NewPostBody] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -461,16 +494,17 @@ class NewPostBody:
     Definition: NewPostBody
     """
 
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Body of the new post."""
-    categories: Optional[List[str]] = None
+    categories: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """The categories associated with the post."""
-    new_participants: Optional[List[GetUsersGraphAction]] = field(
+    new_participants: Optional[List[GetUsersGraphAction]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "newParticipants"},
     )
     """Add participants to the thread as part of this post."""
-    attachments: Optional[List[ClientSendAttachment]] = None
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(default=None, kw_only=True)
     """File attachments to include."""
 
 
@@ -480,8 +514,9 @@ class GetUsersGraphAction:
     Definition: GetUsers__GraphAction
     """
 
-    email_address: Optional[Dict[str, Any]] = field(
+    email_address: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddress"},
     )
     """User email address."""
@@ -493,15 +528,11 @@ class ClientSendAttachment:
     Definition: ClientSendAttachment
     """
 
-    type_: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "@odata.type"},
-    )
+    type_: str = dataclass_field(metadata={"wire_name": "@odata.type"})
     """@odata.type for a file attachment."""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: str = dataclass_field(metadata={"wire_name": "Name"})
     """Name of the attachment."""
-    content_bytes: Optional[str] = field(
-        default=None,
+    content_bytes: str = dataclass_field(
         metadata={"wire_name": "ContentBytes"},
     )
     """Content of the attachment."""
@@ -513,17 +544,23 @@ class ConversationTriggerResponse:
     Definition: ConversationTriggerResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The conversation unique identifier."""
-    last_delivered_date_time: Optional[str] = field(
+    last_delivered_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastDeliveredDateTime"},
     )
     """
     The Timestamp type represents date and time information using ISO 8601
     format and is always in UTC time.
     """
-    threads: Optional[List[ConversationThreadTriggerResponse]] = None
+    threads: Optional[
+        List[ConversationThreadTriggerResponse]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -532,9 +569,9 @@ class ConversationThreadTriggerResponse:
     Definition: ConversationThreadTriggerResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The conversation thread's unique identifier."""
-    posts: Optional[List[PostTriggerResponse]] = None
+    posts: Optional[List[PostTriggerResponse]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -543,14 +580,16 @@ class PostTriggerResponse:
     Definition: PostTriggerResponse
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The post's unique identifier."""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
-    change_key: Optional[str] = field(
+    change_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeKey"},
     )
     """Identifies the version of the post."""
@@ -1511,11 +1550,14 @@ class Office365groupsmailClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List user groups
 
         Retrieves all Office 365 Groups the user is part of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1527,27 +1569,45 @@ class Office365groupsmailClient(ConnectorClientBase):
         query_params.append("$top=" + quote("999", safe=''))
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

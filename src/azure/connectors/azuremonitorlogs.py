@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -51,11 +51,11 @@ class QueryDataInput:
     Run query and list results
     """
 
-    query: Optional[str] = None
+    query: str
     """Specify the query you would like to run. """
-    timerangetype: Optional[str] = None
+    timerangetype: str
     """Select Time Range type. """
-    timerange: Optional[Dict[str, Any]] = None
+    timerange: Dict[str, Any]
     """Time Range"""
 
 
@@ -65,8 +65,8 @@ class Table:
     Response for Run query and list results
     """
 
-    value: Optional[List[Row]] = None
-    error: Optional[PartialQueryError] = None
+    value: Optional[List[Row]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[PartialQueryError] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -75,11 +75,11 @@ class VisualizeQueryInput:
     Run query and visualize results
     """
 
-    query: Optional[str] = None
+    query: str
     """Specify the query you would like to run. """
-    timerangetype: Optional[str] = None
+    timerangetype: str
     """Select Time Range type. """
-    timerange: Optional[Dict[str, Any]] = None
+    timerange: Dict[str, Any]
     """Time Range"""
 
 
@@ -89,16 +89,18 @@ class VisualizeResults:
     Response for Run query and visualize results
     """
 
-    body: Optional[str] = None
-    attachment_content: Optional[str] = field(
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
+    attachment_content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentContent"},
     )
-    attachment_name: Optional[str] = field(
+    attachment_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "attachmentName"},
     )
-    error: Optional[PartialQueryError] = None
+    error: Optional[PartialQueryError] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -107,10 +109,11 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
+    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
     """The subscriptions ."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -122,10 +125,11 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
+    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
     """The list of resource groups. """
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -137,10 +141,11 @@ class ResourceItemListResult:
     Response for List resources
     """
 
-    value: Optional[List[ResourceItem]] = None
+    value: Optional[List[ResourceItem]] = dataclass_field(default=None, kw_only=True)
     """The list of resource items. """
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -155,7 +160,7 @@ class ObjectEntity:
     Response for Get query schema
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -168,7 +173,7 @@ class Row:
     Definition: Row
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -181,7 +186,7 @@ class PartialQueryError:
     Definition: PartialQueryError
     """
 
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -190,18 +195,20 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The fully qualified Id. For example,
     /subscriptions/00000000-0000-0000-0000-000000000000.
     """
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id. """
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -217,11 +224,11 @@ class ResourceGroup:
     Definition: ResourceGroup
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ID of the resource group (e.g. /subscriptions/XXX/resourceGroups/YYY).
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group. """
 
 
@@ -231,9 +238,9 @@ class ResourceItem:
     Definition: ResourceItem
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource. """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource ."""
 
 
@@ -243,10 +250,11 @@ class TimeRangeTypesListResult:
     Definition: TimeRangeTypesListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = None
+    value: Optional[List[TimeRangeItem]] = dataclass_field(default=None, kw_only=True)
     """The list of time range types (Relative\\Absolute\\SetInQuery). """
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -258,10 +266,11 @@ class TimeRangeListResult:
     Definition: TimeRangeListResult
     """
 
-    value: Optional[List[TimeRangeItem]] = None
+    value: Optional[List[TimeRangeItem]] = dataclass_field(default=None, kw_only=True)
     """The list of time range. """
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results. """
@@ -273,9 +282,9 @@ class TimeRangeItem:
     Definition: TimeRangeItem
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The ID of the item. """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the item. """
 
 

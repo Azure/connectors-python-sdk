@@ -23,17 +23,24 @@ contract.
   pageable methods construct and return their pager without being awaited.
 - Paired clients have the same class name, unsuffixed operation names,
   parameters, request controls, and non-paging return payload types.
-- Root pageable operations return `ItemPaged`; aio pageable operations return
-  `AsyncItemPaged`.
+- Root collection operations return `ItemPaged`; aio collection operations
+  return `AsyncItemPaged`. This includes bounded collections without a
+  continuation-link contract.
 - Dataclasses, type aliases, enums, and `TRIGGER_OPERATIONS` are declared only
   in root and imported by aio, preserving object identity.
+- Swagger-required dataclass properties are required constructor arguments;
+  only optional properties default to `None`.
 - Each module defines an explicit `__all__`; paired exports match except for the
   distinct client object.
-- Generated clients are imported from their connector modules. Package-level
-  generated-client registries and barrel exports are not part of the contract.
+- Generated clients are available from their connector modules and as lazy
+  package-root exports. The generated registry and `.pyi` files keep runtime
+  discovery and static typing synchronized without eagerly importing every
+  connector module.
 - Retained operations with an HTTP 202 `Location` response contract use
   `begin_*` and return `LROPoller[T]` or `AsyncLROPoller[T]`. LRO classification
   takes precedence over paging, and bare HTTP 202 responses remain ordinary.
+- `ConnectorException` derives from Azure Core `HttpResponseError` while
+  retaining connector operation, path, status, and response-body details.
 
 Paging must preserve validation, connector error behavior, empty pages,
 continuation links, request controls, and response hooks on every request.
@@ -46,11 +53,14 @@ remain filtered by the existing operation-retention rules.
 
 ## Regeneration evidence
 
-Record the exact generator commit, linked generator change, source subscription
-and region, capture time, and a hash of each ephemeral Swagger response in the
-SDK pull request. Generate the sync/aio pair from one capture. Reviewers should
-use an independent live capture; connector responses and caches are not
-committed to this repository.
+Commit one raw Swagger snapshot per connector under `swagger-cache/`. The
+`generation.manifest.json` file records the exact generator commit and compiler
+hash, source subscription and region, capture time, and hashes for every
+snapshot, generated module, registry, and package type stub.
+
+Use `scripts/regenerate_connectors.py` to regenerate the complete sync/aio
+catalog offline from those snapshots. A second run with the pinned compiler and
+unchanged snapshots must produce no repository changes.
 
 Before submission, verify exact root/aio catalog parity, compile every generated
 module, run connector and runtime tests, validate both sample catalogs, build

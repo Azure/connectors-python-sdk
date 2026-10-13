@@ -50,9 +50,9 @@ async def example_1_list_calendars():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.calendar_get_tables()
+                items = [item async for item in client.list_calendar_get_tables()]
 
-                if result:
+                if items:
                     calendars = result.get("value", [])
                     print(f"Found {len(calendars)} calendar(s):")
                     for cal in calendars:
@@ -81,9 +81,9 @@ async def example_2_list_contact_folders():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.contact_get_tables()
+                items = [item async for item in client.list_contact_get_tables()]
 
-                if result:
+                if items:
                     folders = result.get("value", [])
                     print(f"Found {len(folders)} contact folder(s):")
                     for folder in folders:
@@ -114,12 +114,12 @@ async def example_3_get_calendar_events():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.calendar_get_items(
+                items = [item async for item in client.list_calendar_get_items(
                     table=calendar_id,
                     top=5  # Get up to 5 events
-                )
+                )]
 
-                if result:
+                if items:
                     events = result.get("value", [])
                     print(f"Found {len(events)} event(s) in calendar:")
                     for event in events[:5]:
@@ -147,12 +147,12 @@ async def example_4_get_contacts():
 
         async with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.contact_get_items(
+                items = [item async for item in client.list_contact_get_items(
                     table=folder_id,
                     top=10  # Get up to 10 contacts
-                )
+                )]
 
-                if result:
+                if items:
                     contacts = result.get("value", [])
                     print(f"Found {len(contacts)} contact(s):")
                     for contact in contacts[:5]:

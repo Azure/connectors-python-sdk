@@ -18,6 +18,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
     invoke_generated_operation,
+    resolve_generated_result,
 )
 
 
@@ -91,12 +92,17 @@ class TestWordpressClient:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
+        response_text = (
+            '{"sites": [{"ok": true}]}'
+            if operation == "list_sites"
+            else '{"ok": true}'
+        )
 
         with patch.object(
             client._http_client,
             "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(status=200, text=response_text),
         ) as mock_send:
             result = await invoke_generated_operation(client, operation, wordpress_module)
 
@@ -104,7 +110,8 @@ class TestWordpressClient:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = [{"ok": True}] if operation == "list_sites" else {"ok": True}
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_create_post_success(self, mock_credential):
@@ -146,12 +153,12 @@ class TestWordpressClient:
             new_callable=AsyncMock,
             return_value=MockResponse(status=200, text='{"sites": []}'),
         ) as mock_send:
-            result = await client.list_sites()
+            result = await resolve_generated_result(client.list_sites())
 
         method, url = mock_send.call_args.args[:2]
         assert method == "GET"
         assert "/me/sites?fields=" in url
-        assert result == {"sites": []}
+        assert result == []
 
     def test_trigger_metadata(self):
         """Test polling trigger metadata is registered instead of callable."""

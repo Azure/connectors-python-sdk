@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -56,15 +58,15 @@ class TranscriptionGetResponse:
     Response for Get transcription job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    transcriber: Optional[str] = None
+    transcriber: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcriber."""
 
 
@@ -74,42 +76,52 @@ class TranscriptionInput:
     Submit transcription job
     """
 
-    source_config: Optional[Dict[str, Any]] = None
-    metadata: Optional[str] = None
+    source_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    delete_after_seconds: Optional[int] = None
+    notification_config: Dict[str, Any]
+    delete_after_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The delete after seconds."""
-    transcriber: Optional[str] = None
+    transcriber: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcriber."""
-    verbatim: Optional[bool] = None
+    verbatim: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether verbatim."""
-    rush: Optional[bool] = None
+    rush: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to rush."""
-    test_mode: Optional[bool] = None
+    test_mode: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether test mode."""
-    segments_to_transcribe: Optional[List[Dict[str, Any]]] = None
-    speakers_names: Optional[List[Dict[str, Any]]] = None
-    skip_diarization: Optional[bool] = None
+    segments_to_transcribe: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    speakers_names: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
+    skip_diarization: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to skip diarization."""
-    skip_postprocessing: Optional[bool] = None
+    skip_postprocessing: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to skip postprocessing."""
-    skip_punctuation: Optional[bool] = None
+    skip_punctuation: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to skip punctuations."""
-    remove_disfluencies: Optional[bool] = None
+    remove_disfluencies: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to remove disfluencies."""
-    remove_atmospherics: Optional[bool] = None
+    remove_atmospherics: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to remove atmospherics."""
-    filter_profanity: Optional[bool] = None
+    filter_profanity: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether to filter profanity."""
-    speaker_channels_count: Optional[int] = None
+    speaker_channels_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The speaker channels count."""
-    speakers_count: Optional[int] = None
+    speakers_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The speakers count."""
-    custom_vocabulary_id: Optional[str] = None
+    custom_vocabulary_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The custom vocabulary identifier."""
-    custom_vocabularies: Optional[List[Dict[str, Any]]] = None
-    language: Optional[str] = None
+    custom_vocabularies: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
 
 
@@ -119,15 +131,15 @@ class TranscriptionPostResponse:
     Response for Submit transcription job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    transcriber: Optional[str] = None
+    transcriber: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcriber."""
 
 
@@ -137,7 +149,7 @@ class TranscriptGetResponse:
     Response for Get transcript
     """
 
-    monologues: Optional[List[Dict[str, Any]]] = None
+    monologues: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -146,19 +158,19 @@ class AccountGetResponse:
     Response for Get account
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address."""
-    free_balance: Optional[float] = None
+    free_balance: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The free balance."""
-    purchased_balance: Optional[float] = None
+    purchased_balance: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The purchased balance."""
-    total_balance: Optional[int] = None
+    total_balance: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total balance."""
-    invoiced_balance: Optional[float] = None
+    invoiced_balance: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The invoiced balance."""
-    balance_seconds: Optional[int] = None
+    balance_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The balance seconds."""
-    hipaa_enabled: Optional[bool] = None
+    hipaa_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether HIPAA is enabled."""
 
 
@@ -168,10 +180,15 @@ class VocabularyInput:
     Submit custom vocabulary
     """
 
-    metadata: Optional[str] = None
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    custom_vocabularies: Optional[List[Dict[str, Any]]] = None
+    notification_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    custom_vocabularies: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -180,13 +197,13 @@ class VocabularyPostResponse:
     Response for Submit custom vocabulary
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    callback_url: Optional[str] = None
+    callback_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The callback URL address."""
 
 
@@ -196,13 +213,13 @@ class VocabularyGetResponse:
     Response for Get vocabulary
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    callback_url: Optional[str] = None
+    callback_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The callback URL address."""
 
 
@@ -212,14 +229,14 @@ class ExtractionInput:
     Submit topic extraction job
     """
 
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    metadata: Optional[str] = None
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    delete_after_seconds: Optional[int] = None
+    notification_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    delete_after_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The delete after seconds."""
-    json: Optional[Dict[str, Any]] = None
+    json: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -228,15 +245,19 @@ class ExtractionPostResponse:
     Response for Submit topic extraction job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -246,15 +267,19 @@ class ExtractionGetResponse:
     Response for Get topic extraction job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -264,7 +289,7 @@ class ExtractionResultGetResponse:
     Response for Get topic extraction result
     """
 
-    topics: Optional[List[Dict[str, Any]]] = None
+    topics: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -273,14 +298,14 @@ class AnalysisInput:
     Submit sentiment analysis job
     """
 
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    metadata: Optional[str] = None
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    delete_after_seconds: Optional[int] = None
+    notification_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    delete_after_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The delete after seconds."""
-    json: Optional[Dict[str, Any]] = None
+    json: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -289,17 +314,21 @@ class AnalysisPostResponse:
     Response for Submit sentiment analysis job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    callback_url: Optional[str] = None
+    callback_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The callback URL address."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -309,17 +338,21 @@ class AnalysisGetResponse:
     Response for Get sentiment analysis job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    callback_url: Optional[str] = None
+    callback_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The callback URL address."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -329,7 +362,7 @@ class AnalysisResultGetResponse:
     Response for Get sentiment analysis result
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -338,12 +371,12 @@ class IdentificationInput:
     Submit language identification job
     """
 
-    metadata: Optional[str] = None
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    delete_after_seconds: Optional[int] = None
+    notification_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    delete_after_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The delete after seconds."""
-    source_config: Optional[Dict[str, Any]] = None
+    source_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -352,13 +385,17 @@ class IdentificationPostResponse:
     Response for Submit language identification job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -368,13 +405,17 @@ class IdentificationGetResponse:
     Response for Get language identification job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -384,9 +425,14 @@ class IdentificationResultGetResponse:
     Response for Get language identification result
     """
 
-    top_language: Optional[str] = None
+    top_language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The top language."""
-    language_confidences: Optional[List[Dict[str, Any]]] = None
+    language_confidences: Optional[
+        List[Dict[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -395,15 +441,15 @@ class AlignmentInput:
     Submit forced alignment job
     """
 
-    metadata: Optional[str] = None
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The metadata."""
-    notification_config: Optional[Dict[str, Any]] = None
-    delete_after_seconds: Optional[int] = None
+    notification_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    delete_after_seconds: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The delete after seconds."""
-    source_config: Optional[Dict[str, Any]] = None
-    transcript_text: Optional[str] = None
+    source_config: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    transcript_text: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The transcript text."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The language."""
 
 
@@ -413,13 +459,17 @@ class AlignmentPostResponse:
     Response for Submit forced alignment job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -429,13 +479,17 @@ class AlignmentGetResponse:
     Response for Get forced alignment job
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The identifier."""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status."""
-    created_on: Optional[str] = None
+    created_on: Optional[str] = dataclass_field(default=None, kw_only=True)
     """When created on."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type."""
 
 
@@ -445,7 +499,7 @@ class AlignmentTranscriptGetResponse:
     Response for Get forced alignment transcript
     """
 
-    monologues: Optional[List[Dict[str, Any]]] = None
+    monologues: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -512,6 +566,45 @@ class RevaiClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "revai"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def transcription_get(
         self,
@@ -595,7 +688,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transcriptions_get(
+    def list_transcriptions_get(
         self,
         *,
         limit: Optional[int] = None,
@@ -604,12 +697,15 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get transcription job list
 
         Retrieve a list of transcription jobs submitted within the last 30
         days.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/jobs"
         query_params = []
@@ -625,27 +721,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def transcription(
         self,
@@ -685,7 +799,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def transcript_get(
+    def list_transcript_get(
         self,
         id: str,
         *,
@@ -693,37 +807,58 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get transcript
 
         Returns the transcript for a completed transcription job.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/speechtotext/v1/jobs/{quote(str(id), safe='')}/transcript"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("monologues", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def captions_get(
         self,
@@ -802,7 +937,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def vocabularies_get(
+    def list_vocabularies_get(
         self,
         *,
         limit: Optional[int] = None,
@@ -810,12 +945,15 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of vocabularies
 
         Retrieves a list of most recent custom vocabularies' processing
         information.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/speechtotext/v1/vocabularies"
@@ -828,27 +966,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"limit={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def vocabulary(
         self,
@@ -970,7 +1126,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def extractions_get(
+    def list_extractions_get(
         self,
         *,
         limit: Optional[int] = None,
@@ -979,12 +1135,15 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get topic extraction jobs
 
         Retrieves a list of topic extraction jobs submitted within the last 30
         days in reverse chronological order.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/topic_extraction/v1/jobs"
@@ -1002,27 +1161,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def extraction(
         self,
@@ -1144,7 +1321,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def extraction_result_get(
+    def list_extraction_result_get(
         self,
         id: str,
         *,
@@ -1153,11 +1330,14 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get topic extraction result
 
         Returns the results for a completed topic extraction job.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1171,27 +1351,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"threshold={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("topics", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def analysises_get(
         self,
@@ -1362,7 +1560,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def analysis_result_get(
+    def list_analysis_result_get(
         self,
         id: str,
         *,
@@ -1371,11 +1569,14 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get sentiment analysis result
 
         Returns the results for a completed sentiment analysis job.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1389,29 +1590,47 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"filter_for={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def identifications_get(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("messages", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_identifications_get(
         self,
         *,
         limit: Optional[int] = None,
@@ -1420,12 +1639,15 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get language identification jobs
 
         Retrieves a list of language identification jobs submitted within the
         last 30 days in reverse chronological order.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/languageid/v1/jobs"
         query_params = []
@@ -1441,27 +1663,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def identification(
         self,
@@ -1622,7 +1862,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def alignments_get(
+    def list_alignments_get(
         self,
         *,
         limit: Optional[int] = None,
@@ -1631,12 +1871,15 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get forced alignment jobs
 
         Retrieve a list of alignment jobs submitted within the last 30 days in
         reverse chronological order.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/alignment/v1/jobs"
         query_params = []
@@ -1652,27 +1895,45 @@ class RevaiClient(ConnectorClientBase):
             query_params.append(f"starting_after={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def alignment(
         self,
@@ -1793,7 +2054,7 @@ class RevaiClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def alignment_transcript_get(
+    def list_alignment_transcript_get(
         self,
         id: str,
         *,
@@ -1801,34 +2062,55 @@ class RevaiClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get forced alignment transcript
 
         Returns the results for a completed forced alignment job.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/alignment/v1/jobs/{quote(str(id), safe='')}/transcript"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("monologues", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

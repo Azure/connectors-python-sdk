@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -42,7 +42,7 @@ class SetDNDResponse:
     Response for Set do not disturb
     """
 
-    snooze_enabled: Optional[bool] = None
+    snooze_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether snooze is enabled."""
 
 
@@ -52,7 +52,7 @@ class CreateChannelResponse:
     Response for Create a channel
     """
 
-    channel: Optional[Channel] = None
+    channel: Optional[Channel] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -61,8 +61,8 @@ class JoinChannelResponse:
     Response for Join a public channel
     """
 
-    channel: Optional[Channel] = None
-    warning: Optional[str] = None
+    channel: Optional[Channel] = dataclass_field(default=None, kw_only=True)
+    warning: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Whether the user is already in the channel or not."""
 
 
@@ -72,9 +72,10 @@ class ListChannelsResponse:
     Response for List public channels (Pagination support)
     """
 
-    value: Optional[List[Channel]] = None
-    next_link: Optional[str] = field(
+    value: Optional[List[Channel]] = dataclass_field(default=None, kw_only=True)
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
@@ -86,15 +87,15 @@ class PostMessageResponse:
     Response for Post message
     """
 
-    ok: Optional[bool] = None
+    ok: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates if the operation was successful."""
-    channel: Optional[str] = None
+    channel: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The channel which the message was posted to."""
-    ts: Optional[str] = None
+    ts: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unix timestamp for when the message was created."""
-    message: Optional[Dict[str, Any]] = None
+    message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """A channel message."""
-    error: Optional[str] = None
+    error: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Details of the error messages, if any."""
 
 
@@ -104,9 +105,9 @@ class Channel:
     Definition: Channel
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the channel."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of channel."""
 
 
@@ -116,40 +117,40 @@ class PostMessageRequest:
     Definition: PostMessageRequest
     """
 
-    channel: Optional[str] = None
+    channel: str
     """
     Channel, private group, or IM channel to send message to. Can be a name(ex:
     #general) or an encoded ID.
     """
-    text: Optional[str] = None
+    text: str
     """
     Body of the message to send. Slack API will truncate messages containing
     more than 40,000 characters. For formatting options, see
     https://api.slack.com/docs/formatting
     """
-    username: Optional[str] = None
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the bot."""
-    as_user: Optional[bool] = None
+    as_user: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Pass true to post the message as the authenticated user, instead of as a
     bot.
     """
-    parse: Optional[str] = None
+    parse: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Change how messages are treated. For details, see
     https://api.slack.com/docs/formatting
     """
-    mrkdwn: Optional[bool] = None
+    mrkdwn: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Slack markup parsing setting. Enabled by default."""
-    link_names: Optional[int] = None
+    link_names: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Find and link channel names and usernames."""
-    unfurl_links: Optional[bool] = None
+    unfurl_links: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Pass true to enable unfurling of primarily text-based content."""
-    unfurl_media: Optional[bool] = None
+    unfurl_media: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Pass false to disable unfurling of media content."""
-    icon_url: Optional[str] = None
+    icon_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """URL to an image to use as an icon for this message."""
-    icon_emoji: Optional[str] = None
+    icon_emoji: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Emoji to use as an icon for this message."""
 
 

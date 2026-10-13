@@ -17,20 +17,21 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
     invoke_generated_operation,
+    resolve_generated_result,
 )
 
 
 SUCCESS_CONTRACTS = {
-    "followers": ("GET", "/followers?userName=value", False),
-    "following": ("GET", "/friends?userName=value", False),
-    "home_timeline": ("GET", "/hometimeline", False),
-    "my_followers": ("GET", "/myfollowers", False),
-    "my_following": ("GET", "/myfriends", False),
+    "list_followers": ("GET", "/followers?userName=value", False),
+    "list_following": ("GET", "/friends?userName=value", False),
+    "list_home_timeline": ("GET", "/hometimeline", False),
+    "list_my_followers": ("GET", "/myfollowers", False),
+    "list_my_following": ("GET", "/myfriends", False),
     "retweet": ("POST", "/retweet?tweetId=value", False),
-    "search_tweet": ("GET", "/searchtweets?searchQuery=value", False),
+    "list_search_tweet": ("GET", "/searchtweets?searchQuery=value", False),
     "tweet": ("POST", "/posttweet", True),
     "user": ("GET", "/user?userName=value", False),
-    "user_timeline": ("GET", "/usertimeline?userName=value", False),
+    "list_user_timeline": ("GET", "/usertimeline?userName=value", False),
 }
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 
@@ -143,7 +144,14 @@ class TestTwitterClientOperations:
             client._http_client,
             "send",
             new_callable=AsyncMock,
-            return_value=MockResponse(status=200, text='{"ok": true}'),
+            return_value=MockResponse(
+                status=200,
+                text=(
+                    '[{"ok": true}]'
+                    if operation.startswith("list_")
+                    else '{"ok": true}'
+                ),
+            ),
         ) as mock_send:
             result = await invoke_generated_operation(client, operation, twitter_module)
 
@@ -151,7 +159,12 @@ class TestTwitterClientOperations:
         assert method == expected_method
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-        assert result == {"ok": True}
+        expected_result = (
+            [{"ok": True}]
+            if operation.startswith("list_")
+            else {"ok": True}
+        )
+        assert result == expected_result
 
     @pytest.mark.asyncio
     async def test_user_timeline_success(self, mock_credential):
@@ -160,7 +173,7 @@ class TestTwitterClientOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        response = MockResponse(status=200, text='{"value": []}')
+        response = MockResponse(status=200, text='[{"id": "tweet-1"}]')
 
         with patch.object(
             client._http_client,
@@ -168,12 +181,14 @@ class TestTwitterClientOperations:
             new_callable=AsyncMock,
             return_value=response,
         ) as mock_send:
-            result = await client.user_timeline(user_name="Ada Lovelace", max_results="5")
+            result = await resolve_generated_result(
+                client.list_user_timeline(user_name="Ada Lovelace", max_results=5)
+            )
 
         method, url = mock_send.call_args.args[:2]
         assert method == "GET"
         assert url.endswith("/usertimeline?userName=Ada%20Lovelace&maxResults=5")
-        assert result == {"value": []}
+        assert result == [{"id": "tweet-1"}]
 
     @pytest.mark.asyncio
     async def test_tweet_success(self, mock_credential):
@@ -199,8 +214,8 @@ class TestTwitterClientOperations:
         assert result == {"id": "tweet-1"}
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test an empty successful response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test an empty successful response returns an empty page."""
         client = TwitterClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -212,9 +227,9 @@ class TestTwitterClientOperations:
             new_callable=AsyncMock,
             return_value=MockResponse(status=204, text=""),
         ):
-            result = await client.home_timeline()
+            result = await resolve_generated_result(client.list_home_timeline())
 
-        assert result is None
+        assert result == []
 
     def test_trigger_metadata(self):
         """Test polling trigger metadata is registered instead of callable."""

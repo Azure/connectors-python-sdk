@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -45,11 +45,11 @@ class Network:
     Response for Get my networks
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the network."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary of the network."""
-    permalink: Optional[str] = None
+    permalink: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web link to the network page."""
 
 
@@ -59,11 +59,15 @@ class YammerEntity:
     Response for Get groups
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Details of the Viva Engage entity."""
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the group."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the Viva Engage entity."""
 
 
@@ -73,25 +77,25 @@ class User:
     Response for Get user details
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Username."""
-    job_title: Optional[str] = None
+    job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User job title."""
-    location: Optional[str] = None
+    location: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User location."""
-    full_name: Optional[str] = None
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User full name."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User first name."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User last name."""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User profile url."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User email."""
-    birth_date: Optional[str] = None
+    birth_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User birth date."""
-    mugshot_url: Optional[str] = None
+    mugshot_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """User photo url."""
 
 
@@ -101,9 +105,10 @@ class PageableMessageList:
     Response for Get all messages
     """
 
-    value: Optional[List[Message]] = None
-    next_link: Optional[str] = field(
+    value: Optional[List[Message]] = dataclass_field(default=None, kw_only=True)
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -115,7 +120,7 @@ class MessageList:
     Response for When there is a new message in my followed feed
     """
 
-    messages: Optional[List[Message]] = None
+    messages: Optional[List[Message]] = dataclass_field(default=None, kw_only=True)
     """messages"""
 
 
@@ -125,45 +130,45 @@ class Message:
     Definition: Message
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID associated with the post."""
-    content_excerpt: Optional[str] = None
+    content_excerpt: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Text Content of the post."""
-    sender_id: Optional[int] = None
+    sender_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of user who posted the message."""
-    replied_to_id: Optional[int] = None
+    replied_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """ID of the message to which this message is a reply."""
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Time at which the message was created."""
-    network_id: Optional[int] = None
+    network_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Id of the network message is associated with."""
-    message_type: Optional[str] = None
+    message_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the message type."""
-    sender_type: Optional[str] = None
+    sender_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Description of the type of sender."""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """API url of the post."""
-    web_url: Optional[str] = None
+    web_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web url of the post."""
-    group_id: Optional[int] = None
+    group_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of group who posted the message."""
-    body: Optional[MessageBody] = None
-    thread_id: Optional[int] = None
+    body: Optional[MessageBody] = dataclass_field(default=None, kw_only=True)
+    thread_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique ID of thread."""
-    direct_message: Optional[bool] = None
+    direct_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Flag to specify if the post is a  a direct message."""
-    client_type: Optional[str] = None
+    client_type: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of the client."""
-    client_url: Optional[str] = None
+    client_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Web link of the client."""
-    language: Optional[str] = None
+    language: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Language used in the message."""
-    notified_user_ids: Optional[List[int]] = None
+    notified_user_ids: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Details of users notified."""
-    privacy: Optional[str] = None
+    privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Details of the privacy associated with the message."""
-    liked_by: Optional[LikedBy] = None
-    system_message: Optional[bool] = None
+    liked_by: Optional[LikedBy] = dataclass_field(default=None, kw_only=True)
+    system_message: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Flag to specify if the post is a system generated message or not."""
 
 
@@ -173,9 +178,9 @@ class Topic:
     Definition: Topic
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique identifier of the topic."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the topic."""
 
 
@@ -185,20 +190,20 @@ class PostOperationRequest:
     Definition: PostOperationRequest
     """
 
-    group_id: Optional[int] = None
+    group_id: int
     """The group to post a message to (0 = All Company/Network)."""
-    body: Optional[str] = None
+    body: str
     """Your message to be posted into your network."""
-    replied_to_id: Optional[int] = None
+    replied_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The message ID this message is in reply to."""
-    direct_to_id: Optional[int] = None
+    direct_to_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     If set, a private message will be sent directly to the user with the
     indicated ID.
     """
-    broadcast: Optional[bool] = None
+    broadcast: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Post message as an announcement to all users in a group."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Title of the message to be posted."""
 
 
@@ -208,11 +213,11 @@ class MessageBody:
     Definition: MessageBody
     """
 
-    parsed: Optional[str] = None
+    parsed: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Parsed text format."""
-    plain: Optional[str] = None
+    plain: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Plain text format."""
-    rich: Optional[str] = None
+    rich: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Rich text format."""
 
 
@@ -222,9 +227,9 @@ class LikedBy:
     Definition: LikedBy
     """
 
-    count: Optional[int] = None
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of distinct likes."""
-    names: Optional[List[Dict[str, Any]]] = None
+    names: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of people who liked the post."""
 
 
@@ -332,43 +337,64 @@ class YammerClient(ConnectorClientBase):
             suffix += f"?{parsed_next_link.query}"
         return f"{self._connection_runtime_url}{suffix}"
 
-    def get_networks(
+    def list_networks(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get my networks
 
         Gets all the networks that the user belongs to.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/networks.json"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_groups(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_groups(
         self,
         *,
         network_id: Optional[str] = None,
@@ -378,11 +404,14 @@ class YammerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get groups
 
         Gets all groups. If mine = 1, get only groups to which the user belongs
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/groups.json"
         query_params = []
@@ -403,27 +432,45 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"showAllCompanyGroup={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_user_details_by_id(
         self,
@@ -871,7 +918,7 @@ class YammerClient(ConnectorClientBase):
 
         return ItemPaged(get_next, extract_data)
 
-    def post_message(
+    def list_post_message(
         self,
         input: PostOperationRequest,
         *,
@@ -880,13 +927,16 @@ class YammerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Post message
 
         This operation is used to post a Message to a Group or All Company
         Feed. If group ID is provided, message will be posted to the specified
         group else it will be posted in All Company Feed.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/messages.json"
         query_params = []
@@ -897,27 +947,45 @@ class YammerClient(ConnectorClientBase):
             query_params.append(f"network_id={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("messages", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

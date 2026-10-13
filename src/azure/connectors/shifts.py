@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Literal, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -92,20 +92,23 @@ class ScheduleResponse:
     Response for Get a Schedule's details
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Schedule."""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeZone"},
     )
     """The Time Zone of the Schedule."""
-    provision_status: Optional[str] = field(
+    provision_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatus"},
     )
     """The Provision Status of the Schedule."""
-    provision_status_code: Optional[str] = field(
+    provision_status_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisionStatusCode"},
     )
     """The Provision Status Code of the Schedule."""
@@ -117,14 +120,16 @@ class ListTimesOffResponse:
     Response for List all Time Off instances in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = None
+    value: Optional[List[TimeOffResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Time Off instances"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -136,37 +141,44 @@ class TimeOffResponse:
     Response for Create a new Time Off instance
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Time Off."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID."""
-    user_info: Optional[UserInfo] = field(
+    user_info: Optional[UserInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_time_off: Optional[SharedTimeOff] = field(
+    shared_time_off: Optional[SharedTimeOff] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedTimeOff"},
     )
-    draft_time_off: Optional[DraftTimeOff] = field(
+    draft_time_off: Optional[DraftTimeOff] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftTimeOff"},
     )
 
@@ -177,14 +189,16 @@ class ListShiftsResponse:
     Response for List all Shifts in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = None
+    value: Optional[List[ShiftResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Shifts"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -196,46 +210,55 @@ class ShiftResponse:
     Response for Create a new Shift
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """Assigned To User ID."""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID."""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+    scheduling_group_info: Optional[SchedulingGroupInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    user_info: Optional[UserInfo] = field(
+    user_info: Optional[UserInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_shift: Optional[SharedShift] = field(
+    shared_shift: Optional[SharedShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedShift"},
     )
-    draft_shift: Optional[DraftShift] = field(
+    draft_shift: Optional[DraftShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftShift"},
     )
 
@@ -246,14 +269,16 @@ class ListOpenShiftsResponse:
     Response for List all Open Shifts in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = None
+    value: Optional[List[OpenShiftResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Open Shifts"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -265,37 +290,44 @@ class OpenShiftResponse:
     Response for Create a new Open Shift
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    scheduling_group_info: Optional[SchedulingGroupInfo] = field(
+    scheduling_group_info: Optional[SchedulingGroupInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupInfo"},
     )
-    team_info: Optional[TeamInfo] = field(
+    team_info: Optional[TeamInfo] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamInfo"},
     )
-    shared_open_shift: Optional[SharedOpenShift] = field(
+    shared_open_shift: Optional[SharedOpenShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
-    draft_open_shift: Optional[DraftOpenShift] = field(
+    draft_open_shift: Optional[DraftOpenShift] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "draftOpenShift"},
     )
 
@@ -306,14 +338,16 @@ class GetTimeOffReasonsResponse:
     Response for List all Time Off Reasons in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The list of Time Off Reasons."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -325,14 +359,16 @@ class ListSchedulingGroupsResponse:
     Response for List all Scheduling Groups in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SchedulingGroupResponse]] = None
+    value: Optional[List[SchedulingGroupResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Scheduling Groups."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -344,23 +380,26 @@ class SchedulingGroupResponse:
     Response for Get a Scheduling Group
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the Scheduling Group."""
-    is_active: Optional[bool] = field(
+    is_active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isActive"},
     )
     """
     Indicates whether the Scheduling Group can be used when creating new
     entities or updating existing ones.
     """
-    user_ids: Optional[List[str]] = field(
+    user_ids: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userIds"},
     )
     """List of IDs of users in the Scheduling Group."""
@@ -372,14 +411,16 @@ class ListTimeOffRequestsResponse:
     Response for List all Time Off requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffRequestResponse]] = None
+    value: Optional[List[TimeOffRequestResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Time Off requests."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -391,67 +432,79 @@ class TimeOffRequestResponse:
     Response for Get a Time Off request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Time Off request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """Start of time requested off"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """End of time requested off"""
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """The ID of the Time Off Reason"""
@@ -463,7 +516,7 @@ class TimeOffRequestApproveInput:
     Approve a Time Off request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     accepted.
@@ -476,7 +529,7 @@ class TimeOffRequestApproveResponse:
     Response for Approve a Time Off request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -489,7 +542,7 @@ class TimeOffRequestDeclineInput:
     Decline a Time Off request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     declined.
@@ -502,7 +555,7 @@ class TimeOffRequestDeclineResponse:
     Response for Decline a Time Off request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -515,14 +568,16 @@ class ListOfferShiftRequestsResponse:
     Response for List all Offer Shift requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OfferShiftRequestResponse]] = None
+    value: Optional[List[OfferShiftRequestResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Offer Shift requests."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -534,72 +589,85 @@ class OfferShiftRequestResponse:
     Response for Get an Offer Shift request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Offer Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -611,7 +679,7 @@ class OfferShiftRequestApproveInput:
     Approve an Offer Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is accepted."""
 
 
@@ -621,7 +689,7 @@ class OfferShiftRequestApproveResponse:
     Response for Approve an Offer Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -634,7 +702,7 @@ class OfferShiftRequestDeclineInput:
     Decline an Offer Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is declined."""
 
 
@@ -644,7 +712,7 @@ class OfferShiftRequestDeclineResponse:
     Response for Decline an Offer Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -657,14 +725,21 @@ class ListSwapShiftsChangeRequestsResponse:
     Response for List all Swap Shifts requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[SwapShiftsChangeRequestResponse]] = None
-    """List of Swap Shifts Change Requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[SwapShiftsChangeRequestResponse]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Swap Shifts Change Requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -676,77 +751,91 @@ class SwapShiftsChangeRequestResponse:
     Response for Get a Swap Shifts request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Swap Shift request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    sender_shift_id: Optional[str] = field(
+    sender_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderShiftId"},
     )
     """The ID of the Shift from the sender"""
-    recipient_action_date_time: Optional[str] = field(
+    recipient_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionDateTime"},
     )
     """Time when the recipient responded"""
-    recipient_action_message: Optional[str] = field(
+    recipient_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientActionMessage"},
     )
     """The message from the recipient"""
-    recipient_user_id: Optional[str] = field(
+    recipient_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientUserId"},
     )
     """The ID of the recipient of the request"""
-    recipient_shift_id: Optional[str] = field(
+    recipient_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "recipientShiftId"},
     )
     """The ID of the Shift from the recipient"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
@@ -758,7 +847,7 @@ class SwapShiftsChangeRequestApproveInput:
     Approve a Swap Shifts request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is accepted."""
 
 
@@ -768,7 +857,7 @@ class SwapShiftsChangeRequestApproveResponse:
     Response for Approve a Swap Shifts request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -781,7 +870,7 @@ class SwapShiftsChangeRequestDeclineInput:
     Decline a Swap Shifts request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A message when a request is declined."""
 
 
@@ -791,7 +880,7 @@ class SwapShiftsChangeRequestDeclineResponse:
     Response for Decline a Swap Shifts request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -804,14 +893,21 @@ class ListOpenShiftChangeRequestsResponse:
     Response for List all Open Shift requests in a team
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftChangeRequestResponse]] = None
-    """List of Open Shift Change Requests."""
-    next_link: Optional[str] = field(
+    value: Optional[
+        List[OpenShiftChangeRequestResponse]
+    ] = dataclass_field(
         default=None,
+        kw_only=True,
+    )
+    """List of Open Shift Change Requests."""
+    next_link: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -823,57 +919,67 @@ class OpenShiftChangeRequestResponse:
     Response for Get an Open Shift request
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The unique ID of the Open Shift Change request."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastModifiedDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    assigned_to: Optional[str] = field(
+    assigned_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "assignedTo"},
     )
     """The person the request is assigned to: 'manager' or 'recipient'"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """'approved', 'pending' or 'declined'"""
-    sender_date_time: Optional[str] = field(
+    sender_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderDateTime"},
     )
     """Time when the request was sent"""
-    sender_message: Optional[str] = field(
+    sender_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderMessage"},
     )
     """The message from the request sender"""
-    sender_user_id: Optional[str] = field(
+    sender_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "senderUserId"},
     )
     """The ID of the user that sent the request"""
-    manager_action_date_time: Optional[str] = field(
+    manager_action_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionDateTime"},
     )
     """Time when the manager responded"""
-    manager_action_message: Optional[str] = field(
+    manager_action_message: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerActionMessage"},
     )
     """The message from the manager"""
-    manager_user_id: Optional[str] = field(
+    manager_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managerUserId"},
     )
     """The ID of the manager that responded"""
-    open_shift_id: Optional[str] = field(
+    open_shift_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openShiftId"},
     )
     """The ID of the Open Shift being requested"""
@@ -885,7 +991,7 @@ class OpenShiftChangeRequestApproveInput:
     Approve an Open Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     accepted.
@@ -898,7 +1004,7 @@ class OpenShiftChangeRequestApproveResponse:
     Response for Approve an Open Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -911,7 +1017,7 @@ class OpenShiftChangeRequestDeclineInput:
     Decline an Open Shift request
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message from the manager to the sender/recipient when a request is
     declined.
@@ -924,7 +1030,7 @@ class OpenShiftChangeRequestDeclineResponse:
     Response for Decline an Open Shift request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -937,14 +1043,16 @@ class ListOpenShiftsCrossTeamResponse:
     Response for List all Open Shifts from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[OpenShiftResponse]] = None
+    value: Optional[List[OpenShiftResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Open Shifts"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -956,14 +1064,16 @@ class ListShiftsCrossTeamResponse:
     Response for List all Shifts from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[ShiftResponse]] = None
+    value: Optional[List[ShiftResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Shifts"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -975,14 +1085,16 @@ class ListTimesOffCrossTeamResponse:
     Response for List all Times Off from my teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[TimeOffResponse]] = None
+    value: Optional[List[TimeOffResponse]] = dataclass_field(default=None, kw_only=True)
     """List of Times off"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -994,11 +1106,12 @@ class GetAllTeamsResponse:
     Response for List teams
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of one or more Teams you are a part of."""
 
 
@@ -1008,8 +1121,7 @@ class WebHookRequest:
     Definition: WebHookRequest
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "notificationUrl"},
     )
     """
@@ -1023,7 +1135,7 @@ class WebhookPushResponse:
     Definition: WebhookPushResponse
     """
 
-    value: Optional[List[WebhookNotificationEntity]] = None
+    value: Optional[List[WebhookNotificationEntity]] = dataclass_field(default=None, kw_only=True)
     """List of values"""
 
 
@@ -1033,23 +1145,27 @@ class WebhookNotificationEntity:
     Definition: WebhookNotificationEntity
     """
 
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """WebHook Subscription Id"""
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """Resource change type (created/updated/deleted)."""
-    resource_data: Optional[WebhookPushResponseResourceEntity] = field(
+    resource_data: Optional[WebhookPushResponseResourceEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceData"},
     )
 
@@ -1060,20 +1176,23 @@ class WebhookPushResponseResourceEntity:
     Definition: WebhookPushResponseResourceEntity
     """
 
-    id_2: Optional[str] = field(
+    id_2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.id"},
     )
     """Full resource path."""
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
     """Resoure Type."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the resource that is updated."""
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """ID of team where the update happened."""
@@ -1085,25 +1204,28 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique identifier for the subscription."""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Specifies the resource that will be monitored for changes."""
-    application_id: Optional[str] = field(
+    application_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "applicationId"},
     )
     """Identifier of the application used to create the subscription."""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "changeType"},
     )
     """
     Indicates the type of change in the subscribed resource that will raise a
     notification.
     """
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "clientState"},
     )
     """
@@ -1113,23 +1235,26 @@ class Subscription:
     clientState property sent with the subscription with the value of the
     clientState property received with each notification.
     """
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """
     The URL of the endpoint that will receive the notifications. This URL must
     make use of the HTTPS protocol.
     """
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """
     Specifies the date and time when the webhook subscription expires (UTC).
     """
-    creator_id: Optional[str] = field(
+    creator_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creatorId"},
     )
     """
@@ -1147,22 +1272,25 @@ class SharedTimeOff:
     Definition: SharedTimeOff
     """
 
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1171,22 +1299,25 @@ class DraftTimeOff:
     Definition: DraftTimeOff
     """
 
-    time_off_reason_id: Optional[str] = field(
+    time_off_reason_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "timeOffReasonId"},
     )
     """Time Off Reason ID."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1195,25 +1326,28 @@ class SharedShift:
     Definition: SharedShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Shift Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    activities: Optional[Activities] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1222,25 +1356,28 @@ class DraftShift:
     Definition: DraftShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    activities: Optional[Activities] = None
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 Theme = Literal[
@@ -1268,17 +1405,19 @@ class SchedulingGroupInfo:
     Definition: SchedulingGroupInfo
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """The unique ID of the Scheduling Group."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the Scheduling Group."""
-    code: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The scheduling group code."""
 
 
@@ -1288,13 +1427,15 @@ class UserInfo:
     Definition: UserInfo
     """
 
-    user_id: Optional[str] = field(
+    user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userId"},
     )
     """The ID of the user."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name of the user."""
@@ -1306,13 +1447,15 @@ class TeamInfo:
     Definition: TeamInfo
     """
 
-    team_id: Optional[str] = field(
+    team_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "teamId"},
     )
     """The ID of the team."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The display name for the team."""
@@ -1324,13 +1467,15 @@ class EditOpenShiftRequest:
     Definition: EditOpenShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_open_shift: Optional[Dict[str, Any]] = field(
+    shared_open_shift: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sharedOpenShift"},
     )
 
@@ -1341,30 +1486,34 @@ class SharedOpenShift:
     Definition: SharedOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = field(
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1373,30 +1522,34 @@ class DraftOpenShift:
     Definition: DraftOpenShift
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Display Name"""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Notes"""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    end_date_time: Optional[str] = field(
+    end_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "endDateTime"},
     )
     """yyyy-MM-ddTHH:mm:ss.fffZ (UTC format)"""
-    theme: Optional[Theme] = None
-    open_slot_count: Optional[int] = field(
+    theme: Optional[Theme] = dataclass_field(default=None, kw_only=True)
+    open_slot_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "openSlotCount"},
     )
     """Open Slot Count"""
-    activities: Optional[Activities] = None
+    activities: Optional[Activities] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1405,20 +1558,17 @@ class CreateShiftRequest:
     Definition: CreateShiftRequest
     """
 
-    scheduling_group_id: Optional[str] = field(
+    scheduling_group_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "schedulingGroupId"},
     )
     """Scheduling Group ID"""
-    shared_shift: Optional[Dict[str, Any]] = field(
-        default=None,
+    shared_shift: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "sharedShift"},
     )
     """Shared version of the Shift."""
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Assigned to User ID"""
 
 
@@ -1428,15 +1578,11 @@ class CreateTimeOffRequest:
     Definition: CreateTimeOffRequest
     """
 
-    shared_time_off: Optional[Dict[str, Any]] = field(
-        default=None,
+    shared_time_off: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "sharedTimeOff"},
     )
     """Shared version of a TimeOff."""
-    user_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "userId"},
-    )
+    user_id: str = dataclass_field(metadata={"wire_name": "userId"})
     """Assigned to User ID"""
 
 

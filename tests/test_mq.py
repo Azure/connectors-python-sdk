@@ -15,6 +15,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestMqClientInitialization:
@@ -176,7 +177,7 @@ class TestDelete:
 
 
 class TestDeleteAll:
-    """Tests for delete_all_async method."""
+    """Tests for list_delete_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -188,7 +189,7 @@ class TestDeleteAll:
 
         mock_response = MockResponse(
             status=200,
-            text='{"deletedCount": 5, "messages": []}'
+            text='{"value": [{"deletedCount": 5, "messages": []}]}'
         )
         input_options = MultipleGetValidOptions(queue="QUEUE.NAME", batch_size=10)
 
@@ -198,17 +199,19 @@ class TestDeleteAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.delete_all(input=input_options)
+            result = await resolve_generated_result(
+                client.list_delete_all(input=input_options)
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/deleteall" in call_args[0][1]
-            assert result["deletedCount"] == 5
+            assert result[0]["deletedCount"] == 5
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that empty response yields no items."""
         client = MqClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -222,8 +225,10 @@ class TestDeleteAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.delete_all(input=MultipleGetValidOptions())
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_delete_all(input=MultipleGetValidOptions())
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -242,7 +247,9 @@ class TestDeleteAll:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.delete_all(input=MultipleGetValidOptions())
+                await resolve_generated_result(
+                    client.list_delete_all(input=MultipleGetValidOptions())
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -320,7 +327,7 @@ class TestRead:
 
 
 class TestReadAll:
-    """Tests for read_all_async method."""
+    """Tests for list_read_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -332,7 +339,7 @@ class TestReadAll:
 
         mock_response = MockResponse(
             status=200,
-            text='{"messages": [{"messageId": "msg1"}, {"messageId": "msg2"}]}'
+            text='{"value": [{"messageId": "msg1"}, {"messageId": "msg2"}]}'
         )
         input_options = MultipleGetValidOptions(queue="QUEUE.NAME", batch_size=10)
 
@@ -342,17 +349,19 @@ class TestReadAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.read_all(input=input_options)
+            result = await resolve_generated_result(
+                client.list_read_all(input=input_options)
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/readall" in call_args[0][1]
-            assert len(result["messages"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that empty response yields no items."""
         client = MqClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -366,8 +375,10 @@ class TestReadAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.read_all(input=MultipleGetValidOptions())
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_read_all(input=MultipleGetValidOptions())
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -386,7 +397,9 @@ class TestReadAll:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.read_all(input=MultipleGetValidOptions())
+                await resolve_generated_result(
+                    client.list_read_all(input=MultipleGetValidOptions())
+                )
 
             assert exc_info.value.status_code == 408
 
@@ -464,7 +477,7 @@ class TestReceive:
 
 
 class TestReceiveAll:
-    """Tests for receive_all_async method."""
+    """Tests for list_receive_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -476,7 +489,7 @@ class TestReceiveAll:
 
         mock_response = MockResponse(
             status=200,
-            text='{"messages": [{"messageId": "msg1", "messageData": "Data1"}]}'
+            text='{"value": [{"messageId": "msg1", "messageData": "Data1"}]}'
         )
         input_options = MultipleGetValidOptions(
             queue="QUEUE.NAME",
@@ -490,17 +503,19 @@ class TestReceiveAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.receive_all(input=input_options)
+            result = await resolve_generated_result(
+                client.list_receive_all(input=input_options)
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/receiveall" in call_args[0][1]
-            assert len(result["messages"]) == 1
+            assert len(result) == 1
 
     @pytest.mark.asyncio
-    async def test_empty_response_returns_none(self, mock_credential):
-        """Test that empty response returns None."""
+    async def test_empty_response_returns_empty_page(self, mock_credential):
+        """Test that empty response yields no items."""
         client = MqClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential
@@ -514,8 +529,10 @@ class TestReceiveAll:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.receive_all(input=MultipleGetValidOptions())
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_receive_all(input=MultipleGetValidOptions())
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -534,7 +551,9 @@ class TestReceiveAll:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.receive_all(input=MultipleGetValidOptions())
+                await resolve_generated_result(
+                    client.list_receive_all(input=MultipleGetValidOptions())
+                )
 
             assert exc_info.value.status_code == 401
 
@@ -646,7 +665,9 @@ class TestSend:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.send(input=SendValidDataOptions())
+            result = await client.send(
+                input=SendValidDataOptions(message="test message")
+            )
             assert result is None
 
     @pytest.mark.asyncio
@@ -666,7 +687,9 @@ class TestSend:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.send(input=SendValidDataOptions())
+                await client.send(
+                    input=SendValidDataOptions(message="test message")
+                )
 
             assert exc_info.value.status_code == 400
 

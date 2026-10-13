@@ -18,6 +18,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestCommondataserviceClientInitialization:
@@ -596,7 +597,7 @@ class TestGetDataSets:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_data_sets()
+            await resolve_generated_result(client.list_data_sets())
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
@@ -614,7 +615,7 @@ class TestGetDataSets:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_data_sets()
+                await resolve_generated_result(client.list_data_sets())
 
             assert exc_info.value.status_code == 500
 
@@ -754,13 +755,15 @@ class TestGetTables:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            result = await client.get_tables(dataset="default")
+            result = await resolve_generated_result(
+                client.list_tables(dataset="default")
+            )
 
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert call_args[0][1].endswith("/v2/datasets/default/tables")
             assert call_args.kwargs["body"] is None
-            assert result == {"value": [{"Name": "accounts"}]}
+            assert result == [{"Name": "accounts"}]
 
     @pytest.mark.asyncio
     async def test_get_tables_error_response(self, mock_credential):
@@ -774,7 +777,9 @@ class TestGetTables:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables(dataset="default")
+                await resolve_generated_result(
+                    client.list_tables(dataset="default")
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -998,8 +1003,10 @@ class TestGetItemAttachments:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_item_attachments(
-                dataset="default", table="accounts", id="1"
+            await resolve_generated_result(
+                client.list_item_attachments(
+                    dataset="default", table="accounts", id="1"
+                )
             )
 
             call_args = mock_send.call_args
@@ -1018,8 +1025,10 @@ class TestGetItemAttachments:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_item_attachments(
-                    dataset="default", table="accounts", id="1"
+                await resolve_generated_result(
+                    client.list_item_attachments(
+                        dataset="default", table="accounts", id="1"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -1258,13 +1267,15 @@ class TestGetCollectionRelationships:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_collection_relationships(
-                dataset="default",
-                table="accounts",
-                id="1",
-                collection_type="onetomany",
-                relationship="account_tasks",
-                target="task",
+            await resolve_generated_result(
+                client.list_collection_relationships(
+                    dataset="default",
+                    table="accounts",
+                    id="1",
+                    collection_type="onetomany",
+                    relationship="account_tasks",
+                    target="task",
+                )
             )
 
             call_args = mock_send.call_args
@@ -1284,13 +1295,15 @@ class TestGetCollectionRelationships:
             mock_send.return_value = mock_response
 
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_collection_relationships(
-                    dataset="default",
-                    table="accounts",
-                    id="1",
-                    collection_type="onetomany",
-                    relationship="account_tasks",
-                    target="task",
+                await resolve_generated_result(
+                    client.list_collection_relationships(
+                        dataset="default",
+                        table="accounts",
+                        id="1",
+                        collection_type="onetomany",
+                        relationship="account_tasks",
+                        target="task",
+                    )
                 )
 
             assert exc_info.value.status_code == 404

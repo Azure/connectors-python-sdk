@@ -106,7 +106,7 @@ async def example_3_execute_soql():
                 )
                 result = await client.execute_soql_query(input=query_input)
 
-                if result:
+                if items:
                     records = result.get("records", [])
                     print(f"SOQL returned {len(records)} record(s).")
                     for record in records:

@@ -19,6 +19,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestCampfireClientInitialization:
@@ -174,13 +175,15 @@ class TestCampfireClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_accounts(parent_operation="op1")
+            result = await resolve_generated_result(
+                client.list_accounts(parent_operation="op1")
+            )
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/authorization.json" in url
             assert "parentOperation=op1" in url
-            assert result == {"accounts": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_list_rooms_success(self, mock_credential):
@@ -197,17 +200,19 @@ class TestCampfireClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_rooms(account="acct1")
+            result = await resolve_generated_result(
+                client.list_rooms(account="acct1")
+            )
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/rooms.json" in url
             assert "account=acct1" in url
-            assert result == {"rooms": []}
+            assert result == []
 
     @pytest.mark.asyncio
-    async def test_empty_response_body_returns_none(self, mock_credential):
-        """Test a 2xx response with no body returns None."""
+    async def test_empty_response_body_returns_empty_page(self, mock_credential):
+        """Test a 2xx response with no body returns an empty page."""
         client = CampfireClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -220,9 +225,11 @@ class TestCampfireClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.list_rooms(account="acct1")
+            result = await resolve_generated_result(
+                client.list_rooms(account="acct1")
+            )
 
-            assert result is None
+            assert result == []
 
 
 class TestCampfireClientErrorHandling:
@@ -260,9 +267,11 @@ class TestCampfireClientErrorHandling:
                 elif operation == "get_user":
                     await client.get_user(user_id="5", account="acct1")
                 elif operation == "list_accounts":
-                    await client.list_accounts()
+                    await resolve_generated_result(client.list_accounts())
                 else:
-                    await client.list_rooms(account="acct1")
+                    await resolve_generated_result(
+                        client.list_rooms(account="acct1")
+                    )
 
             assert exc_info.value.status_code == 500
 

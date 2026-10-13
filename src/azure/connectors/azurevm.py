@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -47,16 +47,22 @@ class VirtualMachineInScaleSet:
     Response for Get virtual machine in a VM scale set
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine."""
-    instance_id: Optional[str] = field(
+    instance_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceId"},
     )
     """The instance Id of the virtual machine."""
-    properties: Optional[VirtualMachineInScaleSetProperties] = None
+    properties: Optional[
+        VirtualMachineInScaleSetProperties
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -65,11 +71,11 @@ class VirtualMachine:
     Response for Get virtual machine
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine."""
-    properties: Optional[VirtualMachineProperties] = None
+    properties: Optional[VirtualMachineProperties] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -78,10 +84,11 @@ class SubscriptionListResult:
     Response for List subscriptions
     """
 
-    value: Optional[List[Subscription]] = None
+    value: Optional[List[Subscription]] = dataclass_field(default=None, kw_only=True)
     """The subscriptions."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -93,10 +100,11 @@ class ResourceGroupListResult:
     Response for List resource groups
     """
 
-    value: Optional[List[ResourceGroup]] = None
+    value: Optional[List[ResourceGroup]] = dataclass_field(default=None, kw_only=True)
     """The list of resource groups."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -108,10 +116,11 @@ class VirtualMachineScaleSetListResult:
     Response for List virtual machine scale sets
     """
 
-    value: Optional[List[VirtualMachineScaleSet]] = None
+    value: Optional[List[VirtualMachineScaleSet]] = dataclass_field(default=None, kw_only=True)
     """The list of virtual machine scale sets."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -123,10 +132,11 @@ class VirtualMachineInScaleSetListResult:
     Response for List virtual machines in a VM scale set
     """
 
-    value: Optional[List[VirtualMachineInScaleSet]] = None
+    value: Optional[List[VirtualMachineInScaleSet]] = dataclass_field(default=None, kw_only=True)
     """The list of virtual machines in a VM scale set."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -138,10 +148,11 @@ class VirtualMachineListResult:
     Response for List virtual machines
     """
 
-    value: Optional[List[VirtualMachine]] = None
+    value: Optional[List[VirtualMachine]] = dataclass_field(default=None, kw_only=True)
     """The list of virtual machines."""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to get the next set of results."""
@@ -153,27 +164,31 @@ class Subscription:
     Definition: Subscription
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The fully qualified Id."""
-    subscription_id: Optional[str] = field(
+    subscription_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "subscriptionId"},
     )
     """The subscription Id."""
-    tenant_id: Optional[str] = field(
+    tenant_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tenantId"},
     )
     """The tenant Id."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """The subscription display name."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The subscription state."""
-    authorization_source: Optional[str] = field(
+    authorization_source: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "authorizationSource"},
     )
     """
@@ -189,12 +204,13 @@ class ResourceGroup:
     Definition: ResourceGroup
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the resource group."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the resource group."""
-    managed_by: Optional[str] = field(
+    managed_by: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "managedBy"},
     )
     """Id of the resource that manages this resource group."""
@@ -206,11 +222,16 @@ class VirtualMachineScaleSet:
     Definition: VirtualMachineScaleSet
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the virtual machine scale set."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The Name of the virtual machine scale set."""
-    properties: Optional[VirtualMachineScaleSetProperties] = None
+    properties: Optional[
+        VirtualMachineScaleSetProperties
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
 
 
 @dataclass
@@ -219,8 +240,9 @@ class VirtualMachineScaleSetProperties:
     Definition: VirtualMachineScaleSetProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine scale set."""
@@ -232,8 +254,9 @@ class VirtualMachineInScaleSetProperties:
     Definition: VirtualMachineInScaleSetProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine."""
@@ -245,8 +268,9 @@ class VirtualMachineProperties:
     Definition: VirtualMachineProperties
     """
 
-    provisioning_state: Optional[str] = field(
+    provisioning_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "provisioningState"},
     )
     """The state of the virtual machine."""

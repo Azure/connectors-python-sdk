@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -42,9 +42,9 @@ class GetMailAgentResponse:
     Response for Get all Mail Agent
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
 
 
@@ -54,9 +54,9 @@ class GetProcessedEmailsResponse:
     Response for Get processed email details
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
 
 
@@ -66,32 +66,29 @@ class SendMailInput:
     Send mail
     """
 
-    mailagent_key: Optional[str] = None
+    mailagent_key: str
     """Choose Mail Agent or enter the Mail Agent key."""
-    bounce_address: Optional[str] = None
+    bounce_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The email address to which bounced emails will be sent."""
-    from_: Optional[FromAddress] = field(
-        default=None,
-        metadata={"wire_name": "from"},
-    )
-    to: Optional[List[EmailAddressItems]] = None
+    from_: FromAddress = dataclass_field(metadata={"wire_name": "from"})
+    to: List[EmailAddressItems]
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = None
+    cc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = None
+    bcc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
     """Email addresses of bcc'd recipients."""
-    mailtype: Optional[str] = None
+    mailtype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Format of the mail to be sent"""
-    subject: Optional[str] = None
+    subject: str
     """Subject line of your email"""
-    htmlbody: Optional[str] = None
+    htmlbody: Optional[str] = dataclass_field(default=None, kw_only=True)
     """This is the body content for your email."""
-    reply_to: Optional[List[ReplyToAddress]] = None
+    reply_to: Optional[List[ReplyToAddress]] = dataclass_field(default=None, kw_only=True)
     """
     The email address to which the recipient's email responses will be
     addressed.
     """
-    attachments: Optional[List[Dict[str, Any]]] = None
+    attachments: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Attachments"""
 
 
@@ -101,11 +98,11 @@ class SuccessMessage:
     Response for Send mail
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The status of the request made."""
-    request_id: Optional[str] = None
+    request_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique reference ID of the request."""
 
 
@@ -115,28 +112,25 @@ class SendTemplateMailInput:
     Send template mail
     """
 
-    mailagent_key: Optional[str] = None
+    mailagent_key: str
     """Choose Mail Agent or enter the Mail Agent key."""
-    bounce_address: Optional[str] = None
+    bounce_address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """the email address to which bounced emails will be sent."""
-    mail_template_key: Optional[str] = None
+    mail_template_key: str
     """Choose the Mail template"""
-    from_: Optional[FromAddress] = field(
-        default=None,
-        metadata={"wire_name": "from"},
-    )
-    to: Optional[List[EmailAddressItems]] = None
+    from_: FromAddress = dataclass_field(metadata={"wire_name": "from"})
+    to: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
     """Recipient email address."""
-    cc: Optional[List[EmailAddressItems]] = None
+    cc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
     """Email addresses of cc'd recipients."""
-    bcc: Optional[List[EmailAddressItems]] = None
+    bcc: Optional[List[EmailAddressItems]] = dataclass_field(default=None, kw_only=True)
     """Email addresses of bcc'd recipients."""
-    merge_key_detail: Optional[List[Dict[str, Any]]] = None
+    merge_key_detail: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """
     You can use merge tags to replace the placeholders with multiple values for
     different recipients.
     """
-    reply_to: Optional[List[ReplyToAddress]] = None
+    reply_to: Optional[List[ReplyToAddress]] = dataclass_field(default=None, kw_only=True)
     """Reply To"""
 
 
@@ -146,11 +140,11 @@ class ProcessedMailStatsResponse:
     Response for Processed emails analytics
     """
 
-    hb: Optional[Dict[str, Any]] = None
+    hb: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Emails that have hard bounced"""
-    sb: Optional[Dict[str, Any]] = None
+    sb: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """sb"""
-    sent: Optional[Dict[str, Any]] = None
+    sent: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Emails that have been sent"""
 
 
@@ -160,11 +154,10 @@ class FromAddress:
     Definition: FromAddress
     """
 
-    from_detail: Optional[Dict[str, Any]] = field(
-        default=None,
+    from_detail: Dict[str, Any] = dataclass_field(
         metadata={"wire_name": "from-detail"},
     )
-    name: Optional[str] = None
+    name: str
     """Sender's user name"""
 
 
@@ -174,9 +167,9 @@ class EmailAddress:
     Definition: EmailAddress
     """
 
-    address: Optional[str] = None
+    address: str
     """Recipient's email address."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recipient's name."""
 
 
@@ -186,12 +179,12 @@ class ReplyToAddress:
     Definition: ReplyToAddress
     """
 
-    address: Optional[str] = None
+    address: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A valid email address containing a domain that is verified in your Mail
     Agent.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name for the reply-to."""
 
 
@@ -201,7 +194,7 @@ class EmailAddressItems:
     Definition: EmailAddressItems
     """
 
-    email_address: Optional[EmailAddress] = None
+    email_address: Optional[EmailAddress] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class

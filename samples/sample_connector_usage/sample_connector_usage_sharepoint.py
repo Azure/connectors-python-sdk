@@ -61,7 +61,7 @@ def example_1_get_lists():
 
         with SharepointonlineClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                lists = client.get_tables(dataset=SHAREPOINT_SITE_URL)
+                lists = client.list_tables(dataset=SHAREPOINT_SITE_URL)
 
                 if lists and 'value' in lists:
                     print(f"Found {len(lists['value'])} lists and libraries:")

@@ -46,7 +46,7 @@ async def example_1_get_tables():
 
         async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_tables()
+                items = [item async for item in client.list_tables()]
 
                 tables = (result or {}).get("value", []) if isinstance(result, dict) else []
                 print(f"Found {len(tables)} table(s).")
@@ -112,10 +112,10 @@ async def example_4_search_articles():
 
         async with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.search_articles(
+                items = [item async for item in client.list_search_articles(
                     query="password reset",
                     locale="en-us",
-                )
+                )]
 
                 articles = (result or {}).get("results", []) if isinstance(result, dict) else []
                 print(f"Found {len(articles)} article(s).")

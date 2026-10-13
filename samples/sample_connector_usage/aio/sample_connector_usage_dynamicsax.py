@@ -51,8 +51,8 @@ async def example_1_list_instances():
     async with DefaultAzureCredential() as credential:
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_data_sets()
-            datasets = result.get("value", []) if result else []
+            items = [item async for item in client.list_data_sets()]
+            datasets = result
 
             print(f"Found {len(datasets)} instance(s).")
             for dataset in datasets[:10]:
@@ -70,8 +70,8 @@ async def example_2_list_tables():
     async with DefaultAzureCredential() as credential:
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
-            result = await client.get_tables(dataset=DATASET)
-            tables = result.get("value", []) if result else []
+            items = [item async for item in client.list_tables(dataset=DATASET)]
+            tables = result
 
             print(f"Found {len(tables)} table(s).")
             for table in tables[:10]:

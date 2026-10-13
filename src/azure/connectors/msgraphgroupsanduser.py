@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -40,12 +40,13 @@ class ListUsersResponse:
     Response for List Users
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -55,17 +56,19 @@ class ListGroupsByDisplayNameSearchResponse:
     Response for List Groups By Display Name Search
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -75,12 +78,13 @@ class ListSubscribedSkusResponse:
     Response for List Subscribed Skus
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -90,17 +94,19 @@ class ListDirectGroupMembersResponse:
     Response for List Direct Group Members
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.count"},
     )
     """@odata.count"""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -110,12 +116,13 @@ class GetMemberLicenseDetailsResponse:
     Response for Get Member License Details
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -125,158 +132,185 @@ class GetGroupPropertiesResponse:
     Response for Get Group Properties
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Object id of the group"""
-    deleted_date_time: Optional[str] = field(
+    deleted_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "deletedDateTime"},
     )
     """Group's deletion date time"""
-    classification: Optional[str] = None
+    classification: Optional[str] = dataclass_field(default=None, kw_only=True)
     """classification"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """Group's creation date time"""
-    creation_options: Optional[List[str]] = field(
+    creation_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "creationOptions"},
     )
     """Created options of the group."""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """description"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Group's display name"""
-    expiration_date_time: Optional[str] = field(
+    expiration_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "expirationDateTime"},
     )
     """Group's expiration date time"""
-    group_types: Optional[List[str]] = field(
+    group_types: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "groupTypes"},
     )
     """Group types for the group."""
-    is_assignable_to_role: Optional[str] = field(
+    is_assignable_to_role: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isAssignableToRole"},
     )
     """Can a role be assigned to this group?"""
-    mail: Optional[str] = None
+    mail: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Group's email"""
-    mail_enabled: Optional[bool] = field(
+    mail_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailEnabled"},
     )
     """Is group email enabled?"""
-    mail_nickname: Optional[str] = field(
+    mail_nickname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "mailNickname"},
     )
     """Group's email nick name"""
-    membership_rule: Optional[str] = field(
+    membership_rule: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipRule"},
     )
     """The rule that is used for membership evaluation."""
-    membership_rule_processing_state: Optional[str] = field(
+    membership_rule_processing_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "membershipRuleProcessingState"},
     )
     """
     The processing state of the rule that is used for membership evaluation.
     """
-    on_premises_domain_name: Optional[str] = field(
+    on_premises_domain_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesDomainName"},
     )
     """
     Contains the on-premises domainFQDN, also called dnsDomainName synchronized
     from the on-premises directory.
     """
-    on_premises_last_sync_date_time: Optional[str] = field(
+    on_premises_last_sync_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesLastSyncDateTime"},
     )
     """
     The time and date at which the tenant was last synced with the on-premise
     directory.
     """
-    on_premises_net_bios_name: Optional[str] = field(
+    on_premises_net_bios_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesNetBiosName"},
     )
     """Name of networking service for on-premise server."""
-    on_premises_sam_account_name: Optional[str] = field(
+    on_premises_sam_account_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSamAccountName"},
     )
     """Sam account name for on-premise directory."""
-    on_premises_security_identifier: Optional[str] = field(
+    on_premises_security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSecurityIdentifier"},
     )
     """The on-premises security identifier."""
-    on_premises_sync_enabled: Optional[bool] = field(
+    on_premises_sync_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesSyncEnabled"},
     )
     """True if on-premises sync is enabled for the group."""
-    preferred_data_location: Optional[str] = field(
+    preferred_data_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredDataLocation"},
     )
     """Preferred data location of the group."""
-    preferred_language: Optional[str] = field(
+    preferred_language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "preferredLanguage"},
     )
     """Preferred language as configured in Microsoft Entra ID."""
-    proxy_addresses: Optional[List[str]] = field(
+    proxy_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "proxyAddresses"},
     )
     """Proxy addresses of the group."""
-    renewed_date_time: Optional[str] = field(
+    renewed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "renewedDateTime"},
     )
     """Renewed date time of the group."""
-    resource_behavior_options: Optional[List[str]] = field(
+    resource_behavior_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceBehaviorOptions"},
     )
     """Resource behavior options of the group."""
-    resource_provisioning_options: Optional[List[str]] = field(
+    resource_provisioning_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "resourceProvisioningOptions"},
     )
     """Resource provisioning options of the group."""
-    security_enabled: Optional[bool] = field(
+    security_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityEnabled"},
     )
     """Indicates if the group is security enabled."""
-    security_identifier: Optional[str] = field(
+    security_identifier: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "securityIdentifier"},
     )
     """Security identifier of the group."""
-    theme: Optional[str] = None
+    theme: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Theme of Microsoft Entra ID group."""
-    visibility: Optional[str] = None
+    visibility: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Visibility of the group."""
-    on_premises_provisioning_errors: Optional[List[str]] = field(
+    on_premises_provisioning_errors: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "onPremisesProvisioningErrors"},
     )
     """On premise provisioning errors of the group."""
@@ -288,8 +322,7 @@ class GetMemberGroupsInput:
     Get Member Groups
     """
 
-    security_enabled_only: Optional[bool] = field(
-        default=None,
+    security_enabled_only: bool = dataclass_field(
         metadata={"wire_name": "securityEnabledOnly"},
     )
     """Do you want to retrieve security enabled groups only?"""
@@ -301,12 +334,13 @@ class GetMemberGroupsResponse:
     Response for Get Member Groups
     """
 
-    context: Optional[str] = field(
+    context: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.context"},
     )
     """The Odata.context link."""
-    value: Optional[List[str]] = None
+    value: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 

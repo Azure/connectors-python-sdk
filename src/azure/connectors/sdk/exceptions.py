@@ -2,8 +2,10 @@
 
 """Exception types for connector operations."""
 
+from azure.core.exceptions import HttpResponseError
 
-class ConnectorException(Exception):
+
+class ConnectorException(HttpResponseError):
     """Exception raised when connector operations fail."""
 
     MAX_RESPONSE_BODY_LENGTH = 2000
@@ -32,7 +34,8 @@ class ConnectorException(Exception):
         truncated_body = self._truncate_body(response_body)
         message = f"{self.operation} failed with status {status_code}: "
         message += truncated_body
-        super().__init__(message)
+        super().__init__(message=message)
+        self.status_code = status_code
 
     @classmethod
     def _truncate_body(cls, body: str) -> str:

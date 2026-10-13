@@ -73,7 +73,7 @@ async def example_3_post_message() -> None:
             )
             posted = await client.post_message(input=payload)
             print(
-                f"Posted: ok={posted.get('ok') if posted else None}, "
+                f"Posted result: {posted}; "
                 f"ts={posted.get('ts') if posted else None}"
             )
 

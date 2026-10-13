@@ -17,7 +17,7 @@ def list_templates() -> None:
     """List available Zoho Sign templates."""
     with DefaultAzureCredential() as credential:
         with ZohosignClient(CONNECTION_RUNTIME_URL, credential) as client:
-            templates = client.get_templates()
+            templates = client.list_templates()
             print(f"Templates: {templates}")
 
 

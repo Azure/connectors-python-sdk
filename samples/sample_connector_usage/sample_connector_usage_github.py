@@ -46,7 +46,7 @@ def example_2_list_issues(repository_owner: str, repository_name: str) -> None:
 
     with DefaultAzureCredential() as credential:
         with GithubClient(CONNECTION_RUNTIME_URL, credential) as client:
-            issues = client.get_issues(
+            issues = client.list_issues(
                 repository_owner=repository_owner,
                 repository_name=repository_name,
                 state="open",

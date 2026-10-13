@@ -61,7 +61,7 @@ async def example_1_list_datasets():
 
         async with CommondataserviceClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_data_sets()
+                items = [item async for item in client.list_data_sets()]
 
                 if result and result.get("value"):
                     print(f"Found {len(result['value'])} datasets:")
@@ -128,7 +128,7 @@ async def example_3_get_account_by_id():
                     id=account_id,
                 )
 
-                if result:
+                if items:
                     print(f"Account: {result.get('name', 'N/A')}")
                     print(f"Revenue: {result.get('revenue', 'N/A')}")
                 else:
@@ -163,7 +163,7 @@ async def example_4_create_account():
                     table="accounts",
                 )
 
-                if result:
+                if items:
                     print(f"Account created with id: {result.get('accountid', 'N/A')}")
                 else:
                     print("Account created successfully")
@@ -226,7 +226,7 @@ async def example_6_create_attachment():
                     display_name="sample-note.txt",
                 )
 
-                if result:
+                if items:
                     print(f"Attachment created with id: {result.get('annotationid', 'N/A')}")
                 else:
                     print("Attachment created successfully")
@@ -250,7 +250,7 @@ async def example_7_get_table_metadata():
                     table="accounts",
                 )
 
-                if result:
+                if items:
                     print(f"Table: {result.get('Name', result.get('DisplayName', 'N/A'))}")
                 else:
                     print("Table metadata not found")

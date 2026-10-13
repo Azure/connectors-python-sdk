@@ -220,7 +220,9 @@ class TestListGroupPlansAsync:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_group_plans(group_id="group-123")
+            result = await resolve_generated_result(
+                client.list_group_plans(group_id="group-123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
@@ -244,7 +246,9 @@ class TestListGroupPlansAsync:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException):
-                await client.list_group_plans(group_id="invalid")
+                await resolve_generated_result(
+                    client.list_group_plans(group_id="invalid")
+                )
 
 
 class TestGetTaskAsync:
@@ -438,7 +442,11 @@ class TestCreateTaskAsync:
 
         mock_response = MockResponse(status=400, text='{"error": "Bad request"}')
 
-        task_input = CreateTaskRequest(title="New Task")
+        task_input = CreateTaskRequest(
+            group_id="group-123",
+            plan_id="plan-123",
+            title="New Task",
+        )
 
         with patch.object(
             client._http_client,
@@ -726,16 +734,17 @@ class TestTriggerOperations:
 class TestDataclasses:
     """Tests for dataclass serialization and defaults."""
 
-    def test_unassign_users_input_defaults(self):
-        """Test UnassignUsersInput default values."""
-        input_obj = UnassignUsersInput()
-        assert input_obj.assignments is None
+    def test_unassign_users_input_required_value(self):
+        """Test UnassignUsersInput required value."""
+        input_obj = UnassignUsersInput(assignments="user@contoso.com")
+        assert input_obj.assignments == "user@contoso.com"
 
     def test_current_task_requests_use_swagger_wire_names(self):
         """Test current create and update requests preserve Swagger keys."""
         create_request = CreateTaskRequest(
             group_id="group-123",
             plan_id="plan-123",
+            title="New Task",
             bucket_id="bucket-123",
         )
         update_request = UpdateTaskRequest(
@@ -746,6 +755,7 @@ class TestDataclasses:
         assert to_wire(create_request) == {
             "groupId": "group-123",
             "planId": "plan-123",
+            "title": "New Task",
             "bucketId": "bucket-123",
         }
         assert to_wire(update_request) == {
@@ -777,10 +787,10 @@ class TestDataclasses:
         assert response.title == "My Task"
         assert response.percent_complete == 50
 
-    def test_assign_users_input_defaults(self):
-        """Test AssignUsersInput default values."""
-        input_obj = AssignUsersInput()
-        assert input_obj.assignments is None
+    def test_assign_users_input_required_value(self):
+        """Test AssignUsersInput required value."""
+        input_obj = AssignUsersInput(assignments="user@contoso.com")
+        assert input_obj.assignments == "user@contoso.com"
 
     def test_list_my_plans_response_defaults(self):
         """Test ListMyPlansResponse default values."""
@@ -793,12 +803,16 @@ class TestDataclasses:
         assert response.id is None
         assert response.category_descriptions is None
 
-    def test_create_bucket_input_defaults(self):
-        """Test CreateBucketInput default values."""
-        input_obj = CreateBucketInput()
-        assert input_obj.name is None
-        assert input_obj.group_id is None
-        assert input_obj.plan_id is None
+    def test_create_bucket_input_required_values(self):
+        """Test CreateBucketInput required values."""
+        input_obj = CreateBucketInput(
+            name="New Bucket",
+            group_id="group-123",
+            plan_id="plan-123",
+        )
+        assert input_obj.name == "New Bucket"
+        assert input_obj.group_id == "group-123"
+        assert input_obj.plan_id == "plan-123"
 
     def test_create_bucket_input_with_values(self):
         """Test CreateBucketInput with values."""
@@ -894,11 +908,15 @@ class TestDataclasses:
         assert request.title == "Updated Title"
         assert request.percent_complete == 100
 
-    def test_create_task_request_defaults(self):
-        """Test CreateTaskRequest default values."""
-        request = CreateTaskRequest()
+    def test_create_task_request_optional_defaults(self):
+        """Test CreateTaskRequest optional default values."""
+        request = CreateTaskRequest(
+            group_id="group-123",
+            plan_id="plan-123",
+            title="New Task",
+        )
         assert request.priority is None
-        assert request.title is None
+        assert request.title == "New Task"
 
     def test_create_task_request_with_priority(self):
         """Test CreateTaskRequest with priority."""

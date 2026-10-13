@@ -18,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import model_instance
 
 
 async def resolve_lro(poller_awaitable):
@@ -170,7 +171,7 @@ class TestListKustoResults:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            input_schema = QueryAndListSchema()
+            input_schema = model_instance(QueryAndListSchema)
             result = await resolve_lro(
                 client.begin_list_kusto_results(input_schema)
             )
@@ -196,7 +197,7 @@ class TestListKustoResults:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            input_schema = QueryAndListSchema()
+            input_schema = model_instance(QueryAndListSchema)
 
             with pytest.raises(ConnectorException) as exc_info:
                 await client.begin_list_kusto_results(input_schema)
@@ -226,7 +227,9 @@ class TestListKustoResults:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.begin_list_kusto_results(QueryAndListSchema())
+                await client.begin_list_kusto_results(
+                    model_instance(QueryAndListSchema)
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -291,7 +294,7 @@ class TestListKustoShowCommandResults:
         ):
             result = await resolve_lro(
                 client.begin_list_kusto_show_command_results(
-                    ControlCommandAndListSchema()
+                    model_instance(ControlCommandAndListSchema)
                 )
             )
 
@@ -318,7 +321,7 @@ class TestListKustoShowCommandResults:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.begin_list_kusto_show_command_results(
-                    ControlCommandAndListSchema()
+                    model_instance(ControlCommandAndListSchema)
                 )
 
             assert exc_info.value.status_code == 403
@@ -388,7 +391,7 @@ class TestRunKustoQueryAndVisualizeResults:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.begin_run_kusto_query_and_visualize_results(
-                    QueryAndVisualizeSchema()
+                    model_instance(QueryAndVisualizeSchema)
                 )
 
             assert exc_info.value.status_code == 400
@@ -455,7 +458,7 @@ class TestRunKustoCommandAndVisualizeResults:
         ):
             result = await resolve_lro(
                 client.begin_run_kusto_command_and_visualize_results(
-                    CommandAndVisualizeSchema()
+                    model_instance(CommandAndVisualizeSchema)
                 )
             )
 
@@ -527,7 +530,7 @@ class TestRunAsyncControlCommandAndWait:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.begin_run_async_control_command_and_wait(
-                    ControlCommandAndListSchema()
+                    model_instance(ControlCommandAndListSchema)
                 )
 
             assert exc_info.value.status_code == 408
@@ -756,13 +759,10 @@ class TestDataClasses:
         assert request.params == {"query": "test"}
         assert request.callback_endpoint == "https://callback.example.com"
 
-    def test_dataclasses_with_defaults(self):
-        """Test that dataclasses can be created with default None values."""
-        schema = QueryAndListSchema()
-
-        assert schema.cluster is None
-        assert schema.db is None
-        assert schema.csl is None
+    def test_required_dataclass_fields(self):
+        """Test that Swagger-required dataclass fields must be provided."""
+        with pytest.raises(TypeError):
+            QueryAndListSchema()
 
 
 class TestEdgeCases:
@@ -786,10 +786,14 @@ class TestEdgeCases:
             side_effect=[mock_response_1, mock_response_2]
         ):
             result_1 = await resolve_lro(
-                client.begin_list_kusto_results(QueryAndListSchema())
+                client.begin_list_kusto_results(
+                    model_instance(QueryAndListSchema)
+                )
             )
             result_2 = await resolve_lro(
-                client.begin_list_kusto_results(QueryAndListSchema())
+                client.begin_list_kusto_results(
+                    model_instance(QueryAndListSchema)
+                )
             )
 
             assert result_1 == {"result": "first"}
@@ -813,7 +817,9 @@ class TestEdgeCases:
         ):
             with pytest.raises(json.JSONDecodeError):
                 await resolve_lro(
-                    client.begin_list_kusto_results(QueryAndListSchema())
+                    client.begin_list_kusto_results(
+                        model_instance(QueryAndListSchema)
+                    )
                 )
 
     @pytest.mark.asyncio
@@ -892,7 +898,7 @@ class TestListKustoResultsSchema:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await client.list_kusto_results_schema(
-                    QueryAndListSchema()
+                    model_instance(QueryAndListSchema)
                 )
 
             assert exc_info.value.status_code == 400

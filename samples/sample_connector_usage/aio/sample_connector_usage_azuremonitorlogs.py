@@ -98,6 +98,7 @@ async def example_run_query():
                 request = QueryDataInput(
                     query="Heartbeat | take 5",
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
                 result = await client.query_data(
@@ -108,7 +109,7 @@ async def example_run_query():
                     resourcename=RESOURCE_NAME,
                 )
 
-                rows = result.get("value", []) if result else []
+                rows = result
                 print(f"Returned {len(rows)} rows.")
                 for index, row in enumerate(rows[:3], 1):
                     print(f"  Row {index}: {row}")
@@ -134,6 +135,7 @@ async def example_visualize_query():
                         "| order by TimeGenerated asc"
                     ),
                     timerangetype="SetInQuery",
+                    timerange={},
                 )
 
                 result = await client.visualize_query(

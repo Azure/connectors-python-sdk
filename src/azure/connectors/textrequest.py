@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -64,12 +66,12 @@ class GetMessagesByContactPhoneResponse:
     Response for Get a conversation's messages by a contact's phone number
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of message entities gotten from Text Request."""
 
 
@@ -79,26 +81,26 @@ class SendMessageByPhoneNumberInput:
     Send a message to the contact with the given phone number
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of the message to send."""
-    sender_name: Optional[str] = None
+    sender_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the message sender. This is shown in the TextRequest web app
     and api when retrieving this message.
     """
-    status_callback: Optional[str] = None
+    status_callback: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Url for the web app to hit with a POST command whenever this message's
     status goes from undelivered to sent (or error).
     """
-    location_callback: Optional[str] = None
+    location_callback: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Location callback url to hit with a POST command when the user accesses and
     approves sharing their location with the sender. To include the link, add
     [Location Request] to the message body. This callback is not required for
     location requests, but it can be useful for APIs.
     """
-    mms_media: Optional[List[str]] = None
+    mms_media: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     Array of MMS Media attachments for this message. Attachments must be urls
     gotten from the post /mms endpoint (not included in this connector).
@@ -112,32 +114,32 @@ class SendMessageByPhoneNumberResponse:
     Response for Send a message to the contact with the given phone number
     """
 
-    message_id: Optional[str] = None
+    message_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the message. This value is unique for each message."""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Content of this message."""
-    message_direction: Optional[str] = None
+    message_direction: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Singular character, either R or S, denoting whether this message was
     received from the contact or sent to them, respectively.
     """
-    response_by_username: Optional[str] = None
+    response_by_username: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Username of the Text Request user that last sent a message to this user.
     """
-    message_timestamp_utc: Optional[str] = None
+    message_timestamp_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the message was sent or received by Text Request."""
-    delivery_status: Optional[str] = None
+    delivery_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Current status of this message. This can be 'sending', 'delivered',
     'error', or 'send'.
     """
-    delivery_error: Optional[str] = None
+    delivery_error: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Error that caused this message to not be delivered. If the delivery_status
     is not 'error', this value will be null.
     """
-    mms_media: Optional[List[str]] = None
+    mms_media: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """
     List of urls pointing to this message's attachments. All urls will be
     text-request generated urls.
@@ -150,75 +152,75 @@ class GetContactByPhoneNumberResponse:
     Response for Gets the contact with the specified phone number
     """
 
-    phone_number: Optional[str] = None
+    phone_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of this contact."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name of this contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name of this contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Full name of this contact. This is the default name displayed in the web
     app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are suppressed, and therefore
     not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are archived, and therefore
     cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are blocked, and therefore not
     received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phrase describing the reason for suppressing contact. If is_suppressed is
     false, this will be null.
     """
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact belongs to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact is resolved. Any new texts
     received by this contact will set this false.
     """
-    first_contact_utc: Optional[str] = None
+    first_contact_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the first message was sent to this contact."""
-    opted_out_utc: Optional[str] = None
+    opted_out_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when this contact opted out to receiving messages."""
-    last_msg_sent_utc: Optional[str] = None
+    last_msg_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was sent to this contact."""
-    last_msg_received_utc: Optional[str] = None
+    last_msg_received_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was received from this contact."""
-    total_msgs_sent: Optional[int] = None
+    total_msgs_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages sent to this contact."""
-    total_msgs_received: Optional[int] = None
+    total_msgs_received: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages received from this contact."""
-    response_count: Optional[int] = None
+    response_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The total number of response messages from the contact."""
-    date_created_utc: Optional[str] = None
+    date_created_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The timestamp of when ths contact was created."""
-    last_contact_date_utc: Optional[str] = None
+    last_contact_date_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when the last message was sent or received from this
     contact.
     """
-    last_message: Optional[Dict[str, Any]] = None
+    last_message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Last message sent to or from this contact."""
 
 
@@ -228,44 +230,44 @@ class CreateContactInput:
     Create or update a contact
     """
 
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new first name of the contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new last name of the contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The new full name of the contact. This is the default name displayed in the
     web app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are suppressed, and
     therefore not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are archived, and
     therefore cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether conversations with this contact are blocked, and
     therefore not received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phrase describing the reason for suppressing contact."""
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact will belong to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether the current conversation with this contact is resolved.
     Any new texts received by this contact will set this false.
@@ -278,74 +280,74 @@ class CreateContactResponse:
     Response for Create or update a contact
     """
 
-    phone_number: Optional[str] = None
+    phone_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of this contact."""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name of this contact."""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name of this contact."""
-    display_name: Optional[str] = None
+    display_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Full name of this contact. This is the default name displayed in the web
     app when viewing contacts.
     """
-    is_suppressed: Optional[bool] = None
+    is_suppressed: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are suppressed, and therefore
     not pushed to the top of the message queue when received.
     """
-    is_archived: Optional[bool] = None
+    is_archived: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are archived, and therefore
     cannot be seen when querying conversations (by default).
     """
-    is_blocked: Optional[bool] = None
+    is_blocked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact are blocked, and therefore not
     received or stored.
     """
-    suppressed_reason: Optional[str] = None
+    suppressed_reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Phrase describing the reason for suppressing contact. If is_suppressed is
     false, this will be null.
     """
-    note: Optional[str] = None
+    note: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Short phrase describing contact. Used for convenience. This is never shown
     to the contact.
     """
-    groups: Optional[List[int]] = None
+    groups: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """Array of integer ids referring to groups this contact belongs to."""
-    contact_tags: Optional[List[str]] = None
+    contact_tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Array of guids referring to tags attached to this contact."""
-    custom_fields: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Array of custom field ids and values defined for this contact."""
-    is_resolved: Optional[bool] = None
+    is_resolved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Whether the conversation with this contact is resolved. Any new texts
     received by this contact will set this false.
     """
-    first_contact_utc: Optional[str] = None
+    first_contact_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the first message was sent to this contact."""
-    opted_out_utc: Optional[str] = None
+    opted_out_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when this contact opted out to receiving messages."""
-    last_msg_sent_utc: Optional[str] = None
+    last_msg_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was sent to this contact."""
-    last_msg_received_utc: Optional[str] = None
+    last_msg_received_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last message was received from this contact."""
-    total_msgs_sent: Optional[int] = None
+    total_msgs_sent: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages sent to this contact."""
-    total_msgs_received: Optional[int] = None
+    total_msgs_received: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of total messages received from this contact."""
-    response_count: Optional[int] = None
+    response_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of response messages from the contact."""
-    date_created_utc: Optional[str] = None
+    date_created_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when ths contact was created."""
-    last_contact_date_utc: Optional[str] = None
+    last_contact_date_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Timestamp of when the last message was sent or received from this contact.
     """
-    last_message: Optional[Dict[str, Any]] = None
+    last_message: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Last message sent to or from this contact."""
 
 
@@ -355,12 +357,12 @@ class GetContactsResponse:
     Response for Get all contacts that match the specified filtering criterion
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of contact entities gotten from Text Request."""
 
 
@@ -373,20 +375,20 @@ class GetGroupByIdResponse:
     Response for Get a group by its id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -396,9 +398,9 @@ class UpdateGroupInput:
     Updates a group with the given id
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short phrase describing group. Used for convenience."""
 
 
@@ -408,20 +410,20 @@ class UpdateGroupResponse:
     Response for Updates a group with the given id
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -431,12 +433,12 @@ class GetGroupsResponse:
     Response for Gets all groups
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of group entities gotten from Text Request."""
 
 
@@ -446,9 +448,9 @@ class CreateGroupInput:
     Creates a new group
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Short phrase describing group. Used for convenience."""
 
 
@@ -458,20 +460,20 @@ class CreateGroupResponse:
     Response for Creates a new group
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the group."""
-    group_member_count: Optional[int] = None
+    group_member_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The number of members of the group."""
-    is_keyword: Optional[bool] = None
+    is_keyword: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Wheter this group is a keyword group. Such groups are autogenerated when a
     user sets up a keyword. Contacts are automatically added when they enroll.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of this group."""
-    notes: Optional[str] = None
+    notes: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Any notes on this group."""
-    last_message_sent_utc: Optional[str] = None
+    last_message_sent_utc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Timestamp of when the last group message was sent for this group."""
 
 
@@ -481,12 +483,12 @@ class GetTagsResponse:
     Response for Gets all tags
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of tag entities gotten from Text Request."""
 
 
@@ -496,40 +498,40 @@ class GetPaymentResponse:
     Response for Gets the payment with the specified id
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -543,40 +545,40 @@ class MarkPaymentPaidResponse:
     Response for Mark a payment as paid
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -590,40 +592,40 @@ class SendPaymentReminderResponse:
     Response for Send a follow-up text reminding the user to pay the specified payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -637,40 +639,40 @@ class CancelPaymentResponse:
     Response for Cancels the specified payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -684,12 +686,12 @@ class GetPaymentsResponse:
     Response for Gets all payments
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of payment entities gotten from Text Request."""
 
 
@@ -699,18 +701,18 @@ class CreatePaymentInput:
     Creates a new payment
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Description of the payment. Description is not shown to the contact and is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Phone number of the contact this payment will be sent to."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment. """
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Message text to send to contact along with payment link."""
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     User-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -724,40 +726,40 @@ class CreatePaymentResponse:
     Response for Creates a new payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the payment."""
-    request_date: Optional[str] = None
+    request_date: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The timestamp of when this payment's initial message was queued to be sent.
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The name of the payment recipient. This may be null if the contact does not
     have a name associated with their phone number.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The description of the payment. This is not shown to the contact. It is
     only used by internal users for context about payments.
     """
-    customer_phone: Optional[str] = None
+    customer_phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The phone number of the contact who is being sent this payment."""
-    amount_requested: Optional[float] = None
+    amount_requested: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The amount in dollars requested by this payment."""
-    is_past_due: Optional[bool] = None
+    is_past_due: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether this payment is past the request date."""
-    reminder_was_sent: Optional[bool] = None
+    reminder_was_sent: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Whether a text reminder has already been sent for this payment."""
-    transaction_status: Optional[str] = None
+    transaction_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in authvia. This value starts as Unknown.
     """
-    textrequest_payment_status: Optional[str] = None
+    textrequest_payment_status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The status of the transaction in Text Request. This represents that status
     shown in the payments page on the Text Request app. It starts as Sent.
     """
-    reference_number: Optional[str] = None
+    reference_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The user-defined id defined when payments are created that can be used to
     quickly find payments. Reference numbers are not unique; many payments can
@@ -771,11 +773,11 @@ class GetDashboardResponse:
     Response for Get info on this specific dashboard
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -785,7 +787,7 @@ class UpdateDashboardsNameInput:
     Update a specific dashboard's name
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The new name of the dashboard."""
 
 
@@ -795,11 +797,11 @@ class UpdateDashboardsNameResponse:
     Response for Update a specific dashboard's name
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -809,12 +811,12 @@ class GetConversationsResponse:
     Response for Gets all conversations for this dashboard
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of conversation entities gotten from Text Request."""
 
 
@@ -824,12 +826,12 @@ class GetDashboardsResponse:
     Response for Get all dashboards in an account
     """
 
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Metadata about the data returned by this request. This data is returned by
     all bulk GET requests.
     """
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """List of dashboard entities gotten from Text Request."""
 
 
@@ -839,9 +841,9 @@ class CreateDashboardInput:
     Create a new dashboard with the given name and phone number
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -851,11 +853,11 @@ class CreateDashboardResponse:
     Response for Create a new dashboard with the given name and phone number
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the dashboard."""
-    phone: Optional[str] = None
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The texting number associated with this dashboard."""
 
 
@@ -865,14 +867,11 @@ class TextingWebhookInput:
     Triggers when a text is sent or received
     """
 
-    target_url: Optional[str] = None
+    target_url: str
     """Url the webhook will redirect to"""
-    event: Optional[str] = None
+    event: str
     """event"""
-    http_verb: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "httpVerb"},
-    )
+    http_verb: str = dataclass_field(metadata={"wire_name": "httpVerb"})
     """httpVerb"""
 
 
@@ -882,11 +881,11 @@ class TextingWebhookResponse:
     Response for Triggers when a text is sent or received
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numerical id of the dashboard."""
-    target_url: Optional[str] = None
+    target_url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The url the webhook will post to"""
-    event: Optional[str] = None
+    event: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The webhook's associated trigger event"""
 
 
@@ -954,6 +953,45 @@ class TextrequestClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "textrequest"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def get_messages_by_contact_phone(
         self,
@@ -1483,7 +1521,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def bulk_update_contacts(
+    def list_bulk_update_contacts(
         self,
         input: BulkUpdateContactsInput,
         dashboard_id: int,
@@ -1492,39 +1530,60 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Bulk update contacts
 
         Only the dashboard specified will have contacts added; contacts are
         organized by dashboard, and there is no account level search for a
         number available.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/contacts"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_group_by_id(
         self,
@@ -1810,7 +1869,7 @@ class TextrequestClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_custom_fields(
+    def list_custom_fields(
         self,
         dashboard_id: int,
         *,
@@ -1818,38 +1877,59 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Gets all custom fields
 
         Gets all custom fields for this dashboard. Custom fields are unique
         between dashboards.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/dashboards/{quote(str(dashboard_id), safe='')}/fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_payment(
         self,

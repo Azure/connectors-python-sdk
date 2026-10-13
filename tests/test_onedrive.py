@@ -726,8 +726,10 @@ class TestListRootFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "folder1", "name": "Documents"}, '
-                 '{"id": "folder2", "name": "Pictures"}]}'
+            text=(
+                '[{"id": "folder1", "name": "Documents"}, '
+                '{"id": "folder2", "name": "Pictures"}]'
+            )
         )
 
         with patch.object(
@@ -736,13 +738,13 @@ class TestListRootFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_root_folder()
+            result = await resolve_generated_result(client.list_root_folder())
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/folders" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
 
 class TestFindFiles:
@@ -758,7 +760,7 @@ class TestFindFiles:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"id": "file1", "name": "report.docx"}]}'
+            text='[{"id": "file1", "name": "report.docx"}]'
         )
 
         with patch.object(
@@ -767,10 +769,12 @@ class TestFindFiles:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.find_files(
-                id="folder123",
-                query="report",
-                find_mode="search"
+            result = await resolve_generated_result(
+                client.list_find_files(
+                    id="folder123",
+                    query="report",
+                    find_mode="search"
+                )
             )
 
             mock_send.assert_called_once()
@@ -778,7 +782,7 @@ class TestFindFiles:
             assert call_args[0][0] == "GET"
             assert "/search" in call_args[0][1]
             assert "query=report" in call_args[0][1]
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
 
 class TestCreateShareLink:
@@ -829,7 +833,7 @@ class TestGetFileTags:
 
         mock_response = MockResponse(
             status=200,
-            text='{"tags": ["important", "work", "2026"]}'
+            text='{"Tags": ["important", "work", "2026"]}'
         )
 
         with patch.object(
@@ -838,13 +842,15 @@ class TestGetFileTags:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_file_tags(id="file123")
+            result = await resolve_generated_result(
+                client.list_file_tags(id="file123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/tags" in call_args[0][1]
-            assert "important" in result["tags"]
+            assert "important" in result
 
 
 class TestAddFileTag:
@@ -860,7 +866,7 @@ class TestAddFileTag:
 
         mock_response = MockResponse(
             status=200,
-            text='{"tags": ["important", "work", "new-tag"]}'
+            text='{"Tags": ["important", "work", "new-tag"]}'
         )
 
         with patch.object(
@@ -869,9 +875,11 @@ class TestAddFileTag:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.add_file_tag(
-                id="file123",
-                tag="new-tag"
+            await resolve_generated_result(
+                client.list_add_file_tag(
+                    id="file123",
+                    tag="new-tag"
+                )
             )
 
             mock_send.assert_called_once()
@@ -994,7 +1002,7 @@ class TestExtractFolder:
 
         mock_response = MockResponse(
             status=200,
-            text='{"id": "folder123", "name": "extracted"}'
+            text='[{"id": "folder123", "name": "extracted"}]'
         )
 
         with patch.object(
@@ -1003,9 +1011,11 @@ class TestExtractFolder:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.extract_folder(
-                source="/Documents/archive.zip",
-                destination="/Documents/extracted"
+            await resolve_generated_result(
+                client.list_extract_folder(
+                    source="/Documents/archive.zip",
+                    destination="/Documents/extracted"
+                )
             )
 
             mock_send.assert_called_once()

@@ -60,7 +60,7 @@ async def example_1_list_booking_businesses():
 
         async with MicrosoftbookingsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_bookings_business_user_as_admin()
+                items = [item async for item in client.list_bookings_business_user_as_admin()]
 
                 if result and result.get("mailboxes"):
                     mailboxes = result["mailboxes"]

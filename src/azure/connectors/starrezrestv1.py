@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -76,201 +78,249 @@ class SelectEntryInput:
     Get Entry
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Address type of the entry's active address record."""
-    birth_gender_enum: Optional[str] = field(
+    birth_gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birth_GenderEnum"},
     )
     """The gender of the entry at birth."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Pointer to the active booking record."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """The category that the entry belongs to."""
-    conference_email: Optional[str] = field(
+    conference_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConferenceEmail"},
     )
     """
     The email that is used to identify a student through Conference
     registration.
     """
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    created_by_security_user_id: Optional[int] = field(
+    created_by_security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy_SecurityUserID"},
     )
     """Pointer to the security user record."""
-    date_created: Optional[Dict[str, Any]] = field(
+    date_created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    directory_flag_privacy: Optional[bool] = field(
+    directory_flag_privacy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryFlagPrivacy"},
     )
     """Determines if the entry has elected to remain private."""
-    d_o_b: Optional[Dict[str, Any]] = field(
+    d_o_b: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DOB"},
     )
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Pointer to the active application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Unique ID for this Entry field."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the entry."""
-    event_id: Optional[int] = field(
+    event_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventID"},
     )
     """Pointer to the event record."""
-    gender_enum: Optional[str] = field(
+    gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderEnum"},
     )
     """Entry gender."""
-    i_d1: Optional[str] = field(default=None, metadata={"wire_name": "ID1"})
-    """Generic ID field."""
-    i_d2: Optional[str] = field(default=None, metadata={"wire_name": "ID2"})
-    """Generic ID field."""
-    i_d3: Optional[str] = field(default=None, metadata={"wire_name": "ID3"})
-    """Generic ID field."""
-    i_d4: Optional[int] = field(default=None, metadata={"wire_name": "ID4"})
-    """Generic ID field."""
-    i_d5: Optional[int] = field(default=None, metadata={"wire_name": "ID5"})
-    """Generic ID field."""
-    last_check_in_out_date: Optional[Dict[str, Any]] = field(
+    i_d1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID1"},
+    )
+    """Generic ID field."""
+    i_d2: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID2"},
+    )
+    """Generic ID field."""
+    i_d3: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID3"},
+    )
+    """Generic ID field."""
+    i_d4: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID4"},
+    )
+    """Generic ID field."""
+    i_d5: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID5"},
+    )
+    """Generic ID field."""
+    last_check_in_out_date: Optional[Dict[str, Any]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastCheckInOutDate"},
     )
-    name_first: Optional[str] = field(
+    name_first: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameFirst"},
     )
     """The first or given name of the entry."""
-    name_initials: Optional[str] = field(
+    name_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameInitials"},
     )
     """Name initials."""
-    name_last: Optional[str] = field(
+    name_last: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameLast"},
     )
     """The surname, family name or last name of the entry."""
-    name_other: Optional[str] = field(
+    name_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameOther"},
     )
     """Alternative name."""
-    name_preferred: Optional[str] = field(
+    name_preferred: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NamePreferred"},
     )
     """Preferred name."""
-    name_sharer: Optional[str] = field(
+    name_sharer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameSharer"},
     )
     """Additional occupant name."""
-    name_title: Optional[str] = field(
+    name_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameTitle"},
     )
     """The title or salutation of the entry."""
-    name_web: Optional[str] = field(
+    name_web: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameWeb"},
     )
     """A name to display for this entry on the Web."""
-    pin_number: Optional[int] = field(
+    pin_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PinNumber"},
     )
     """Personal Identification Number."""
-    portal_auth_provider_user_id: Optional[str] = field(
+    portal_auth_provider_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalAuthProviderUserID"},
     )
     """
     User identification used to identify the entry in PortalX. This could be an
     email, username or other identifier.
     """
-    portal_email: Optional[str] = field(
+    portal_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalEmail"},
     )
     """The email that is used by the student to login to the portal."""
-    position: Optional[str] = field(
+    position: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
     """Entry position in the institution."""
-    previous_entry_status_enum: Optional[str] = field(
+    previous_entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Previous_EntryStatusEnum"},
     )
     """The previous entry status."""
-    tax_exemption_enum: Optional[str] = field(
+    tax_exemption_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxExemptionEnum"},
     )
     """Tax exemption."""
-    testing: Optional[bool] = field(
+    testing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Testing"},
     )
     """Testing User."""
@@ -282,166 +332,211 @@ class CreateEntryInput:
     Create Entry
     """
 
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Address type of the entry's active address record."""
-    birth_gender_enum: Optional[str] = field(
+    birth_gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birth_GenderEnum"},
     )
     """The gender of the entry at birth."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Pointer to the active booking record."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """The category that the entry belongs to."""
-    conference_email: Optional[str] = field(
+    conference_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConferenceEmail"},
     )
     """
     The email that is used to identify a student through Conference
     registration.
     """
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    directory_flag_privacy: Optional[bool] = field(
+    directory_flag_privacy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryFlagPrivacy"},
     )
     """Determines if the entry has elected to remain private."""
-    d_o_b: Optional[str] = field(default=None, metadata={"wire_name": "DOB"})
-    """Date of birth."""
-    entry_application_id: Optional[int] = field(
+    d_o_b: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "DOB"},
+    )
+    """Date of birth."""
+    entry_application_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Pointer to the active application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Unique ID for this Entry field."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the entry."""
-    event_id: Optional[int] = field(
+    event_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventID"},
     )
     """Pointer to the event record."""
-    gender_enum: Optional[str] = field(
+    gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderEnum"},
     )
     """Entry gender."""
-    i_d1: Optional[str] = field(default=None, metadata={"wire_name": "ID1"})
-    """Generic ID field."""
-    i_d2: Optional[str] = field(default=None, metadata={"wire_name": "ID2"})
-    """Generic ID field."""
-    i_d3: Optional[str] = field(default=None, metadata={"wire_name": "ID3"})
-    """Generic ID field."""
-    i_d4: Optional[int] = field(default=None, metadata={"wire_name": "ID4"})
-    """Generic ID field."""
-    i_d5: Optional[int] = field(default=None, metadata={"wire_name": "ID5"})
-    """Generic ID field."""
-    last_check_in_out_date: Optional[str] = field(
+    i_d1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID1"},
+    )
+    """Generic ID field."""
+    i_d2: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID2"},
+    )
+    """Generic ID field."""
+    i_d3: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID3"},
+    )
+    """Generic ID field."""
+    i_d4: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID4"},
+    )
+    """Generic ID field."""
+    i_d5: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID5"},
+    )
+    """Generic ID field."""
+    last_check_in_out_date: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastCheckInOutDate"},
     )
     """The last date a check-in or check-out was performed."""
-    name_first: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "NameFirst"},
-    )
+    name_first: str = dataclass_field(metadata={"wire_name": "NameFirst"})
     """The first or given name of the entry."""
-    name_initials: Optional[str] = field(
+    name_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameInitials"},
     )
     """Name initials."""
-    name_last: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "NameLast"},
-    )
+    name_last: str = dataclass_field(metadata={"wire_name": "NameLast"})
     """The surname, family name or last name of the entry."""
-    name_other: Optional[str] = field(
+    name_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameOther"},
     )
     """Alternative name."""
-    name_preferred: Optional[str] = field(
+    name_preferred: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NamePreferred"},
     )
     """Preferred name."""
-    name_sharer: Optional[str] = field(
+    name_sharer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameSharer"},
     )
     """Additional occupant name."""
-    name_title: Optional[str] = field(
+    name_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameTitle"},
     )
     """The title or salutation of the entry."""
-    name_web: Optional[str] = field(
+    name_web: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameWeb"},
     )
     """A name to display for this entry on the Web."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Password"""
-    pin_number: Optional[int] = field(
+    pin_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PinNumber"},
     )
     """Personal Identification Number."""
-    portal_auth_provider_user_id: Optional[str] = field(
+    portal_auth_provider_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalAuthProviderUserID"},
     )
     """
     User identification used to identify the entry in PortalX. This could be an
     email, username or other identifier.
     """
-    portal_email: Optional[str] = field(
+    portal_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalEmail"},
     )
     """The email that is used by the student to login to the portal."""
-    position: Optional[str] = field(
+    position: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
     """Entry position in the institution."""
-    previous_entry_status_enum: Optional[str] = field(
+    previous_entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Previous_EntryStatusEnum"},
     )
     """The previous entry status."""
-    tax_exemption_enum: Optional[str] = field(
+    tax_exemption_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxExemptionEnum"},
     )
     """Tax exemption."""
-    testing: Optional[bool] = field(
+    testing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Testing"},
     )
     """Testing User."""
@@ -453,166 +548,219 @@ class CreateEntryResponse:
     Response for Create Entry
     """
 
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Address type of the entry's active address record."""
-    birth_gender_enum: Optional[str] = field(
+    birth_gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birth_GenderEnum"},
     )
     """The gender of the entry at birth."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Pointer to the active booking record."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """The category that the entry belongs to."""
-    conference_email: Optional[str] = field(
+    conference_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConferenceEmail"},
     )
     """
     The email that is used to identify a student through Conference
     registration.
     """
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    directory_flag_privacy: Optional[bool] = field(
+    directory_flag_privacy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryFlagPrivacy"},
     )
     """Determines if the entry has elected to remain private."""
-    d_o_b: Optional[str] = field(default=None, metadata={"wire_name": "DOB"})
-    """Date of birth."""
-    entry_application_id: Optional[int] = field(
+    d_o_b: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "DOB"},
+    )
+    """Date of birth."""
+    entry_application_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Pointer to the active application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Unique ID for this Entry field."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the entry."""
-    event_id: Optional[int] = field(
+    event_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventID"},
     )
     """Pointer to the event record."""
-    gender_enum: Optional[str] = field(
+    gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderEnum"},
     )
     """Entry gender."""
-    i_d1: Optional[str] = field(default=None, metadata={"wire_name": "ID1"})
-    """Generic ID field."""
-    i_d2: Optional[str] = field(default=None, metadata={"wire_name": "ID2"})
-    """Generic ID field."""
-    i_d3: Optional[str] = field(default=None, metadata={"wire_name": "ID3"})
-    """Generic ID field."""
-    i_d4: Optional[int] = field(default=None, metadata={"wire_name": "ID4"})
-    """Generic ID field."""
-    i_d5: Optional[int] = field(default=None, metadata={"wire_name": "ID5"})
-    """Generic ID field."""
-    last_check_in_out_date: Optional[str] = field(
+    i_d1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID1"},
+    )
+    """Generic ID field."""
+    i_d2: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID2"},
+    )
+    """Generic ID field."""
+    i_d3: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID3"},
+    )
+    """Generic ID field."""
+    i_d4: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID4"},
+    )
+    """Generic ID field."""
+    i_d5: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID5"},
+    )
+    """Generic ID field."""
+    last_check_in_out_date: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastCheckInOutDate"},
     )
     """The last date a check-in or check-out was performed."""
-    name_first: Optional[str] = field(
+    name_first: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameFirst"},
     )
     """The first or given name of the entry."""
-    name_initials: Optional[str] = field(
+    name_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameInitials"},
     )
     """Initials in name."""
-    name_last: Optional[str] = field(
+    name_last: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameLast"},
     )
     """The surname, family name or last name of the entry."""
-    name_other: Optional[str] = field(
+    name_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameOther"},
     )
     """Alternative name."""
-    name_preferred: Optional[str] = field(
+    name_preferred: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NamePreferred"},
     )
     """Preferred name."""
-    name_sharer: Optional[str] = field(
+    name_sharer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameSharer"},
     )
     """Additional occupant name."""
-    name_title: Optional[str] = field(
+    name_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameTitle"},
     )
     """The title or salutation of the entry."""
-    name_web: Optional[str] = field(
+    name_web: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameWeb"},
     )
     """A name to display for this entry on the Web."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Password"""
-    pin_number: Optional[int] = field(
+    pin_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PinNumber"},
     )
     """Personal Identification Number."""
-    portal_auth_provider_user_id: Optional[str] = field(
+    portal_auth_provider_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalAuthProviderUserID"},
     )
     """
     User identification used to identify the entry in PortalX. This could be an
     email, username or other identifier.
     """
-    portal_email: Optional[str] = field(
+    portal_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalEmail"},
     )
     """Portal email."""
-    position: Optional[str] = field(
+    position: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
     """Entry position in the institution."""
-    previous_entry_status_enum: Optional[str] = field(
+    previous_entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Previous_EntryStatusEnum"},
     )
     """The previous entry status."""
-    tax_exemption_enum: Optional[str] = field(
+    tax_exemption_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxExemptionEnum"},
     )
     """Tax exemption."""
-    testing: Optional[bool] = field(
+    testing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Testing"},
     )
     """Testing user."""
@@ -624,166 +772,219 @@ class UpdateEntryInput:
     Update Entry
     """
 
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Address type of the entry's active address record."""
-    birth_gender_enum: Optional[str] = field(
+    birth_gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birth_GenderEnum"},
     )
     """The gender of the entry at birth."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Pointer to the active booking record."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """The category that the entry belongs to."""
-    conference_email: Optional[str] = field(
+    conference_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConferenceEmail"},
     )
     """
     The email that is used to identify a student through Conference
     registration.
     """
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    directory_flag_privacy: Optional[bool] = field(
+    directory_flag_privacy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryFlagPrivacy"},
     )
     """Determines if the entry has elected to remain private."""
-    d_o_b: Optional[str] = field(default=None, metadata={"wire_name": "DOB"})
-    """Date of birth."""
-    entry_application_id: Optional[int] = field(
+    d_o_b: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "DOB"},
+    )
+    """Date of birth."""
+    entry_application_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Pointer to the active application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Unique ID for this Entry field."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the entry."""
-    event_id: Optional[int] = field(
+    event_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventID"},
     )
     """Pointer to the event record."""
-    gender_enum: Optional[str] = field(
+    gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderEnum"},
     )
     """Entry gender."""
-    i_d1: Optional[str] = field(default=None, metadata={"wire_name": "ID1"})
-    """Generic ID field."""
-    i_d2: Optional[str] = field(default=None, metadata={"wire_name": "ID2"})
-    """Generic ID field."""
-    i_d3: Optional[str] = field(default=None, metadata={"wire_name": "ID3"})
-    """Generic ID field."""
-    i_d4: Optional[int] = field(default=None, metadata={"wire_name": "ID4"})
-    """Generic ID field."""
-    i_d5: Optional[int] = field(default=None, metadata={"wire_name": "ID5"})
-    """Generic ID field."""
-    last_check_in_out_date: Optional[str] = field(
+    i_d1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID1"},
+    )
+    """Generic ID field."""
+    i_d2: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID2"},
+    )
+    """Generic ID field."""
+    i_d3: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID3"},
+    )
+    """Generic ID field."""
+    i_d4: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID4"},
+    )
+    """Generic ID field."""
+    i_d5: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID5"},
+    )
+    """Generic ID field."""
+    last_check_in_out_date: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastCheckInOutDate"},
     )
     """The last date a check-in or check-out was performed."""
-    name_first: Optional[str] = field(
+    name_first: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameFirst"},
     )
     """The first or given name of the entry."""
-    name_initials: Optional[str] = field(
+    name_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameInitials"},
     )
     """Name initials."""
-    name_last: Optional[str] = field(
+    name_last: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameLast"},
     )
     """The surname, family name or last name of the entry."""
-    name_other: Optional[str] = field(
+    name_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameOther"},
     )
     """Alternative name."""
-    name_preferred: Optional[str] = field(
+    name_preferred: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NamePreferred"},
     )
     """Preferred name."""
-    name_sharer: Optional[str] = field(
+    name_sharer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameSharer"},
     )
     """Additional occupant name."""
-    name_title: Optional[str] = field(
+    name_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameTitle"},
     )
     """The title or salutation of the entry."""
-    name_web: Optional[str] = field(
+    name_web: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameWeb"},
     )
     """A name to display for this entry on the Web."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Password"""
-    pin_number: Optional[int] = field(
+    pin_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PinNumber"},
     )
     """Personal Identification Number."""
-    portal_auth_provider_user_id: Optional[str] = field(
+    portal_auth_provider_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalAuthProviderUserID"},
     )
     """
     User identification used to identify the entry in PortalX. This could be an
     email, username or other identifier.
     """
-    portal_email: Optional[str] = field(
+    portal_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalEmail"},
     )
     """The email that is used by the student to login to the portal."""
-    position: Optional[str] = field(
+    position: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
     """Entry position in the institution."""
-    previous_entry_status_enum: Optional[str] = field(
+    previous_entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Previous_EntryStatusEnum"},
     )
     """The previous entry status."""
-    tax_exemption_enum: Optional[str] = field(
+    tax_exemption_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxExemptionEnum"},
     )
     """Tax exemption."""
-    testing: Optional[bool] = field(
+    testing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Testing"},
     )
     """Testing User."""
@@ -795,166 +996,219 @@ class UpdateEntryResponse:
     Response for Update Entry
     """
 
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Pointer to this entry's active address record."""
-    birth_gender_enum: Optional[str] = field(
+    birth_gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birth_GenderEnum"},
     )
     """The gender of the entry at birth."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Pointer to the active booking record."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """The category that the entry belongs to."""
-    conference_email: Optional[str] = field(
+    conference_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConferenceEmail"},
     )
     """
     The email that is used to identify a student through Conference
     registration.
     """
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    directory_flag_privacy: Optional[bool] = field(
+    directory_flag_privacy: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DirectoryFlagPrivacy"},
     )
     """Determines if the entry has elected to remain private."""
-    d_o_b: Optional[str] = field(default=None, metadata={"wire_name": "DOB"})
-    """Date of birth."""
-    entry_application_id: Optional[int] = field(
+    d_o_b: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "DOB"},
+    )
+    """Date of birth."""
+    entry_application_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Pointer to the active application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Unique ID for this Entry field."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the entry."""
-    event_id: Optional[int] = field(
+    event_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventID"},
     )
     """Pointer to the event record."""
-    gender_enum: Optional[str] = field(
+    gender_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderEnum"},
     )
     """Entry gender."""
-    i_d1: Optional[str] = field(default=None, metadata={"wire_name": "ID1"})
-    """Generic ID field."""
-    i_d2: Optional[str] = field(default=None, metadata={"wire_name": "ID2"})
-    """Generic ID field."""
-    i_d3: Optional[str] = field(default=None, metadata={"wire_name": "ID3"})
-    """Generic ID field."""
-    i_d4: Optional[int] = field(default=None, metadata={"wire_name": "ID4"})
-    """Generic ID field."""
-    i_d5: Optional[int] = field(default=None, metadata={"wire_name": "ID5"})
-    """Generic ID field."""
-    last_check_in_out_date: Optional[str] = field(
+    i_d1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID1"},
+    )
+    """Generic ID field."""
+    i_d2: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID2"},
+    )
+    """Generic ID field."""
+    i_d3: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID3"},
+    )
+    """Generic ID field."""
+    i_d4: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID4"},
+    )
+    """Generic ID field."""
+    i_d5: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ID5"},
+    )
+    """Generic ID field."""
+    last_check_in_out_date: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "LastCheckInOutDate"},
     )
     """The last date a check-in or check-out was performed."""
-    name_first: Optional[str] = field(
+    name_first: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameFirst"},
     )
     """The first or given name of the entry."""
-    name_initials: Optional[str] = field(
+    name_initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameInitials"},
     )
     """Name initials."""
-    name_last: Optional[str] = field(
+    name_last: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameLast"},
     )
     """The surname, family name or last name of the entry."""
-    name_other: Optional[str] = field(
+    name_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameOther"},
     )
     """Alternative name."""
-    name_preferred: Optional[str] = field(
+    name_preferred: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NamePreferred"},
     )
     """Preferred name."""
-    name_sharer: Optional[str] = field(
+    name_sharer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameSharer"},
     )
     """Additional occupant name."""
-    name_title: Optional[str] = field(
+    name_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameTitle"},
     )
     """The title or salutation of the entry."""
-    name_web: Optional[str] = field(
+    name_web: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NameWeb"},
     )
     """A name to display for this entry on the Web."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Password"""
-    pin_number: Optional[int] = field(
+    pin_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PinNumber"},
     )
     """Personal Identification Number."""
-    portal_auth_provider_user_id: Optional[str] = field(
+    portal_auth_provider_user_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalAuthProviderUserID"},
     )
     """
     User identification used to identify the entry in PortalX. This could be an
     email, username or other identifier.
     """
-    portal_email: Optional[str] = field(
+    portal_email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalEmail"},
     )
     """The email that is used by the student to login to the portal."""
-    position: Optional[str] = field(
+    position: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Position"},
     )
     """Entry position in the institution."""
-    previous_entry_status_enum: Optional[str] = field(
+    previous_entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Previous_EntryStatusEnum"},
     )
     """The previous entry status."""
-    tax_exemption_enum: Optional[str] = field(
+    tax_exemption_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxExemptionEnum"},
     )
     """Tax exemption."""
-    testing: Optional[bool] = field(
+    testing: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Testing"},
     )
     """Testing User."""
@@ -966,7 +1220,7 @@ class DeleteResponse:
     Response for Delete
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -979,77 +1233,83 @@ class SelectEntryCustomFieldInput:
     Get Entry Custom Field
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    custom_field_definition_id: Optional[int] = field(
+    custom_field_definition_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomFieldDefinitionID"},
     )
     """Pointer to the custom field definition record."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    entry_custom_field_id: Optional[int] = field(
+    entry_custom_field_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryCustomFieldID"},
     )
     """Unique ID for this entry custom field record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    field_data_type_enum: Optional[str] = field(
+    field_data_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldDataTypeEnum"},
     )
     """Field data type."""
-    value_boolean: Optional[bool] = field(
+    value_boolean: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueBoolean"},
     )
     """Boolean value."""
-    value_date: Optional[Dict[str, Any]] = field(
+    value_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueDate"},
     )
-    value_integer: Optional[int] = field(
+    value_integer: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueInteger"},
     )
     """Integer value."""
-    value_money: Optional[float] = field(
+    value_money: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueMoney"},
     )
     """Money value."""
-    value_string: Optional[str] = field(
+    value_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueString"},
     )
     """String value."""
@@ -1061,48 +1321,57 @@ class UpdateEntryCustomFieldInput:
     Update Entry Custom Field
     """
 
-    custom_field_definition_id: Optional[int] = field(
+    custom_field_definition_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomFieldDefinitionID"},
     )
     """Pointer to the custom field definition record."""
-    entry_custom_field_id: Optional[int] = field(
+    entry_custom_field_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryCustomFieldID"},
     )
     """Unique ID for this entry custom field record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    field_data_type_enum: Optional[str] = field(
+    field_data_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldDataTypeEnum"},
     )
     """Field data type."""
-    value_boolean: Optional[bool] = field(
+    value_boolean: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueBoolean"},
     )
     """Boolean value."""
-    value_date: Optional[str] = field(
+    value_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueDate"},
     )
     """Date value."""
-    value_integer: Optional[int] = field(
+    value_integer: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueInteger"},
     )
     """Integer value."""
-    value_money: Optional[float] = field(
+    value_money: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueMoney"},
     )
     """Money value."""
-    value_string: Optional[str] = field(
+    value_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueString"},
     )
     """String value."""
@@ -1114,48 +1383,57 @@ class UpdateEntryCustomFieldResponse:
     Response for Update Entry Custom Field
     """
 
-    custom_field_definition_id: Optional[int] = field(
+    custom_field_definition_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomFieldDefinitionID"},
     )
     """Pointer to the custom field definition record."""
-    entry_custom_field_id: Optional[int] = field(
+    entry_custom_field_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryCustomFieldID"},
     )
     """Unique ID for this entry custom field record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    field_data_type_enum: Optional[str] = field(
+    field_data_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FieldDataTypeEnum"},
     )
     """Field data type."""
-    value_boolean: Optional[bool] = field(
+    value_boolean: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueBoolean"},
     )
     """Boolean value."""
-    value_date: Optional[str] = field(
+    value_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueDate"},
     )
     """Date value."""
-    value_integer: Optional[int] = field(
+    value_integer: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueInteger"},
     )
     """Integer value."""
-    value_money: Optional[float] = field(
+    value_money: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueMoney"},
     )
     """Money value."""
-    value_string: Optional[str] = field(
+    value_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ValueString"},
     )
     """String value."""
@@ -1167,86 +1445,94 @@ class SelectTermInput:
     Get Term
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    active: Optional[bool] = field(
+    active: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Active"},
     )
     """Current active state."""
-    active_date_close: Optional[Dict[str, Any]] = field(
+    active_date_close: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateClose"},
     )
-    active_date_open: Optional[Dict[str, Any]] = field(
+    active_date_open: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateOpen"},
     )
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """Pointer to the category record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Term comments."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Term description."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    term_code: Optional[str] = field(
+    term_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermCode"},
     )
     """Term code."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Unique ID for this term record."""
-    term_type_id: Optional[int] = field(
+    term_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermTypeID"},
     )
     """Pointer to the term type record."""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """Term displayed in the Portal."""
@@ -1258,132 +1544,160 @@ class SelectEntryAddressInput:
     Get Entry Address
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    active_date_end: Optional[Dict[str, Any]] = field(
+    active_date_end: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateEnd"},
     )
-    active_date_start: Optional[Dict[str, Any]] = field(
+    active_date_start: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateStart"},
     )
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Pointer to the address type record."""
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    """City"""
-    comments: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    """City"""
+    comments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Address comments."""
-    contact_name: Optional[str] = field(
+    contact_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName"},
     )
     """Contact name."""
-    contact_name2: Optional[str] = field(
+    contact_name2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName2"},
     )
     """Contact name 2."""
-    country_id: Optional[int] = field(
+    country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryID"},
     )
     """Pointer to the country record."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """Email"""
-    entry_address_id: Optional[int] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """Email"""
+    entry_address_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryAddressID"},
     )
     """Unique ID for this entry address record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    phone: Optional[str] = field(default=None, metadata={"wire_name": "Phone"})
-    """Phone"""
-    phone_mobile_cell: Optional[str] = field(
+    phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Phone"},
+    )
+    """Phone"""
+    phone_mobile_cell: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneMobileCell"},
     )
     """Mobile/Cell"""
-    phone_other: Optional[str] = field(
+    phone_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther"},
     )
     """Alternative phone."""
-    phone_other2: Optional[str] = field(
+    phone_other2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther2"},
     )
     """Alternative phone 2."""
-    reference: Optional[str] = field(
+    reference: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference"},
     )
     """Reference"""
-    relationship: Optional[str] = field(
+    relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Relationship"},
     )
     """Relationship this address has to the entry."""
-    salutation: Optional[str] = field(
+    salutation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Salutation"},
     )
     """Salutation"""
-    state_province: Optional[str] = field(
+    state_province: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StateProvince"},
     )
     """State/Province"""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -1395,104 +1709,135 @@ class UpdateEntryAddressInput:
     Update Entry Address
     """
 
-    active_date_end: Optional[str] = field(
+    active_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateEnd"},
     )
     """End active date."""
-    active_date_start: Optional[str] = field(
+    active_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateStart"},
     )
     """Date when this address becomes active."""
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Pointer to the address type record."""
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    """City"""
-    comments: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    """City"""
+    comments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Address comments."""
-    contact_name: Optional[str] = field(
+    contact_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName"},
     )
     """Contact name."""
-    contact_name2: Optional[str] = field(
+    contact_name2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName2"},
     )
     """Contact name 2."""
-    country_id: Optional[int] = field(
+    country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryID"},
     )
     """Pointer to the country record."""
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """Email"""
-    entry_address_id: Optional[int] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """Email"""
+    entry_address_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryAddressID"},
     )
     """Unique ID for this entry address record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    phone: Optional[str] = field(default=None, metadata={"wire_name": "Phone"})
-    """Phone"""
-    phone_mobile_cell: Optional[str] = field(
+    phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Phone"},
+    )
+    """Phone"""
+    phone_mobile_cell: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneMobileCell"},
     )
     """Mobile/Cell"""
-    phone_other: Optional[str] = field(
+    phone_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther"},
     )
     """Alternative phone."""
-    phone_other2: Optional[str] = field(
+    phone_other2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther2"},
     )
     """Alternative phone 2."""
-    reference: Optional[str] = field(
+    reference: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference"},
     )
     """Reference"""
-    relationship: Optional[str] = field(
+    relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Relationship"},
     )
     """Relationship this address has to the entry."""
-    salutation: Optional[str] = field(
+    salutation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Salutation"},
     )
     """Salutation"""
-    state_province: Optional[str] = field(
+    state_province: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StateProvince"},
     )
     """State/Province"""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -1504,104 +1849,135 @@ class UpdateEntryAddressResponse:
     Response for Update Entry Address
     """
 
-    active_date_end: Optional[str] = field(
+    active_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateEnd"},
     )
     """End active date."""
-    active_date_start: Optional[str] = field(
+    active_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActiveDateStart"},
     )
     """Date when this address becomes active."""
-    address_type_id: Optional[int] = field(
+    address_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AddressTypeID"},
     )
     """Pointer to the address type record."""
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    """City"""
-    comments: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    """City"""
+    comments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Address comments."""
-    contact_name: Optional[str] = field(
+    contact_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName"},
     )
     """Contact name."""
-    contact_name2: Optional[str] = field(
+    contact_name2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactName2"},
     )
     """Contact name 2."""
-    country_id: Optional[int] = field(
+    country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryID"},
     )
     """Pointer to the country record."""
-    email: Optional[str] = field(default=None, metadata={"wire_name": "Email"})
-    """Email"""
-    entry_address_id: Optional[int] = field(
+    email: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Email"},
+    )
+    """Email"""
+    entry_address_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryAddressID"},
     )
     """Unique ID for this entry address record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    phone: Optional[str] = field(default=None, metadata={"wire_name": "Phone"})
-    """Phone"""
-    phone_mobile_cell: Optional[str] = field(
+    phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Phone"},
+    )
+    """Phone"""
+    phone_mobile_cell: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneMobileCell"},
     )
     """Mobile/Cell"""
-    phone_other: Optional[str] = field(
+    phone_other: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther"},
     )
     """Alternative phone."""
-    phone_other2: Optional[str] = field(
+    phone_other2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhoneOther2"},
     )
     """Alternative phone 2."""
-    reference: Optional[str] = field(
+    reference: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference"},
     )
     """Reference"""
-    relationship: Optional[str] = field(
+    relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Relationship"},
     )
     """Relationship this address has to the entry."""
-    salutation: Optional[str] = field(
+    salutation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Salutation"},
     )
     """Salutation"""
-    state_province: Optional[str] = field(
+    state_province: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StateProvince"},
     )
     """State/Province"""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -1613,295 +1989,351 @@ class SelectEntryApplicationInput:
     Get Entry Application
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    allocate_option_enum: Optional[str] = field(
+    allocate_option_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateOptionEnum"},
     )
     """Allocate option."""
-    application_date: Optional[Dict[str, Any]] = field(
+    application_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationDate"},
     )
-    application_status_id: Optional[int] = field(
+    application_status_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationStatusID"},
     )
     """Pointer to the application status record."""
-    cancel_date: Optional[Dict[str, Any]] = field(
+    cancel_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelDate"},
     )
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Application comments."""
-    comments_internal: Optional[str] = field(
+    comments_internal: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentsInternal"},
     )
     """Internal comments."""
-    complete_date: Optional[Dict[str, Any]] = field(
+    complete_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
-    contract_signed_date: Optional[Dict[str, Any]] = field(
+    contract_signed_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractSignedDate"},
     )
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_date3: Optional[Dict[str, Any]] = field(
+    custom_date3: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
-    custom_date4: Optional[Dict[str, Any]] = field(
+    custom_date4: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
-    date_created: Optional[Dict[str, Any]] = field(
+    date_created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    enquiry_date: Optional[Dict[str, Any]] = field(
+    enquiry_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnquiryDate"},
     )
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Unique ID for this entry application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    expected_arrival_date: Optional[Dict[str, Any]] = field(
+    expected_arrival_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDate"},
     )
-    expected_arrival_date_latest: Optional[Dict[str, Any]] = field(
+    expected_arrival_date_latest: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDateLatest"},
     )
-    expected_departure_date: Optional[Dict[str, Any]] = field(
+    expected_departure_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedDepartureDate"},
     )
-    offered_date: Optional[Dict[str, Any]] = field(
+    offered_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferedDate"},
     )
-    offer_reply_date: Optional[Dict[str, Any]] = field(
+    offer_reply_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyDate"},
     )
-    offer_reply_enum: Optional[str] = field(
+    offer_reply_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyEnum"},
     )
     """Offer reply."""
-    offer_reply_reason: Optional[str] = field(
+    offer_reply_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyReason"},
     )
     """Offer reply reason."""
-    offer_sent_date: Optional[Dict[str, Any]] = field(
+    offer_sent_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferSentDate"},
     )
-    portal_tracking_only: Optional[bool] = field(
+    portal_tracking_only: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalTrackingOnly"},
     )
     """Whether this application is just for the portal to track progress."""
-    preference_comments: Optional[str] = field(
+    preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreferenceComments"},
     )
     """Preference comments."""
-    rating: Optional[str] = field(
+    rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rating"},
     )
     """Application rating."""
-    received_date: Optional[Dict[str, Any]] = field(
+    received_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDate"},
     )
-    received_deposit: Optional[bool] = field(
+    received_deposit: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit"},
     )
     """Indicates if the deposit has been received."""
-    received_deposit_waived: Optional[bool] = field(
+    received_deposit_waived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositWaived"},
     )
     """Date deposit was waived."""
-    received_deposit_payment_id: Optional[int] = field(
+    received_deposit_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_deposit_web_payment_id: Optional[int] = field(
+    received_deposit_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_deposit_amount: Optional[float] = field(
+    received_deposit_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositAmount"},
     )
     """Received deposit amount."""
-    received_deposit_date: Optional[Dict[str, Any]] = field(
+    received_deposit_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositDate"},
     )
-    received_fee: Optional[bool] = field(
+    received_fee: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee"},
     )
     """Indicates if the fee has been received."""
-    received_fee_payment_id: Optional[int] = field(
+    received_fee_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_fee_web_payment_id: Optional[int] = field(
+    received_fee_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_fee_amount: Optional[float] = field(
+    received_fee_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeAmount"},
     )
     """Received fee amount."""
-    received_fee_date: Optional[Dict[str, Any]] = field(
+    received_fee_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeDate"},
     )
-    received_photo_date: Optional[Dict[str, Any]] = field(
+    received_photo_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedPhotoDate"},
     )
-    returning: Optional[bool] = field(
+    returning: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Returning"},
     )
     """Indicates if the entry has been here before and is returning."""
-    room_mate_description: Optional[str] = field(
+    room_mate_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateDescription"},
     )
     """
     Description the applicant can write which is displayed in the roommate
     module.
     """
-    roommate_group_id: Optional[int] = field(
+    roommate_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoommateGroupID"},
     )
     """Pointer to the Roommate group record."""
-    room_mate_group_sort_order: Optional[int] = field(
+    room_mate_group_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateGroupSortOrder"},
     )
     """Order that group members should be processed in."""
-    room_mate_show_in_search: Optional[bool] = field(
+    room_mate_show_in_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateShowInSearch"},
     )
     """Whether to include this applicant in roommate searches."""
-    room_preference_comments: Optional[str] = field(
+    room_preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomPreferenceComments"},
     )
     """Room preference comments."""
-    room_selection_number: Optional[int] = field(
+    room_selection_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionNumber"},
     )
     """Room selection number."""
-    room_selection_timeslot: Optional[str] = field(
+    room_selection_timeslot: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionTimeslot"},
     )
     """Room selection timeslot."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Defines the period this application is for."""
-    web: Optional[bool] = field(default=None, metadata={"wire_name": "Web"})
+    web: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Web"},
+    )
     """Indicates if this application was created on the web."""
 
 
@@ -1911,280 +2343,334 @@ class CreateEntryApplicationInput:
     Create Entry Application
     """
 
-    allocate_option_enum: Optional[str] = field(
+    allocate_option_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateOptionEnum"},
     )
     """Allocate option."""
-    application_date: Optional[str] = field(
+    application_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationDate"},
     )
     """Date of application."""
-    application_status_id: Optional[int] = field(
+    application_status_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationStatusID"},
     )
     """Pointer to the application status record."""
-    cancel_date: Optional[str] = field(
+    cancel_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelDate"},
     )
     """Cancellation date."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Application comments."""
-    comments_internal: Optional[str] = field(
+    comments_internal: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentsInternal"},
     )
     """Internal comments."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Completion date."""
-    contract_signed_date: Optional[str] = field(
+    contract_signed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractSignedDate"},
     )
     """Date contract was signed."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    enquiry_date: Optional[str] = field(
+    enquiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnquiryDate"},
     )
     """Date of enquiry."""
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Unique ID for this entry application record."""
-    entry_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "EntryID"},
-    )
+    entry_id: int = dataclass_field(metadata={"wire_name": "EntryID"})
     """Pointer to the entry record."""
-    expected_arrival_date: Optional[str] = field(
+    expected_arrival_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDate"},
     )
     """Date entry is expected to arrive."""
-    expected_arrival_date_latest: Optional[str] = field(
+    expected_arrival_date_latest: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDateLatest"},
     )
     """Latest expected arrival date."""
-    expected_departure_date: Optional[str] = field(
+    expected_departure_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedDepartureDate"},
     )
     """Date entry is expected to depart."""
-    offered_date: Optional[str] = field(
+    offered_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferedDate"},
     )
     """Date application was offered."""
-    offer_reply_date: Optional[str] = field(
+    offer_reply_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyDate"},
     )
     """Date offer was replied to."""
-    offer_reply_enum: Optional[str] = field(
+    offer_reply_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyEnum"},
     )
     """Offer reply."""
-    offer_reply_reason: Optional[str] = field(
+    offer_reply_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyReason"},
     )
     """Offer reply reason."""
-    offer_sent_date: Optional[str] = field(
+    offer_sent_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferSentDate"},
     )
     """Date offer sent."""
-    portal_tracking_only: Optional[bool] = field(
+    portal_tracking_only: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalTrackingOnly"},
     )
     """Whether this application is just for the portal to track progress."""
-    preference_comments: Optional[str] = field(
+    preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreferenceComments"},
     )
     """Preference comments."""
-    rating: Optional[str] = field(
+    rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rating"},
     )
     """Application rating."""
-    received_date: Optional[str] = field(
+    received_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDate"},
     )
     """Date received."""
-    received_deposit: Optional[bool] = field(
+    received_deposit: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit"},
     )
     """Indicates if the deposit has been received."""
-    received_deposit_payment_id: Optional[int] = field(
+    received_deposit_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_PaymentID"},
     )
     """Pointer to the payment record for the received deposit."""
-    received_deposit_web_payment_id: Optional[int] = field(
+    received_deposit_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_WebPaymentID"},
     )
     """Most recent deposit payment that was attempted."""
-    received_deposit_amount: Optional[float] = field(
+    received_deposit_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositAmount"},
     )
     """Received deposit amount."""
-    received_deposit_date: Optional[str] = field(
+    received_deposit_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositDate"},
     )
     """Date deposit was received."""
-    received_deposit_waived: Optional[bool] = field(
+    received_deposit_waived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositWaived"},
     )
     """Date deposit was waived."""
-    received_fee: Optional[bool] = field(
+    received_fee: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee"},
     )
     """Indicates if the fee has been received."""
-    received_fee_payment_id: Optional[int] = field(
+    received_fee_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_fee_web_payment_id: Optional[int] = field(
+    received_fee_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_fee_amount: Optional[float] = field(
+    received_fee_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeAmount"},
     )
     """Received fee amount."""
-    received_fee_date: Optional[str] = field(
+    received_fee_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeDate"},
     )
     """Date fee was received."""
-    received_photo_date: Optional[str] = field(
+    received_photo_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedPhotoDate"},
     )
     """Date photo was received."""
-    returning: Optional[bool] = field(
+    returning: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Returning"},
     )
     """Indicates if the entry has been here before and is returning."""
-    room_mate_description: Optional[str] = field(
+    room_mate_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateDescription"},
     )
     """
     Description the applicant can write which is displayed in the roommate
     module.
     """
-    roommate_group_id: Optional[int] = field(
+    roommate_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoommateGroupID"},
     )
     """Pointer to the Roommate group record."""
-    room_mate_group_sort_order: Optional[int] = field(
+    room_mate_group_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateGroupSortOrder"},
     )
     """Order that group members should be processed in."""
-    room_mate_show_in_search: Optional[bool] = field(
+    room_mate_show_in_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateShowInSearch"},
     )
     """Whether to include this applicant in roommate searches."""
-    room_preference_comments: Optional[str] = field(
+    room_preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomPreferenceComments"},
     )
     """Room preference comments."""
-    room_selection_number: Optional[int] = field(
+    room_selection_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionNumber"},
     )
     """Room selection number."""
-    room_selection_timeslot: Optional[str] = field(
+    room_selection_timeslot: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionTimeslot"},
     )
     """Room selection timeslot."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Defines the period this application is for."""
-    web: Optional[bool] = field(default=None, metadata={"wire_name": "Web"})
+    web: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Web"},
+    )
     """Indicates if this application was created on the web."""
 
 
@@ -2194,280 +2680,338 @@ class CreateEntryApplicationResponse:
     Response for Create Entry Application
     """
 
-    allocate_option_enum: Optional[str] = field(
+    allocate_option_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateOptionEnum"},
     )
     """Allocate option."""
-    application_date: Optional[str] = field(
+    application_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationDate"},
     )
     """Date of application."""
-    application_status_id: Optional[int] = field(
+    application_status_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationStatusID"},
     )
     """Pointer to the application status record."""
-    cancel_date: Optional[str] = field(
+    cancel_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelDate"},
     )
     """Cancellation date."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Application comments."""
-    comments_internal: Optional[str] = field(
+    comments_internal: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentsInternal"},
     )
     """Internal comments."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Completion date."""
-    contract_signed_date: Optional[str] = field(
+    contract_signed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractSignedDate"},
     )
     """Date contract was signed."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Unique ID for this entry application record."""
-    enquiry_date: Optional[str] = field(
+    enquiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnquiryDate"},
     )
     """Date of enquiry."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    expected_arrival_date: Optional[str] = field(
+    expected_arrival_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDate"},
     )
     """Date entry is expected to arrive."""
-    expected_arrival_date_latest: Optional[str] = field(
+    expected_arrival_date_latest: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDateLatest"},
     )
     """Latest expected arrival date."""
-    expected_departure_date: Optional[str] = field(
+    expected_departure_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedDepartureDate"},
     )
     """Date entry is expected to depart."""
-    offered_date: Optional[str] = field(
+    offered_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferedDate"},
     )
     """Date application was offered."""
-    offer_reply_date: Optional[str] = field(
+    offer_reply_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyDate"},
     )
     """Date offer was replied to."""
-    offer_reply_enum: Optional[str] = field(
+    offer_reply_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyEnum"},
     )
     """Offer reply."""
-    offer_reply_reason: Optional[str] = field(
+    offer_reply_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyReason"},
     )
     """Offer reply reason."""
-    offer_sent_date: Optional[str] = field(
+    offer_sent_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferSentDate"},
     )
     """Date offer sent."""
-    portal_tracking_only: Optional[bool] = field(
+    portal_tracking_only: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalTrackingOnly"},
     )
     """Whether this application is just for the portal to track progress."""
-    preference_comments: Optional[str] = field(
+    preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreferenceComments"},
     )
     """Preference comments."""
-    rating: Optional[str] = field(
+    rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rating"},
     )
     """Application rating."""
-    received_date: Optional[str] = field(
+    received_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDate"},
     )
     """Date received."""
-    received_deposit: Optional[bool] = field(
+    received_deposit: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit"},
     )
     """Indicates if the deposit has been received."""
-    received_deposit_payment_id: Optional[int] = field(
+    received_deposit_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_PaymentID"},
     )
     """Pointer to the payment record for the received deposit."""
-    received_deposit_web_payment_id: Optional[int] = field(
+    received_deposit_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_WebPaymentID"},
     )
     """Most recent deposit payment that was attempted."""
-    received_deposit_amount: Optional[float] = field(
+    received_deposit_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositAmount"},
     )
     """Received deposit amount."""
-    received_deposit_date: Optional[str] = field(
+    received_deposit_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositDate"},
     )
     """Date deposit was received."""
-    received_deposit_waived: Optional[bool] = field(
+    received_deposit_waived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositWaived"},
     )
     """Date deposit was waived."""
-    received_fee: Optional[bool] = field(
+    received_fee: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee"},
     )
     """Indicates if the fee has been received."""
-    received_fee_payment_id: Optional[int] = field(
+    received_fee_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_fee_web_payment_id: Optional[int] = field(
+    received_fee_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_fee_amount: Optional[float] = field(
+    received_fee_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeAmount"},
     )
     """Received fee amount."""
-    received_fee_date: Optional[str] = field(
+    received_fee_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeDate"},
     )
     """Date fee was received."""
-    received_photo_date: Optional[str] = field(
+    received_photo_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedPhotoDate"},
     )
     """Date photo was received."""
-    returning: Optional[bool] = field(
+    returning: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Returning"},
     )
     """Indicates if the entry has been here before and is returning."""
-    room_mate_description: Optional[str] = field(
+    room_mate_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateDescription"},
     )
     """
     Description the applicant can write which is displayed in the roommate
     module.
     """
-    roommate_group_id: Optional[int] = field(
+    roommate_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoommateGroupID"},
     )
     """Pointer to the Roommate group record."""
-    room_mate_group_sort_order: Optional[int] = field(
+    room_mate_group_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateGroupSortOrder"},
     )
     """Order that group members should be processed in."""
-    room_mate_show_in_search: Optional[bool] = field(
+    room_mate_show_in_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateShowInSearch"},
     )
     """Whether to include this applicant in roommate searches."""
-    room_preference_comments: Optional[str] = field(
+    room_preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomPreferenceComments"},
     )
     """Room preference comments."""
-    room_selection_number: Optional[int] = field(
+    room_selection_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionNumber"},
     )
     """Room selection number."""
-    room_selection_timeslot: Optional[str] = field(
+    room_selection_timeslot: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionTimeslot"},
     )
     """Room selection timeslot."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Defines the period this application is for."""
-    web: Optional[bool] = field(default=None, metadata={"wire_name": "Web"})
+    web: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Web"},
+    )
     """Indicates if this application was created on the web."""
 
 
@@ -2477,280 +3021,338 @@ class UpdateEntryApplicationInput:
     Update Entry Application
     """
 
-    allocate_option_enum: Optional[str] = field(
+    allocate_option_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateOptionEnum"},
     )
     """Allocate option."""
-    application_date: Optional[str] = field(
+    application_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationDate"},
     )
     """Date of application."""
-    application_status_id: Optional[int] = field(
+    application_status_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationStatusID"},
     )
     """Pointer to the application status record."""
-    cancel_date: Optional[str] = field(
+    cancel_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelDate"},
     )
     """Cancellation date."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Application comments."""
-    comments_internal: Optional[str] = field(
+    comments_internal: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentsInternal"},
     )
     """Internal comments."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Completion date."""
-    contract_signed_date: Optional[str] = field(
+    contract_signed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractSignedDate"},
     )
     """Date contract was signed."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Unique ID for this entry application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    enquiry_date: Optional[str] = field(
+    enquiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnquiryDate"},
     )
     """Date of enquiry."""
-    expected_arrival_date: Optional[str] = field(
+    expected_arrival_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDate"},
     )
     """Date entry is expected to arrive."""
-    expected_arrival_date_latest: Optional[str] = field(
+    expected_arrival_date_latest: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDateLatest"},
     )
     """Latest expected arrival date."""
-    expected_departure_date: Optional[str] = field(
+    expected_departure_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedDepartureDate"},
     )
     """Date entry is expected to depart."""
-    offered_date: Optional[str] = field(
+    offered_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferedDate"},
     )
     """Date application was offered."""
-    offer_reply_date: Optional[str] = field(
+    offer_reply_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyDate"},
     )
     """Date offer was replied to."""
-    offer_reply_enum: Optional[str] = field(
+    offer_reply_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyEnum"},
     )
     """Offer reply."""
-    offer_reply_reason: Optional[str] = field(
+    offer_reply_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyReason"},
     )
     """Offer reply reason."""
-    offer_sent_date: Optional[str] = field(
+    offer_sent_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferSentDate"},
     )
     """Date offer sent."""
-    portal_tracking_only: Optional[bool] = field(
+    portal_tracking_only: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalTrackingOnly"},
     )
     """Whether this application is just for the portal to track progress."""
-    preference_comments: Optional[str] = field(
+    preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreferenceComments"},
     )
     """Preference comments."""
-    rating: Optional[str] = field(
+    rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rating"},
     )
     """Application rating."""
-    received_date: Optional[str] = field(
+    received_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDate"},
     )
     """Date received."""
-    received_deposit: Optional[bool] = field(
+    received_deposit: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit"},
     )
     """Indicates if the deposit has been received."""
-    received_deposit_payment_id: Optional[int] = field(
+    received_deposit_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_PaymentID"},
     )
     """Pointer to the payment record for the received deposit."""
-    received_deposit_web_payment_id: Optional[int] = field(
+    received_deposit_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_WebPaymentID"},
     )
     """Most recent deposit payment that was attempted."""
-    received_deposit_amount: Optional[float] = field(
+    received_deposit_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositAmount"},
     )
     """Received deposit amount."""
-    received_deposit_date: Optional[str] = field(
+    received_deposit_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositDate"},
     )
     """Date deposit was received."""
-    received_deposit_waived: Optional[bool] = field(
+    received_deposit_waived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositWaived"},
     )
     """Date deposit was waived."""
-    received_fee: Optional[bool] = field(
+    received_fee: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee"},
     )
     """Indicates if the fee has been received."""
-    received_fee_payment_id: Optional[int] = field(
+    received_fee_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_fee_web_payment_id: Optional[int] = field(
+    received_fee_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_fee_amount: Optional[float] = field(
+    received_fee_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeAmount"},
     )
     """Received fee amount."""
-    received_fee_date: Optional[str] = field(
+    received_fee_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeDate"},
     )
     """Date fee was received."""
-    received_photo_date: Optional[str] = field(
+    received_photo_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedPhotoDate"},
     )
     """Date photo was received."""
-    returning: Optional[bool] = field(
+    returning: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Returning"},
     )
     """Indicates if the entry has been here before and is returning."""
-    room_mate_description: Optional[str] = field(
+    room_mate_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateDescription"},
     )
     """
     Description the applicant can write which is displayed in the roommate
     module.
     """
-    roommate_group_id: Optional[int] = field(
+    roommate_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoommateGroupID"},
     )
     """Pointer to the Roommate group record."""
-    room_mate_group_sort_order: Optional[int] = field(
+    room_mate_group_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateGroupSortOrder"},
     )
     """Order that group members should be processed in."""
-    room_mate_show_in_search: Optional[bool] = field(
+    room_mate_show_in_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateShowInSearch"},
     )
     """Whether to include this applicant in roommate searches."""
-    room_preference_comments: Optional[str] = field(
+    room_preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomPreferenceComments"},
     )
     """Room preference comments."""
-    room_selection_number: Optional[int] = field(
+    room_selection_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionNumber"},
     )
     """Room selection number."""
-    room_selection_timeslot: Optional[str] = field(
+    room_selection_timeslot: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionTimeslot"},
     )
     """Room selection timeslot."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Defines the period this application is for."""
-    web: Optional[bool] = field(default=None, metadata={"wire_name": "Web"})
+    web: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Web"},
+    )
     """Indicates if this application was created on the web."""
 
 
@@ -2760,280 +3362,338 @@ class UpdateEntryApplicationResponse:
     Response for Update Entry Application
     """
 
-    allocate_option_enum: Optional[str] = field(
+    allocate_option_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateOptionEnum"},
     )
     """Allocate option."""
-    application_date: Optional[str] = field(
+    application_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationDate"},
     )
     """Date of application."""
-    application_status_id: Optional[int] = field(
+    application_status_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ApplicationStatusID"},
     )
     """Pointer to the application status record."""
-    cancel_date: Optional[str] = field(
+    cancel_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelDate"},
     )
     """Cancellation date."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Application comments."""
-    comments_internal: Optional[str] = field(
+    comments_internal: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CommentsInternal"},
     )
     """Internal comments."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Completion date."""
-    contract_signed_date: Optional[str] = field(
+    contract_signed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractSignedDate"},
     )
     """Date contract was signed."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    entry_application_id: Optional[int] = field(
+    entry_application_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryApplicationID"},
     )
     """Unique ID for this entry application record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    enquiry_date: Optional[str] = field(
+    enquiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnquiryDate"},
     )
     """Date of enquiry."""
-    expected_arrival_date: Optional[str] = field(
+    expected_arrival_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDate"},
     )
     """Date entry is expected to arrive."""
-    expected_arrival_date_latest: Optional[str] = field(
+    expected_arrival_date_latest: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedArrivalDateLatest"},
     )
     """Latest expected arrival date."""
-    expected_departure_date: Optional[str] = field(
+    expected_departure_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedDepartureDate"},
     )
     """Date entry is expected to depart."""
-    offered_date: Optional[str] = field(
+    offered_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferedDate"},
     )
     """Date application was offered."""
-    offer_reply_date: Optional[str] = field(
+    offer_reply_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyDate"},
     )
     """Date offer was replied to."""
-    offer_reply_enum: Optional[str] = field(
+    offer_reply_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyEnum"},
     )
     """Offer reply."""
-    offer_reply_reason: Optional[str] = field(
+    offer_reply_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferReplyReason"},
     )
     """Offer reply reason."""
-    offer_sent_date: Optional[str] = field(
+    offer_sent_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfferSentDate"},
     )
     """Date offer sent."""
-    portal_tracking_only: Optional[bool] = field(
+    portal_tracking_only: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PortalTrackingOnly"},
     )
     """Whether this application is just for the portal to track progress."""
-    preference_comments: Optional[str] = field(
+    preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreferenceComments"},
     )
     """Preference comments."""
-    rating: Optional[str] = field(
+    rating: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Rating"},
     )
     """Application rating."""
-    received_date: Optional[str] = field(
+    received_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDate"},
     )
     """Date received."""
-    received_deposit: Optional[bool] = field(
+    received_deposit: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit"},
     )
     """Indicates if the deposit has been received."""
-    received_deposit_payment_id: Optional[int] = field(
+    received_deposit_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_PaymentID"},
     )
     """Pointer to the payment record for the received deposit."""
-    received_deposit_web_payment_id: Optional[int] = field(
+    received_deposit_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDeposit_WebPaymentID"},
     )
     """Most recent deposit payment that was attempted."""
-    received_deposit_amount: Optional[float] = field(
+    received_deposit_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositAmount"},
     )
     """Received deposit amount."""
-    received_deposit_date: Optional[str] = field(
+    received_deposit_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositDate"},
     )
     """Date deposit was received."""
-    received_deposit_waived: Optional[bool] = field(
+    received_deposit_waived: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDepositWaived"},
     )
     """Date deposit was waived."""
-    received_fee: Optional[bool] = field(
+    received_fee: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee"},
     )
     """Indicates if the fee has been received."""
-    received_fee_payment_id: Optional[int] = field(
+    received_fee_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_PaymentID"},
     )
     """Pointer to the payment record for the received fee."""
-    received_fee_web_payment_id: Optional[int] = field(
+    received_fee_web_payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFee_WebPaymentID"},
     )
     """Most recent fee payment that was attempted."""
-    received_fee_amount: Optional[float] = field(
+    received_fee_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeAmount"},
     )
     """Received fee amount."""
-    received_fee_date: Optional[str] = field(
+    received_fee_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedFeeDate"},
     )
     """Date fee was received."""
-    received_photo_date: Optional[str] = field(
+    received_photo_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedPhotoDate"},
     )
     """Date photo was received."""
-    returning: Optional[bool] = field(
+    returning: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Returning"},
     )
     """Indicates if the entry has been here before and is returning."""
-    room_mate_description: Optional[str] = field(
+    room_mate_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateDescription"},
     )
     """
     Description the applicant can write which is displayed in the roommate
     module.
     """
-    roommate_group_id: Optional[int] = field(
+    roommate_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoommateGroupID"},
     )
     """Pointer to the Roommate group record."""
-    room_mate_group_sort_order: Optional[int] = field(
+    room_mate_group_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateGroupSortOrder"},
     )
     """Order that group members should be processed in."""
-    room_mate_show_in_search: Optional[bool] = field(
+    room_mate_show_in_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomMateShowInSearch"},
     )
     """Whether to include this applicant in roommate searches."""
-    room_preference_comments: Optional[str] = field(
+    room_preference_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomPreferenceComments"},
     )
     """Room preference comments."""
-    room_selection_number: Optional[int] = field(
+    room_selection_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionNumber"},
     )
     """Room selection number."""
-    room_selection_timeslot: Optional[str] = field(
+    room_selection_timeslot: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSelectionTimeslot"},
     )
     """Room selection timeslot."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Defines the period this application is for."""
-    web: Optional[bool] = field(default=None, metadata={"wire_name": "Web"})
+    web: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Web"},
+    )
     """Indicates if this application was created on the web."""
 
 
@@ -3043,264 +3703,314 @@ class SelectTermSessionInput:
     Get Term Session
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    cancel_booking_default_end_booking_reason_id: Optional[int] = field(
+    cancel_booking_default_end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelBookingDefaultEnd_BookingReasonID"},
     )
     """The default booking end reason when cancelling a booking."""
-    cancel_booking_update_end_booking_reason_boolean_ask_enum: Optional[str] = field(
+    cancel_booking_update_end_booking_reason_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CancelBookingUpdateEndBookingReason_BooleanAskEnum"},
     )
     """Update booking end reason on booking cancel."""
-    check_in_date: Optional[Dict[str, Any]] = field(
+    check_in_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
-    check_in_date_actual_decrease_boolean_ask_enum: Optional[str] = field(
+    check_in_date_actual_decrease_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActualDecrease_BooleanAskEnum"},
     )
     """
     Update CheckInDateActual if check-in date moves backward (in the past).
     """
-    check_in_date_actual_increase_boolean_ask_enum: Optional[str] = field(
+    check_in_date_actual_increase_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActualIncrease_BooleanAskEnum"},
     )
     """
     Update CheckInDateActual if check-in date moves forward (in the future).
     """
-    check_in_default_start_booking_reason_id: Optional[int] = field(
+    check_in_default_start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDefaultStart_BookingReasonID"},
     )
     """The default booking start reason when checking in."""
-    check_in_update_start_booking_reason_boolean_ask_enum: Optional[str] = field(
+    check_in_update_start_booking_reason_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInUpdateStartBookingReason_BooleanAskEnum"},
     )
     """Update booking start reason on check-in."""
-    check_out_date: Optional[Dict[str, Any]] = field(
+    check_out_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
-    check_out_date_actual_decrease_boolean_ask_enum: Optional[str] = field(
+    check_out_date_actual_decrease_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActualDecrease_BooleanAskEnum"},
     )
     """
     Update CheckOutDateActual if check-in date moves backward (in the past).
     """
-    check_out_date_actual_increase_boolean_ask_enum: Optional[str] = field(
+    check_out_date_actual_increase_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActualIncrease_BooleanAskEnum"},
     )
     """
     Update CheckOutDateActual if check-in date moves forward (in the future).
     """
-    check_out_default_end_booking_reason_id: Optional[int] = field(
+    check_out_default_end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDefaultEnd_BookingReasonID"},
     )
     """The default booking end reason when checking out."""
-    check_out_update_end_booking_reason_boolean_ask_enum: Optional[str] = field(
+    check_out_update_end_booking_reason_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutUpdateEndBookingReason_BooleanAskEnum"},
     )
     """Update booking end reason on check-out."""
-    contract_date_check_in_decrease_boolean_ask_enum: Optional[str] = field(
+    contract_date_check_in_decrease_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateCheckInDecrease_BooleanAskEnum"},
     )
     """Update Charge Dates if check-in date moves backward (in the past)."""
-    contract_date_check_in_increase_boolean_ask_enum: Optional[str] = field(
+    contract_date_check_in_increase_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateCheckInIncrease_BooleanAskEnum"},
     )
     """Update Charge Dates if check-in date moves forward (in the future)."""
-    contract_date_check_out_decrease_boolean_ask_enum: Optional[str] = field(
+    contract_date_check_out_decrease_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateCheckOutDecrease_BooleanAskEnum"},
     )
     """Update Charge Dates if check-out date moves backward (in the past)."""
-    contract_date_check_out_increase_boolean_ask_enum: Optional[str] = field(
+    contract_date_check_out_increase_boolean_ask_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateCheckOutIncrease_BooleanAskEnum"},
     )
     """Update Charge Dates if check-out date moves forward (in the future)."""
-    contract_date_end: Optional[Dict[str, Any]] = field(
+    contract_date_end: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
-    contract_date_start: Optional[Dict[str, Any]] = field(
+    contract_date_start: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Term description."""
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """Pointer to the end booking reason record."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """Entry status."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Minutes since midnight for estimated time of arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Minutes since midnight for estimated time of departure."""
-    housekeeping_id: Optional[int] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Minutes since midnight for estimated time of arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Minutes since midnight for estimated time of departure."""
+    housekeeping_id: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """Pointer to the house-keeping record."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """Fixed room location."""
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the address room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Room rate amount."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Pointer to the room rate record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Pointer to the start booking reason record."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    term_session_code: Optional[str] = field(
+    term_session_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionCode"},
     )
     """Term session code."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Unique ID for this term session record."""
-    use_active_booking_as_template: Optional[bool] = field(
+    use_active_booking_as_template: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UseActiveBookingAsTemplate"},
     )
     """Indicates if the active booking should be used as a template."""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """Term Session displayed in PortalX."""
@@ -3312,463 +4022,551 @@ class SelectEntryDetailInput:
     Get Entry Detail
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    academic_hold: Optional[bool] = field(
+    academic_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AcademicHold"},
     )
     """Indicates if the academic hold flag has been set."""
-    account_payment_type_id: Optional[int] = field(
+    account_payment_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Account_PaymentTypeID"},
     )
     """Pointer to the payment type record."""
-    account_hold: Optional[bool] = field(
+    account_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountHold"},
     )
     """Indicates if the account hold flag has been set."""
-    account_bank_name: Optional[str] = field(
+    account_bank_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankName"},
     )
     """Account bank name."""
-    account_bank_number: Optional[str] = field(
+    account_bank_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankNumber"},
     )
     """Account bank number."""
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    account_comments: Optional[str] = field(
+    account_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountComments"},
     )
     """Account comments."""
-    account_detail1: Optional[str] = field(
+    account_detail1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail1"},
     )
     """Account detail."""
-    account_detail2: Optional[str] = field(
+    account_detail2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail2"},
     )
     """Account detail."""
-    account_detail3: Optional[str] = field(
+    account_detail3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail3"},
     )
     """Account detail."""
-    account_detail4: Optional[str] = field(
+    account_detail4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail4"},
     )
     """Account detail."""
-    account_due_date: Optional[Dict[str, Any]] = field(
+    account_due_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDueDate"},
     )
-    athlete: Optional[bool] = field(
+    athlete: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Athlete"},
     )
     """Indicates if the athlete flag has been set."""
-    athlete_team: Optional[str] = field(
+    athlete_team: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AthleteTeam"},
     )
     """Athlete team."""
-    attendee_status_enum: Optional[str] = field(
+    attendee_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AttendeeStatusEnum"},
     )
     """Attendee status."""
-    career: Optional[str] = field(
+    career: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Career"},
     )
     """Intended career."""
-    career_comments: Optional[str] = field(
+    career_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CareerComments"},
     )
     """Reasons for choosing intended career."""
-    citizenship_country_id: Optional[int] = field(
+    citizenship_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Citizenship_CountryID"},
     )
     """Pointer to the citizenship record."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    classification_override: Optional[bool] = field(
+    classification_override: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationOverride"},
     )
     """Classification override."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments."""
-    country_of_birth_country_id: Optional[int] = field(
+    country_of_birth_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfBirth_CountryID"},
     )
     """Pointer to the country of birth record."""
-    country_of_residence_country_id: Optional[int] = field(
+    country_of_residence_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfResidence_CountryID"},
     )
     """Pointer to the country of residence record."""
-    cumulative_g_p_a: Optional[float] = field(
+    cumulative_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeGPA"},
     )
     """Cumulative GPA."""
-    cumulative_hours: Optional[float] = field(
+    cumulative_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeHours"},
     )
     """Cumulative hours."""
-    current_g_p_a: Optional[float] = field(
+    current_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentGPA"},
     )
     """Current GPA."""
-    current_hours: Optional[float] = field(
+    current_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentHours"},
     )
     """Current hours."""
-    current_major: Optional[str] = field(
+    current_major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMajor"},
     )
     """The major chosen by the Entry."""
-    current_minor: Optional[str] = field(
+    current_minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMinor"},
     )
     """The minor chosen by the Entry."""
-    date_entry: Optional[Dict[str, Any]] = field(
+    date_entry: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEntry"},
     )
-    date_exit: Optional[Dict[str, Any]] = field(
+    date_exit: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateExit"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    deceased: Optional[bool] = field(
+    deceased: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Deceased"},
     )
     """Indicates if the Entry is deceased."""
-    deceased_date: Optional[Dict[str, Any]] = field(
+    deceased_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeceasedDate"},
     )
-    dietary: Optional[str] = field(
+    dietary: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Dietary"},
     )
     """Dietary requirements."""
-    disability: Optional[str] = field(
+    disability: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Disability"},
     )
     """Disability."""
-    employment_details: Optional[str] = field(
+    employment_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmploymentDetails"},
     )
     """Employment details."""
-    enrollment_class: Optional[str] = field(
+    enrollment_class: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentClass"},
     )
     """First year, freshman, sophomore, etc."""
-    enrollment_level: Optional[str] = field(
+    enrollment_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentLevel"},
     )
     """Undergraduate, post graduate, etc."""
-    enrollment_status: Optional[str] = field(
+    enrollment_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentStatus"},
     )
     """Newly admitted, current, active, etc."""
-    enrollment_term: Optional[str] = field(
+    enrollment_term: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTerm"},
     )
     """Spring, fall, post graduate, etc."""
-    enrollment_year: Optional[int] = field(
+    enrollment_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentYear"},
     )
     """Year/Level of enrollment."""
-    entry_detail_id: Optional[int] = field(
+    entry_detail_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryDetailID"},
     )
     """Unique ID for this entry detail record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    ethnicity: Optional[str] = field(
+    ethnicity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Ethnicity"},
     )
     """Ethnicity."""
-    event_registration_fee_id: Optional[int] = field(
+    event_registration_fee_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventRegistrationFeeID"},
     )
     """Pointer to the event registration fee record."""
-    expected_graduation_date: Optional[Dict[str, Any]] = field(
+    expected_graduation_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedGraduationDate"},
     )
-    financial_comments: Optional[str] = field(
+    financial_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialComments"},
     )
     """Financial support comments."""
-    financial_support_id: Optional[int] = field(
+    financial_support_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialSupportID"},
     )
     """Pointer to the financial support record."""
-    hear_about_us: Optional[str] = field(
+    hear_about_us: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HearAboutUs"},
     )
     """How did the Entry hear about us."""
-    honors_indicator: Optional[bool] = field(
+    honors_indicator: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HonorsIndicator"},
     )
     """Honors indicator."""
-    immunizations_hold: Optional[bool] = field(
+    immunizations_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImmunizationsHold"},
     )
     """Immunizations hold."""
-    incident_hold: Optional[bool] = field(
+    incident_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHold"},
     )
     """Incident hold."""
-    incident_hold_comments: Optional[str] = field(
+    incident_hold_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHoldComments"},
     )
     """Incident hold comments."""
-    international: Optional[bool] = field(
+    international: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "International"},
     )
     """Indicates if the Entry is considered an international student."""
-    international_details: Optional[str] = field(
+    international_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InternationalDetails"},
     )
     """International details."""
-    living_with_dependents: Optional[bool] = field(
+    living_with_dependents: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LivingWithDependents"},
     )
     """Living with dependents."""
-    married: Optional[bool] = field(
+    married: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Married"},
     )
     """Indicates if the Entry is married."""
-    medical: Optional[str] = field(
+    medical: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Medical"},
     )
     """Medical details."""
-    nationality_id: Optional[int] = field(
+    nationality_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NationalityID"},
     )
     """Pointer to the nationality record."""
-    occupation: Optional[str] = field(
+    occupation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupation"},
     )
     """Occupation."""
-    photo_path: Optional[str] = field(
+    photo_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhotoPath"},
     )
     """Photo path."""
-    previous_member_name: Optional[str] = field(
+    previous_member_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberName"},
     )
     """Previous member name."""
-    previous_member_relationship: Optional[str] = field(
+    previous_member_relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberRelationship"},
     )
     """Previous member relationship."""
-    previous_membership: Optional[str] = field(
+    previous_membership: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembership"},
     )
     """Previous membership."""
-    previous_membership_years: Optional[str] = field(
+    previous_membership_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembershipYears"},
     )
     """Previous membership years."""
-    previous_member_years: Optional[str] = field(
+    previous_member_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberYears"},
     )
     """Previous member years."""
-    profile_interests: Optional[str] = field(
+    profile_interests: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProfileInterests"},
     )
     """Profile interests."""
-    region_of_birth_id: Optional[int] = field(
+    region_of_birth_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RegionOfBirthID"},
     )
     """Pointer to the Region of birth record."""
-    religion: Optional[str] = field(
+    religion: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Religion"},
     )
     """Religion."""
-    residency: Optional[str] = field(
+    residency: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Residency"},
     )
     """Residency."""
-    resident_status: Optional[str] = field(
+    resident_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentStatus"},
     )
     """Resident status."""
-    resident_year: Optional[int] = field(
+    resident_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentYear"},
     )
     """Resident year."""
-    situation_response_comments: Optional[str] = field(
+    situation_response_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseComments"},
     )
     """Situation response comments."""
-    situation_response_detail: Optional[str] = field(
+    situation_response_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseDetail"},
     )
     """Situation response detail."""
-    situation_response_enum: Optional[str] = field(
+    situation_response_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseEnum"},
     )
     """Situation response."""
-    situation_response_expiry_date: Optional[Dict[str, Any]] = field(
+    situation_response_expiry_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseExpiryDate"},
     )
-    situation_response_modified_date: Optional[Dict[str, Any]] = field(
+    situation_response_modified_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseModifiedDate"},
     )
-    situation_response_situation: Optional[str] = field(
+    situation_response_situation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseSituation"},
     )
     """Situation response situation."""
-    special_needs: Optional[str] = field(
+    special_needs: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialNeeds"},
     )
     """Special needs."""
-    staff_id: Optional[int] = field(
+    staff_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StaffID"},
     )
     """Pointer to the staff record."""
-    uses_screen_reader: Optional[bool] = field(
+    uses_screen_reader: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UsesScreenReader"},
     )
     """Uses screen reader."""
-    vehicle_details: Optional[str] = field(
+    vehicle_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleDetails"},
     )
     """Vehicle details."""
-    vehicle_permit: Optional[str] = field(
+    vehicle_permit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehiclePermit"},
     )
     """Vehicle permit."""
-    vehicle_registration: Optional[str] = field(
+    vehicle_registration: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleRegistration"},
     )
     """Vehicle registration."""
-    veteran_status: Optional[str] = field(
+    veteran_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VeteranStatus"},
     )
     """Veteran status."""
-    visa: Optional[bool] = field(default=None, metadata={"wire_name": "Visa"})
-    """Indicates if the Entry holds a visa."""
-    visa_details: Optional[str] = field(
+    visa: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Visa"},
+    )
+    """Indicates if the Entry holds a visa."""
+    visa_details: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "VisaDetails"},
     )
     """Visa details."""
-    visitor_hold: Optional[bool] = field(
+    visitor_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VisitorHold"},
     )
     """Visitor hold."""
@@ -3780,440 +4578,531 @@ class UpdateEntryDetailInput:
     Update Entry Detail
     """
 
-    academic_hold: Optional[bool] = field(
+    academic_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AcademicHold"},
     )
     """Indicates if the academic hold flag has been set."""
-    account_payment_type_id: Optional[int] = field(
+    account_payment_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Account_PaymentTypeID"},
     )
     """Pointer to the preferred payment type record."""
-    account_bank_name: Optional[str] = field(
+    account_bank_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankName"},
     )
     """Account bank name."""
-    account_bank_number: Optional[str] = field(
+    account_bank_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankNumber"},
     )
     """Account bank number."""
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    account_comments: Optional[str] = field(
+    account_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountComments"},
     )
     """Account comments."""
-    account_detail1: Optional[str] = field(
+    account_detail1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail1"},
     )
     """Account detail."""
-    account_detail2: Optional[str] = field(
+    account_detail2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail2"},
     )
     """Account detail."""
-    account_detail3: Optional[str] = field(
+    account_detail3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail3"},
     )
     """Account detail."""
-    account_detail4: Optional[str] = field(
+    account_detail4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail4"},
     )
     """Account detail."""
-    account_due_date: Optional[str] = field(
+    account_due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDueDate"},
     )
     """Paid to date."""
-    account_hold: Optional[bool] = field(
+    account_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountHold"},
     )
     """Indicates if the account hold flag has been set."""
-    athlete: Optional[bool] = field(
+    athlete: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Athlete"},
     )
     """Indicates if the athlete flag has been set."""
-    athlete_team: Optional[str] = field(
+    athlete_team: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AthleteTeam"},
     )
     """Athlete team."""
-    attendee_status_enum: Optional[str] = field(
+    attendee_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AttendeeStatusEnum"},
     )
     """Attendee status."""
-    career: Optional[str] = field(
+    career: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Career"},
     )
     """Intended career."""
-    career_comments: Optional[str] = field(
+    career_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CareerComments"},
     )
     """Reasons for choosing intended career."""
-    citizenship_country_id: Optional[int] = field(
+    citizenship_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Citizenship_CountryID"},
     )
     """Pointer to the citizenship record."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    classification_override: Optional[bool] = field(
+    classification_override: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationOverride"},
     )
     """Classification override."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments."""
-    country_of_birth_country_id: Optional[int] = field(
+    country_of_birth_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfBirth_CountryID"},
     )
     """Pointer to the country of birth record."""
-    country_of_residence_country_id: Optional[int] = field(
+    country_of_residence_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfResidence_CountryID"},
     )
     """Pointer to the country of residence record."""
-    cumulative_g_p_a: Optional[float] = field(
+    cumulative_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeGPA"},
     )
     """Cumulative GPA."""
-    cumulative_hours: Optional[float] = field(
+    cumulative_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeHours"},
     )
     """Cumulative hours."""
-    current_g_p_a: Optional[float] = field(
+    current_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentGPA"},
     )
     """Current GPA."""
-    current_hours: Optional[float] = field(
+    current_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentHours"},
     )
     """Current hours."""
-    current_major: Optional[str] = field(
+    current_major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMajor"},
     )
     """The major chosen by the Entry."""
-    current_minor: Optional[str] = field(
+    current_minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMinor"},
     )
     """The minor chosen by the Entry."""
-    date_entry: Optional[str] = field(
+    date_entry: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEntry"},
     )
     """Entry date."""
-    date_exit: Optional[str] = field(
+    date_exit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateExit"},
     )
     """Exit date."""
-    deceased: Optional[bool] = field(
+    deceased: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Deceased"},
     )
     """Indicates if the Entry is deceased."""
-    deceased_date: Optional[str] = field(
+    deceased_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeceasedDate"},
     )
     """Deceased date."""
-    dietary: Optional[str] = field(
+    dietary: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Dietary"},
     )
     """Dietary requirements."""
-    disability: Optional[str] = field(
+    disability: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Disability"},
     )
     """Disability."""
-    employment_details: Optional[str] = field(
+    employment_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmploymentDetails"},
     )
     """Employment details."""
-    enrollment_class: Optional[str] = field(
+    enrollment_class: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentClass"},
     )
     """First year, freshman, sophomore, etc."""
-    enrollment_level: Optional[str] = field(
+    enrollment_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentLevel"},
     )
     """Undergraduate, post graduate, etc."""
-    enrollment_status: Optional[str] = field(
+    enrollment_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentStatus"},
     )
     """Newly admitted, current, active, etc."""
-    enrollment_term: Optional[str] = field(
+    enrollment_term: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTerm"},
     )
     """Spring, fall, post graduate, etc."""
-    enrollment_year: Optional[int] = field(
+    enrollment_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentYear"},
     )
     """Year/Level of enrollment."""
-    entry_detail_id: Optional[int] = field(
+    entry_detail_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryDetailID"},
     )
     """Unique ID for this entry detail record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    ethnicity: Optional[str] = field(
+    ethnicity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Ethnicity"},
     )
     """Ethnicity."""
-    event_registration_fee_id: Optional[int] = field(
+    event_registration_fee_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventRegistrationFeeID"},
     )
     """Pointer to the Event registration fee record."""
-    expected_graduation_date: Optional[str] = field(
+    expected_graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedGraduationDate"},
     )
     """Expected graduation date."""
-    financial_comments: Optional[str] = field(
+    financial_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialComments"},
     )
     """Financial support comments."""
-    financial_support_id: Optional[int] = field(
+    financial_support_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialSupportID"},
     )
     """Pointer to the financial support record."""
-    hear_about_us: Optional[str] = field(
+    hear_about_us: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HearAboutUs"},
     )
     """How did the Entry hear about us."""
-    honors_indicator: Optional[bool] = field(
+    honors_indicator: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HonorsIndicator"},
     )
     """Honors indicator."""
-    immunizations_hold: Optional[bool] = field(
+    immunizations_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImmunizationsHold"},
     )
     """Immunizations hold."""
-    incident_hold: Optional[bool] = field(
+    incident_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHold"},
     )
     """Incident hold."""
-    incident_hold_comments: Optional[str] = field(
+    incident_hold_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHoldComments"},
     )
     """Incident hold comments."""
-    international: Optional[bool] = field(
+    international: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "International"},
     )
     """Indicates if the Entry is considered an international student."""
-    international_details: Optional[str] = field(
+    international_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InternationalDetails"},
     )
     """International details."""
-    living_with_dependents: Optional[bool] = field(
+    living_with_dependents: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LivingWithDependents"},
     )
     """Living with dependents."""
-    married: Optional[bool] = field(
+    married: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Married"},
     )
     """Indicates if the Entry is married."""
-    medical: Optional[str] = field(
+    medical: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Medical"},
     )
     """Medical details."""
-    nationality_id: Optional[int] = field(
+    nationality_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NationalityID"},
     )
     """Pointer to the nationality record."""
-    occupation: Optional[str] = field(
+    occupation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupation"},
     )
     """Occupation."""
-    photo_path: Optional[str] = field(
+    photo_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhotoPath"},
     )
     """Photo path."""
-    previous_member_name: Optional[str] = field(
+    previous_member_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberName"},
     )
     """Previous member name."""
-    previous_member_relationship: Optional[str] = field(
+    previous_member_relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberRelationship"},
     )
     """Previous member relationship."""
-    previous_membership: Optional[str] = field(
+    previous_membership: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembership"},
     )
     """Previous membership."""
-    previous_membership_years: Optional[str] = field(
+    previous_membership_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembershipYears"},
     )
     """Previous membership years."""
-    previous_member_years: Optional[str] = field(
+    previous_member_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberYears"},
     )
     """Previous member years."""
-    profile_interests: Optional[str] = field(
+    profile_interests: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProfileInterests"},
     )
     """Profile interests."""
-    region_of_birth_id: Optional[int] = field(
+    region_of_birth_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RegionOfBirthID"},
     )
     """Pointer to the region of birth record."""
-    religion: Optional[str] = field(
+    religion: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Religion"},
     )
     """Religion."""
-    residency: Optional[str] = field(
+    residency: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Residency"},
     )
     """Residency."""
-    resident_status: Optional[str] = field(
+    resident_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentStatus"},
     )
     """Resident status."""
-    resident_year: Optional[int] = field(
+    resident_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentYear"},
     )
     """Resident year."""
-    situation_response_comments: Optional[str] = field(
+    situation_response_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseComments"},
     )
     """Situation response comments."""
-    situation_response_detail: Optional[str] = field(
+    situation_response_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseDetail"},
     )
     """Situation response detail."""
-    situation_response_enum: Optional[str] = field(
+    situation_response_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseEnum"},
     )
     """Situation response."""
-    situation_response_expiry_date: Optional[str] = field(
+    situation_response_expiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseExpiryDate"},
     )
     """The date when the response ends (e.g because the emergency is over)"""
-    situation_response_modified_date: Optional[str] = field(
+    situation_response_modified_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseModifiedDate"},
     )
     """The date the response was last modified."""
-    situation_response_situation: Optional[str] = field(
+    situation_response_situation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseSituation"},
     )
     """Situation response situation."""
-    special_needs: Optional[str] = field(
+    special_needs: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialNeeds"},
     )
     """Special needs."""
-    staff_id: Optional[int] = field(
+    staff_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StaffID"},
     )
     """Pointer to the staff record."""
-    uses_screen_reader: Optional[bool] = field(
+    uses_screen_reader: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UsesScreenReader"},
     )
     """Uses screen reader."""
-    vehicle_details: Optional[str] = field(
+    vehicle_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleDetails"},
     )
     """Vehicle details."""
-    vehicle_permit: Optional[str] = field(
+    vehicle_permit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehiclePermit"},
     )
     """Vehicle permit."""
-    vehicle_registration: Optional[str] = field(
+    vehicle_registration: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleRegistration"},
     )
     """Vehicle registration."""
-    veteran_status: Optional[str] = field(
+    veteran_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VeteranStatus"},
     )
     """Veteran status."""
-    visa: Optional[bool] = field(default=None, metadata={"wire_name": "Visa"})
-    """Indicates if the Entry holds a visa."""
-    visa_details: Optional[str] = field(
+    visa: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Visa"},
+    )
+    """Indicates if the Entry holds a visa."""
+    visa_details: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "VisaDetails"},
     )
     """Visa details."""
-    visitor_hold: Optional[bool] = field(
+    visitor_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VisitorHold"},
     )
     """Visitor hold."""
@@ -4225,440 +5114,531 @@ class UpdateEntryDetailResponse:
     Response for Update Entry Detail
     """
 
-    academic_hold: Optional[bool] = field(
+    academic_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AcademicHold"},
     )
     """Indicates if the academic hold flag has been set."""
-    account_payment_type_id: Optional[int] = field(
+    account_payment_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Account_PaymentTypeID"},
     )
     """Pointer to the preferred payment type record."""
-    account_bank_name: Optional[str] = field(
+    account_bank_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankName"},
     )
     """Account bank name."""
-    account_bank_number: Optional[str] = field(
+    account_bank_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountBankNumber"},
     )
     """Account bank number."""
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    account_comments: Optional[str] = field(
+    account_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountComments"},
     )
     """Account comments."""
-    account_detail1: Optional[str] = field(
+    account_detail1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail1"},
     )
     """Account detail."""
-    account_detail2: Optional[str] = field(
+    account_detail2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail2"},
     )
     """Account detail."""
-    account_detail3: Optional[str] = field(
+    account_detail3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail3"},
     )
     """Account detail."""
-    account_detail4: Optional[str] = field(
+    account_detail4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDetail4"},
     )
     """Account detail."""
-    account_due_date: Optional[str] = field(
+    account_due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountDueDate"},
     )
     """Paid to date."""
-    account_hold: Optional[bool] = field(
+    account_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountHold"},
     )
     """Indicates if the account hold flag has been set."""
-    athlete: Optional[bool] = field(
+    athlete: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Athlete"},
     )
     """Indicates if the athlete flag has been set."""
-    athlete_team: Optional[str] = field(
+    athlete_team: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AthleteTeam"},
     )
     """Athlete team."""
-    attendee_status_enum: Optional[str] = field(
+    attendee_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AttendeeStatusEnum"},
     )
     """Attendee status."""
-    career: Optional[str] = field(
+    career: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Career"},
     )
     """Intended career."""
-    career_comments: Optional[str] = field(
+    career_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CareerComments"},
     )
     """Reasons for choosing intended career."""
-    citizenship_country_id: Optional[int] = field(
+    citizenship_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Citizenship_CountryID"},
     )
     """Pointer to the citizenship record."""
-    classification_id: Optional[int] = field(
+    classification_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationID"},
     )
     """Pointer to the classification record."""
-    classification_override: Optional[bool] = field(
+    classification_override: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClassificationOverride"},
     )
     """Classification override."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments."""
-    country_of_birth_country_id: Optional[int] = field(
+    country_of_birth_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfBirth_CountryID"},
     )
     """Pointer to the country of birth record."""
-    country_of_residence_country_id: Optional[int] = field(
+    country_of_residence_country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOfResidence_CountryID"},
     )
     """Pointer to the country of residence record."""
-    cumulative_g_p_a: Optional[float] = field(
+    cumulative_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeGPA"},
     )
     """Cumulative GPA."""
-    cumulative_hours: Optional[float] = field(
+    cumulative_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CumulativeHours"},
     )
     """Cumulative hours."""
-    current_g_p_a: Optional[float] = field(
+    current_g_p_a: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentGPA"},
     )
     """Current GPA."""
-    current_hours: Optional[float] = field(
+    current_hours: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentHours"},
     )
     """Current hours."""
-    current_major: Optional[str] = field(
+    current_major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMajor"},
     )
     """The major chosen by the Entry."""
-    current_minor: Optional[str] = field(
+    current_minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CurrentMinor"},
     )
     """The minor chosen by the Entry."""
-    date_entry: Optional[str] = field(
+    date_entry: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEntry"},
     )
     """Entry date."""
-    date_exit: Optional[str] = field(
+    date_exit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateExit"},
     )
     """Exit date."""
-    deceased: Optional[bool] = field(
+    deceased: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Deceased"},
     )
     """Indicates if the Entry is deceased."""
-    deceased_date: Optional[str] = field(
+    deceased_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeceasedDate"},
     )
     """Deceased date."""
-    dietary: Optional[str] = field(
+    dietary: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Dietary"},
     )
     """Dietary requirements."""
-    disability: Optional[str] = field(
+    disability: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Disability"},
     )
     """Disability."""
-    employment_details: Optional[str] = field(
+    employment_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmploymentDetails"},
     )
     """Employment details."""
-    enrollment_class: Optional[str] = field(
+    enrollment_class: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentClass"},
     )
     """First year, freshman, sophomore, etc."""
-    enrollment_level: Optional[str] = field(
+    enrollment_level: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentLevel"},
     )
     """Undergraduate, post graduate, etc."""
-    enrollment_status: Optional[str] = field(
+    enrollment_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentStatus"},
     )
     """Newly admitted, current, active, etc."""
-    enrollment_term: Optional[str] = field(
+    enrollment_term: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTerm"},
     )
     """Spring, fall, post graduate, etc."""
-    enrollment_year: Optional[int] = field(
+    enrollment_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentYear"},
     )
     """Year/Level of enrollment."""
-    entry_detail_id: Optional[int] = field(
+    entry_detail_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryDetailID"},
     )
     """Unique ID for this entry detail record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    ethnicity: Optional[str] = field(
+    ethnicity: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Ethnicity"},
     )
     """Ethnicity."""
-    event_registration_fee_id: Optional[int] = field(
+    event_registration_fee_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EventRegistrationFeeID"},
     )
     """Pointer to the event registration fee record."""
-    expected_graduation_date: Optional[str] = field(
+    expected_graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExpectedGraduationDate"},
     )
     """Expected graduation date."""
-    financial_comments: Optional[str] = field(
+    financial_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialComments"},
     )
     """Financial support comments."""
-    financial_support_id: Optional[int] = field(
+    financial_support_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FinancialSupportID"},
     )
     """Pointer to the financial support fee record."""
-    hear_about_us: Optional[str] = field(
+    hear_about_us: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HearAboutUs"},
     )
     """How did the Entry hear about us."""
-    honors_indicator: Optional[bool] = field(
+    honors_indicator: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HonorsIndicator"},
     )
     """Honors indicator."""
-    immunizations_hold: Optional[bool] = field(
+    immunizations_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImmunizationsHold"},
     )
     """Immunizations hold."""
-    incident_hold: Optional[bool] = field(
+    incident_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHold"},
     )
     """Incident hold."""
-    incident_hold_comments: Optional[str] = field(
+    incident_hold_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IncidentHoldComments"},
     )
     """Incident hold comments."""
-    international: Optional[bool] = field(
+    international: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "International"},
     )
     """Indicates if the Entry is considered an international student."""
-    international_details: Optional[str] = field(
+    international_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InternationalDetails"},
     )
     """International details."""
-    living_with_dependents: Optional[bool] = field(
+    living_with_dependents: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LivingWithDependents"},
     )
     """Living with dependents."""
-    married: Optional[bool] = field(
+    married: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Married"},
     )
     """Indicates if the Entry is married."""
-    medical: Optional[str] = field(
+    medical: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Medical"},
     )
     """Medical details."""
-    nationality_id: Optional[int] = field(
+    nationality_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NationalityID"},
     )
     """Pointer to the nationality record."""
-    occupation: Optional[str] = field(
+    occupation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupation"},
     )
     """Occupation."""
-    photo_path: Optional[str] = field(
+    photo_path: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PhotoPath"},
     )
     """Photo path."""
-    previous_member_name: Optional[str] = field(
+    previous_member_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberName"},
     )
     """Previous member name."""
-    previous_member_relationship: Optional[str] = field(
+    previous_member_relationship: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberRelationship"},
     )
     """Previous member relationship."""
-    previous_membership: Optional[str] = field(
+    previous_membership: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembership"},
     )
     """Previous membership."""
-    previous_membership_years: Optional[str] = field(
+    previous_membership_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMembershipYears"},
     )
     """Previous membership years."""
-    previous_member_years: Optional[str] = field(
+    previous_member_years: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PreviousMemberYears"},
     )
     """Previous member years."""
-    profile_interests: Optional[str] = field(
+    profile_interests: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProfileInterests"},
     )
     """Profile interests."""
-    region_of_birth_id: Optional[int] = field(
+    region_of_birth_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RegionOfBirthID"},
     )
     """Pointer to the region of birth record."""
-    religion: Optional[str] = field(
+    religion: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Religion"},
     )
     """Religion."""
-    residency: Optional[str] = field(
+    residency: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Residency"},
     )
     """Residency."""
-    resident_status: Optional[str] = field(
+    resident_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentStatus"},
     )
     """Resident status."""
-    resident_year: Optional[int] = field(
+    resident_year: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResidentYear"},
     )
     """Resident year."""
-    situation_response_comments: Optional[str] = field(
+    situation_response_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseComments"},
     )
     """Situation response comments."""
-    situation_response_detail: Optional[str] = field(
+    situation_response_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseDetail"},
     )
     """Situation response detail."""
-    situation_response_enum: Optional[str] = field(
+    situation_response_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseEnum"},
     )
     """Situation response."""
-    situation_response_expiry_date: Optional[str] = field(
+    situation_response_expiry_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseExpiryDate"},
     )
     """The date when the response ends (e.g. because the emergency is over)"""
-    situation_response_modified_date: Optional[str] = field(
+    situation_response_modified_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseModifiedDate"},
     )
     """The date the response was last modified."""
-    situation_response_situation: Optional[str] = field(
+    situation_response_situation: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SituationResponseSituation"},
     )
     """Situation response situation."""
-    special_needs: Optional[str] = field(
+    special_needs: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialNeeds"},
     )
     """Special needs."""
-    staff_id: Optional[int] = field(
+    staff_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StaffID"},
     )
     """Pointer to the staff record."""
-    uses_screen_reader: Optional[bool] = field(
+    uses_screen_reader: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UsesScreenReader"},
     )
     """Uses screen reader."""
-    vehicle_details: Optional[str] = field(
+    vehicle_details: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleDetails"},
     )
     """Vehicle details."""
-    vehicle_permit: Optional[str] = field(
+    vehicle_permit: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehiclePermit"},
     )
     """Vehicle permit."""
-    vehicle_registration: Optional[str] = field(
+    vehicle_registration: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VehicleRegistration"},
     )
     """Vehicle registration."""
-    veteran_status: Optional[str] = field(
+    veteran_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VeteranStatus"},
     )
     """Veteran status."""
-    visa: Optional[bool] = field(default=None, metadata={"wire_name": "Visa"})
-    """Indicates if the Entry holds a visa."""
-    visa_details: Optional[str] = field(
+    visa: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Visa"},
+    )
+    """Indicates if the Entry holds a visa."""
+    visa_details: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "VisaDetails"},
     )
     """Visa details."""
-    visitor_hold: Optional[bool] = field(
+    visitor_hold: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VisitorHold"},
     )
     """Visitor hold."""
@@ -4670,191 +5650,231 @@ class SelectEntryEnrollmentInput:
     Get Entry Enrollment
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    campus: Optional[str] = field(
+    campus: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Campus"},
     )
     """Campus where entry is enrolled."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Enrollment comments."""
-    course_id: Optional[int] = field(
+    course_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CourseID"},
     )
     """Pointer to the course record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_end: Optional[Dict[str, Any]] = field(
+    date_end: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEnd"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    date_start: Optional[Dict[str, Any]] = field(
+    date_start: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateStart"},
     )
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """Department entry is enrolled in."""
-    enrollment_field: Optional[str] = field(
+    enrollment_field: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentField"},
     )
     """Field of enrollment."""
-    enrollment_order: Optional[int] = field(
+    enrollment_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentOrder"},
     )
     """Enrollment order."""
-    enrollment_type_enum: Optional[str] = field(
+    enrollment_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTypeEnum"},
     )
     """Enrollment type."""
-    entry_enrollment_id: Optional[int] = field(
+    entry_enrollment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryEnrollmentID"},
     )
     """Unique ID for this entry enrollment record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    faculty: Optional[str] = field(
+    faculty: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Faculty"},
     )
     """Course faculty."""
-    full_time: Optional[bool] = field(
+    full_time: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullTime"},
     )
     """Indicates if the entry is enrolled full time."""
-    graduation_date: Optional[Dict[str, Any]] = field(
+    graduation_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GraduationDate"},
     )
-    institution: Optional[str] = field(
+    institution: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Institution"},
     )
     """Course institution."""
-    is_enrolled: Optional[bool] = field(
+    is_enrolled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsEnrolled"},
     )
     """Indicates if the entry is enrolled."""
-    major: Optional[str] = field(default=None, metadata={"wire_name": "Major"})
-    """Course Major."""
-    major_category: Optional[str] = field(
+    major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Major"},
+    )
+    """Course Major."""
+    major_category: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MajorCategory"},
     )
     """Major category."""
-    minor: Optional[str] = field(default=None, metadata={"wire_name": "Minor"})
-    """Course Minor."""
-    post_grad: Optional[bool] = field(
+    minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Minor"},
+    )
+    """Course Minor."""
+    post_grad: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PostGrad"},
     )
     """Indicates if this is a post graduate course."""
-    sequence: Optional[int] = field(
+    sequence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sequence"},
     )
     """Sequence"""
-    subjects: Optional[str] = field(
+    subjects: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subjects"},
     )
     """The subjects the entry is enrolled in."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    years: Optional[str] = field(default=None, metadata={"wire_name": "Years"})
+    years: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Years"},
+    )
     """Years enrolled."""
 
 
@@ -4864,166 +5884,205 @@ class CreateEntryEnrollmentInput:
     Create Entry Enrollment
     """
 
-    campus: Optional[str] = field(
+    campus: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Campus"},
     )
     """Campus where entry is enrolled."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Enrollment comments."""
-    course_id: Optional[int] = field(
+    course_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CourseID"},
     )
     """Pointer to the course record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_end: Optional[str] = field(
+    date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEnd"},
     )
     """Date enrollment ends."""
-    date_start: Optional[str] = field(
+    date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateStart"},
     )
     """Date enrollment starts."""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """Department entry is enrolled in."""
-    enrollment_field: Optional[str] = field(
+    enrollment_field: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentField"},
     )
     """Field of enrollment."""
-    enrollment_order: Optional[int] = field(
+    enrollment_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentOrder"},
     )
     """Enrollment order."""
-    enrollment_type_enum: Optional[str] = field(
+    enrollment_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTypeEnum"},
     )
     """Enrollment type."""
-    entry_enrollment_id: Optional[int] = field(
+    entry_enrollment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryEnrollmentID"},
     )
     """Unique ID for this entry enrollment record."""
-    entry_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "EntryID"},
-    )
+    entry_id: int = dataclass_field(metadata={"wire_name": "EntryID"})
     """Pointer to the entry record."""
-    faculty: Optional[str] = field(
+    faculty: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Faculty"},
     )
     """Course faculty."""
-    full_time: Optional[bool] = field(
+    full_time: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullTime"},
     )
     """Indicates if the entry is enrolled full time."""
-    graduation_date: Optional[str] = field(
+    graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GraduationDate"},
     )
     """Date of graduation."""
-    institution: Optional[str] = field(
+    institution: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Institution"},
     )
     """Course institution."""
-    is_enrolled: Optional[bool] = field(
+    is_enrolled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsEnrolled"},
     )
     """Indicates if the entry is enrolled."""
-    major: Optional[str] = field(default=None, metadata={"wire_name": "Major"})
-    """Course Major."""
-    major_category: Optional[str] = field(
+    major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Major"},
+    )
+    """Course Major."""
+    major_category: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MajorCategory"},
     )
     """Major category."""
-    minor: Optional[str] = field(default=None, metadata={"wire_name": "Minor"})
-    """Course Minor."""
-    post_grad: Optional[bool] = field(
+    minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Minor"},
+    )
+    """Course Minor."""
+    post_grad: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PostGrad"},
     )
     """Indicates if this is a post graduate course."""
-    sequence: Optional[int] = field(
+    sequence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sequence"},
     )
     """Sequence"""
-    subjects: Optional[str] = field(
+    subjects: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subjects"},
     )
     """The subjects the entry is enrolled in."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    years: Optional[str] = field(default=None, metadata={"wire_name": "Years"})
+    years: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Years"},
+    )
     """Years enrolled."""
 
 
@@ -5033,166 +6092,209 @@ class CreateEntryEnrollmentResponse:
     Response for Create Entry Enrollment
     """
 
-    campus: Optional[str] = field(
+    campus: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Campus"},
     )
     """Campus where entry is enrolled."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Enrollment comments."""
-    course_id: Optional[int] = field(
+    course_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CourseID"},
     )
     """Pointer to the course record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_end: Optional[str] = field(
+    date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEnd"},
     )
     """Date enrollment ends."""
-    date_start: Optional[str] = field(
+    date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateStart"},
     )
     """Date enrollment starts."""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """Department entry is enrolled in."""
-    enrollment_field: Optional[str] = field(
+    enrollment_field: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentField"},
     )
     """Field of enrollment."""
-    enrollment_order: Optional[int] = field(
+    enrollment_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentOrder"},
     )
     """Enrollment order."""
-    enrollment_type_enum: Optional[str] = field(
+    enrollment_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTypeEnum"},
     )
     """Enrollment type."""
-    entry_enrollment_id: Optional[int] = field(
+    entry_enrollment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryEnrollmentID"},
     )
     """Unique ID for this entry enrollment record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    faculty: Optional[str] = field(
+    faculty: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Faculty"},
     )
     """Course faculty."""
-    full_time: Optional[bool] = field(
+    full_time: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullTime"},
     )
     """Indicates if the entry is enrolled full time."""
-    graduation_date: Optional[str] = field(
+    graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GraduationDate"},
     )
     """Date of graduation."""
-    institution: Optional[str] = field(
+    institution: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Institution"},
     )
     """Course institution."""
-    is_enrolled: Optional[bool] = field(
+    is_enrolled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsEnrolled"},
     )
     """Indicates if the entry is enrolled."""
-    major: Optional[str] = field(default=None, metadata={"wire_name": "Major"})
-    """Course Major."""
-    major_category: Optional[str] = field(
+    major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Major"},
+    )
+    """Course Major."""
+    major_category: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MajorCategory"},
     )
     """Major category."""
-    minor: Optional[str] = field(default=None, metadata={"wire_name": "Minor"})
-    """Course Minor."""
-    post_grad: Optional[bool] = field(
+    minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Minor"},
+    )
+    """Course Minor."""
+    post_grad: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PostGrad"},
     )
     """Indicates if this is a post graduate course."""
-    sequence: Optional[int] = field(
+    sequence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sequence"},
     )
     """Sequence"""
-    subjects: Optional[str] = field(
+    subjects: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subjects"},
     )
     """The subjects the entry is enrolled in."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    years: Optional[str] = field(default=None, metadata={"wire_name": "Years"})
+    years: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Years"},
+    )
     """Years enrolled."""
 
 
@@ -5202,166 +6304,209 @@ class UpdateEntryEnrollmentInput:
     Update Entry Enrollment
     """
 
-    campus: Optional[str] = field(
+    campus: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Campus"},
     )
     """Campus where entry is enrolled."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Enrollment comments."""
-    course_id: Optional[int] = field(
+    course_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CourseID"},
     )
     """Pointer to the course record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_end: Optional[str] = field(
+    date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEnd"},
     )
     """Date enrollment ends."""
-    date_start: Optional[str] = field(
+    date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateStart"},
     )
     """Date enrollment starts."""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """Department entry is enrolled in."""
-    enrollment_field: Optional[str] = field(
+    enrollment_field: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentField"},
     )
     """Field of enrollment."""
-    enrollment_order: Optional[int] = field(
+    enrollment_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentOrder"},
     )
     """Enrollment order."""
-    enrollment_type_enum: Optional[str] = field(
+    enrollment_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTypeEnum"},
     )
     """Enrollment type."""
-    entry_enrollment_id: Optional[int] = field(
+    entry_enrollment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryEnrollmentID"},
     )
     """Unique ID for this entry enrollment record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    faculty: Optional[str] = field(
+    faculty: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Faculty"},
     )
     """Course faculty."""
-    full_time: Optional[bool] = field(
+    full_time: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullTime"},
     )
     """Indicates if the entry is enrolled full time."""
-    graduation_date: Optional[str] = field(
+    graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GraduationDate"},
     )
     """Date of graduation."""
-    institution: Optional[str] = field(
+    institution: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Institution"},
     )
     """Course institution."""
-    is_enrolled: Optional[bool] = field(
+    is_enrolled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsEnrolled"},
     )
     """Indicates if the entry is enrolled."""
-    major: Optional[str] = field(default=None, metadata={"wire_name": "Major"})
-    """Course Major."""
-    major_category: Optional[str] = field(
+    major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Major"},
+    )
+    """Course Major."""
+    major_category: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MajorCategory"},
     )
     """Major category."""
-    minor: Optional[str] = field(default=None, metadata={"wire_name": "Minor"})
-    """Course Minor."""
-    post_grad: Optional[bool] = field(
+    minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Minor"},
+    )
+    """Course Minor."""
+    post_grad: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PostGrad"},
     )
     """Indicates if this is a post graduate course."""
-    sequence: Optional[int] = field(
+    sequence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sequence"},
     )
     """Sequence"""
-    subjects: Optional[str] = field(
+    subjects: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subjects"},
     )
     """The subjects the entry is enrolled in."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    years: Optional[str] = field(default=None, metadata={"wire_name": "Years"})
+    years: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Years"},
+    )
     """Years enrolled."""
 
 
@@ -5371,166 +6516,209 @@ class UpdateEntryEnrollmentResponse:
     Response for Update Entry Enrollment
     """
 
-    campus: Optional[str] = field(
+    campus: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Campus"},
     )
     """Campus where entry is enrolled."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Enrollment comments."""
-    course_id: Optional[int] = field(
+    course_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CourseID"},
     )
     """Pointer to the course record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_end: Optional[str] = field(
+    date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateEnd"},
     )
     """Date enrollment ends."""
-    date_start: Optional[str] = field(
+    date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateStart"},
     )
     """Date enrollment starts."""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """Department entry is enrolled in."""
-    enrollment_field: Optional[str] = field(
+    enrollment_field: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentField"},
     )
     """Field of enrollment."""
-    enrollment_order: Optional[int] = field(
+    enrollment_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentOrder"},
     )
     """Enrollment order."""
-    enrollment_type_enum: Optional[str] = field(
+    enrollment_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EnrollmentTypeEnum"},
     )
     """Enrollment type."""
-    entry_enrollment_id: Optional[int] = field(
+    entry_enrollment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryEnrollmentID"},
     )
     """Unique ID for this entry enrollment record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    faculty: Optional[str] = field(
+    faculty: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Faculty"},
     )
     """Course faculty."""
-    full_time: Optional[bool] = field(
+    full_time: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FullTime"},
     )
     """Indicates if the entry is enrolled full time."""
-    graduation_date: Optional[str] = field(
+    graduation_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GraduationDate"},
     )
     """Date of graduation."""
-    institution: Optional[str] = field(
+    institution: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Institution"},
     )
     """Course institution."""
-    is_enrolled: Optional[bool] = field(
+    is_enrolled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsEnrolled"},
     )
     """Indicates if the entry is enrolled."""
-    major: Optional[str] = field(default=None, metadata={"wire_name": "Major"})
-    """Course Major."""
-    major_category: Optional[str] = field(
+    major: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Major"},
+    )
+    """Course Major."""
+    major_category: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "MajorCategory"},
     )
     """Major category."""
-    minor: Optional[str] = field(default=None, metadata={"wire_name": "Minor"})
-    """Course Minor."""
-    post_grad: Optional[bool] = field(
+    minor: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Minor"},
+    )
+    """Course Minor."""
+    post_grad: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "PostGrad"},
     )
     """Indicates if this is a post graduate course."""
-    sequence: Optional[int] = field(
+    sequence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sequence"},
     )
     """Sequence"""
-    subjects: Optional[str] = field(
+    subjects: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subjects"},
     )
     """The subjects the entry is enrolled in."""
-    term_id: Optional[int] = field(
+    term_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermID"},
     )
     """Pointer to the term record."""
-    years: Optional[str] = field(default=None, metadata={"wire_name": "Years"})
+    years: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Years"},
+    )
     """Years enrolled."""
 
 
@@ -5540,331 +6728,396 @@ class SelectBookingInput:
     Get Booking
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    additional_occupant_count: Optional[int] = field(
+    additional_occupant_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalOccupantCount"},
     )
     """The number of additional human occupants in this booking."""
-    auto_allocation_detail: Optional[str] = field(
+    auto_allocation_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AutoAllocationDetail"},
     )
     """Details of the auto allocation."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Unique ID for this booking record."""
-    booking_link_type_enum: Optional[str] = field(
+    booking_link_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingLinkTypeEnum"},
     )
     """Booking link type."""
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    check_in_date: Optional[Dict[str, Any]] = field(
+    check_in_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
-    check_in_date_actual: Optional[Dict[str, Any]] = field(
+    check_in_date_actual: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActual"},
     )
-    check_out_date: Optional[Dict[str, Any]] = field(
+    check_out_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
-    check_out_date_actual: Optional[Dict[str, Any]] = field(
+    check_out_date_actual: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActual"},
     )
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments"""
-    contract_date_end: Optional[Dict[str, Any]] = field(
+    contract_date_end: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
-    contract_date_start: Optional[Dict[str, Any]] = field(
+    contract_date_start: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_date3: Optional[Dict[str, Any]] = field(
+    custom_date3: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
-    custom_date4: Optional[Dict[str, Any]] = field(
+    custom_date4: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    custom_string7: Optional[str] = field(
+    custom_string7: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString7"},
     )
     """Custom string field value."""
-    custom_string8: Optional[str] = field(
+    custom_string8: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString8"},
     )
     """Custom string field value."""
-    custom_string9: Optional[str] = field(
+    custom_string9: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString9"},
     )
     """Custom string field value."""
-    custom_string10: Optional[str] = field(
+    custom_string10: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString10"},
     )
     """Custom string field value."""
-    date_billed: Optional[Dict[str, Any]] = field(
+    date_billed: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateBilled"},
     )
-    date_charged_to: Optional[Dict[str, Any]] = field(
+    date_charged_to: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateChargedTo"},
     )
-    date_created: Optional[Dict[str, Any]] = field(
+    date_created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    date_modified_billing: Optional[Dict[str, Any]] = field(
+    date_modified_billing: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModifiedBilling"},
     )
-    emotional_support_animal_count: Optional[int] = field(
+    emotional_support_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmotionalSupportAnimalCount"},
     )
     """
     The number of additional Emotional Support Animal occupants in this
     booking.
     """
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """The reason this booking finished."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    entry_invitation_id: Optional[int] = field(
+    entry_invitation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryInvitationID"},
     )
     """Identifies the entry invitation that the booking is created for."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the booking."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Minutes since midnight for estimated time of arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Minutes since midnight for estimated time of departure."""
-    excess: Optional[float] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Minutes since midnight for estimated time of arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Minutes since midnight for estimated time of departure."""
+    excess: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Amount of excess."""
-    group_id: Optional[int] = field(
+    group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupID"},
     )
     """Pointer to the group record."""
-    housekeeping_id: Optional[int] = field(
+    housekeeping_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """The housekeeping rules that should be applied to this booking."""
-    number_of_children: Optional[int] = field(
+    number_of_children: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildren"},
     )
     """The number of children in the booking."""
-    number_of_children_free: Optional[int] = field(
+    number_of_children_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildrenFree"},
     )
     """The number of children that are free to stay."""
-    number_of_guests: Optional[int] = field(
+    number_of_guests: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuests"},
     )
     """The number of guests in the booking."""
-    number_of_guests_free: Optional[int] = field(
+    number_of_guests_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuestsFree"},
     )
     """The number of guests that are free to stay."""
-    paid_to: Optional[Dict[str, Any]] = field(
+    paid_to: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
-    pet_count: Optional[int] = field(
+    pet_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PetCount"},
     )
     """The number of additional pet occupants in this booking."""
-    resv_charge_to_entry: Optional[bool] = field(
+    resv_charge_to_entry: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResvChargeToEntry"},
     )
     """
     Whether reservation charges are charged to the entry or group master
     account.
     """
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """
     Indicates if the location was manually selected, and should not be changed
     by Auto Room Allocations.
     """
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Actual dollar amount of room rate."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Selected room rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    service_animal_count: Optional[int] = field(
+    service_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceAnimalCount"},
     )
     """The number of additional Service Animal occupants in this booking."""
-    special_requirement: Optional[str] = field(
+    special_requirement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialRequirement"},
     )
     """Special requirements for this booking."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Reason for this booking (normal, room change etc.)."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
@@ -5876,306 +7129,368 @@ class CreateBookingInput:
     Create Booking
     """
 
-    additional_occupant_count: Optional[int] = field(
+    additional_occupant_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalOccupantCount"},
     )
     """The number of additional human occupants in this booking."""
-    auto_allocation_detail: Optional[str] = field(
+    auto_allocation_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AutoAllocationDetail"},
     )
     """Details of the auto allocation."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Unique ID for this booking record."""
-    booking_link_type_enum: Optional[str] = field(
+    booking_link_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingLinkTypeEnum"},
     )
     """Booking link type."""
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    check_in_date: Optional[str] = field(
+    check_in_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
     """Main (contract) check-in date."""
-    check_in_date_actual: Optional[str] = field(
+    check_in_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActual"},
     )
     """Actual date the entry arrives."""
-    check_out_date: Optional[str] = field(
+    check_out_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
     """Main (contract) check-out date."""
-    check_out_date_actual: Optional[str] = field(
+    check_out_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActual"},
     )
     """Actual date the entry departs."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments"""
-    contract_date_end: Optional[str] = field(
+    contract_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
     """Contact chargeable date end."""
-    contract_date_start: Optional[str] = field(
+    contract_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
     """Contact chargeable date start."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    custom_string7: Optional[str] = field(
+    custom_string7: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString7"},
     )
     """Custom string field value."""
-    custom_string8: Optional[str] = field(
+    custom_string8: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString8"},
     )
     """Custom string field value."""
-    custom_string9: Optional[str] = field(
+    custom_string9: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString9"},
     )
     """Custom string field value."""
-    custom_string10: Optional[str] = field(
+    custom_string10: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString10"},
     )
     """Custom string field value."""
-    date_billed: Optional[str] = field(
+    date_billed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateBilled"},
     )
     """Date when this booking was processed for billing."""
-    date_charged_to: Optional[str] = field(
+    date_charged_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateChargedTo"},
     )
     """Date this booking has been charged up to (using reservation charges)."""
-    emotional_support_animal_count: Optional[int] = field(
+    emotional_support_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmotionalSupportAnimalCount"},
     )
     """
     The number of additional Emotional Support Animal occupants in this
     booking.
     """
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """The reason this booking finished."""
-    entry_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "EntryID"},
-    )
+    entry_id: int = dataclass_field(metadata={"wire_name": "EntryID"})
     """Pointer to the entry record."""
-    entry_invitation_id: Optional[int] = field(
+    entry_invitation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryInvitationID"},
     )
     """Identifies the entry invitation that the booking is created for."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the booking."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Date and time of estimated arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Date and time of estimated departure."""
-    excess: Optional[float] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Date and time of estimated arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Date and time of estimated departure."""
+    excess: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Amount of excess."""
-    group_id: Optional[int] = field(
+    group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupID"},
     )
     """Pointer to the group record."""
-    housekeeping_id: Optional[int] = field(
+    housekeeping_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """The housekeeping rules that should be applied to this booking."""
-    number_of_children: Optional[int] = field(
+    number_of_children: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildren"},
     )
     """The number of children in the booking."""
-    number_of_children_free: Optional[int] = field(
+    number_of_children_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildrenFree"},
     )
     """The number of children that are free to stay."""
-    number_of_guests: Optional[int] = field(
+    number_of_guests: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuests"},
     )
     """The number of guests in the booking."""
-    number_of_guests_free: Optional[int] = field(
+    number_of_guests_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuestsFree"},
     )
     """The number of guests that are free to stay."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Date the booking is paid to."""
-    pet_count: Optional[int] = field(
+    pet_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PetCount"},
     )
     """The number of additional pet occupants in this booking."""
-    resv_charge_to_entry: Optional[bool] = field(
+    resv_charge_to_entry: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResvChargeToEntry"},
     )
     """
     Whether reservation charges are charged to the entry or group master
     account.
     """
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """
     Indicates if the location was manually selected, and should not be changed
     by Auto Room Allocations.
     """
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Actual dollar amount of room rate."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Selected room rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    service_animal_count: Optional[int] = field(
+    service_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceAnimalCount"},
     )
     """The number of additional Service Animal occupants in this booking."""
-    special_requirement: Optional[str] = field(
+    special_requirement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialRequirement"},
     )
     """Special requirements for this booking."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Reason for this booking (normal, room change etc.)."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
@@ -6187,311 +7502,378 @@ class CreateBookingResponse:
     Response for Create Booking
     """
 
-    additional_occupant_count: Optional[int] = field(
+    additional_occupant_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalOccupantCount"},
     )
     """The number of additional human occupants in this booking."""
-    auto_allocation_detail: Optional[str] = field(
+    auto_allocation_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AutoAllocationDetail"},
     )
     """Details of the auto allocation."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Unique ID for this booking record."""
-    booking_link_type_enum: Optional[str] = field(
+    booking_link_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingLinkTypeEnum"},
     )
     """Booking link type."""
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    check_in_date: Optional[str] = field(
+    check_in_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
     """Main (contract) check-in date."""
-    check_in_date_actual: Optional[str] = field(
+    check_in_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActual"},
     )
     """Actual date the entry arrives."""
-    check_out_date: Optional[str] = field(
+    check_out_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
     """Main (contract) check-out date."""
-    check_out_date_actual: Optional[str] = field(
+    check_out_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActual"},
     )
     """Actual date the entry departs."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments"""
-    contract_date_end: Optional[str] = field(
+    contract_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
     """Contact chargeable date end."""
-    contract_date_start: Optional[str] = field(
+    contract_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
     """Contact chargeable date start."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    custom_string7: Optional[str] = field(
+    custom_string7: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString7"},
     )
     """Custom string field value."""
-    custom_string8: Optional[str] = field(
+    custom_string8: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString8"},
     )
     """Custom string field value."""
-    custom_string9: Optional[str] = field(
+    custom_string9: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString9"},
     )
     """Custom string field value."""
-    custom_string10: Optional[str] = field(
+    custom_string10: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString10"},
     )
     """Custom string field value."""
-    date_billed: Optional[str] = field(
+    date_billed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateBilled"},
     )
     """Date when this booking was processed for billing."""
-    date_charged_to: Optional[str] = field(
+    date_charged_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateChargedTo"},
     )
     """Date this booking has been charged up to (using reservation charges)."""
-    date_modified_billing: Optional[str] = field(
+    date_modified_billing: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModifiedBilling"},
     )
     """Indicates when critical booking fields are modified."""
-    emotional_support_animal_count: Optional[int] = field(
+    emotional_support_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmotionalSupportAnimalCount"},
     )
     """
     The number of additional Emotional Support Animal occupants in this
     booking.
     """
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """The reason this booking finished."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    entry_invitation_id: Optional[int] = field(
+    entry_invitation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryInvitationID"},
     )
     """Identifies the entry invitation that the booking is created for."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the booking."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Date and time of estimated arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Date and time of estimated departure."""
-    excess: Optional[float] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Date and time of estimated arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Date and time of estimated departure."""
+    excess: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Amount of excess."""
-    group_id: Optional[int] = field(
+    group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupID"},
     )
     """Pointer to the group record."""
-    housekeeping_id: Optional[int] = field(
+    housekeeping_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """The housekeeping rules that should be applied to this booking."""
-    number_of_children: Optional[int] = field(
+    number_of_children: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildren"},
     )
     """The number of children in the booking."""
-    number_of_children_free: Optional[int] = field(
+    number_of_children_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildrenFree"},
     )
     """The number of children that are free to stay."""
-    number_of_guests: Optional[int] = field(
+    number_of_guests: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuests"},
     )
     """The number of guests in the booking."""
-    number_of_guests_free: Optional[int] = field(
+    number_of_guests_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuestsFree"},
     )
     """The number of guests that are free to stay."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Date the booking is paid to."""
-    pet_count: Optional[int] = field(
+    pet_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PetCount"},
     )
     """The number of additional pet occupants in this booking."""
-    resv_charge_to_entry: Optional[bool] = field(
+    resv_charge_to_entry: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResvChargeToEntry"},
     )
     """
     Whether reservation charges are charged to the entry or group master
     account.
     """
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """
     Indicates if the location was manually selected, and should not be changed
     by Auto Room Allocations.
     """
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Actual dollar amount of room rate."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Selected room rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    service_animal_count: Optional[int] = field(
+    service_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceAnimalCount"},
     )
     """The number of additional Service Animal occupants in this booking."""
-    special_requirement: Optional[str] = field(
+    special_requirement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialRequirement"},
     )
     """Special requirements for this booking."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Reason for this booking (normal, room change etc.)."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
@@ -6503,306 +7885,372 @@ class UpdateBookingInput:
     Update Booking
     """
 
-    additional_occupant_count: Optional[int] = field(
+    additional_occupant_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalOccupantCount"},
     )
     """The number of additional human occupants in this booking."""
-    auto_allocation_detail: Optional[str] = field(
+    auto_allocation_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AutoAllocationDetail"},
     )
     """Details of the auto allocation."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Unique ID for this booking record."""
-    booking_link_type_enum: Optional[str] = field(
+    booking_link_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingLinkTypeEnum"},
     )
     """Booking link type."""
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    check_in_date: Optional[str] = field(
+    check_in_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
     """Main (contract) check-in date."""
-    check_in_date_actual: Optional[str] = field(
+    check_in_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActual"},
     )
     """Actual date the entry arrives."""
-    check_out_date: Optional[str] = field(
+    check_out_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
     """Main (contract) check-out date."""
-    check_out_date_actual: Optional[str] = field(
+    check_out_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActual"},
     )
     """Actual date the entry departs."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments"""
-    contract_date_end: Optional[str] = field(
+    contract_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
     """Contact chargeable date end."""
-    contract_date_start: Optional[str] = field(
+    contract_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
     """Contact chargeable date start."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    custom_string7: Optional[str] = field(
+    custom_string7: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString7"},
     )
     """Custom string field value."""
-    custom_string8: Optional[str] = field(
+    custom_string8: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString8"},
     )
     """Custom string field value."""
-    custom_string9: Optional[str] = field(
+    custom_string9: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString9"},
     )
     """Custom string field value."""
-    custom_string10: Optional[str] = field(
+    custom_string10: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString10"},
     )
     """Custom string field value."""
-    date_billed: Optional[str] = field(
+    date_billed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateBilled"},
     )
     """Date when this booking was processed for billing."""
-    date_charged_to: Optional[str] = field(
+    date_charged_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateChargedTo"},
     )
     """Date this booking has been charged up to (using reservation charges)."""
-    emotional_support_animal_count: Optional[int] = field(
+    emotional_support_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmotionalSupportAnimalCount"},
     )
     """
     The number of additional Emotional Support Animal occupants in this
     booking.
     """
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """The reason this booking finished."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    entry_invitation_id: Optional[int] = field(
+    entry_invitation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryInvitationID"},
     )
     """Identifies the entry invitation that the booking is created for."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the booking."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Date and time of estimated arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Date and time of estimated departure."""
-    excess: Optional[float] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Date and time of estimated arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Date and time of estimated departure."""
+    excess: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Amount of excess."""
-    group_id: Optional[int] = field(
+    group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupID"},
     )
     """Pointer to the group record."""
-    housekeeping_id: Optional[int] = field(
+    housekeeping_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """The housekeeping rules that should be applied to this booking."""
-    number_of_children: Optional[int] = field(
+    number_of_children: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildren"},
     )
     """The number of children in the booking."""
-    number_of_children_free: Optional[int] = field(
+    number_of_children_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildrenFree"},
     )
     """The number of children that are free to stay."""
-    number_of_guests: Optional[int] = field(
+    number_of_guests: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuests"},
     )
     """The number of guests in the booking."""
-    number_of_guests_free: Optional[int] = field(
+    number_of_guests_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuestsFree"},
     )
     """The number of guests that are free to stay."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Date the booking is paid to."""
-    pet_count: Optional[int] = field(
+    pet_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PetCount"},
     )
     """The number of additional pet occupants in this booking."""
-    resv_charge_to_entry: Optional[bool] = field(
+    resv_charge_to_entry: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResvChargeToEntry"},
     )
     """
     Whether reservation charges are charged to the entry or group master
     account.
     """
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """
     Indicates if the location was manually selected, and should not be changed
     by Auto Room Allocations.
     """
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Actual dollar amount of room rate."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Selected room rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    service_animal_count: Optional[int] = field(
+    service_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceAnimalCount"},
     )
     """The number of additional Service Animal occupants in this booking."""
-    special_requirement: Optional[str] = field(
+    special_requirement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialRequirement"},
     )
     """Special requirements for this booking."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Reason for this booking (normal, room change etc.)."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
@@ -6814,311 +8262,378 @@ class UpdateBookingResponse:
     Response for Update Booking
     """
 
-    additional_occupant_count: Optional[int] = field(
+    additional_occupant_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AdditionalOccupantCount"},
     )
     """The number of additional human occupants in this booking."""
-    auto_allocation_detail: Optional[str] = field(
+    auto_allocation_detail: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AutoAllocationDetail"},
     )
     """Details of the auto allocation."""
-    booking_id: Optional[int] = field(
+    booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingID"},
     )
     """Unique ID for this booking record."""
-    booking_link_type_enum: Optional[str] = field(
+    booking_link_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingLinkTypeEnum"},
     )
     """Booking link type."""
-    booking_type_id: Optional[int] = field(
+    booking_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BookingTypeID"},
     )
     """Pointer to the booking type record."""
-    check_in_date: Optional[str] = field(
+    check_in_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDate"},
     )
     """Main (contract) check-in date."""
-    check_in_date_actual: Optional[str] = field(
+    check_in_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckInDateActual"},
     )
     """Actual date the entry arrives."""
-    check_out_date: Optional[str] = field(
+    check_out_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDate"},
     )
     """Main (contract) check-out date."""
-    check_out_date_actual: Optional[str] = field(
+    check_out_date_actual: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CheckOutDateActual"},
     )
     """Actual date the entry departs."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Comments"""
-    contract_date_end: Optional[str] = field(
+    contract_date_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateEnd"},
     )
     """Contact chargeable date end."""
-    contract_date_start: Optional[str] = field(
+    contract_date_start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDateStart"},
     )
     """Contact chargeable date start."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_bit3: Optional[bool] = field(
+    custom_bit3: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit3"},
     )
     """Custom boolean field value."""
-    custom_bit4: Optional[bool] = field(
+    custom_bit4: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit4"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date field value."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date field value."""
-    custom_date3: Optional[str] = field(
+    custom_date3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate3"},
     )
     """Custom date field value."""
-    custom_date4: Optional[str] = field(
+    custom_date4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate4"},
     )
     """Custom date field value."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    custom_string7: Optional[str] = field(
+    custom_string7: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString7"},
     )
     """Custom string field value."""
-    custom_string8: Optional[str] = field(
+    custom_string8: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString8"},
     )
     """Custom string field value."""
-    custom_string9: Optional[str] = field(
+    custom_string9: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString9"},
     )
     """Custom string field value."""
-    custom_string10: Optional[str] = field(
+    custom_string10: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString10"},
     )
     """Custom string field value."""
-    date_billed: Optional[str] = field(
+    date_billed: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateBilled"},
     )
     """Date when this booking was processed for billing."""
-    date_charged_to: Optional[str] = field(
+    date_charged_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateChargedTo"},
     )
     """Date this booking has been charged up to (using reservation charges)."""
-    date_modified_billing: Optional[str] = field(
+    date_modified_billing: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModifiedBilling"},
     )
     """Indicates when critical booking fields are modified."""
-    emotional_support_animal_count: Optional[int] = field(
+    emotional_support_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmotionalSupportAnimalCount"},
     )
     """
     The number of additional Emotional Support Animal occupants in this
     booking.
     """
-    end_booking_reason_id: Optional[int] = field(
+    end_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "End_BookingReasonID"},
     )
     """The reason this booking finished."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    entry_invitation_id: Optional[int] = field(
+    entry_invitation_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryInvitationID"},
     )
     """Identifies the entry invitation that the booking is created for."""
-    entry_status_enum: Optional[str] = field(
+    entry_status_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryStatusEnum"},
     )
     """The status of the booking."""
-    e_t_a: Optional[str] = field(default=None, metadata={"wire_name": "ETA"})
-    """Date and time of estimated arrival."""
-    e_t_d: Optional[str] = field(default=None, metadata={"wire_name": "ETD"})
-    """Date and time of estimated departure."""
-    excess: Optional[float] = field(
+    e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETA"},
+    )
+    """Date and time of estimated arrival."""
+    e_t_d: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "ETD"},
+    )
+    """Date and time of estimated departure."""
+    excess: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Amount of excess."""
-    group_id: Optional[int] = field(
+    group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GroupID"},
     )
     """Pointer to the group record."""
-    housekeeping_id: Optional[int] = field(
+    housekeeping_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HousekeepingID"},
     )
     """The housekeeping rules that should be applied to this booking."""
-    number_of_children: Optional[int] = field(
+    number_of_children: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildren"},
     )
     """The number of children in the booking."""
-    number_of_children_free: Optional[int] = field(
+    number_of_children_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfChildrenFree"},
     )
     """The number of children that are free to stay."""
-    number_of_guests: Optional[int] = field(
+    number_of_guests: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuests"},
     )
     """The number of guests in the booking."""
-    number_of_guests_free: Optional[int] = field(
+    number_of_guests_free: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfGuestsFree"},
     )
     """The number of guests that are free to stay."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Date the booking is paid to."""
-    pet_count: Optional[int] = field(
+    pet_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PetCount"},
     )
     """The number of additional pet occupants in this booking."""
-    resv_charge_to_entry: Optional[bool] = field(
+    resv_charge_to_entry: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResvChargeToEntry"},
     )
     """
     Whether reservation charges are charged to the entry or group master
     account.
     """
-    room_location_fixed: Optional[bool] = field(
+    room_location_fixed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationFixed"},
     )
     """
     Indicates if the location was manually selected, and should not be changed
     by Auto Room Allocations.
     """
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Pointer to the room location record."""
-    room_rate_amount: Optional[float] = field(
+    room_rate_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateAmount"},
     )
     """Actual dollar amount of room rate."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Selected room rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_type_id: Optional[int] = field(
+    room_type_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomTypeID"},
     )
     """Pointer to the room type record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    service_animal_count: Optional[int] = field(
+    service_animal_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ServiceAnimalCount"},
     )
     """The number of additional Service Animal occupants in this booking."""
-    special_requirement: Optional[str] = field(
+    special_requirement: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SpecialRequirement"},
     )
     """Special requirements for this booking."""
-    start_booking_reason_id: Optional[int] = field(
+    start_booking_reason_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Start_BookingReasonID"},
     )
     """Reason for this booking (normal, room change etc.)."""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
@@ -7130,138 +8645,159 @@ class SelectRoomSpaceInput:
     Get Room Space
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    allocate_exclude: Optional[bool] = field(
+    allocate_exclude: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateExclude"},
     )
     """Room Allocation - Do not include room in allocations."""
-    allocate_sort_order: Optional[int] = field(
+    allocate_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateSortOrder"},
     )
     """Room Allocation - Allows allocating nicer rooms first."""
-    bathrooms: Optional[int] = field(
+    bathrooms: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Bathrooms"},
     )
     """The number of bathrooms available."""
-    bed_capacity: Optional[int] = field(
+    bed_capacity: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BedCapacity"},
     )
     """The number of beds available."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Room space comments."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """The actual room name."""
-    extension_id: Optional[int] = field(
+    extension_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtensionID"},
     )
     """Link to extension table. 0 means no phone in the room."""
-    hold: Optional[bool] = field(default=None, metadata={"wire_name": "Hold"})
+    hold: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Hold"},
+    )
     """
     Space is held for any reason. Will warn the user when allocating this
     space.
     """
-    networked: Optional[bool] = field(
+    networked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Networked"},
     )
     """Indicates if the room space is networked."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    room_base_id: Optional[int] = field(
+    room_base_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomBaseID"},
     )
     """Pointer to the room base record."""
-    room_id: Optional[int] = field(
+    room_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomID"},
     )
     """Pointer to the room record."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Default tariff rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Unique ID for this room space record."""
-    room_space_type_enum: Optional[str] = field(
+    room_space_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceTypeEnum"},
     )
     """Room space type."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    sort_order: Optional[int] = field(
+    sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SortOrder"},
     )
     """Use to control where the room space is shown when part of a list."""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """The room space displayed in the Portal."""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -7273,108 +8809,132 @@ class CreateRoomSpaceInput:
     Create Room Space
     """
 
-    allocate_exclude: Optional[bool] = field(
+    allocate_exclude: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateExclude"},
     )
     """Room Allocation - Do not include room in allocations."""
-    allocate_sort_order: Optional[int] = field(
+    allocate_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateSortOrder"},
     )
     """Room Allocation - Allows allocating nicer rooms first."""
-    bathrooms: Optional[int] = field(
+    bathrooms: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Bathrooms"},
     )
     """The number of bathrooms available."""
-    bed_capacity: Optional[int] = field(
+    bed_capacity: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BedCapacity"},
     )
     """The number of beds available."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Room space comments."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """The actual room name."""
-    extension_id: Optional[int] = field(
+    extension_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtensionID"},
     )
     """Link to extension table. 0 means no phone in the room."""
-    hold: Optional[bool] = field(default=None, metadata={"wire_name": "Hold"})
+    hold: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Hold"},
+    )
     """
     Space is held for any reason. Will warn the user when allocating this
     space.
     """
-    networked: Optional[bool] = field(
+    networked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Networked"},
     )
     """Indicates if the room space is networked."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    room_base_id: Optional[int] = field(
+    room_base_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomBaseID"},
     )
     """Pointer to the room base record."""
-    room_id: Optional[int] = field(
+    room_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomID"},
     )
     """Pointer to the room record."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Default tariff rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Unique ID for this room space record."""
-    room_space_type_enum: Optional[str] = field(
+    room_space_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceTypeEnum"},
     )
     """Room space type."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    sort_order: Optional[int] = field(
+    sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SortOrder"},
     )
     """Use to control where the room space is shown when part of a list."""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """The room space displayed in the Portal."""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -7386,108 +8946,132 @@ class CreateRoomSpaceResponse:
     Response for Create Room Space
     """
 
-    allocate_exclude: Optional[bool] = field(
+    allocate_exclude: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateExclude"},
     )
     """Room Allocation - Do not include room in allocations."""
-    allocate_sort_order: Optional[int] = field(
+    allocate_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateSortOrder"},
     )
     """Room Allocation - allows allocating nicer rooms first."""
-    bathrooms: Optional[int] = field(
+    bathrooms: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Bathrooms"},
     )
     """The number of bathrooms available."""
-    bed_capacity: Optional[int] = field(
+    bed_capacity: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BedCapacity"},
     )
     """The number of beds available."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Room space comments."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """The actual room name."""
-    extension_id: Optional[int] = field(
+    extension_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExtensionID"},
     )
     """Link to extension table. 0 means no phone in the room."""
-    hold: Optional[bool] = field(default=None, metadata={"wire_name": "Hold"})
+    hold: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Hold"},
+    )
     """
     Space is held for any reason. Will warn the user when allocating this
     space.
     """
-    networked: Optional[bool] = field(
+    networked: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Networked"},
     )
     """Indicates if the room space is networked."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    room_base_id: Optional[int] = field(
+    room_base_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomBaseID"},
     )
     """Pointer to the room base record."""
-    room_id: Optional[int] = field(
+    room_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomID"},
     )
     """Pointer to the room record."""
-    room_rate_id: Optional[int] = field(
+    room_rate_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomRateID"},
     )
     """Default tariff rate."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Unique ID for this room space record."""
-    room_space_type_enum: Optional[str] = field(
+    room_space_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceTypeEnum"},
     )
     """Room space type."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    sort_order: Optional[int] = field(
+    sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SortOrder"},
     )
     """Use to control where the room space is shown when part of a list."""
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
     """Street"""
-    street2: Optional[str] = field(
+    street2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street2"},
     )
     """Street"""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """The room space displayed in the Portal."""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode"""
@@ -7499,178 +9083,208 @@ class SelectRoomLocationInput:
     Get Room Location
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    allocate_sort_order: Optional[int] = field(
+    allocate_sort_order: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AllocateSortOrder"},
     )
     """Allocate sort order."""
-    category_id: Optional[int] = field(
+    category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CategoryID"},
     )
     """Pointer to the category record."""
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    """City"""
-    comments: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    """City"""
+    comments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Room location comments."""
-    country_id: Optional[int] = field(
+    country_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryID"},
     )
     """Pointer to the country record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom boolean field value."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom boolean field value."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string field value."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string field value."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string field value."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string field value."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string field value."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string field value."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Room location description."""
-    gender_type_enum: Optional[str] = field(
+    gender_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GenderTypeEnum"},
     )
     """Gender type suitability."""
-    lease: Optional[bool] = field(
+    lease: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Lease"},
     )
     """Indicates if the room location is leased."""
-    managed_externally: Optional[bool] = field(
+    managed_externally: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ManagedExternally"},
     )
     """Indicates if the room location is managed externally."""
-    non_residential: Optional[bool] = field(
+    non_residential: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NonResidential"},
     )
     """Indicates if the room location is non residential."""
-    record_type_enum: Optional[str] = field(
+    record_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecordTypeEnum"},
     )
     """Record type."""
-    room_location_area_id: Optional[int] = field(
+    room_location_area_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationAreaID"},
     )
     """Pointer to the room location area record."""
-    room_location_id: Optional[int] = field(
+    room_location_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomLocationID"},
     )
     """Unique ID for this room location record."""
-    state_province: Optional[str] = field(
+    state_province: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StateProvince"},
     )
     """State/Province"""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space is viewable on the web."""
-    web_comments: Optional[str] = field(
+    web_comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebComments"},
     )
     """Comments to display if visible on the web."""
-    web_description: Optional[str] = field(
+    web_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebDescription"},
     )
     """Description to display if visible on the web."""
-    web_image_alt_text: Optional[str] = field(
+    web_image_alt_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebImageAltText"},
     )
     """Alternate text to display for the image when displayed on the web."""
-    web_image_location: Optional[str] = field(
+    web_image_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebImageLocation"},
     )
     """Path for the web image."""
-    zip_postcode: Optional[str] = field(
+    zip_postcode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ZipPostcode"},
     )
     """Zip/Postcode."""
@@ -7682,192 +9296,225 @@ class SelectTransactionInput:
     Get Transaction
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    amount: Optional[float] = field(
+    amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Amount"},
     )
     """The total amount for this transaction (including tax)."""
-    call_type_enum: Optional[str] = field(
+    call_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CallTypeEnum"},
     )
     """Call type."""
-    charge_group_id: Optional[int] = field(
+    charge_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeGroupID"},
     )
     """Pointer to the charge group record."""
-    charge_item_id: Optional[int] = field(
+    charge_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeItemID"},
     )
     """Pointer to the charge item record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Transaction comments."""
-    created_by_security_user_id: Optional[int] = field(
+    created_by_security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy_SecurityUserID"},
     )
     """Pointer to the created by security user record."""
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Transaction description."""
-    due_date: Optional[Dict[str, Any]] = field(
+    due_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDate"},
     )
-    duration: Optional[int] = field(
+    duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Duration"},
     )
     """Phone call duration in seconds."""
-    end_of_session_id: Optional[int] = field(
+    end_of_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndOfSessionID"},
     )
     """Pointer to the end of session record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    excess: Optional[float] = field(
+    excess: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Excess amount."""
-    extension: Optional[int] = field(
+    extension: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Extension"},
     )
     """Extension qty."""
-    external_id: Optional[int] = field(
+    external_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalID"},
     )
     """
     Stores the (unique) ID from an external system - for imported transactions.
     """
-    external_receipt_id: Optional[str] = field(
+    external_receipt_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalReceiptID"},
     )
     """Pointer to the external receipt record."""
-    invoice_id: Optional[int] = field(
+    invoice_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InvoiceID"},
     )
     """Pointer to the invoice record."""
-    paid_from: Optional[Dict[str, Any]] = field(
+    paid_from: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidFrom"},
     )
-    paid_to: Optional[Dict[str, Any]] = field(
+    paid_to: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
-    payment_id: Optional[int] = field(
+    payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaymentID"},
     )
     """Pointer to the payment record."""
-    processed_date: Optional[Dict[str, Any]] = field(
+    processed_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProcessedDate"},
     )
-    reference_booking_id: Optional[int] = field(
+    reference_booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference_BookingID"},
     )
     """The booking (if any) that this transaction relates to."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    table_id: Optional[int] = field(
+    table_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableID"},
     )
     """Link to a referencing record (e.g. a BookingID for pro-rating)."""
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Reference link table."""
-    tag: Optional[str] = field(default=None, metadata={"wire_name": "Tag"})
-    """Transaction tag."""
-    tag_finance: Optional[str] = field(
+    tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Tag"},
+    )
+    """Transaction tag."""
+    tag_finance: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "TagFinance"},
     )
     """Finance tag."""
-    tax_amount: Optional[float] = field(
+    tax_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount"},
     )
     """Tax amount"""
-    tax_amount2: Optional[float] = field(
+    tax_amount2: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount2"},
     )
     """Tax amount"""
-    tax_amount3: Optional[float] = field(
+    tax_amount3: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount3"},
     )
     """Tax amount"""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
-    transaction_date: Optional[Dict[str, Any]] = field(
+    transaction_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionDate"},
     )
-    transaction_id: Optional[int] = field(
+    transaction_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionID"},
     )
     """Unique ID for this transaction record."""
-    transaction_type_enum: Optional[str] = field(
+    transaction_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionTypeEnum"},
     )
     """Transaction type."""
@@ -7879,162 +9526,191 @@ class CreateTransactionInput:
     Create Transaction
     """
 
-    amount: Optional[float] = field(
-        default=None,
-        metadata={"wire_name": "Amount"},
-    )
+    amount: float = dataclass_field(metadata={"wire_name": "Amount"})
     """The total amount for this transaction (including tax)."""
-    call_type_enum: Optional[str] = field(
+    call_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CallTypeEnum"},
     )
     """Call type."""
-    charge_group_id: Optional[int] = field(
-        default=None,
+    charge_group_id: int = dataclass_field(
         metadata={"wire_name": "ChargeGroupID"},
     )
     """Pointer to the charge group record."""
-    charge_item_id: Optional[int] = field(
+    charge_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeItemID"},
     )
     """This is only required for Adjustments and Charges."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Transaction comments."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Transaction description."""
-    due_date: Optional[str] = field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDate"},
     )
     """Due date."""
-    duration: Optional[int] = field(
+    duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Duration"},
     )
     """Phone call duration in seconds."""
-    end_of_session_id: Optional[int] = field(
+    end_of_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndOfSessionID"},
     )
     """Pointer to the end of session record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    excess: Optional[float] = field(
+    excess: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Excess amount."""
-    extension: Optional[int] = field(
+    extension: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Extension"},
     )
     """Extension qty."""
-    external_id: Optional[int] = field(
+    external_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalID"},
     )
     """
     Stores the (unique) ID from an external system - for imported transactions.
     """
-    external_receipt_id: Optional[str] = field(
+    external_receipt_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalReceiptID"},
     )
     """Pointer to the external receipt record."""
-    invoice_id: Optional[int] = field(
+    invoice_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InvoiceID"},
     )
     """Pointer to the invoice record."""
-    paid_from: Optional[str] = field(
+    paid_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidFrom"},
     )
     """Paid from date."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Paid to date."""
-    payment_id: Optional[int] = field(
+    payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaymentID"},
     )
     """Pointer to the payment record."""
-    processed_date: Optional[str] = field(
+    processed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProcessedDate"},
     )
     """Date transaction was processed."""
-    reference_booking_id: Optional[int] = field(
+    reference_booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference_BookingID"},
     )
     """The booking (if any) that this transaction relates to."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    table_id: Optional[int] = field(
+    table_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableID"},
     )
     """Link to a referencing record (e.g. a BookingID for pro-rating)."""
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Reference link table."""
-    tag: Optional[str] = field(default=None, metadata={"wire_name": "Tag"})
-    """Transaction tag."""
-    tag_finance: Optional[str] = field(
+    tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Tag"},
+    )
+    """Transaction tag."""
+    tag_finance: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "TagFinance"},
     )
     """Finance tag."""
-    tax_amount: Optional[float] = field(
+    tax_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount"},
     )
     """Tax amount"""
-    tax_amount2: Optional[float] = field(
+    tax_amount2: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount2"},
     )
     """Tax amount"""
-    tax_amount3: Optional[float] = field(
+    tax_amount3: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount3"},
     )
     """Tax amount"""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
-    transaction_date: Optional[str] = field(
+    transaction_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionDate"},
     )
     """Date of the transaction."""
-    transaction_id: Optional[int] = field(
+    transaction_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionID"},
     )
     """Unique ID for this transaction record."""
-    transaction_type_enum: Optional[str] = field(
+    transaction_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionTypeEnum"},
     )
     """Transaction type."""
@@ -8046,162 +9722,197 @@ class CreateTransactionResponse:
     Response for Create Transaction
     """
 
-    amount: Optional[float] = field(
+    amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Amount"},
     )
     """The total amount for this transaction (including tax)."""
-    call_type_enum: Optional[str] = field(
+    call_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CallTypeEnum"},
     )
     """Call type."""
-    charge_group_id: Optional[int] = field(
+    charge_group_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeGroupID"},
     )
     """Pointer to the charge group record."""
-    charge_item_id: Optional[int] = field(
+    charge_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeItemID"},
     )
     """Pointer to the charge item record."""
-    comments: Optional[str] = field(
+    comments: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comments"},
     )
     """Transaction comments."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Transaction description."""
-    due_date: Optional[str] = field(
+    due_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DueDate"},
     )
     """Due date."""
-    duration: Optional[int] = field(
+    duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Duration"},
     )
     """Phone call duration in seconds."""
-    end_of_session_id: Optional[int] = field(
+    end_of_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndOfSessionID"},
     )
     """Pointer to the end of session record."""
-    entry_id: Optional[int] = field(
+    entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EntryID"},
     )
     """Pointer to the entry record."""
-    excess: Optional[float] = field(
+    excess: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Excess"},
     )
     """Excess amount."""
-    extension: Optional[int] = field(
+    extension: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Extension"},
     )
     """Extension qty."""
-    external_id: Optional[int] = field(
+    external_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalID"},
     )
     """
     Stores the (unique) ID from an external system - for imported transactions.
     """
-    external_receipt_id: Optional[str] = field(
+    external_receipt_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ExternalReceiptID"},
     )
     """Pointer to the external receipt record."""
-    invoice_id: Optional[int] = field(
+    invoice_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InvoiceID"},
     )
     """Pointer to the invoice record."""
-    paid_from: Optional[str] = field(
+    paid_from: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidFrom"},
     )
     """Paid from date."""
-    paid_to: Optional[str] = field(
+    paid_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaidTo"},
     )
     """Paid to date."""
-    payment_id: Optional[int] = field(
+    payment_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PaymentID"},
     )
     """Pointer to the payment record."""
-    processed_date: Optional[str] = field(
+    processed_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProcessedDate"},
     )
     """Date transaction was processed."""
-    reference_booking_id: Optional[int] = field(
+    reference_booking_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reference_BookingID"},
     )
     """The booking (if any) that this transaction relates to."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    table_id: Optional[int] = field(
+    table_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableID"},
     )
     """Link to a referencing record (e.g. a BookingID for pro-rating)."""
-    table_name: Optional[str] = field(
+    table_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TableName"},
     )
     """Reference link table."""
-    tag: Optional[str] = field(default=None, metadata={"wire_name": "Tag"})
-    """Transaction tag."""
-    tag_finance: Optional[str] = field(
+    tag: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Tag"},
+    )
+    """Transaction tag."""
+    tag_finance: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "TagFinance"},
     )
     """Finance tag."""
-    tax_amount: Optional[float] = field(
+    tax_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount"},
     )
     """Tax amount"""
-    tax_amount2: Optional[float] = field(
+    tax_amount2: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount2"},
     )
     """Tax amount"""
-    tax_amount3: Optional[float] = field(
+    tax_amount3: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TaxAmount3"},
     )
     """Tax amount"""
-    term_session_id: Optional[int] = field(
+    term_session_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TermSessionID"},
     )
     """Pointer to the term session record."""
-    transaction_date: Optional[str] = field(
+    transaction_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionDate"},
     )
     """Date of the transaction."""
-    transaction_id: Optional[int] = field(
+    transaction_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionID"},
     )
     """Unique ID for this transaction record."""
-    transaction_type_enum: Optional[str] = field(
+    transaction_type_enum: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TransactionTypeEnum"},
     )
     """Transaction type."""
@@ -8213,286 +9924,339 @@ class SelectRoomSpaceMaintenanceInput:
     Get Room Space Maintenance
     """
 
-    return_empty_array_on_no_result: Optional[bool] = field(
+    return_empty_array_on_no_result: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_returnEmptyArrayOnNoResult"},
     )
     """
     Determines whether an empty array should be returned when there is no
     result.
     """
-    page_size: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageSize"},
-    )
+    page_size: int = dataclass_field(metadata={"wire_name": "_pageSize"})
     """Maximum number of records to return."""
-    page_index: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "_pageIndex"},
-    )
+    page_index: int = dataclass_field(metadata={"wire_name": "_pageIndex"})
     """Index of the first record to return."""
-    orderby: Optional[str] = field(
+    orderby: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_orderby"},
     )
     """
     Sort by one or more fields in ascending order. Fields must be separated by
     commas with no spaces (e.g. field1,field2).
     """
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    cause: Optional[str] = field(default=None, metadata={"wire_name": "Cause"})
-    """Cause."""
-    charge: Optional[bool] = field(
+    cause: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cause"},
+    )
+    """Cause."""
+    charge: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge"},
     )
     """Indicates if a charge should be applied."""
-    charge_entry_id: Optional[int] = field(
+    charge_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge_EntryID"},
     )
     """Pointer to the charge entry record."""
-    charge_amount: Optional[float] = field(
+    charge_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeAmount"},
     )
     """Charge amount."""
-    charge_invoiced: Optional[bool] = field(
+    charge_invoiced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiced"},
     )
     """Indicates if the charge has been invoiced."""
-    charge_invoice_number: Optional[str] = field(
+    charge_invoice_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiceNumber"},
     )
     """Charge invoice number."""
-    charge_type: Optional[str] = field(
+    charge_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeType"},
     )
     """Charge type."""
-    complete_date: Optional[Dict[str, Any]] = field(
+    complete_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    contract_date: Optional[Dict[str, Any]] = field(
+    contract_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDate"},
     )
-    contractor_cost: Optional[float] = field(
+    contractor_cost: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCost"},
     )
     """Contractor cost."""
-    contractor_cost_estimate: Optional[float] = field(
+    contractor_cost_estimate: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCostEstimate"},
     )
     """Contractor cost estimate."""
-    contractor_date: Optional[Dict[str, Any]] = field(
+    contractor_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorDate"},
     )
-    contractor_e_t_a: Optional[str] = field(
+    contractor_e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorETA"},
     )
     """Contractor ETA."""
-    contractor_order_number: Optional[str] = field(
+    contractor_order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorOrderNumber"},
     )
     """Contractor order number."""
-    created_by_security_user_id: Optional[int] = field(
+    created_by_security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy_SecurityUserID"},
     )
     """Pointer to the security user record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom bit 1."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom bit 2."""
-    custom_date1: Optional[Dict[str, Any]] = field(
+    custom_date1: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
-    custom_date2: Optional[Dict[str, Any]] = field(
+    custom_date2: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string 1."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string 2."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string 3."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string 4."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string 5."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string 6."""
-    date_created: Optional[Dict[str, Any]] = field(
+    date_created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
-    date_due: Optional[Dict[str, Any]] = field(
+    date_due: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateDue"},
     )
-    date_modified: Optional[Dict[str, Any]] = field(
+    date_modified: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
-    date_reported: Optional[Dict[str, Any]] = field(
+    date_reported: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateReported"},
     )
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description."""
-    job_sent: Optional[bool] = field(
+    job_sent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobSent"},
     )
     """Indicates if a job has been sent."""
-    job_status: Optional[str] = field(
+    job_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobStatus"},
     )
     """Job status."""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location."""
-    occupant_entry_id: Optional[int] = field(
+    occupant_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupant_EntryID"},
     )
     """Pointer to the occupant entry record."""
-    occupant_entry_name: Optional[str] = field(
+    occupant_entry_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantEntryName"},
     )
     """Occupant entry name."""
-    occupant_present: Optional[bool] = field(
+    occupant_present: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresent"},
     )
     """Indicates if an occupant is present."""
-    occupant_present_reason: Optional[str] = field(
+    occupant_present_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresentReason"},
     )
     """Occupant present reason."""
-    other_service_number: Optional[str] = field(
+    other_service_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherServiceNumber"},
     )
     """Other service number."""
-    priority_id: Optional[int] = field(
+    priority_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PriorityID"},
     )
     """Pointer to the priority record."""
-    repair_description: Optional[str] = field(
+    repair_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RepairDescription"},
     )
     """Repair description."""
-    reported_by_name: Optional[str] = field(
+    reported_by_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByName"},
     )
     """Reported by name."""
-    reported_by_phone: Optional[str] = field(
+    reported_by_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByPhone"},
     )
     """Reported by phone."""
-    room_space_closed_id: Optional[int] = field(
+    room_space_closed_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceClosedID"},
     )
     """Pointer to the room space closed record."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_space_maintenance_category_id: Optional[int] = field(
+    room_space_maintenance_category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceCategoryID"},
     )
     """Pointer to the room space maintenance category record."""
-    room_space_maintenance_id: Optional[int] = field(
+    room_space_maintenance_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceID"},
     )
     """Unique ID for this room space maintenance record."""
-    room_space_maintenance_item_id: Optional[int] = field(
+    room_space_maintenance_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceItemID"},
     )
     """Pointer to the room space maintenance item record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    start_date: Optional[Dict[str, Any]] = field(
+    start_date: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """Status."""
-    technician: Optional[str] = field(
+    technician: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Technician"},
     )
     """Technician."""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space maintenance is viewable on the web."""
@@ -8504,255 +10268,305 @@ class CreateRoomSpaceMaintenanceInput:
     Create Room Space Maintenance
     """
 
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    cause: Optional[str] = field(default=None, metadata={"wire_name": "Cause"})
-    """Cause."""
-    charge: Optional[bool] = field(
+    cause: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cause"},
+    )
+    """Cause."""
+    charge: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge"},
     )
     """Indicates if a charge should be applied."""
-    charge_entry_id: Optional[int] = field(
+    charge_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge_EntryID"},
     )
     """Pointer to the charge entry record."""
-    charge_amount: Optional[float] = field(
+    charge_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeAmount"},
     )
     """Charge amount."""
-    charge_invoiced: Optional[bool] = field(
+    charge_invoiced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiced"},
     )
     """Indicates if the charge has been invoiced."""
-    charge_invoice_number: Optional[str] = field(
+    charge_invoice_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiceNumber"},
     )
     """Charge invoice number."""
-    charge_type: Optional[str] = field(
+    charge_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeType"},
     )
     """Charge type."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Complete date."""
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    contract_date: Optional[str] = field(
+    contract_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDate"},
     )
     """Contract date."""
-    contractor_cost: Optional[float] = field(
+    contractor_cost: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCost"},
     )
     """Contractor cost."""
-    contractor_cost_estimate: Optional[float] = field(
+    contractor_cost_estimate: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCostEstimate"},
     )
     """Contractor cost estimate."""
-    contractor_date: Optional[str] = field(
+    contractor_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorDate"},
     )
     """Contractor date."""
-    contractor_e_t_a: Optional[str] = field(
+    contractor_e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorETA"},
     )
     """Contractor ETA."""
-    contractor_order_number: Optional[str] = field(
+    contractor_order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorOrderNumber"},
     )
     """Contractor order number."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom bit 1."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom bit 2."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date 1."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date 2."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string 1."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string 2."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string 3."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string 4."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string 5."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string 6."""
-    date_due: Optional[str] = field(
+    date_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateDue"},
     )
     """Date due."""
-    date_reported: Optional[str] = field(
+    date_reported: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateReported"},
     )
     """Date reported."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description."""
-    job_sent: Optional[bool] = field(
+    job_sent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobSent"},
     )
     """Indicates if a job has been sent."""
-    job_status: Optional[str] = field(
+    job_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobStatus"},
     )
     """Job status."""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location."""
-    occupant_entry_id: Optional[int] = field(
+    occupant_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupant_EntryID"},
     )
     """Pointer to the occupant entry record."""
-    occupant_entry_name: Optional[str] = field(
+    occupant_entry_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantEntryName"},
     )
     """Occupant entry name."""
-    occupant_present: Optional[bool] = field(
+    occupant_present: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresent"},
     )
     """Indicates if an occupant is present."""
-    occupant_present_reason: Optional[str] = field(
+    occupant_present_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresentReason"},
     )
     """Occupant present reason."""
-    other_service_number: Optional[str] = field(
+    other_service_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherServiceNumber"},
     )
     """Other service number."""
-    priority_id: Optional[int] = field(
+    priority_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PriorityID"},
     )
     """Pointer to the priority record."""
-    repair_description: Optional[str] = field(
+    repair_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RepairDescription"},
     )
     """Repair description."""
-    reported_by_name: Optional[str] = field(
+    reported_by_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByName"},
     )
     """Reported by name."""
-    reported_by_phone: Optional[str] = field(
+    reported_by_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByPhone"},
     )
     """Reported by phone."""
-    room_space_closed_id: Optional[int] = field(
+    room_space_closed_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceClosedID"},
     )
     """Pointer to the room space closed record."""
-    room_space_id: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "RoomSpaceID"},
-    )
+    room_space_id: int = dataclass_field(metadata={"wire_name": "RoomSpaceID"})
     """Pointer to the room space record."""
-    room_space_maintenance_category_id: Optional[int] = field(
+    room_space_maintenance_category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceCategoryID"},
     )
     """Pointer to the room space maintenance category record."""
-    room_space_maintenance_id: Optional[int] = field(
+    room_space_maintenance_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceID"},
     )
     """Unique ID for this room space maintenance record."""
-    room_space_maintenance_item_id: Optional[int] = field(
+    room_space_maintenance_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceItemID"},
     )
     """Pointer to the room space maintenance item record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
     """Start date."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """Status."""
-    technician: Optional[str] = field(
+    technician: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Technician"},
     )
     """Technician."""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space maintenance is viewable on the web."""
@@ -8764,270 +10578,327 @@ class CreateRoomSpaceMaintenanceResponse:
     Response for Create Room Space Maintenance
     """
 
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    cause: Optional[str] = field(default=None, metadata={"wire_name": "Cause"})
-    """Cause."""
-    charge: Optional[bool] = field(
+    cause: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cause"},
+    )
+    """Cause."""
+    charge: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge"},
     )
     """Indicates if a charge should be applied."""
-    charge_entry_id: Optional[int] = field(
+    charge_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge_EntryID"},
     )
     """Pointer to the charge entry record."""
-    charge_amount: Optional[float] = field(
+    charge_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeAmount"},
     )
     """Charge amount."""
-    charge_invoiced: Optional[bool] = field(
+    charge_invoiced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiced"},
     )
     """Indicates if the charge has been invoiced."""
-    charge_invoice_number: Optional[str] = field(
+    charge_invoice_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiceNumber"},
     )
     """Charge invoice number."""
-    charge_type: Optional[str] = field(
+    charge_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeType"},
     )
     """Charge type."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Complete date."""
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    contract_date: Optional[str] = field(
+    contract_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDate"},
     )
     """Contract date."""
-    contractor_cost: Optional[float] = field(
+    contractor_cost: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCost"},
     )
     """Contractor cost."""
-    contractor_cost_estimate: Optional[float] = field(
+    contractor_cost_estimate: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCostEstimate"},
     )
     """Contractor cost estimate."""
-    contractor_date: Optional[str] = field(
+    contractor_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorDate"},
     )
     """Contractor date."""
-    contractor_e_t_a: Optional[str] = field(
+    contractor_e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorETA"},
     )
     """Contractor ETA."""
-    contractor_order_number: Optional[str] = field(
+    contractor_order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorOrderNumber"},
     )
     """Contractor order number."""
-    created_by_security_user_id: Optional[int] = field(
+    created_by_security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy_SecurityUserID"},
     )
     """Pointer to the security user record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom bit 1."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom bit 2."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date 1."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date 2."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string 1."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string 2."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string 3."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string 4."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string 5."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string 6."""
-    date_created: Optional[str] = field(
+    date_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
     """Date created."""
-    date_due: Optional[str] = field(
+    date_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateDue"},
     )
     """Date due."""
-    date_modified: Optional[str] = field(
+    date_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
     """Date modified."""
-    date_reported: Optional[str] = field(
+    date_reported: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateReported"},
     )
     """Date reported."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description."""
-    job_sent: Optional[bool] = field(
+    job_sent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobSent"},
     )
     """Indicates if a job has been sent."""
-    job_status: Optional[str] = field(
+    job_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobStatus"},
     )
     """Job status."""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location."""
-    occupant_entry_id: Optional[int] = field(
+    occupant_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupant_EntryID"},
     )
     """Pointer to the occupant entry record."""
-    occupant_entry_name: Optional[str] = field(
+    occupant_entry_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantEntryName"},
     )
     """Occupant entry name."""
-    occupant_present: Optional[bool] = field(
+    occupant_present: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresent"},
     )
     """Indicates if an occupant is present."""
-    occupant_present_reason: Optional[str] = field(
+    occupant_present_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresentReason"},
     )
     """Occupant present reason."""
-    other_service_number: Optional[str] = field(
+    other_service_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherServiceNumber"},
     )
     """Other service number."""
-    priority_id: Optional[int] = field(
+    priority_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PriorityID"},
     )
     """Pointer to the priority record."""
-    repair_description: Optional[str] = field(
+    repair_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RepairDescription"},
     )
     """Repair description."""
-    reported_by_name: Optional[str] = field(
+    reported_by_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByName"},
     )
     """Reported by name."""
-    reported_by_phone: Optional[str] = field(
+    reported_by_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByPhone"},
     )
     """Reported by phone."""
-    room_space_closed_id: Optional[int] = field(
+    room_space_closed_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceClosedID"},
     )
     """Pointer to the room space closed record."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_space_maintenance_category_id: Optional[int] = field(
+    room_space_maintenance_category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceCategoryID"},
     )
     """Pointer to the room space maintenance category record."""
-    room_space_maintenance_id: Optional[int] = field(
+    room_space_maintenance_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceID"},
     )
     """Unique ID for this room space maintenance record."""
-    room_space_maintenance_item_id: Optional[int] = field(
+    room_space_maintenance_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceItemID"},
     )
     """Pointer to the room space maintenance item record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
     """Start date."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """Status."""
-    technician: Optional[str] = field(
+    technician: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Technician"},
     )
     """Technician."""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space maintenance is viewable on the web."""
@@ -9039,255 +10910,309 @@ class UpdateRoomSpaceMaintenanceInput:
     Update Room Space Maintenance
     """
 
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    cause: Optional[str] = field(default=None, metadata={"wire_name": "Cause"})
-    """Cause."""
-    charge: Optional[bool] = field(
+    cause: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cause"},
+    )
+    """Cause."""
+    charge: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge"},
     )
     """Indicates if a charge should be applied."""
-    charge_entry_id: Optional[int] = field(
+    charge_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge_EntryID"},
     )
     """Pointer to the charge entry record."""
-    charge_amount: Optional[float] = field(
+    charge_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeAmount"},
     )
     """Charge amount."""
-    charge_invoiced: Optional[bool] = field(
+    charge_invoiced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiced"},
     )
     """Indicates if the charge has been invoiced."""
-    charge_invoice_number: Optional[str] = field(
+    charge_invoice_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiceNumber"},
     )
     """Charge invoice number."""
-    charge_type: Optional[str] = field(
+    charge_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeType"},
     )
     """Charge type."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Complete date."""
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    contract_date: Optional[str] = field(
+    contract_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDate"},
     )
     """Contract date."""
-    contractor_cost: Optional[float] = field(
+    contractor_cost: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCost"},
     )
     """Contractor cost."""
-    contractor_cost_estimate: Optional[float] = field(
+    contractor_cost_estimate: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCostEstimate"},
     )
     """Contractor cost estimate."""
-    contractor_date: Optional[str] = field(
+    contractor_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorDate"},
     )
     """Contractor date."""
-    contractor_e_t_a: Optional[str] = field(
+    contractor_e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorETA"},
     )
     """Contractor ETA."""
-    contractor_order_number: Optional[str] = field(
+    contractor_order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorOrderNumber"},
     )
     """Contractor order number."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom bit 1."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom bit 2."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date 1."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date 2."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string 1."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string 2."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string 3."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string 4."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string 5."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string 6."""
-    date_due: Optional[str] = field(
+    date_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateDue"},
     )
     """Date due."""
-    date_reported: Optional[str] = field(
+    date_reported: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateReported"},
     )
     """Date reported."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description."""
-    job_sent: Optional[bool] = field(
+    job_sent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobSent"},
     )
     """Indicates if a job has been sent."""
-    job_status: Optional[str] = field(
+    job_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobStatus"},
     )
     """Job status."""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location."""
-    occupant_entry_id: Optional[int] = field(
+    occupant_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupant_EntryID"},
     )
     """Pointer to the occupant entry record."""
-    occupant_entry_name: Optional[str] = field(
+    occupant_entry_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantEntryName"},
     )
     """Occupant entry name."""
-    occupant_present: Optional[bool] = field(
+    occupant_present: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresent"},
     )
     """Indicates if an occupant is present."""
-    occupant_present_reason: Optional[str] = field(
+    occupant_present_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresentReason"},
     )
     """Occupant present reason."""
-    other_service_number: Optional[str] = field(
+    other_service_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherServiceNumber"},
     )
     """Other service number."""
-    priority_id: Optional[int] = field(
+    priority_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PriorityID"},
     )
     """Pointer to the priority record."""
-    repair_description: Optional[str] = field(
+    repair_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RepairDescription"},
     )
     """Repair description."""
-    reported_by_name: Optional[str] = field(
+    reported_by_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByName"},
     )
     """Reported by name."""
-    reported_by_phone: Optional[str] = field(
+    reported_by_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByPhone"},
     )
     """Reported by phone."""
-    room_space_closed_id: Optional[int] = field(
+    room_space_closed_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceClosedID"},
     )
     """Pointer to the room space closed record."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_space_maintenance_category_id: Optional[int] = field(
+    room_space_maintenance_category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceCategoryID"},
     )
     """Pointer to the room space maintenance category record."""
-    room_space_maintenance_id: Optional[int] = field(
+    room_space_maintenance_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceID"},
     )
     """Unique ID for this room space maintenance record."""
-    room_space_maintenance_item_id: Optional[int] = field(
+    room_space_maintenance_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceItemID"},
     )
     """Pointer to the room space maintenance item record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
     """Start date."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """Status."""
-    technician: Optional[str] = field(
+    technician: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Technician"},
     )
     """Technician."""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space maintenance is viewable on the web."""
@@ -9299,270 +11224,327 @@ class UpdateRoomSpaceMaintenanceResponse:
     Response for Update Room Space Maintenance
     """
 
-    account_code: Optional[str] = field(
+    account_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AccountCode"},
     )
     """Account code."""
-    cause: Optional[str] = field(default=None, metadata={"wire_name": "Cause"})
-    """Cause."""
-    charge: Optional[bool] = field(
+    cause: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cause"},
+    )
+    """Cause."""
+    charge: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge"},
     )
     """Indicates if a charge should be applied."""
-    charge_entry_id: Optional[int] = field(
+    charge_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Charge_EntryID"},
     )
     """Pointer to the charge entry record."""
-    charge_amount: Optional[float] = field(
+    charge_amount: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeAmount"},
     )
     """Charge amount."""
-    charge_invoiced: Optional[bool] = field(
+    charge_invoiced: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiced"},
     )
     """Indicates if the charge has been invoiced."""
-    charge_invoice_number: Optional[str] = field(
+    charge_invoice_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeInvoiceNumber"},
     )
     """Charge invoice number."""
-    charge_type: Optional[str] = field(
+    charge_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChargeType"},
     )
     """Charge type."""
-    complete_date: Optional[str] = field(
+    complete_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompleteDate"},
     )
     """Complete date."""
-    contact_id: Optional[int] = field(
+    contact_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContactID"},
     )
     """Pointer to the contact record."""
-    contract_date: Optional[str] = field(
+    contract_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractDate"},
     )
     """Contract date."""
-    contractor_cost: Optional[float] = field(
+    contractor_cost: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCost"},
     )
     """Contractor cost."""
-    contractor_cost_estimate: Optional[float] = field(
+    contractor_cost_estimate: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorCostEstimate"},
     )
     """Contractor cost estimate."""
-    contractor_date: Optional[str] = field(
+    contractor_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorDate"},
     )
     """Contractor date."""
-    contractor_e_t_a: Optional[str] = field(
+    contractor_e_t_a: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorETA"},
     )
     """Contractor ETA."""
-    contractor_order_number: Optional[str] = field(
+    contractor_order_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContractorOrderNumber"},
     )
     """Contractor order number."""
-    created_by_security_user_id: Optional[int] = field(
+    created_by_security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedBy_SecurityUserID"},
     )
     """Pointer to the security user record."""
-    custom_bit1: Optional[bool] = field(
+    custom_bit1: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit1"},
     )
     """Custom bit 1."""
-    custom_bit2: Optional[bool] = field(
+    custom_bit2: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomBit2"},
     )
     """Custom bit 2."""
-    custom_date1: Optional[str] = field(
+    custom_date1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate1"},
     )
     """Custom date 1."""
-    custom_date2: Optional[str] = field(
+    custom_date2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomDate2"},
     )
     """Custom date 2."""
-    custom_string1: Optional[str] = field(
+    custom_string1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString1"},
     )
     """Custom string 1."""
-    custom_string2: Optional[str] = field(
+    custom_string2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString2"},
     )
     """Custom string 2."""
-    custom_string3: Optional[str] = field(
+    custom_string3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString3"},
     )
     """Custom string 3."""
-    custom_string4: Optional[str] = field(
+    custom_string4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString4"},
     )
     """Custom string 4."""
-    custom_string5: Optional[str] = field(
+    custom_string5: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString5"},
     )
     """Custom string 5."""
-    custom_string6: Optional[str] = field(
+    custom_string6: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CustomString6"},
     )
     """Custom string 6."""
-    date_created: Optional[str] = field(
+    date_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateCreated"},
     )
     """Date created."""
-    date_due: Optional[str] = field(
+    date_due: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateDue"},
     )
     """Date due."""
-    date_modified: Optional[str] = field(
+    date_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateModified"},
     )
     """Date modified."""
-    date_reported: Optional[str] = field(
+    date_reported: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateReported"},
     )
     """Date reported."""
-    description: Optional[str] = field(
+    description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Description"},
     )
     """Description."""
-    job_sent: Optional[bool] = field(
+    job_sent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobSent"},
     )
     """Indicates if a job has been sent."""
-    job_status: Optional[str] = field(
+    job_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobStatus"},
     )
     """Job status."""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location."""
-    occupant_entry_id: Optional[int] = field(
+    occupant_entry_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Occupant_EntryID"},
     )
     """Pointer to the occupant entry record."""
-    occupant_entry_name: Optional[str] = field(
+    occupant_entry_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantEntryName"},
     )
     """Occupant entry name."""
-    occupant_present: Optional[bool] = field(
+    occupant_present: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresent"},
     )
     """Indicates if an occupant is present."""
-    occupant_present_reason: Optional[str] = field(
+    occupant_present_reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OccupantPresentReason"},
     )
     """Occupant present reason."""
-    other_service_number: Optional[str] = field(
+    other_service_number: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherServiceNumber"},
     )
     """Other service number."""
-    priority_id: Optional[int] = field(
+    priority_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PriorityID"},
     )
     """Pointer to the priority record."""
-    repair_description: Optional[str] = field(
+    repair_description: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RepairDescription"},
     )
     """Repair description."""
-    reported_by_name: Optional[str] = field(
+    reported_by_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByName"},
     )
     """Reported by name."""
-    reported_by_phone: Optional[str] = field(
+    reported_by_phone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReportedByPhone"},
     )
     """Reported by phone."""
-    room_space_closed_id: Optional[int] = field(
+    room_space_closed_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceClosedID"},
     )
     """Pointer to the room space closed record."""
-    room_space_id: Optional[int] = field(
+    room_space_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceID"},
     )
     """Pointer to the room space record."""
-    room_space_maintenance_category_id: Optional[int] = field(
+    room_space_maintenance_category_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceCategoryID"},
     )
     """Pointer to the room space maintenance category record."""
-    room_space_maintenance_id: Optional[int] = field(
+    room_space_maintenance_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceID"},
     )
     """Unique ID for this room space maintenance record."""
-    room_space_maintenance_item_id: Optional[int] = field(
+    room_space_maintenance_item_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RoomSpaceMaintenanceItemID"},
     )
     """Pointer to the room space maintenance item record."""
-    security_user_id: Optional[int] = field(
+    security_user_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SecurityUserID"},
     )
     """Pointer to the security user record."""
-    start_date: Optional[str] = field(
+    start_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
     """Start date."""
-    status: Optional[str] = field(
+    status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
     """Status."""
-    technician: Optional[str] = field(
+    technician: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Technician"},
     )
     """Technician."""
-    view_on_web: Optional[bool] = field(
+    view_on_web: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ViewOnWeb"},
     )
     """Indicates if the room space maintenance is viewable on the web."""
@@ -9633,7 +11615,46 @@ class Starrezrestv1Client(ConnectorClientBase):
     def connector_name(self) -> str:
         return "starrezrestv1"
 
-    def select_entry(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_select_entry(
         self,
         input: SelectEntryInput,
         *,
@@ -9641,34 +11662,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry
 
         Retrieves one or more records from the Entry table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/entry.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_entry(
         self,
@@ -9791,7 +11833,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_entry_custom_field(
+    def list_select_entry_custom_field(
         self,
         input: SelectEntryCustomFieldInput,
         *,
@@ -9799,36 +11841,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry Custom Field
 
         Retrieves one or more records from the Entry Custom Field table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryCustomField.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_entry_custom_field(
         self,
@@ -9873,7 +11936,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_term(
+    def list_select_term(
         self,
         input: SelectTermInput,
         *,
@@ -9881,36 +11944,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Term
 
         Retrieves one or more records from the Term table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Term.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def select_entry_address(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_select_entry_address(
         self,
         input: SelectEntryAddressInput,
         *,
@@ -9918,36 +12002,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry Address
 
         Retrieves one or more records from the Entry Address table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryAddress.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_entry_address(
         self,
@@ -9992,7 +12097,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_entry_application(
+    def list_select_entry_application(
         self,
         input: SelectEntryApplicationInput,
         *,
@@ -10000,36 +12105,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry Application
 
         Retrieves one or more records from the Entry Application table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryApplication.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_entry_application(
         self,
@@ -10113,7 +12239,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_term_session(
+    def list_select_term_session(
         self,
         input: SelectTermSessionInput,
         *,
@@ -10121,36 +12247,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Term Session
 
         Retrieves one or more records from the Term Session table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/TermSession.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def select_entry_detail(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_select_entry_detail(
         self,
         input: SelectEntryDetailInput,
         *,
@@ -10158,34 +12305,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry Detail
 
         Retrieves one or more records from the Entry Detail table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/EntryDetail.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def update_entry_detail(
         self,
@@ -10228,7 +12396,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_entry_enrollment(
+    def list_select_entry_enrollment(
         self,
         input: SelectEntryEnrollmentInput,
         *,
@@ -10236,36 +12404,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Entry Enrollment
 
         Retrieves one or more records from the Entry Enrollment table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryEnrollment.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_entry_enrollment(
         self,
@@ -10349,7 +12538,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_booking(
+    def list_select_booking(
         self,
         input: SelectBookingInput,
         *,
@@ -10357,34 +12546,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Booking
 
         Retrieves one or more records from the Booking table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Booking.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_booking(
         self,
@@ -10464,7 +12674,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_room_space(
+    def list_select_room_space(
         self,
         input: SelectRoomSpaceInput,
         *,
@@ -10472,34 +12682,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Room Space
 
         Retrieves one or more records from the Room Space table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/RoomSpace.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_room_space(
         self,
@@ -10538,7 +12769,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_room_location(
+    def list_select_room_location(
         self,
         input: SelectRoomLocationInput,
         *,
@@ -10546,38 +12777,59 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Room Location
 
         Retrieves one or more records from the Room Location table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomLocation.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def select_transaction(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_select_transaction(
         self,
         input: SelectTransactionInput,
         *,
@@ -10585,34 +12837,55 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Transaction
 
         Retrieves one or more records from the Transaction table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/select/Transaction.json"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_transaction(
         self,
@@ -10651,7 +12924,7 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def select_room_space_maintenance(
+    def list_select_room_space_maintenance(
         self,
         input: SelectRoomSpaceMaintenanceInput,
         *,
@@ -10659,36 +12932,57 @@ class Starrezrestv1Client(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Room Space Maintenance
 
         Retrieves one or more records from the Room Space Maintenance table.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomSpaceMaintenance.json"
         )
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def create_room_space_maintenance(
         self,

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -42,7 +44,7 @@ class InvokeAPIInput:
     Invoke API
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -55,7 +57,7 @@ class InvokeAPIResponse:
     Response for Invoke API
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -68,13 +70,13 @@ class ZohoSignTriggersInput:
     Zoho Sign Triggers
     """
 
-    webhook_url: Optional[str] = None
+    webhook_url: str
     """Webhook url"""
-    webhook_actions: Optional[str] = None
+    webhook_actions: str
     """Webhook actions"""
-    purpose: Optional[str] = None
+    purpose: str
     """Purpose"""
-    appname: Optional[str] = None
+    appname: str
     """appname"""
 
 
@@ -84,11 +86,11 @@ class GetFormDataResponse:
     Response for Get data of completed request
     """
 
-    code: Optional[int] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """code"""
-    document_form_data: Optional[Dict[str, Any]] = None
+    document_form_data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Document form data"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -98,13 +100,13 @@ class GetDocumentResponse:
     Response for Get a document
     """
 
-    code: Optional[int] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """code"""
-    requests: Optional[Dict[str, Any]] = None
+    requests: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """requests"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -114,7 +116,7 @@ class UpdateDocumentInput:
     Update the properties of a created request
     """
 
-    requests: Optional[Dict[str, Any]] = None
+    requests: Dict[str, Any]
     """requests"""
 
 
@@ -124,11 +126,11 @@ class UpdateDocumentResponse:
     Response for Update the properties of a created request
     """
 
-    code: Optional[int] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """code"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -138,11 +140,11 @@ class SendSignRequestResponse:
     Response for SendSignRequest
     """
 
-    code: Optional[int] = None
+    code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """code"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
 
 
@@ -152,7 +154,7 @@ class GetTemplatesResponse:
     Response for Get list of templates
     """
 
-    templates: Optional[List[Dict[str, Any]]] = None
+    templates: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -219,6 +221,45 @@ class ZohosignClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "zohosign"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def invoke_api(
         self,
@@ -687,41 +728,62 @@ class ZohosignClient(ConnectorClientBase):
                 response.text,
             )
 
-    def get_templates(
+    def list_templates(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get list of templates
 
         Shows a list of all the document templates created
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/templates"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("templates", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

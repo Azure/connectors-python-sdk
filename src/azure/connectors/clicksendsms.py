@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -57,7 +57,7 @@ class SmsSendInput:
     Send SMS
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
 
 
@@ -67,13 +67,13 @@ class SmsSendResponse:
     Response for Send SMS
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Msg"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -83,7 +83,7 @@ class CreateListInput:
     Create New Contact List
     """
 
-    list_name: Optional[str] = None
+    list_name: str
     """Your contact list name"""
 
 
@@ -93,13 +93,13 @@ class CreateListResponse:
     Response for Create New Contact List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -109,13 +109,13 @@ class GetContactListsResponse:
     Response for Get Contact Lists
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -125,7 +125,7 @@ class SendVoiceInput:
     Send Voice Message
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
 
 
@@ -135,13 +135,13 @@ class SendVoiceResponse:
     Response for Send Voice Message
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -151,11 +151,11 @@ class DeleteListResponse:
     Response for Delete List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
 
 
@@ -165,52 +165,58 @@ class CreateListContactInput:
     Create New Contact
     """
 
-    first_name: Optional[str] = None
+    first_name: str
     """Contact's first name."""
-    last_name: Optional[str] = None
+    last_name: str
     """Contact's last name."""
-    phone_number: Optional[str] = None
+    phone_number: str
     """The contact phone in local or international format e.g. +61411111111."""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's email address."""
-    fax_number: Optional[str] = None
+    fax_number: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's fax number."""
-    organization_name: Optional[str] = None
+    organization_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Contact's organization name."""
-    address_country: Optional[str] = None
+    address_country: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The contact's country."""
-    address_state: Optional[str] = None
+    address_state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State"""
-    address_city: Optional[str] = None
+    address_city: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Address City"""
-    custom1: Optional[str] = field(
+    custom1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_1"},
     )
     """Custom 1"""
-    custom3: Optional[str] = field(
+    custom3: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_3"},
     )
     """Custom 3"""
-    address_postal_code: Optional[str] = None
-    custom2: Optional[str] = field(
+    address_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
+    custom2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_2"},
     )
     """Custom 2"""
-    custom4: Optional[str] = field(
+    custom4: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "custom_4"},
     )
     """Custom 4"""
-    address_line1: Optional[str] = field(
+    address_line1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "address_line_1"},
     )
     """Address Line 1"""
-    address_line2: Optional[str] = field(
+    address_line2: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "address_line_2"},
     )
     """Address Line 2"""
@@ -222,13 +228,13 @@ class CreateListContactResponse:
     Response for Create New Contact
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -238,13 +244,13 @@ class ViewListContactsResponse:
     Response for Get Contacts in a List
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -254,11 +260,11 @@ class DeleteListContactResponse:
     Response for Delete a Contact
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
 
 
@@ -268,9 +274,9 @@ class SendMmsInput:
     Send MMS
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
-    media_file: Optional[str] = None
+    media_file: str
     """
     Supports maximum file size of 250kB, Gif can only be supported if it below
     100 kB file size
@@ -283,13 +289,13 @@ class SendMmsResponse:
     Response for Send MMS
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -299,9 +305,9 @@ class SendFaxInput:
     Send Fax
     """
 
-    messages: Optional[List[Dict[str, Any]]] = None
+    messages: List[Dict[str, Any]]
     """Message"""
-    file_url: Optional[str] = None
+    file_url: str
     """
     Maximum file size is 4 MB. All pages should be in portrait. Chat with
     ClickSend Support for complete specifications
@@ -314,13 +320,13 @@ class SendFaxResponse:
     Response for Send Fax
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -330,7 +336,7 @@ class UploadMediaInput:
     Convert Media File Format
     """
 
-    content: Optional[str] = None
+    content: str
     """File Content (base64)"""
 
 
@@ -340,13 +346,13 @@ class UploadMediaResponse:
     Response for Convert Media File Format
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -356,13 +362,13 @@ class SearchContactListResponse:
     Response for Search Contact Lists
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -372,27 +378,27 @@ class SendLetterInput:
     Send Letter
     """
 
-    file_url: Optional[str] = None
+    file_url: str
     """
     Maximum file size is 10 MB. All pages should be in portrait. Chat with
     ClickSend Support for complete specifications.
     """
-    template_used: Optional[int] = None
+    template_used: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Whether using letter template. Flag value must be 1 for yes or 0 for no.
     """
-    colour: Optional[int] = None
+    colour: int
     """Choose to use colour or B&W printing. (Black & White = 0, Colour = 1)"""
-    duplex: Optional[int] = None
+    duplex: int
     """
     Choose to use Duplex = 1 (double-sided) or Simplex = 0(single sided)
     printing.
     """
-    priority_post: Optional[int] = None
+    priority_post: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Whether letter is priority, Flag value must be 1 for yes or 0 for no."""
-    recipients: Optional[List[Dict[str, Any]]] = None
+    recipients: List[Dict[str, Any]]
     """Recipient"""
-    source: Optional[str] = None
+    source: str
     """Source"""
 
 
@@ -402,13 +408,13 @@ class SendLetterResponse:
     Response for Send Letter
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -418,9 +424,9 @@ class SendPostcardInput:
     Send Postcard
     """
 
-    recipients: Optional[List[Dict[str, Any]]] = None
+    recipients: List[Dict[str, Any]]
     """item"""
-    file_urls: Optional[List[str]] = None
+    file_urls: List[str]
     """PDF File URL"""
 
 
@@ -430,13 +436,13 @@ class SendPostcardResponse:
     Response for Send Postcard
     """
 
-    http_code: Optional[int] = None
+    http_code: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Http Code"""
-    response_code: Optional[str] = None
+    response_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Code"""
-    response_msg: Optional[str] = None
+    response_msg: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Response Message"""
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -446,28 +452,28 @@ class SmsInboundAutomationInput:
     SMS Inbound Automation
     """
 
-    message_search_type: Optional[int] = None
+    message_search_type: int
     """
     Message Search Type: 0=Any message, 1=starts with, 2=contains, 3=does not
     contain.
     """
-    message_search_term: Optional[str] = None
+    message_search_term: str
     """word or phrase in the SMS"""
-    action_address: Optional[str] = None
+    action_address: str
     """Action address"""
-    dedicated_number: Optional[str] = None
+    dedicated_number: str
     """Decicated Number. Can be '*' to apply to all numbers."""
-    rule_name: Optional[str] = None
+    rule_name: str
     """Rule Name"""
-    webhook_type: Optional[str] = None
+    webhook_type: str
     """Webhook Type"""
-    action: Optional[str] = None
+    action: str
     """
     Action to be taken (AUTO_REPLY, EMAIL_USER, EMAIL_FIXED, URL, SMS, POLL,
     GROUP_SMS, MOVE_CONTACT, CREATE_CONTACT, CREATE_CONTACT_PLUS_EMAIL,
     CREATE_CONTACT_PLUS_NAME_EMAIL CREATE_CONTACT_PLUS_NAME, SMPP, NONE).
     """
-    enabled: Optional[int] = None
+    enabled: int
     """enabled"""
 
 

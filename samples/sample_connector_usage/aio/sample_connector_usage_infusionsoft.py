@@ -39,8 +39,8 @@ async def example_1_list_tasks() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with InfusionsoftClient(CONNECTION_RUNTIME_URL, credential) as client:
-            response = await client.list_tasks()
-            tasks = response.get("tasks", []) if response else []
+            response = [item async for item in client.list_tasks()]
+            tasks = response
 
             print(f"Found {len(tasks)} tasks")
             for task in tasks[:5]:

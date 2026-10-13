@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -47,7 +49,7 @@ class AddGlobalSuppressRequestAndResponse:
     Response for Add a global suppression
     """
 
-    recipient_emails: Optional[List[str]] = None
+    recipient_emails: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """Recipient email"""
 
 
@@ -57,7 +59,7 @@ class GetGlobalSuppressResponse:
     Response for Get the global suppression
     """
 
-    recipient_email: Optional[str] = None
+    recipient_email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Recipient email"""
 
 
@@ -67,7 +69,7 @@ class ObjectEntity:
     Response for Add recipient to list
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -83,8 +85,9 @@ class EmailIsUnsubscribedResponse:
     Response for Check if email is in unsubscribed email list
     """
 
-    is_unsubscribed: Optional[bool] = field(
+    is_unsubscribed: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isUnsubscribed"},
     )
     """Is Email Unsubscribed"""
@@ -96,7 +99,7 @@ class RecipientLists:
     Response for List Recipient Lists
     """
 
-    lists: Optional[List[RecipientList]] = None
+    lists: Optional[List[RecipientList]] = dataclass_field(default=None, kw_only=True)
     """List of recipient lists"""
 
 
@@ -106,7 +109,7 @@ class Recipients:
     Response for List Recipients
     """
 
-    recipients: Optional[List[Recipient]] = None
+    recipients: Optional[List[Recipient]] = dataclass_field(default=None, kw_only=True)
     """List of recipients"""
 
 
@@ -116,7 +119,7 @@ class EmailResponse:
     Definition: EmailResponse
     """
 
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status message from send email response"""
 
 
@@ -126,7 +129,7 @@ class GetGlobalSuppressEmptyResponse:
     Definition: GetGlobalSuppressEmptyResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -139,36 +142,36 @@ class EmailRequest:
     Definition: EmailRequest
     """
 
-    attachments: Optional[List[EmailAttachment]] = None
+    attachments: Optional[List[EmailAttachment]] = dataclass_field(default=None, kw_only=True)
     """Attachments"""
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    from_: str = dataclass_field(metadata={"wire_name": "from"})
     """
     Origination address of your email. Must be a valid email address from your
     domain
     """
-    fromname: Optional[str] = None
+    fromname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Origination name of your email"""
-    to: Optional[str] = None
+    to: str
     """Valid email addresses separated by a semicolon or comma"""
-    toname: Optional[str] = None
+    toname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each email address separated by a semicolon or comma
     """
-    subject: Optional[str] = None
+    subject: str
     """Subject of your email"""
-    text: Optional[str] = None
+    text: str
     """Content of your email"""
-    ishtml: Optional[bool] = None
+    ishtml: bool
     """Specify whether the content of the email is HTML or plain text"""
-    cc: Optional[str] = None
+    cc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Valid email addresses separated by a semicolon or comma"""
-    ccname: Optional[str] = None
+    ccname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each CC email address separated by a semicolon or comma
     """
-    bcc: Optional[str] = None
+    bcc: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Valid email addresses separated by a semicolon or comma"""
-    bccname: Optional[str] = None
+    bccname: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A display name for each BCC email address separated by a semicolon or comma
     """
@@ -180,11 +183,11 @@ class EmailAttachment:
     Definition: EmailAttachment
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachment file content"""
-    filename: Optional[str] = None
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Attachment file name"""
-    contenttype: Optional[str] = None
+    contenttype: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Type of content in the attachment."""
 
 
@@ -194,11 +197,11 @@ class RecipientList:
     Definition: RecipientList
     """
 
-    id: Optional[int] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Unique list id"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    recipient_count: Optional[int] = None
+    recipient_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Recipient count"""
 
 
@@ -208,13 +211,13 @@ class Recipient:
     Definition: Recipient
     """
 
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email address"""
-    last_name: Optional[str] = None
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Last name"""
-    first_name: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """First name"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique recipient id"""
 
 
@@ -224,7 +227,7 @@ class ScopeList:
     Definition: ScopeList
     """
 
-    scopes: Optional[List[str]] = None
+    scopes: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """List of scopes"""
 
 
@@ -234,13 +237,13 @@ class Bounce:
     Definition: Bounce
     """
 
-    created: Optional[int] = None
+    created: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Created"""
-    email: Optional[str] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Email"""
-    reason: Optional[str] = None
+    reason: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Reason"""
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Status"""
 
 
@@ -309,7 +312,46 @@ class SendgridClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "sendgrid"
 
-    def add_global_suppression(
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
+
+    def list_add_global_suppression(
         self,
         input: AddGlobalSuppressRequestAndResponse,
         *,
@@ -317,34 +359,55 @@ class SendgridClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Add a global suppression
 
         Add a global suppression
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/suppressions/global"
+        initial_request_url = request_url
+        request_body = input
 
-        response = self.http_client.send(
-            "POST", request_url, body=input,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "POST",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "POST", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "POST",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("recipient_emails", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_global_suppression(
         self,
@@ -467,7 +530,7 @@ class SendgridClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_bounce(
+    def list_bounce(
         self,
         email: str,
         *,
@@ -475,37 +538,58 @@ class SendgridClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get bounce for an email
 
         Get a specific bounce for a given email address.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/suppression/bounces/{quote(str(email), safe='')}"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else []
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page:
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def delete_bounce(
         self,
@@ -626,34 +710,55 @@ class SendgridClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Recipient Lists
 
         Retrieves all the recipient lists.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/lists"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("lists", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_recipients(
         self,
@@ -662,31 +767,52 @@ class SendgridClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List Recipients
 
         Retrieves all registered recipients.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v3/contactdb/recipients"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("recipients", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

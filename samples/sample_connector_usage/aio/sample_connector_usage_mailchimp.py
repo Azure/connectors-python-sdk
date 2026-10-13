@@ -26,6 +26,8 @@ from azure.identity.aio import DefaultAzureCredential
 from azure.connectors import ConnectorException
 from azure.connectors.aio.mailchimp import MailchimpClient
 from azure.connectors.mailchimp import (
+    CampaignDefaults,
+    Contact,
     NewListRequest,
     NewMemberInListRequest,
 )
@@ -42,7 +44,7 @@ async def example_1_list_campaigns() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with MailchimpClient(CONNECTION_RUNTIME_URL, credential) as client:
-            campaigns = await client.get_campaigns()
+            campaigns = [item async for item in client.list_campaigns()]
             print(f"Campaigns: {campaigns}")
 
 
@@ -66,6 +68,22 @@ async def example_3_new_list() -> None:
                 input=NewListRequest(
                     name="SDK sample list",
                     permission_reminder="You signed up via the SDK sample.",
+                    contact=Contact(
+                        company="Contoso",
+                        address1="1 Microsoft Way",
+                        city="Redmond",
+                        state="WA",
+                        zip="98052",
+                        country="US",
+                        phone="425-555-0100",
+                    ),
+                    campaign_defaults=CampaignDefaults(
+                        from_name="SDK Sample",
+                        from_email="sample@example.com",
+                        subject="Welcome",
+                        language="en",
+                    ),
+                    email_type_option=True,
                 ),
             )
             print(f"Created list: {new_list}")

@@ -48,7 +48,7 @@ def example_1_list_calendars():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.calendar_get_tables()
+                result = client.list_calendar_get_tables()
 
                 if result:
                     calendars = result.get("value", [])
@@ -79,7 +79,7 @@ def example_2_list_contact_folders():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.contact_get_tables()
+                result = client.list_contact_get_tables()
 
                 if result:
                     folders = result.get("value", [])
@@ -112,7 +112,7 @@ def example_3_get_calendar_events():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.calendar_get_items(
+                result = client.list_calendar_get_items(
                     table=calendar_id,
                     top=5  # Get up to 5 events
                 )
@@ -145,7 +145,7 @@ def example_4_get_contacts():
 
         with OutlookClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.contact_get_items(
+                result = client.list_contact_get_items(
                     table=folder_id,
                     top=10  # Get up to 10 contacts
                 )

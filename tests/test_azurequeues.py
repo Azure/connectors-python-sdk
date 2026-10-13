@@ -22,6 +22,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestAzurequeuesClientInitialization:
@@ -284,7 +285,7 @@ class TestListQueues:
 
         mock_response = MockResponse(
             status=200,
-            text='{"value": [{"name": "queue1"}, {"name": "queue2"}]}'
+            text='[{"name": "queue1"}, {"name": "queue2"}]'
         )
 
         with patch.object(
@@ -293,15 +294,15 @@ class TestListQueues:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.list_queues(
+            result = await resolve_generated_result(client.list_queues(
                 storage_account_name="mystorageaccount"
-            )
+            ))
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/queues/list" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -319,10 +320,10 @@ class TestListQueues:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.list_queues(
+            result = await resolve_generated_result(client.list_queues(
                 storage_account_name="mystorageaccount"
-            )
-            assert result is None
+            ))
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -341,9 +342,9 @@ class TestListQueues:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.list_queues(
+                await resolve_generated_result(client.list_queues(
                     storage_account_name="nonexistent"
-                )
+                ))
 
             assert exc_info.value.status_code == 404
 
@@ -581,7 +582,7 @@ class TestEdgeCases:
             credential=mock_credential
         )
 
-        mock_response = MockResponse(status=200, text='{"value": []}')
+        mock_response = MockResponse(status=200, text='[]')
 
         with patch.object(
             client._http_client,
@@ -589,8 +590,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.list_queues(storage_account_name="account1")
-            await client.list_queues(storage_account_name="account2")
+            await resolve_generated_result(client.list_queues(storage_account_name="account1"))
+            await resolve_generated_result(client.list_queues(storage_account_name="account2"))
 
             assert mock_send.call_count == 2
 

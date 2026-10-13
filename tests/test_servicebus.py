@@ -17,16 +17,17 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 DISCOVERY_OPERATIONS = [
-    ("get_entities", {}, "/entities"),
-    ("get_system_properties", {}, "/systemproperties"),
-    ("get_queues", {}, "/queues"),
-    ("get_session_options", {}, "/sessionoptions"),
-    ("get_topics", {}, "/topics"),
+    ("list_entities", {}, "/entities"),
+    ("list_system_properties", {}, "/systemproperties"),
+    ("list_queues", {}, "/queues"),
+    ("list_session_options", {}, "/sessionoptions"),
+    ("list_topics", {}, "/topics"),
     (
-        "get_subscriptions",
+        "list_subscriptions",
         {"topic_name": "topic/one"},
         "/topics/topic%252Fone/subscriptions",
     ),
@@ -257,6 +258,7 @@ class TestDiscoveryOperations:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
+        is_pageable = operation.startswith("list_")
 
         with patch.object(
             client._http_client,
@@ -264,11 +266,11 @@ class TestDiscoveryOperations:
             new_callable=AsyncMock,
             return_value=MockResponse(
                 status=200,
-                text='{"value": ["item"]}',
+                text='["item"]' if is_pageable else '{"value": ["item"]}',
             ),
         ) as mock_send:
             method = getattr(client, f"{operation}")
-            result = await method(**operation_args)
+            result = await resolve_generated_result(method(**operation_args))
 
             mock_send.assert_called_once_with(
                 "GET",
@@ -279,7 +281,8 @@ class TestDiscoveryOperations:
                 client_request_id=None,
                 response_hook=None,
             )
-            assert result == {"value": ["item"]}
+            expected_result = ["item"] if is_pageable else {"value": ["item"]}
+            assert result == expected_result
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -307,7 +310,7 @@ class TestDiscoveryOperations:
         ):
             method = getattr(client, f"{operation}")
             with pytest.raises(ConnectorException) as exc_info:
-                await method(**operation_args)
+                await resolve_generated_result(method(**operation_args))
 
             assert expected_path in exc_info.value.operation
             assert exc_info.value.status_code == 500

@@ -51,7 +51,7 @@ async def example_1_list_keys():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_keys()
+                items = await client.list_keys()
 
                 if result and result.get("value"):
                     keys = result["value"]
@@ -77,7 +77,7 @@ async def example_2_get_key_metadata():
             try:
                 result = await client.get_key_metadata(key_name=KEY_NAME)
 
-                if result:
+                if items:
                     print(f"Key Name: {result.get('name')}")
                     print(f"Version: {result.get('version')}")
                     print(f"Key Type: {result.get('key_type')}")
@@ -147,7 +147,7 @@ async def example_4_list_secrets():
 
         async with KeyvaultClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.list_secrets()
+                items = await client.list_secrets()
 
                 if result and result.get("value"):
                     secrets = result["value"]
@@ -173,7 +173,7 @@ async def example_5_get_secret():
             try:
                 result = await client.get_secret(secret_name=SECRET_NAME)
 
-                if result:
+                if items:
                     print(f"Secret Name: {result.get('name')}")
                     print(f"Content Type: {result.get('content_type')}")
                     # Note: Be careful with secret values in logs
@@ -201,7 +201,7 @@ async def example_6_get_secret_metadata():
                     secret_name=SECRET_NAME
                 )
 
-                if result:
+                if items:
                     print(f"Secret Name: {result.get('name')}")
                     print(f"Version: {result.get('version')}")
                     print(f"Content Type: {result.get('content_type')}")

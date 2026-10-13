@@ -374,6 +374,8 @@ class TestCreateCalendarEventAsync:
 
         event_input = UpdateCalendarEventHTMLRequest(
             subject="Team Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
             is_all_day=False
         )
 
@@ -410,7 +412,9 @@ class TestUpdateCalendarEventAsync:
         )
 
         event_input = UpdateCalendarEventHTMLRequest(
-            subject="Updated Meeting"
+            subject="Updated Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
         )
 
         with patch.object(
@@ -762,16 +766,22 @@ class TestDataclasses:
         assert response.context is None
         assert response.value is None
 
-    def test_update_calendar_event_request_defaults(self):
-        """Test UpdateCalendarEventRequest default values."""
-        request = UpdateCalendarEventRequest()
-        assert request.subject is None
+    def test_update_calendar_event_request_optional_defaults(self):
+        """Test UpdateCalendarEventRequest optional default values."""
+        request = UpdateCalendarEventRequest(
+            subject="Team Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
+        )
+        assert request.subject == "Team Meeting"
         assert request.is_all_day is None
 
     def test_update_calendar_event_request_with_values(self):
         """Test UpdateCalendarEventRequest with values."""
         request = UpdateCalendarEventRequest(
             subject="Team Standup",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T09:30:00Z"},
             importance="Normal",
             is_all_day=False,
             is_reminder_on=True,
@@ -781,16 +791,22 @@ class TestDataclasses:
         assert request.is_reminder_on is True
         assert request.reminder_minutes_before_start == 15
 
-    def test_update_calendar_event_html_request_defaults(self):
-        """Test UpdateCalendarEventHTMLRequest default values."""
-        request = UpdateCalendarEventHTMLRequest()
-        assert request.subject is None
+    def test_update_calendar_event_html_request_optional_defaults(self):
+        """Test UpdateCalendarEventHTMLRequest optional default values."""
+        request = UpdateCalendarEventHTMLRequest(
+            subject="HTML Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
+        )
+        assert request.subject == "HTML Meeting"
         assert request.body is None
 
     def test_update_calendar_event_html_request_with_values(self):
         """Test UpdateCalendarEventHTMLRequest with values."""
         request = UpdateCalendarEventHTMLRequest(
             subject="HTML Meeting",
+            start={"dateTime": "2026-10-12T09:00:00Z"},
+            end={"dateTime": "2026-10-12T10:00:00Z"},
             body={"contentType": "HTML", "content": "<p>Meeting details</p>"},
             is_all_day=True
         )

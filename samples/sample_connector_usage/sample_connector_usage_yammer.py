@@ -44,7 +44,7 @@ def example_1_get_networks():
 
         with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                networks = client.get_networks()
+                networks = client.list_networks()
 
                 if networks:
                     print(f"Found {len(networks)} network(s):")
@@ -68,7 +68,7 @@ def example_2_get_groups():
         with YammerClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
                 # Get only groups the user belongs to
-                groups = client.get_groups(mine=1)
+                groups = client.list_groups(mine=1)
 
                 if groups:
                     print(f"Found {len(groups)} group(s):")
@@ -154,7 +154,7 @@ def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                result = client.post_message(input=message)
+                result = client.list_post_message(input=message)
 
                 if result:
                     print("Message posted successfully!")

@@ -182,7 +182,7 @@ async def example_4_list_event_hubs():
 
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_event_hubs()
+                items = [item async for item in client.list_event_hubs()]
                 print(f"Event Hubs: {result}")
 
             except ConnectorException as ex:
@@ -203,9 +203,9 @@ async def example_5_list_consumer_groups():
 
         async with EventhubsClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = await client.get_consumer_groups(
+                items = [item async for item in client.list_consumer_groups(
                     event_hub_name=EVENT_HUB_NAME
-                )
+                )]
                 print(f"Consumer groups for '{EVENT_HUB_NAME}': {result}")
 
             except ConnectorException as ex:

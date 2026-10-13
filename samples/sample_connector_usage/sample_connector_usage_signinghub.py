@@ -28,6 +28,7 @@ from azure.connectors import ConnectorException
 from azure.connectors.signinghub import (
     SigninghubClient,
     CheckBoxFieldRequest,
+    FieldDimension,
 )
 
 # Connection runtime URL format:
@@ -43,7 +44,7 @@ def example_1_get_contacts():
 
         with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.contacts_get(
+                result = client.list_contacts_get(
                     record_per_page=10,
                     page_no=1,
                 )
@@ -64,7 +65,14 @@ def example_2_add_check_box_field():
 
         with SigninghubClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                request = CheckBoxFieldRequest()
+                request = CheckBoxFieldRequest(
+                    order=1,
+                    page_no=1,
+                    dimensions=FieldDimension(x=120.0, y=220.0, width=18.0, height=18.0),
+                    field_name="Approve",
+                    value="false",
+                    validation_rule="none",
+                )
 
                 result = client.checkbox_add_check_box(
                     input=request,

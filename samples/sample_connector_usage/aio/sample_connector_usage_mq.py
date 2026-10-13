@@ -65,7 +65,7 @@ async def example_1_send_message():
 
                 result = await client.send(input=options)
 
-                if result:
+                if items:
                     print("Message sent successfully:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -93,7 +93,7 @@ async def example_2_browse_message():
 
                 result = await client.read(input=options)
 
-                if result:
+                if items:
                     print("Browsed message:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -125,7 +125,7 @@ async def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                result = await client.read_all(input=options)
+                items = [item async for item in client.list_read_all(input=options)]
 
                 if result and isinstance(result, list):
                     print(f"Browsed {len(result)} messages:")
@@ -158,7 +158,7 @@ async def example_4_receive_message():
 
                 result = await client.receive(input=options)
 
-                if result:
+                if items:
                     print("Received message (removed from queue):")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -188,7 +188,7 @@ async def example_5_delete_message():
 
                 result = await client.delete(input=options)
 
-                if result:
+                if items:
                     print("Deleted message:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print("  Success: True")

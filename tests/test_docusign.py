@@ -19,6 +19,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 class TestDocusignClientInitialization:
@@ -219,7 +220,10 @@ class TestGetLoginAccountsAsync:
             "https://example.azure.com/connections/test",
             credential=mock_credential,
         )
-        mock_response = MockResponse(status=200, text='{"accounts": [{"accountId": "123"}]}')
+        mock_response = MockResponse(
+            status=200,
+            text='{"loginAccounts": [{"accountId": "123"}]}',
+        )
 
         with patch.object(
             client._http_client,
@@ -227,14 +231,13 @@ class TestGetLoginAccountsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_login_accounts()
+            result = await resolve_generated_result(client.list_login_accounts())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert path.endswith("/oauth/userinfo")
-            assert result is not None
-            assert "accounts" in result
+            assert result == [{"accountId": "123"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -252,7 +255,7 @@ class TestGetLoginAccountsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_login_accounts()
+                await resolve_generated_result(client.list_login_accounts())
 
 
 class TestSearchListEnvelopesAsync:

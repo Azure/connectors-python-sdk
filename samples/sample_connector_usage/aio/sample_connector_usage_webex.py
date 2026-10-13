@@ -57,7 +57,7 @@ async def example_2_get_spaces() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with WebexClient(CONNECTION_RUNTIME_URL, credential) as client:
-            spaces = await client.get_spaces()
+            spaces = [item async for item in client.list_spaces()]
             print(f"Spaces: {spaces}")
 
 

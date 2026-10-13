@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 import json
 
@@ -137,17 +137,18 @@ class HtmlToPdfInput:
     HTML to PDF
     """
 
-    html: Optional[str] = None
+    html: str
     """Input HTML code to be converted."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base file name for new PDF files."""
-    margins: Optional[str] = None
+    margins: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Override default margins with custom values (the order is `top right bottom
     left`). You can als set all margins: `10px`, `5mm`, `5in` for all sides.
     """
-    paper_size: Optional[str] = field(
+    paper_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "paperSize"},
     )
     """
@@ -156,18 +157,19 @@ class HtmlToPdfInput:
     or in (inches) with width and height separated by space like this: 200 300,
     200px 300px, 200mm 300mm, 20cm 30cm or 6in 8in.
     """
-    orientation: Optional[str] = None
+    orientation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """PDF page orientation."""
-    print_background: Optional[bool] = field(
+    print_background: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "printBackground"},
     )
     """Enable or disable printing of document background"""
-    header: Optional[str] = None
+    header: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Set to HTML for header to be applied on every page at the header."""
-    footer: Optional[str] = None
+    footer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Set to HTML for footer to be applied on every page at the bottom."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -175,15 +177,16 @@ class HtmlToPdfInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -200,30 +203,33 @@ class HtmlToPdfResponse:
     Response for HTML to PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -235,20 +241,21 @@ class UrlToPdfInput:
     URL to PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """
     Link to input HTML file or website page to be converted. You can pass link
     to file from Google Drive, Dropbox or another online file service that can
     generate shareable links.
     """
-    margins: Optional[str] = None
+    margins: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Margins to be used in output document. Set to css style margins like 10px,
     5mm, 5in for all sides or 5px 5px 5px 5px (the order of margins is top,
     right, bottom, left).
     """
-    paper_size: Optional[str] = field(
+    paper_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "paperSize"},
     )
     """
@@ -257,18 +264,19 @@ class UrlToPdfInput:
     mm or in (inches) with width and height separated by space like this: 200
     300, 200px 300px, 200mm 300mm, 20cm 30cm or 6in 8in.
     """
-    orientation: Optional[str] = None
+    orientation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output page orientation"""
-    print_background: Optional[bool] = field(
+    print_background: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "printBackground"},
     )
     """Enable or disable printing of document background"""
-    header: Optional[str] = None
+    header: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Set to HTML for header to be applied on every page at the header."""
-    footer: Optional[str] = None
+    footer: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Set to HTML for footer to be applied on every page at the bottom."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -276,15 +284,16 @@ class UrlToPdfInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -301,30 +310,33 @@ class UrlToPdfResponse:
     Response for URL to PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -336,10 +348,11 @@ class PdfFillerInput:
     Add Text, Images, Form Fields to PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """Url to the input PDF document"""
-    annotations_string: Optional[str] = field(
+    annotations_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "annotationsString"},
     )
     """
@@ -347,8 +360,9 @@ class PdfFillerInput:
     \"x;y;page;text\". Refer to PDF.co documentations for more advanced formats
     and examples.
     """
-    images_string: Optional[str] = field(
+    images_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "imagesString"},
     )
     """
@@ -356,21 +370,22 @@ class PdfFillerInput:
     \"x;y;page;urltoimage;link;width;height\". Refer to PDF.co documentations
     for more advanced formats and examples.
     """
-    fields_string: Optional[str] = field(
+    fields_string: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "fieldsString"},
     )
     """
     Fill PDF form fields. Format should be like \"page;fieldName;value\". Refer
     to PDF.co documentations for more advanced formats and examples.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output PDF Name"""
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether to return output in response or link to output file.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -378,15 +393,16 @@ class PdfFillerInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples and
     more.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -403,30 +419,33 @@ class PdfFillerResponse:
     Response for Add Text, Images, Form Fields to PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -438,7 +457,7 @@ class MergePdfSimplifiedInput:
     Merge PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """
     The comma-separated list of links to PDFs files. Supports links to external
     sites, `filetoken://..` from PDF.co Files storage and links to G Drive,
@@ -446,7 +465,7 @@ class MergePdfSimplifiedInput:
     For password protected PDF files, use PDF Security module first to unlock
     input pdf.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -454,14 +473,15 @@ class MergePdfSimplifiedInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -478,30 +498,33 @@ class MergePdfSimplifiedResponse:
     Response for Merge PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -513,7 +536,7 @@ class MergePdfInput:
     Merge PDF (Advanced)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     The comma-separated list of links to PDFs, documents, spreadsheets, images.
     Supports links to external sites, `filetoken://..` from PDF.co Files
@@ -521,7 +544,7 @@ class MergePdfInput:
     accessible without password. For password protected PDF files, use PDF
     Security module first to unlock input pdf.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -529,14 +552,15 @@ class MergePdfInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -553,30 +577,33 @@ class MergePdfResponse:
     Response for Merge PDF (Advanced)
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -588,21 +615,21 @@ class SplitPdfInput:
     Split PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """Url to the source PDF document"""
-    pages: Optional[str] = None
+    pages: str
     """
     Comma-separated list of page indices (or ranges) to split into. First page
     is 1 (one). Example: \"1,2-5,7-\". Special cases: to extract each page into
     separate PDF use to `*`.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether to return output in response or link to output file.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base file name for new PDF files"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -610,14 +637,15 @@ class SplitPdfInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """Creates a background processing job."""
@@ -629,32 +657,35 @@ class SplitPdfResponse:
     Response for Split PDF
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -666,10 +697,9 @@ class SplitPdf2Input:
     Split PDF (Advanced)
     """
 
-    url: Optional[str] = None
+    url: str
     """Url to the source PDF document"""
-    search_string: Optional[str] = field(
-        default=None,
+    search_string: str = dataclass_field(
         metadata={"wire_name": "searchString"},
     )
     """
@@ -677,22 +707,25 @@ class SplitPdf2Input:
     visit
     https://developer.pdf.co/api/pdf-split/index.html?utm_source=api-docs#post-tag-pdf-split2
     """
-    exclude_key_pages: Optional[bool] = field(
+    exclude_key_pages: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "excludeKeyPages"},
     )
     """Set to true if you want to exclude pages where text was found"""
-    regex_search: Optional[bool] = field(
+    regex_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "regexSearch"},
     )
     """Set to true to enable regular expressions for the search string"""
-    case_sensitive: Optional[bool] = field(
+    case_sensitive: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "caseSensitive"},
     )
     """Set to true to enable case-sensitive search."""
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     the language for OCR (text from image) to use for scanned PDF, PNG, and JPG
     documents input when extracting text. The default is \"eng\". Other
@@ -702,13 +735,13 @@ class SplitPdf2Input:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether to return output in response or link to output file.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base file name for new PDF files"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -716,14 +749,15 @@ class SplitPdf2Input:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """Creates a background processing job."""
@@ -735,32 +769,35 @@ class SplitPdf2Response:
     Response for Split PDF (Advanced)
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""
@@ -772,26 +809,26 @@ class PDFSearchTextInput:
     PDF Search Text
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_string: Optional[str] = field(
-        default=None,
+    search_string: str = dataclass_field(
         metadata={"wire_name": "searchString"},
     )
     """
     Text to search can support regular expressions if you set the \"Regex
     Search\" parameter to true.
     """
-    regex_search: Optional[bool] = field(
+    regex_search: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "regexSearch"},
     )
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. IMPORTANT: the
     very first page starts at 0 (zero). To set a range use the dash -, for
@@ -802,16 +839,18 @@ class PDFSearchTextInput:
     from the 8th (index = 7) page till the end of the document, The input must
     be in string format.
     """
-    inline: Optional[bool] = None
-    word_matching_mode: Optional[str] = field(
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    word_matching_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "wordMatchingMode"},
     )
     """Values can be either 'SmartMatch', 'ExactMatch', or 'None'."""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -820,7 +859,7 @@ class PDFSearchTextInput:
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
@@ -834,33 +873,36 @@ class PDFSearchTextResponse:
     Response for PDF Search Text
     """
 
-    body: Optional[List[Dict[str, Any]]] = None
+    body: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -870,42 +912,42 @@ class DocumentParserInput:
     Document Parser
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage. To upload files via API, Check out the Files
     Upload section at https://developer.pdf.co/api/file-upload/index.html
     """
-    template_id: Optional[str] = field(
+    template_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "templateId"},
     )
     """
     Set ID of document parser template to be used. View and manage your
     templates at https://app.pdf.co/document-parser
     """
-    output_format: Optional[str] = field(
-        default=None,
+    output_format: str = dataclass_field(
         metadata={"wire_name": "outputFormat"},
     )
     """
     Default is JSON. You can override the default output format to CSV or XML
     to generate CSV or XML output accordingly.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Set to true to return results inside the response. Otherwise, the endpoint
     will return a link to the output file generated
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     https://developer.pdf.co/api/profiles/index.html for profile examples,
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -913,8 +955,9 @@ class DocumentParserInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -931,28 +974,31 @@ class DocumentParserResponse:
     Response for Document Parser
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output URL"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
-    error: Optional[bool] = None
-    job_id: Optional[str] = field(
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
-    status: Optional[int] = None
-    name: Optional[str] = None
-    credits: Optional[int] = None
-    remaining_credits: Optional[int] = field(
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
-    duration: Optional[int] = None
-    message: Optional[str] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -961,7 +1007,7 @@ class JobCheckInput:
     Background Jobs Check
     """
 
-    jobid: Optional[str] = None
+    jobid: str
     """PDF.co background Job Id"""
 
 
@@ -971,40 +1017,45 @@ class JobCheckResponse:
     Response for Background Jobs Check
     """
 
-    status: Optional[str] = None
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
     """status"""
-    message: Optional[str] = None
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """message"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    job_duration: Optional[int] = field(
+    job_duration: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobDuration"},
     )
     """jobDuration"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    error_code: Optional[int] = field(
+    error_code: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "errorCode"},
     )
     """errorCode"""
@@ -1016,27 +1067,29 @@ class BarcodeGeneratorInput:
     Barcode Generator
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set async to true for long processes to run in the background, API will
     then return a jobId which you can use with /job/check endpoint to check the
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish.
     """
-    value: Optional[str] = None
+    value: str
     """Set the string value to encode inside the barcode."""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """Set the barcode type, QRCode By default."""
-    decoration_image: Optional[str] = field(
+    decoration_image: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "decorationImage"},
     )
     """
     Set this to the image that you want to be inserted the logo inside the
     QR-Code barcode.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1045,7 +1098,7 @@ class BarcodeGeneratorInput:
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1053,7 +1106,7 @@ class BarcodeGeneratorInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co Knowledgebase
@@ -1067,27 +1120,29 @@ class BarcodeGeneratorResponse:
     Response for Barcode Generator
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1097,12 +1152,12 @@ class BarcodeReaderInput:
     Barcode Reader
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    types: Optional[str] = None
+    types: str
     """
     Set the barcode type, QRCode is default. You can also combine types by
     comma, example \"QRCode,Code128,Code39,Interleaved2of5,EAN13\". All
@@ -1117,7 +1172,7 @@ class BarcodeReaderInput:
     QRCode, Rectangle, RoyalMail, RoyalMailKIX, Segment, Trioptic,
     UnderlinedField, UPCA, UPCE, UPU, VerticalLine.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-Separated list of page indices (or ranges) to process. IMPORTANT: the
     very first page starts at 0 (zero). To set a range use the dash -, for
@@ -1127,16 +1182,17 @@ class BarcodeReaderInput:
     means the first page, then the 3rd page to the 6th page, and then the range
     from the 8th (index = 7) page till the end of the document.
     """
-    encrypt: Optional[bool] = None
+    encrypt: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """encrypt"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1153,32 +1209,35 @@ class BarcodeReaderResponse:
     Response for Barcode Reader
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    barcodes: Optional[List[Dict[str, Any]]] = None
+    barcodes: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """barcodes"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1188,13 +1247,14 @@ class PDFInfoReaderInput:
     PDF Info Reader
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1203,9 +1263,9 @@ class PDFInfoReaderInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configuration for fine-tuning and
     extra options, Explore PDF.co knowledgebase
@@ -1219,27 +1279,29 @@ class PDFInfoReaderResponse:
     Response for PDF Info Reader
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    info: Optional[Dict[str, Any]] = None
+    info: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """info"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1249,13 +1311,14 @@ class PDFFormsInfoReaderInput:
     PDF Forms Info Reader
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1264,9 +1327,9 @@ class PDFFormsInfoReaderInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configuration for fine-tuning and
     extra options, Explore PDF.co knowledgebase
@@ -1280,27 +1343,29 @@ class PDFFormsInfoReaderResponse:
     Response for PDF Forms Info Reader
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    info: Optional[Dict[str, Any]] = None
+    info: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """info"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1310,12 +1375,12 @@ class PDFFindTableInput:
     PDF Find Table
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. IMPORTANT: the
     very first page starts at 0 (zero). To set a range use the dash -, for
@@ -1325,16 +1390,16 @@ class PDFFindTableInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    inline: Optional[bool] = None
-    password: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1342,8 +1407,9 @@ class PDFFindTableInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1360,34 +1426,37 @@ class PDFFindTableResponse:
     Response for PDF Find Table
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1397,27 +1466,29 @@ class SearchAndReplaceInput:
     PDF Search and Replace Text
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_strings: Optional[List[str]] = field(
-        default=None,
+    search_strings: List[str] = dataclass_field(
         metadata={"wire_name": "searchStrings"},
     )
     """Search Strings"""
-    replace_strings: Optional[List[str]] = field(
+    replace_strings: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replaceStrings"},
     )
     """Replacement Strings"""
-    case_sensitive: Optional[bool] = field(
+    case_sensitive: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "caseSensitive"},
     )
-    replacement_limit: Optional[int] = field(
+    replacement_limit: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replacementLimit"},
     )
     """
@@ -1425,9 +1496,9 @@ class SearchAndReplaceInput:
     value is 0 which means unlimited searches and replacements so every found
     occurrence will be replaced.
     """
-    regex: Optional[bool] = None
+    regex: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true to use regular expression for a search string(s)."""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1437,11 +1508,11 @@ class SearchAndReplaceInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The password of the PDF file"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1449,8 +1520,9 @@ class SearchAndReplaceInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1467,31 +1539,34 @@ class SearchAndReplaceResponse:
     Response for PDF Search and Replace Text
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1500,26 +1575,25 @@ class SearchAndReplaceWithImageInput:
     PDF Search and Replace Text with Image
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    case_sensitive: Optional[bool] = field(
+    case_sensitive: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "caseSensitive"},
     )
-    search_string: Optional[str] = field(
-        default=None,
+    search_string: str = dataclass_field(
         metadata={"wire_name": "searchString"},
     )
     """Single text replacement. Word or phrase to be replaced"""
-    replace_image: Optional[str] = field(
-        default=None,
+    replace_image: str = dataclass_field(
         metadata={"wire_name": "replaceImage"},
     )
     """Image URL to be inserted in the doc."""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1529,8 +1603,9 @@ class SearchAndReplaceWithImageInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1539,9 +1614,10 @@ class SearchAndReplaceWithImageInput:
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish..
     """
-    regex: Optional[bool] = None
-    replacement_limit: Optional[int] = field(
+    regex: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    replacement_limit: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replacementLimit"},
     )
     """
@@ -1549,7 +1625,7 @@ class SearchAndReplaceWithImageInput:
     value is 0 which means unlimited searches and replacements so every found
     occurrence will be replaced.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1557,7 +1633,7 @@ class SearchAndReplaceWithImageInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
 
 
@@ -1567,32 +1643,35 @@ class SearchAndReplaceWithImageResponse:
     Response for PDF Search and Replace Text with Image
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1602,24 +1681,25 @@ class SearchAndDeleteTextInput:
     PDF Search and Delete Text from PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    search_strings: Optional[List[str]] = field(
-        default=None,
+    search_strings: List[str] = dataclass_field(
         metadata={"wire_name": "searchStrings"},
     )
     """searchStrings"""
-    case_sensitive: Optional[bool] = field(
+    case_sensitive: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "caseSensitive"},
     )
-    regex: Optional[bool] = None
+    regex: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Set to true to use regular expression for a search string(s)."""
-    replacement_limit: Optional[int] = field(
+    replacement_limit: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "replacementLimit"},
     )
     """
@@ -1627,7 +1707,7 @@ class SearchAndDeleteTextInput:
     value is 0 which means unlimited searches and replacements so every found
     occurrence will be replaced.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1635,11 +1715,11 @@ class SearchAndDeleteTextInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1649,14 +1729,15 @@ class SearchAndDeleteTextInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1673,32 +1754,35 @@ class SearchAndDeleteTextResponse:
     Response for PDF Search and Delete Text from PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1708,12 +1792,12 @@ class PDFSearchableInput:
     Make Scanned PDF to Text Searchable
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     the language for OCR (text from image) to use for scanned PDF, PNG, and JPG
     documents input when extracting text. The default is \"eng\". Other
@@ -1723,7 +1807,7 @@ class PDFSearchableInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1733,10 +1817,11 @@ class PDFSearchableInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of PDF file"""
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1745,7 +1830,7 @@ class PDFSearchableInput:
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
@@ -1759,32 +1844,35 @@ class PDFSearchableResponse:
     Response for Make Scanned PDF to Text Searchable
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1794,12 +1882,12 @@ class PDFUnSearchableInput:
     PDF to Scanned PDF
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1809,10 +1897,11 @@ class PDFUnSearchableInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of PDF file"""
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1821,7 +1910,7 @@ class PDFUnSearchableInput:
     status of the process and retrieve the output while you can proceed with
     other tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
@@ -1835,32 +1924,35 @@ class PDFUnSearchableResponse:
     Response for PDF to Scanned PDF
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1870,12 +1962,12 @@ class PDFToCSVInput:
     PDF To CSV
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -1885,13 +1977,13 @@ class PDFToCSVInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    inline: Optional[bool] = None
-    unwrap: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -1901,14 +1993,15 @@ class PDFToCSVInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -1917,16 +2010,17 @@ class PDFToCSVInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -1934,7 +2028,7 @@ class PDFToCSVInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -1949,29 +2043,31 @@ class PDFToCSVResponse:
     Response for PDF To CSV
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -1981,12 +2077,12 @@ class PDFToJSONInput:
     PDF To JSON
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -1996,13 +2092,13 @@ class PDFToJSONInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    inline: Optional[bool] = None
-    unwrap: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2012,14 +2108,15 @@ class PDFToJSONInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2028,16 +2125,17 @@ class PDFToJSONInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2045,7 +2143,7 @@ class PDFToJSONInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2060,34 +2158,37 @@ class PDFToJSONResponse:
     Response for PDF To JSON
     """
 
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2097,12 +2198,12 @@ class PDFToJSONMetaInput:
     PDF To JSON (AI Powered)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -2112,13 +2213,13 @@ class PDFToJSONMetaInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    inline: Optional[bool] = None
-    unwrap: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2128,14 +2229,15 @@ class PDFToJSONMetaInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2144,16 +2246,17 @@ class PDFToJSONMetaInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2161,7 +2264,7 @@ class PDFToJSONMetaInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2176,34 +2279,37 @@ class PDFToJSONMetaResponse:
     Response for PDF To JSON (AI Powered)
     """
 
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2213,12 +2319,12 @@ class PDFToTextInput:
     PDF To Text (with layout and ocr)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -2228,13 +2334,13 @@ class PDFToTextInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    inline: Optional[bool] = None
-    unwrap: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2244,14 +2350,15 @@ class PDFToTextInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2260,16 +2367,17 @@ class PDFToTextInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2277,7 +2385,7 @@ class PDFToTextInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2292,34 +2400,37 @@ class PDFToTextResponse:
     Response for PDF To Text (with layout and ocr)
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2329,13 +2440,13 @@ class PDFToTextSimpleInput:
     PDF To Text (without layout and ocr)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
-    pages: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2345,8 +2456,9 @@ class PDFToTextSimpleInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2355,11 +2467,11 @@ class PDFToTextSimpleInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2375,34 +2487,37 @@ class PDFToTextSimpleResponse:
     Response for PDF To Text (without layout and ocr)
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2412,12 +2527,12 @@ class PDFToXLSInput:
     PDF To XLS
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -2427,12 +2542,12 @@ class PDFToXLSInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    unwrap: Optional[str] = None
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2442,14 +2557,15 @@ class PDFToXLSInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2458,16 +2574,17 @@ class PDFToXLSInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2475,7 +2592,7 @@ class PDFToXLSInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2490,32 +2607,35 @@ class PDFToXLSResponse:
     Response for PDF To XLS
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2525,12 +2645,12 @@ class PDFToXLSXInput:
     PDF To XLSX
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -2540,12 +2660,12 @@ class PDFToXLSXInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    unwrap: Optional[str] = None
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2555,14 +2675,15 @@ class PDFToXLSXInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2571,16 +2692,17 @@ class PDFToXLSXInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2588,7 +2710,7 @@ class PDFToXLSXInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2603,32 +2725,35 @@ class PDFToXLSXResponse:
     Response for PDF To XLSX
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2638,13 +2763,13 @@ class PDFToXMLInput:
     PDF To XML
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
-    lang: Optional[str] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Set the language for OCR (text from image) to use for scanned PDF, PNG, and
     JPG documents input when extracting text. The default is \"eng\". Other
@@ -2654,12 +2779,12 @@ class PDFToXMLInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    unwrap: Optional[str] = None
+    unwrap: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Unwrap lines into a single line within table cells when lineGrouping is
     enabled.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2669,14 +2794,15 @@ class PDFToXMLInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2685,16 +2811,17 @@ class PDFToXMLInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """password"""
-    line_grouping: Optional[str] = field(
+    line_grouping: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineGrouping"},
     )
     """Line grouping within table cells. Set to 1 to enable the grouping."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2702,7 +2829,7 @@ class PDFToXMLInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     This parameter can be used to set additional configurations for fine-tuning
     and to enable more options. Visit PDF.co knowledgebase
@@ -2717,34 +2844,37 @@ class PDFToXMLResponse:
     Response for PDF To XML
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2754,14 +2884,14 @@ class PDFToJPGInput:
     PDF to JPG
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """inline"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2771,13 +2901,13 @@ class PDFToJPGInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2785,8 +2915,9 @@ class PDFToJPGInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2795,7 +2926,7 @@ class PDFToJPGInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -2809,32 +2940,35 @@ class PDFToJPGResponse:
     Response for PDF to JPG
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2844,14 +2978,14 @@ class PDFToPNGInput:
     PDF to PNG
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """inline"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2861,13 +2995,13 @@ class PDFToPNGInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2875,8 +3009,9 @@ class PDFToPNGInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2885,7 +3020,7 @@ class PDFToPNGInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -2899,32 +3034,35 @@ class PDFToPNGResponse:
     Response for PDF to PNG
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -2934,14 +3072,14 @@ class PDFToWEBPInput:
     PDF to WEBP
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """inline"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -2951,13 +3089,13 @@ class PDFToWEBPInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -2965,8 +3103,9 @@ class PDFToWEBPInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -2975,7 +3114,7 @@ class PDFToWEBPInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -2989,32 +3128,35 @@ class PDFToWEBPResponse:
     Response for PDF to WEBP
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3024,14 +3166,14 @@ class PDFToTIFFInput:
     PDF to TIFF
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """inline"""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -3041,13 +3183,13 @@ class PDFToTIFFInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    rect: Optional[str] = None
+    rect: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Defines coordinates for extraction, e.g. 51.8, 114.8, 235.5, 204.0. Use
     PDF.co PDF Edit Add Helper (https://app.pdf.co/pdf-edit-add-helper) to get
     or measure pdf coordinates.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3055,8 +3197,9 @@ class PDFToTIFFInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3065,7 +3208,7 @@ class PDFToTIFFInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3079,31 +3222,34 @@ class PDFToTIFFResponse:
     Response for PDF to TIFF
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3113,12 +3259,12 @@ class PDFFromCSVInput:
     PDF from CSV
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -3128,9 +3274,9 @@ class PDFFromCSVInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3138,8 +3284,9 @@ class PDFFromCSVInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3148,7 +3295,7 @@ class PDFFromCSVInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3162,31 +3309,34 @@ class PDFFromCSVResponse:
     Response for PDF from CSV
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3196,12 +3346,12 @@ class PDFFromDocInput:
     PDF from Document (Doc, DocX, RTF, TXT, XPS)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -3211,9 +3361,9 @@ class PDFFromDocInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3221,8 +3371,9 @@ class PDFFromDocInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3231,7 +3382,7 @@ class PDFFromDocInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3245,31 +3396,34 @@ class PDFFromDocResponse:
     Response for PDF from Document (Doc, DocX, RTF, TXT, XPS)
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3279,15 +3433,15 @@ class PDFFromImagesInput:
     PDF from Image
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Provide multiple URLS in comma separated format.
     Supports links from Google Drive, Dropbox, and PDF.co built-in files
     storage.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3295,8 +3449,9 @@ class PDFFromImagesInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3305,7 +3460,7 @@ class PDFFromImagesInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3319,31 +3474,34 @@ class PDFFromImagesResponse:
     Response for PDF from Image
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3353,13 +3511,14 @@ class PDFFromEmailInput:
     PDF from Email
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    embed_attachments: Optional[bool] = field(
+    embed_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "embedAttachments"},
     )
     """
@@ -3368,8 +3527,9 @@ class PDFFromEmailInput:
     don't want to embed attachments so it will convert only the body of the
     input email.
     """
-    convert_attachments: Optional[bool] = field(
+    convert_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "convertAttachments"},
     )
     """
@@ -3380,13 +3540,14 @@ class PDFFromEmailInput:
     Non-supported file types are added as PDF attachments (Adobe Reader or
     another viewer may be required to view PDF attachments).
     """
-    margins: Optional[str] = None
+    margins: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     set to CSS style margins like 10px, 5mm, 5in for all sides or 5px 5px 5px
     5px (the order of margins is top, right, bottom, left).
     """
-    paper_size: Optional[str] = field(
+    paper_size: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "paperSize"},
     )
     """
@@ -3395,10 +3556,10 @@ class PDFFromEmailInput:
     mm or in (inches) with width and height separated by space like this: 200
     300, 200px 300px, 200mm 300mm, 20cm 30cm or 6in 8in.
     """
-    orientation: Optional[str] = None
-    name: Optional[str] = None
+    orientation: Optional[str] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3406,8 +3567,9 @@ class PDFFromEmailInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3416,7 +3578,7 @@ class PDFFromEmailInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3430,31 +3592,34 @@ class PDFFromEmailResponse:
     Response for PDF from Email
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3464,36 +3629,38 @@ class PDFAddSecurityInput:
     PDF Add Security
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    owner_password: Optional[str] = field(
-        default=None,
+    owner_password: str = dataclass_field(
         metadata={"wire_name": "ownerPassword"},
     )
     """
     The main owner password that is used for document encryption and for
     setting/removing restrictions.
     """
-    user_password: Optional[str] = field(
+    user_password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "userPassword"},
     )
     """
     The optional user password will be asked for viewing and printing document.
     """
-    encryption_algorithm: Optional[str] = field(
+    encryption_algorithm: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "encryptionAlgorithm"},
     )
     """
     Encryption algorithm. Valid values: RC4_40bit, RC4_128bit, AES_128bit,
     AES_256bit. AES_128bit or higher is recommended
     """
-    allow_accessibility_support: Optional[bool] = field(
+    allow_accessibility_support: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowAccessibilitySupport"},
     )
     """
@@ -3501,8 +3668,9 @@ class PDFAddSecurityInput:
     restriction applies when userPassword (if any) is entered. This restriction
     does not apply if the user enters Owner Password.
     """
-    allow_assembly_document: Optional[bool] = field(
+    allow_assembly_document: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowAssemblyDocument"},
     )
     """
@@ -3510,8 +3678,9 @@ class PDFAddSecurityInput:
     when userPassword (if any) is entered. This restriction does not apply if
     the user enters Owner Password.
     """
-    allow_print_document: Optional[bool] = field(
+    allow_print_document: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowPrintDocument"},
     )
     """
@@ -3519,8 +3688,9 @@ class PDFAddSecurityInput:
     when userPassword (if any) is entered. This restriction does not apply if
     the user enters Owner Password.
     """
-    allow_fill_forms: Optional[bool] = field(
+    allow_fill_forms: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowFillForms"},
     )
     """
@@ -3529,8 +3699,9 @@ class PDFAddSecurityInput:
     userPassword (if any) is entered. This restriction does not apply if the
     user enters Owner Password.
     """
-    allow_modify_document: Optional[bool] = field(
+    allow_modify_document: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowModifyDocument"},
     )
     """
@@ -3538,8 +3709,9 @@ class PDFAddSecurityInput:
     applies when userPassword (if any) is entered. This restriction does not
     apply if the user enters Owner Password.
     """
-    allow_content_extraction: Optional[bool] = field(
+    allow_content_extraction: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowContentExtraction"},
     )
     """
@@ -3547,8 +3719,9 @@ class PDFAddSecurityInput:
     applies when userPassword (if any) is entered. This restriction does not
     apply if the user enters Owner Password.
     """
-    allow_modify_annotations: Optional[bool] = field(
+    allow_modify_annotations: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowModifyAnnotations"},
     )
     """
@@ -3556,8 +3729,9 @@ class PDFAddSecurityInput:
     document. Note: this restriction applies when userPassword (if any) is
     entered. This restriction does not apply if the user enters Owner Password.
     """
-    print_quality: Optional[str] = field(
+    print_quality: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "printQuality"},
     )
     """
@@ -3565,9 +3739,9 @@ class PDFAddSecurityInput:
     Note: this restriction applies when userPassword (if any) is entered. This
     restriction does not apply if the user enters Owner Password.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3575,8 +3749,9 @@ class PDFAddSecurityInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3585,7 +3760,7 @@ class PDFAddSecurityInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3599,31 +3774,34 @@ class PDFAddSecurityResponse:
     Response for PDF Add Security
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3633,16 +3811,16 @@ class PDFSecurityRemoveInput:
     PDF Remove Security
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    password: Optional[str] = None
+    password: str
     """The owner/user password to open files and remove security features."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3650,8 +3828,9 @@ class PDFSecurityRemoveInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3660,7 +3839,7 @@ class PDFSecurityRemoveInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3674,31 +3853,34 @@ class PDFSecurityRemoveResponse:
     Response for PDF Remove Security
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3708,19 +3890,20 @@ class PDFFromXLSXLSXInput:
     PDF From Spreadsheet
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3728,8 +3911,9 @@ class PDFFromXLSXLSXInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3738,7 +3922,7 @@ class PDFFromXLSXLSXInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3752,31 +3936,34 @@ class PDFFromXLSXLSXResponse:
     Response for PDF From Spreadsheet
     """
 
-    url: Optional[str] = None
-    job_id: Optional[str] = field(
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3786,29 +3973,32 @@ class XLStoCSVInput:
     Spreadsheet to CSV
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    quotation_symbol: Optional[str] = field(
+    quotation_symbol: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "quotationSymbol"},
     )
     """Set the CSV Quotation Symbol"""
-    separator_symbol: Optional[str] = field(
+    separator_symbol: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "separatorSymbol"},
     )
     """Set the CSV Separator Symbol"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3816,8 +4006,9 @@ class XLStoCSVInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3826,7 +4017,7 @@ class XLStoCSVInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3840,27 +4031,29 @@ class XLStoCSVResponse:
     Response for Spreadsheet to CSV
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3870,19 +4063,20 @@ class XLStoJSONInput:
     Spreadsheet to JSON
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3890,8 +4084,9 @@ class XLStoJSONInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3900,7 +4095,7 @@ class XLStoJSONInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3914,27 +4109,29 @@ class XLStoJSONResponse:
     Response for Spreadsheet to JSON
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -3944,19 +4141,20 @@ class XLStoHTMLInput:
     Spreadsheet to HTML
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -3964,8 +4162,9 @@ class XLStoHTMLInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -3974,7 +4173,7 @@ class XLStoHTMLInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -3988,27 +4187,29 @@ class XLStoHTMLResponse:
     Response for Spreadsheet to HTML
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4018,19 +4219,20 @@ class XLStoTXTInput:
     Spreadsheet to TXT
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4038,8 +4240,9 @@ class XLStoTXTInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4048,7 +4251,7 @@ class XLStoTXTInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -4062,27 +4265,29 @@ class XLStoTXTResponse:
     Response for Spreadsheet to TXT
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4092,19 +4297,20 @@ class XLStoXMLInput:
     Spreadsheet to XML
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    worksheet_index: Optional[str] = field(
+    worksheet_index: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "worksheetIndex"},
     )
     """Set the WorkSheet index (Default is 0)."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output."""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4112,8 +4318,9 @@ class XLStoXMLInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4122,7 +4329,7 @@ class XLStoXMLInput:
     of the process and retrieve the output while you can proceed with other
     tasks without waiting for this process to finish.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     You can set additional and extra options using this parameter that allows
     you to set custom configuration. Explore PDF.co knowledgebase
@@ -4136,27 +4343,29 @@ class XLStoXMLResponse:
     Response for Spreadsheet to XML
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4166,14 +4375,14 @@ class PDFRotatePagesInput:
     Rotate PDF Pages
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    angle: Optional[int] = None
+    angle: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Angle in degrees. Supported values 90, 180, and 270."""
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -4183,7 +4392,7 @@ class PDFRotatePagesInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4191,16 +4400,17 @@ class PDFRotatePagesInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4217,32 +4427,35 @@ class PDFRotatePagesResponse:
     Response for Rotate PDF Pages
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4252,12 +4465,12 @@ class PDFAutoRotatePagesInput:
     Rotate PDF Pages (Auto)
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    lang: Optional[str] = None
+    lang: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     the language for OCR (text from image) to use for scanned PDF, PNG, and JPG
     documents input when extracting text. The default is \"eng\". Other
@@ -4267,7 +4480,7 @@ class PDFAutoRotatePagesInput:
     You can also use 2 languages simultaneously like this: eng+deu or jpn+kor
     (any combination).
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4275,16 +4488,17 @@ class PDFAutoRotatePagesInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4301,32 +4515,35 @@ class PDFAutoRotatePagesResponse:
     Response for Rotate PDF Pages (Auto)
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4336,12 +4553,12 @@ class PDFDeletePagesInput:
     PDF Delete Pages
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    pages: Optional[str] = None
+    pages: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Comma-separated list of page indices (or ranges) to process. The very first
     page starts at 0 (zero). To set a range use the dash -, for example:
@@ -4351,9 +4568,9 @@ class PDFDeletePagesInput:
     means first page, then 3rd page to 6th page, and then the range from 8th
     (index = 7) page till the end of the document.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4361,14 +4578,15 @@ class PDFDeletePagesInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4385,32 +4603,35 @@ class PDFDeletePagesResponse:
     Response for PDF Delete Pages
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4420,14 +4641,14 @@ class PDFCompressInput:
     PDF Compress and Optimize
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """File name for the generated output"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4435,16 +4656,17 @@ class PDFCompressInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4461,32 +4683,35 @@ class PDFCompressResponse:
     Response for PDF Compress and Optimize
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4496,34 +4721,35 @@ class PDFClassifierInput:
     Document Classifier
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    rulescsv: Optional[str] = None
+    rulescsv: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Define custom classification rules in CSV format. Rules are in CSV format
     where each row contains: \"class name, logic (AND or OR (default)), and
     keywords\" separated by a comma. Each row is separated by the \\n symbol.
     """
-    rulescsvurl: Optional[str] = None
+    rulescsvurl: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Instead of inline CSV you can use this parameter and set the URL to a CSV
     file with classification rules. This is useful if you have a separate
     developer working on CSV rules.
     """
-    case_sensitive: Optional[bool] = field(
+    case_sensitive: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "caseSensitive"},
     )
     """Defines if keywords in rules are case-sensitive or not."""
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Set to true to return results inside the response. Otherwise, the endpoint
     will return a link to the output file generated.
     """
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4531,16 +4757,17 @@ class PDFClassifierInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    password: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Password of the PDF file"""
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4557,34 +4784,37 @@ class PDFClassifierResponse:
     Response for Document Classifier
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """pageCount"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4594,47 +4824,48 @@ class EmailSendInput:
     Send Email with Attachments
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "from"})
+    from_: str = dataclass_field(metadata={"wire_name": "from"})
     """
     The \"From\" field with sender name and email. Example: John Doe
     <john@example.com>
     """
-    to: Optional[str] = None
+    to: str
     """
     The \"To\" field with receiver name and email. Example: Partner
     <partner@example.com>
     """
-    subject: Optional[str] = None
+    subject: str
     """The subject for the outgoing email"""
-    bodytext: Optional[str] = None
+    bodytext: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Plain text version of the outgoing email message."""
-    bodyhtml: Optional[str] = None
+    bodyhtml: Optional[str] = dataclass_field(default=None, kw_only=True)
     """HTML version of the outgoing email message."""
-    smtpserver: Optional[str] = None
+    smtpserver: str
     """SMTP server address"""
-    smtpport: Optional[str] = None
+    smtpport: str
     """SMTP port"""
-    smtpusername: Optional[str] = None
+    smtpusername: str
     """SMTP server username"""
-    smtppassword: Optional[str] = None
+    smtppassword: str
     """
     SMTP server password, If you use Gmail then you need to generate an
     app-specific password as instructed at
     https://support.google.com/accounts/answer/185833.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4651,23 +4882,25 @@ class EmailSendResponse:
     Response for Send Email with Attachments
     """
 
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4677,19 +4910,20 @@ class EmailDecodeInput:
     Email Information
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4706,29 +4940,31 @@ class EmailDecodeResponse:
     Response for Email Information
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4738,19 +4974,20 @@ class EmailAttachmentExtractionInput:
     Email Attachment Extraction
     """
 
-    url: Optional[str] = None
+    url: str
     """
     URL to the source file. Supports links from Google Drive, Dropbox, and
     PDF.co built-in files storage.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """
@@ -4767,29 +5004,31 @@ class EmailAttachmentExtractionResponse:
     Response for Email Attachment Extraction
     """
 
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """url"""
-    body: Optional[Dict[str, Any]] = None
+    body: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """body"""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """error"""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """status"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """credits"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """remainingCredits"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """duration"""
 
 
@@ -4799,15 +5038,15 @@ class PDFAttachmentExtractionInput:
     PDF Attachment Extraction
     """
 
-    url: Optional[str] = None
+    url: str
     """Url to the source PDF document"""
-    inline: Optional[bool] = None
+    inline: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     Determines whether to return output in response or link to output file.
     """
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Base file name for new PDF files"""
-    expiration: Optional[int] = None
+    expiration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Set the expiration time for the output link in minutes (default is 60 i.e
     60 minutes or 1 hour), After this specified duration, any generated output
@@ -4815,14 +5054,15 @@ class PDFAttachmentExtractionInput:
     The maximum duration for link expiration varies based on your current
     subscription plan.
     """
-    profiles: Optional[str] = None
+    profiles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Use this parameter to set additional configurations for fine-tuning and
     extra options. Explore PDF.co knowledgebase
     (https://developer.pdf.co/api/profiles/index.html) for profile examples.
     """
-    async_: Optional[bool] = field(
+    async_: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "async"},
     )
     """Creates a background processing job."""
@@ -4834,32 +5074,35 @@ class PDFAttachmentExtractionResponse:
     Response for PDF Attachment Extraction
     """
 
-    urls: Optional[List[str]] = None
+    urls: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """urls"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document URL."""
-    job_id: Optional[str] = field(
+    job_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobId"},
     )
     """jobId"""
-    page_count: Optional[int] = field(
+    page_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "pageCount"},
     )
     """Number of pages in the output document."""
-    error: Optional[bool] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether the operation is successful or not."""
-    status: Optional[int] = None
+    status: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Status code for HTTP response"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Output document name"""
-    credits: Optional[int] = None
+    credits: Optional[int] = dataclass_field(default=None, kw_only=True)
     """PDF.co credits used for this request"""
-    duration: Optional[int] = None
+    duration: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Request execution duration"""
-    remaining_credits: Optional[int] = field(
+    remaining_credits: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "remainingCredits"},
     )
     """PDF.co account remaining credits"""

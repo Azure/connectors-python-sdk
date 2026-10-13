@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -140,9 +142,9 @@ class GetUserTasksResponse:
     Response for Get a member's tasks
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """meta"""
 
 
@@ -152,15 +154,15 @@ class InviteUserToOrganizationInput:
     Invite a new member to your organization
     """
 
-    first_name: Optional[str] = None
+    first_name: str
     """Invitee's first name"""
-    last_name: Optional[str] = None
+    last_name: str
     """invitee's last name"""
-    email: Optional[str] = None
+    email: str
     """invitee's work email address"""
-    message: Optional[str] = None
+    message: str
     """Message to add"""
-    role: Optional[str] = None
+    role: str
     """Role"""
 
 
@@ -170,7 +172,7 @@ class InviteUserToOrganizationResponse:
     Response for Invite a new member to your organization
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -180,11 +182,11 @@ class CreateRunInput:
     Launch a Process
     """
 
-    name: Optional[str] = None
+    name: str
     """Name to give the new Process"""
-    checklist_id: Optional[str] = None
+    checklist_id: str
     """ID of the Blueprint to start the process"""
-    summary: Optional[str] = None
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Summary notes to include with the Process"""
 
 
@@ -194,7 +196,7 @@ class CreateRunResponse:
     Response for Launch a Process
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -204,9 +206,9 @@ class CompletedOneOffTaskInput:
     Complete One Off Task
     """
 
-    task_id: Optional[str] = None
+    task_id: str
     """Task ID"""
-    is_approved: Optional[bool] = None
+    is_approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """starred"""
 
 
@@ -216,7 +218,7 @@ class CompletedOneOffTaskResponse:
     Response for Complete One Off Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -229,7 +231,7 @@ class ReopenOneOffTaskResponse:
     Response for Reopen One Off Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -242,9 +244,9 @@ class CompletedProcessTaskInput:
     Complete process task
     """
 
-    task_id: Optional[str] = None
+    task_id: str
     """Task ID"""
-    is_approved: Optional[bool] = None
+    is_approved: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """starred"""
 
 
@@ -254,7 +256,7 @@ class CompletedProcessTaskResponse:
     Response for Complete process task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -267,7 +269,7 @@ class ReopenProcessTaskResponse:
     Response for Reopen process Task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -280,9 +282,9 @@ class CommentTaskInput:
     Add comment, report issue, resolve issue on a task
     """
 
-    content: Optional[str] = None
+    content: str
     """Comment content"""
-    label: Optional[str] = None
+    label: str
     """Comment label"""
 
 
@@ -292,7 +294,7 @@ class CommentTaskResponse:
     Response for Add comment, report issue, resolve issue on a task
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -305,15 +307,15 @@ class CreateTaskInput:
     Create a task
     """
 
-    owners: Optional[Dict[str, Any]] = None
+    owners: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """owners"""
-    task_type: Optional[str] = None
+    task_type: str
     """Task type"""
-    deadline: Optional[str] = None
+    deadline: str
     """task deadline, in date-time format"""
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Task's description"""
-    name: Optional[str] = None
+    name: str
     """task name"""
 
 
@@ -323,7 +325,7 @@ class CreateTaskResponse:
     Response for Create a task
     """
 
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -333,8 +335,9 @@ class EditTaskDeadlineInput:
     Edit task deadline
     """
 
-    deadline: Optional[str] = field(
+    deadline: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Deadline"},
     )
     """New task deadline"""
@@ -346,7 +349,7 @@ class EditTaskDeadlineResponse:
     Response for Edit task deadline
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -359,7 +362,7 @@ class RemoveGuestResponse:
     Response for Remove guest assigned
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -372,7 +375,7 @@ class RemoveAssigneeResponse:
     Response for Remove assignee
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -385,8 +388,9 @@ class EditStepTypeInput:
     Edit step type
     """
 
-    step_type: Optional[str] = field(
+    step_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "stepType"},
     )
     """New step type"""
@@ -398,7 +402,7 @@ class EditStepTypeResponse:
     Response for Edit step type
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -411,9 +415,9 @@ class GetUserOrganizationsResponse:
     Response for Get user's organizations
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
-    meta: Optional[Dict[str, Any]] = None
+    meta: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """meta"""
 
 
@@ -423,7 +427,7 @@ class GetOrganizationUsersResponse:
     Response for Get organization's users
     """
 
-    data: Optional[List[Dict[str, Any]]] = None
+    data: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """data"""
 
 
@@ -433,8 +437,8 @@ class Error:
     Definition: error
     """
 
-    error: Optional[bool] = None
-    message: Optional[str] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    message: str
 
 
 Date = str
@@ -449,13 +453,13 @@ class Address:
     Definition: Address
     """
 
-    address1: Optional[str] = None
-    address2: Optional[str] = None
-    city: Optional[str] = None
-    state: Optional[str] = None
-    zip: Optional[str] = None
-    country: Optional[str] = None
-    phone: Optional[str] = None
+    address1: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address2: Optional[str] = dataclass_field(default=None, kw_only=True)
+    city: Optional[str] = dataclass_field(default=None, kw_only=True)
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
+    zip: Optional[str] = dataclass_field(default=None, kw_only=True)
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -464,8 +468,8 @@ class LoginInput:
     Definition: loginInput
     """
 
-    email: Optional[str] = None
-    password: Optional[str] = None
+    email: str
+    password: str
 
 
 @dataclass
@@ -474,11 +478,11 @@ class File:
     Definition: File
     """
 
-    name: Optional[str] = None
-    url: Optional[str] = None
-    extension: Optional[str] = None
-    size: Optional[int] = None
-    last_modified: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
+    extension: Optional[str] = dataclass_field(default=None, kw_only=True)
+    size: Optional[int] = dataclass_field(default=None, kw_only=True)
+    last_modified: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -487,14 +491,14 @@ class RegisterInput:
     Definition: registerInput
     """
 
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[str] = None
-    password: Optional[str] = None
-    company_name: Optional[str] = None
-    timezone: Optional[str] = None
-    plan_code: Optional[str] = None
-    coupon_code: Optional[str] = None
+    first_name: str
+    last_name: str
+    email: str
+    password: str
+    company_name: str
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
+    plan_code: str
+    coupon_code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -503,9 +507,9 @@ class ResetPasswordInput:
     Definition: resetPasswordInput
     """
 
-    password: Optional[str] = None
-    password_confirmation: Optional[str] = None
-    code: Optional[str] = None
+    password: Optional[str] = dataclass_field(default=None, kw_only=True)
+    password_confirmation: Optional[str] = dataclass_field(default=None, kw_only=True)
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -514,19 +518,19 @@ class OrganizationInput:
     Definition: organizationInput
     """
 
-    name: Optional[str] = None
-    address1: Optional[str] = None
-    address2: Optional[str] = None
-    address3: Optional[str] = None
-    slug: Optional[str] = None
-    welcome_title: Optional[str] = None
-    welcome_description: Optional[str] = None
-    industry: Optional[str] = None
-    country: Optional[str] = None
-    state: Optional[str] = None
-    city: Optional[str] = None
-    zipcode: Optional[str] = None
-    settings: Optional[OrganizationSettings] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address1: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address2: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address3: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    welcome_title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    welcome_description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    industry: Optional[str] = dataclass_field(default=None, kw_only=True)
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
+    city: Optional[str] = dataclass_field(default=None, kw_only=True)
+    zipcode: Optional[str] = dataclass_field(default=None, kw_only=True)
+    settings: Optional[OrganizationSettings] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -535,9 +539,9 @@ class OrganizationSettings:
     Definition: organizationSettings
     """
 
-    determine_deadline: Optional[GenericObject] = None
-    workdays: Optional[List[str]] = None
-    holidays: Optional[List[str]] = None
+    determine_deadline: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    workdays: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    holidays: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -546,7 +550,7 @@ class BillInput:
     Definition: billInput
     """
 
-    token_id: Optional[str] = None
+    token_id: str
 
 
 @dataclass
@@ -555,8 +559,8 @@ class SubcriptionInput:
     Definition: subcriptionInput
     """
 
-    plan_code: Optional[str] = None
-    coupon_code: Optional[str] = None
+    plan_code: Optional[str] = dataclass_field(default=None, kw_only=True)
+    coupon_code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -565,9 +569,9 @@ class AccountInput:
     Definition: accountInput
     """
 
-    email: Optional[str] = None
-    cc_emails: Optional[str] = None
-    address: Optional[Address] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
+    cc_emails: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address: Optional[Address] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -576,10 +580,10 @@ class RunView:
     Definition: RunView
     """
 
-    name: Optional[str] = None
-    is_active: Optional[int] = None
-    filter_type: Optional[str] = None
-    criteria: Optional[List[str]] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_active: Optional[int] = dataclass_field(default=None, kw_only=True)
+    filter_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    criteria: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -588,10 +592,10 @@ class RunViewInput:
     Definition: runViewInput
     """
 
-    name: Optional[str] = None
-    filter_type: Optional[str] = None
-    is_active: Optional[int] = None
-    criteria: Optional[List[Dict[str, Any]]] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    filter_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_active: Optional[int] = dataclass_field(default=None, kw_only=True)
+    criteria: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -600,9 +604,9 @@ class PreferenceInput:
     Definition: preferenceInput
     """
 
-    slug: Optional[str] = None
-    value: Optional[str] = None
-    metadata: Optional[GenericObject] = None
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -611,15 +615,15 @@ class AccountsInput:
     Definition: accountsInput
     """
 
-    email: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    username: Optional[str] = None
-    phone: Optional[str] = None
-    job_title: Optional[str] = None
-    job_description: Optional[str] = None
-    timezone: Optional[str] = None
-    country_id: Optional[int] = None
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    timezone: Optional[str] = dataclass_field(default=None, kw_only=True)
+    country_id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -628,9 +632,9 @@ class InviteInput:
     Definition: inviteInput
     """
 
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[str] = None
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -639,7 +643,7 @@ class Passwordreset:
     Definition: passwordreset
     """
 
-    new_password: Optional[str] = None
+    new_password: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -648,9 +652,9 @@ class Passwordreseterro:
     Definition: passwordreseterro
     """
 
-    error: Optional[bool] = None
-    message: Optional[str] = None
-    code: Optional[str] = None
+    error: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -659,7 +663,7 @@ class CheckUrlInput:
     Definition: checkUrlInput
     """
 
-    url: Optional[str] = None
+    url: str
 
 
 @dataclass
@@ -668,8 +672,12 @@ class AssetSubject:
     Definition: AssetSubject
     """
 
-    id: Optional[int] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
 
 
 @dataclass
@@ -678,12 +686,12 @@ class Asset:
     Definition: Asset
     """
 
-    id: Optional[str] = None
-    filename: Optional[str] = None
-    version: Optional[int] = None
-    step_id: Optional[str] = None
-    uploaded_from: Optional[str] = None
-    subject: Optional[AssetSubject] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    filename: Optional[str] = dataclass_field(default=None, kw_only=True)
+    version: Optional[int] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    uploaded_from: Optional[str] = dataclass_field(default=None, kw_only=True)
+    subject: Optional[AssetSubject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -692,13 +700,13 @@ class CaptureInput:
     Definition: CaptureInput
     """
 
-    alias: Optional[str] = None
-    field_type: Optional[str] = None
-    guidance: Optional[str] = None
-    label: Optional[str] = None
-    position: Optional[int] = None
-    required: Optional[bool] = None
-    options: Optional[List[GenericObject]] = None
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    field_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    guidance: Optional[str] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    required: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    options: Optional[List[GenericObject]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -707,18 +715,18 @@ class Capture:
     Definition: Capture
     """
 
-    id: Optional[int] = None
-    step_id: Optional[int] = None
-    alias: Optional[str] = None
-    field_type: Optional[str] = None
-    guidance: Optional[str] = None
-    label: Optional[str] = None
-    position: Optional[int] = None
-    required: Optional[bool] = None
-    options: Optional[str] = None
-    created_at: Optional[RequestDate] = None
-    last_updated: Optional[RequestDate] = None
-    archived_at: Optional[RequestDate] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    field_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    guidance: Optional[str] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    required: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    options: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -727,11 +735,11 @@ class BrandingInput:
     Definition: brandingInput
     """
 
-    bg_color: Optional[str] = None
-    text_color: Optional[str] = None
-    alternate_color: Optional[str] = None
-    bright_shade: Optional[str] = None
-    dark_shade: Optional[str] = None
+    bg_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    text_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alternate_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    bright_shade: Optional[str] = dataclass_field(default=None, kw_only=True)
+    dark_shade: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -740,12 +748,12 @@ class Branding:
     Definition: Branding
     """
 
-    bg_color: Optional[str] = None
-    text_color: Optional[str] = None
-    alternate_color: Optional[str] = None
-    bright_shade: Optional[str] = None
-    dark_shade: Optional[str] = None
-    updated_at: Optional[Date] = None
+    bg_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    text_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alternate_color: Optional[str] = dataclass_field(default=None, kw_only=True)
+    bright_shade: Optional[str] = dataclass_field(default=None, kw_only=True)
+    dark_shade: Optional[str] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -754,7 +762,7 @@ class ChecklistInput:
     Definition: checklistInput
     """
 
-    checklist: Optional[Checklist] = None
+    checklist: Optional[Checklist] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -763,8 +771,8 @@ class PowerbuilderInput:
     Definition: powerbuilderInput
     """
 
-    id: Optional[str] = None
-    steps: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    steps: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -773,19 +781,19 @@ class CreateChecklistInput:
     Definition: createChecklistInput
     """
 
-    title: Optional[str] = None
-    summary: Optional[str] = None
-    privacy: Optional[str] = None
-    settings: Optional[GenericObject] = None
-    contributors: Optional[List[int]] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
+    privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
+    settings: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    contributors: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """The list of users who can update the checklist."""
-    tags: Optional[List[str]] = None
-    start_run_permissions: Optional[GenericObject] = None
+    tags: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
+    start_run_permissions: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
     """The list of groups and users who can access the run."""
-    prerun: Optional[GenericObject] = None
-    user_id: Optional[int] = None
+    prerun: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    user_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Template creator ID"""
-    owner_id: Optional[int] = None
+    owner_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Template Owner ID"""
 
 
@@ -795,23 +803,23 @@ class Checklist:
     Definition: Checklist
     """
 
-    id: Optional[str] = None
-    title: Optional[str] = None
-    summary: Optional[str] = None
-    privacy: Optional[str] = None
-    starred: Optional[int] = None
-    settings: Optional[GenericObject] = None
-    contributors: Optional[List[int]] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
+    privacy: Optional[str] = dataclass_field(default=None, kw_only=True)
+    starred: Optional[int] = dataclass_field(default=None, kw_only=True)
+    settings: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    contributors: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """The list of users who can update the Blueprint."""
-    statistics: Optional[GenericObject] = None
-    created_by: Optional[int] = None
-    owner_id: Optional[int] = None
+    statistics: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    created_by: Optional[int] = dataclass_field(default=None, kw_only=True)
+    owner_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Template Owner ID"""
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
-    created_ago: Optional[str] = None
-    steps: Optional[List[Step]] = None
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_ago: Optional[str] = dataclass_field(default=None, kw_only=True)
+    steps: Optional[List[Step]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -820,8 +828,12 @@ class CommentOn:
     Definition: comment_on
     """
 
-    id: Optional[int] = None
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
 
 
 @dataclass
@@ -830,8 +842,8 @@ class CreateCommentInput:
     Definition: createCommentInput
     """
 
-    comment_on: Optional[CommentOn] = None
-    content: Optional[str] = None
+    comment_on: Optional[CommentOn] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -840,13 +852,13 @@ class Comment:
     Definition: Comment
     """
 
-    id: Optional[int] = None
-    comment_on: Optional[CommentOn] = None
-    content: Optional[str] = None
-    replies_count: Optional[int] = None
-    author_id: Optional[int] = None
-    metadata: Optional[str] = None
-    archived_at: Optional[str] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    comment_on: Optional[CommentOn] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
+    replies_count: Optional[int] = dataclass_field(default=None, kw_only=True)
+    author_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[str] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -855,8 +867,8 @@ class CreateGroupInput:
     Definition: createGroupInput
     """
 
-    name: Optional[str] = None
-    users: Optional[List[int]] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    users: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -865,10 +877,10 @@ class Group:
     Definition: Group
     """
 
-    id: Optional[int] = None
-    name: Optional[str] = None
-    created_at: Optional[Date] = None
-    updated_at: Optional[Date] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -877,11 +889,11 @@ class IntegrationS3Input:
     Definition: integrationS3Input
     """
 
-    aws_key: Optional[str] = None
-    aws_secret: Optional[str] = None
-    aws_region: Optional[str] = None
-    aws_bucket: Optional[str] = None
-    aws_account_id: Optional[str] = None
+    aws_key: Optional[str] = dataclass_field(default=None, kw_only=True)
+    aws_secret: Optional[str] = dataclass_field(default=None, kw_only=True)
+    aws_region: Optional[str] = dataclass_field(default=None, kw_only=True)
+    aws_bucket: Optional[str] = dataclass_field(default=None, kw_only=True)
+    aws_account_id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -890,19 +902,19 @@ class Message:
     Definition: Message
     """
 
-    id: Optional[int] = None
-    thread_id: Optional[str] = None
-    label: Optional[str] = None
-    thread_last_updated_at: Optional[str] = None
-    updated_at: Optional[Date] = None
-    content: Optional[str] = None
-    sent_by: Optional[int] = None
-    sent_at: Optional[Date] = None
-    created_ago: Optional[str] = None
-    sent_to: Optional[List[int]] = None
-    author_name: Optional[str] = None
-    author: Optional[GenericObject] = None
-    subject: Optional[GenericObject] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    thread_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    thread_last_updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
+    sent_by: Optional[int] = dataclass_field(default=None, kw_only=True)
+    sent_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_ago: Optional[str] = dataclass_field(default=None, kw_only=True)
+    sent_to: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
+    author_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    author: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    subject: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -911,20 +923,20 @@ class Organization:
     Definition: Organization
     """
 
-    id: Optional[int] = None
-    name: Optional[str] = None
-    address1: Optional[str] = None
-    address2: Optional[str] = None
-    address3: Optional[str] = None
-    slug: Optional[str] = None
-    welcome_title: Optional[str] = None
-    welcome_description: Optional[str] = None
-    created_on: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    user_status: Optional[str] = None
-    joined_on: Optional[Date] = None
-    disabled_on: Optional[Date] = None
-    last_accessed: Optional[Date] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address1: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address2: Optional[str] = dataclass_field(default=None, kw_only=True)
+    address3: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    welcome_title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    welcome_description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_on: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    user_status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    joined_on: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    disabled_on: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_accessed: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -933,10 +945,10 @@ class Preference:
     Definition: Preference
     """
 
-    slug: Optional[str] = None
-    value: Optional[str] = None
-    metadata: Optional[GenericObject] = None
-    last_updated: Optional[Date] = None
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -945,8 +957,8 @@ class RunRatingsInput:
     Definition: runRatingsInput
     """
 
-    rating: Optional[float] = None
-    comment: Optional[str] = None
+    rating: Optional[float] = dataclass_field(default=None, kw_only=True)
+    comment: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -955,8 +967,8 @@ class CreateRoleInput:
     Definition: createRoleInput
     """
 
-    name: Optional[str] = None
-    permissions: Optional[List[str]] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    permissions: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -965,11 +977,11 @@ class Role:
     Definition: Role
     """
 
-    id: Optional[int] = None
-    name: Optional[str] = None
-    permissions: Optional[GenericObject] = None
-    created_at: Optional[Date] = None
-    updated_at: Optional[Date] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    permissions: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -978,8 +990,8 @@ class RunCollaborators:
     Definition: runCollaborators
     """
 
-    members: Optional[List[int]] = None
-    guests: Optional[List[str]] = None
+    members: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
+    guests: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -988,7 +1000,7 @@ class OwnerInput:
     Definition: ownerInput
     """
 
-    owners: Optional[Any] = None
+    owners: Optional[Any] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -997,7 +1009,7 @@ class DueDateInput:
     Definition: dueDateInput
     """
 
-    deadline: Optional[str] = None
+    deadline: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1006,17 +1018,17 @@ class PrerunData:
     Definition: PrerunData
     """
 
-    id: Optional[str] = None
-    alias: Optional[str] = None
-    created_at: Optional[Date] = None
-    field_type: Optional[str] = None
-    field_value: Optional[str] = None
-    label: Optional[str] = None
-    updated_at: Optional[Date] = None
-    options: Optional[str] = None
-    position: Optional[int] = None
-    required: Optional[bool] = None
-    value: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    field_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    field_value: Optional[str] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    options: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    required: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1025,17 +1037,17 @@ class AlertIssues:
     Definition: AlertIssues
     """
 
-    id: Optional[str] = None
-    task_id: Optional[str] = None
-    label: Optional[str] = None
-    content: Optional[str] = None
-    sent_to: Optional[GenericObject] = None
-    sent_by: Optional[int] = None
-    created_at: Optional[Date] = None
-    created_ago: Optional[str] = None
-    recent_updated_at: Optional[Date] = None
-    author: Optional[GenericObject] = None
-    resolve_id: Optional[int] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    task_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
+    sent_to: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    sent_by: Optional[int] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_ago: Optional[str] = dataclass_field(default=None, kw_only=True)
+    recent_updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    author: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    resolve_id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1044,7 +1056,7 @@ class RunAlerts:
     Definition: RunAlerts
     """
 
-    issues: Optional[List[AlertIssues]] = None
+    issues: Optional[List[AlertIssues]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1053,27 +1065,27 @@ class Run:
     Definition: Run
     """
 
-    id: Optional[str] = None
-    checklist_id: Optional[str] = None
-    name: Optional[str] = None
-    summary: Optional[str] = None
-    status: Optional[str] = None
-    progress: Optional[GenericObject] = None
-    started_by: Optional[int] = None
-    owner_id: Optional[int] = None
-    prerun: Optional[List[PrerunData]] = None
-    alerts: Optional[RunAlerts] = None
-    starred: Optional[bool] = None
-    created_at: Optional[Date] = None
-    started_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    last_synced: Optional[Date] = None
-    completed_at: Optional[Date] = None
-    archived_at: Optional[Date] = None
-    due_date_passed: Optional[bool] = None
-    collaborators: Optional[List[int]] = None
-    due_soon: Optional[bool] = None
-    max_task_deadline: Optional[Date] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    checklist_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    progress: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    started_by: Optional[int] = dataclass_field(default=None, kw_only=True)
+    owner_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    prerun: Optional[List[PrerunData]] = dataclass_field(default=None, kw_only=True)
+    alerts: Optional[RunAlerts] = dataclass_field(default=None, kw_only=True)
+    starred: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    started_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_synced: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    completed_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    due_date_passed: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    collaborators: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
+    due_soon: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    max_task_deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1082,10 +1094,10 @@ class RunMetaInput:
     Definition: runMetaInput
     """
 
-    run_id: Optional[str] = None
-    category: Optional[str] = None
-    slug: Optional[str] = None
-    value: Optional[str] = None
+    run_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1094,11 +1106,11 @@ class Section:
     Definition: Section
     """
 
-    id: Optional[str] = None
-    checklist_id: Optional[str] = None
-    name: Optional[str] = None
-    position: Optional[int] = None
-    condition: Optional[GenericObject] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    checklist_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    condition: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1107,9 +1119,9 @@ class SectionInput:
     Definition: SectionInput
     """
 
-    name: Optional[str] = None
-    position: Optional[int] = None
-    condition: Optional[StepCondition] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    condition: Optional[StepCondition] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1118,8 +1130,8 @@ class SectionCreateInput:
     Definition: SectionCreateInput
     """
 
-    name: Optional[str] = None
-    position: Optional[int] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1128,28 +1140,28 @@ class StandaloneTask:
     Definition: StandaloneTask
     """
 
-    id: Optional[str] = None
-    title: Optional[str] = None
-    run_id: Optional[str] = None
-    step_id: Optional[str] = None
-    alias: Optional[str] = None
-    taskdata: Optional[GenericObject] = None
-    owners: Optional[StepOwner] = None
-    is_completable: Optional[int] = None
-    status: Optional[str] = None
-    position: Optional[int] = None
-    deadline: Optional[Date] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
-    completed_at: Optional[Date] = None
-    starter_id: Optional[int] = None
-    completer_id: Optional[int] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    owner_id: Optional[int] = None
-    task_type: Optional[str] = None
-    is_accepted: Optional[int] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    run_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    is_completable: Optional[int] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    completed_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    starter_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    completer_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    owner_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    task_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_accepted: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1158,11 +1170,11 @@ class CreateStandaloneTaskInput:
     Definition: createStandaloneTaskInput
     """
 
-    owners: Optional[StepOwner] = None
-    task_type: Optional[str] = None
-    deadline: Optional[RequestDate] = None
-    description: Optional[str] = None
-    name: Optional[str] = None
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    task_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1171,13 +1183,13 @@ class UpdateStandaloneTaskInput:
     Definition: updateStandaloneTaskInput
     """
 
-    taskdata: Optional[GenericObject] = None
-    owners: Optional[StepOwner] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
-    task_type: Optional[str] = None
-    status: Optional[str] = None
-    deadline: Optional[RequestDate] = None
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    task_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1186,8 +1198,8 @@ class StepOwner:
     Definition: stepOwner
     """
 
-    users: Optional[List[int]] = None
-    guests: Optional[List[str]] = None
+    users: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
+    guests: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1196,10 +1208,10 @@ class StepDeadline:
     Definition: stepDeadline
     """
 
-    value: Optional[int] = None
-    unit: Optional[str] = None
-    option: Optional[str] = None
-    step: Optional[str] = None
+    value: Optional[int] = dataclass_field(default=None, kw_only=True)
+    unit: Optional[str] = dataclass_field(default=None, kw_only=True)
+    option: Optional[str] = dataclass_field(default=None, kw_only=True)
+    step: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1208,11 +1220,11 @@ class StepConditionTerm:
     Definition: StepConditionTerm
     """
 
-    subject_id: Optional[str] = None
-    subject_type: Optional[str] = None
-    operation: Optional[str] = None
-    statement: Optional[str] = None
-    logic: Optional[str] = None
+    subject_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    subject_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    operation: Optional[str] = dataclass_field(default=None, kw_only=True)
+    statement: Optional[str] = dataclass_field(default=None, kw_only=True)
+    logic: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1221,8 +1233,8 @@ class StepCondition:
     Definition: StepCondition
     """
 
-    terms: Optional[List[StepConditionTerm]] = None
-    flag: Optional[str] = None
+    terms: Optional[List[StepConditionTerm]] = dataclass_field(default=None, kw_only=True)
+    flag: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1231,18 +1243,18 @@ class CreateStepInput:
     Definition: createStepInput
     """
 
-    title: Optional[str] = None
-    checklist_id: Optional[str] = None
-    summary: Optional[str] = None
-    rationale: Optional[str] = None
-    position: Optional[int] = None
-    owners: Optional[StepOwner] = None
-    invisibility: Optional[GenericObject] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    checklist_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
+    rationale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    invisibility: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
     """The list of groups the step is invisible to."""
-    settings: Optional[GenericObject] = None
-    metadata: Optional[GenericObject] = None
-    condition: Optional[StepCondition] = None
-    captures: Optional[List[CaptureInput]] = None
+    settings: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    condition: Optional[StepCondition] = dataclass_field(default=None, kw_only=True)
+    captures: Optional[List[CaptureInput]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1251,23 +1263,23 @@ class Step:
     Definition: Step
     """
 
-    id: Optional[int] = None
-    checklist_id: Optional[str] = None
-    summary: Optional[str] = None
-    title: Optional[str] = None
-    rationale: Optional[str] = None
-    position: Optional[int] = None
-    owners: Optional[StepOwner] = None
-    invisibility: Optional[GenericObject] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    checklist_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    summary: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    rationale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    invisibility: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
     """The list of groups the step is invisible to."""
-    settings: Optional[GenericObject] = None
-    metadata: Optional[GenericObject] = None
-    deadline: Optional[StepDeadline] = None
-    captures: Optional[GenericObject] = None
-    condition: Optional[GenericObject] = None
-    created_at: Optional[RequestDate] = None
-    last_updated: Optional[RequestDate] = None
-    archived_at: Optional[RequestDate] = None
+    settings: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    metadata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[StepDeadline] = dataclass_field(default=None, kw_only=True)
+    captures: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    condition: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[RequestDate] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1276,13 +1288,13 @@ class StepMeta:
     Definition: StepMeta
     """
 
-    step_id: Optional[str] = None
-    category: Optional[str] = None
-    slug: Optional[str] = None
-    value: Optional[str] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
+    step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    category: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1291,11 +1303,11 @@ class Tag:
     Definition: Tag
     """
 
-    id: Optional[str] = None
-    title: Optional[str] = None
-    items: Optional[int] = None
-    created_at: Optional[Date] = None
-    deleted_at: Optional[Date] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    items: Optional[int] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    deleted_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1304,7 +1316,7 @@ class CreateTagInput:
     Definition: createTagInput
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1313,9 +1325,9 @@ class AddTagInput:
     Definition: addTagInput
     """
 
-    tag_id: Optional[str] = None
-    subject_id: Optional[str] = None
-    subject_type: Optional[str] = None
+    tag_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    subject_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    subject_type: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1324,24 +1336,24 @@ class TaskObject:
     Definition: Task
     """
 
-    id: Optional[str] = None
-    title: Optional[str] = None
-    run_id: Optional[str] = None
-    step_id: Optional[str] = None
-    alias: Optional[str] = None
-    taskdata: Optional[GenericObject] = None
-    owners: Optional[StepOwner] = None
-    is_completable: Optional[bool] = None
-    status: Optional[str] = None
-    position: Optional[int] = None
-    deadline: Optional[Date] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
-    completed_at: Optional[Date] = None
-    starter_id: Optional[int] = None
-    completer_id: Optional[int] = None
-    run_status: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    run_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    is_completable: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    completed_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    starter_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    completer_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    run_status: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1350,12 +1362,12 @@ class Pagination:
     Definition: Pagination
     """
 
-    total: Optional[int] = None
-    count: Optional[int] = None
-    per_page: Optional[int] = None
-    current_page: Optional[int] = None
-    total_pages: Optional[int] = None
-    links: Optional[GenericObject] = None
+    total: Optional[int] = dataclass_field(default=None, kw_only=True)
+    count: Optional[int] = dataclass_field(default=None, kw_only=True)
+    per_page: Optional[int] = dataclass_field(default=None, kw_only=True)
+    current_page: Optional[int] = dataclass_field(default=None, kw_only=True)
+    total_pages: Optional[int] = dataclass_field(default=None, kw_only=True)
+    links: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1364,9 +1376,9 @@ class TasksListMeta:
     Definition: TasksListMeta
     """
 
-    overdue_tasks: Optional[int] = None
-    tasks_due_soon: Optional[int] = None
-    pagination: Optional[Pagination] = None
+    overdue_tasks: Optional[int] = dataclass_field(default=None, kw_only=True)
+    tasks_due_soon: Optional[int] = dataclass_field(default=None, kw_only=True)
+    pagination: Optional[Pagination] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1375,8 +1387,8 @@ class TasksList:
     Definition: TasksList
     """
 
-    data: Optional[List[TaskObject]] = None
-    meta: Optional[TasksListMeta] = None
+    data: Optional[List[TaskObject]] = dataclass_field(default=None, kw_only=True)
+    meta: Optional[TasksListMeta] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1385,25 +1397,25 @@ class CompletedProcessTask:
     Definition: CompletedProcessTask
     """
 
-    id: Optional[str] = None
-    title: Optional[str] = None
-    run_id: Optional[str] = None
-    step_id: Optional[str] = None
-    alias: Optional[str] = None
-    taskdata: Optional[GenericObject] = None
-    owners: Optional[StepOwner] = None
-    is_completable: Optional[bool] = None
-    status: Optional[str] = None
-    position: Optional[int] = None
-    deadline: Optional[Date] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
-    completed_at: Optional[Date] = None
-    starter_id: Optional[int] = None
-    completer_id: Optional[int] = None
-    run_status: Optional[str] = None
-    tasks_changed_by_rules: Optional[GenericObject] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    run_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    is_completable: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    completed_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    starter_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    completer_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    run_status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    tasks_changed_by_rules: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1412,12 +1424,12 @@ class UpdateTaskInput:
     Definition: updateTaskInput
     """
 
-    taskdata: Optional[GenericObject] = None
-    threads: Optional[Dict[str, Any]] = None
-    owners: Optional[StepOwner] = None
-    status: Optional[str] = None
-    position: Optional[int] = None
-    deadline: Optional[Date] = None
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    threads: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    owners: Optional[StepOwner] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    position: Optional[int] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1426,19 +1438,19 @@ class TaskGuest:
     Definition: TaskGuest
     """
 
-    alias: Optional[str] = None
-    organization: Optional[GenericObject] = None
-    taskdata: Optional[GenericObject] = None
-    threads: Optional[GenericObject] = None
-    status: Optional[str] = None
-    is_completable: Optional[bool] = None
-    deadline: Optional[Date] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    completed_at: Optional[Date] = None
-    step: Optional[Step] = None
-    step_id: Optional[int] = None
-    guest_email: Optional[str] = None
+    alias: Optional[str] = dataclass_field(default=None, kw_only=True)
+    organization: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    threads: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
+    is_completable: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    deadline: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    completed_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    step: Optional[Step] = dataclass_field(default=None, kw_only=True)
+    step_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    guest_email: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1447,8 +1459,8 @@ class UpdateGuestsTasksInput:
     Definition: updateGuestsTasksInput
     """
 
-    taskdata: Optional[GenericObject] = None
-    status: Optional[str] = None
+    taskdata: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
+    status: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1457,7 +1469,7 @@ class CreateGuestsTasksComment:
     Definition: createGuestsTasksComment
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1466,8 +1478,8 @@ class TaskMetaInput:
     Definition: TaskMetaInput
     """
 
-    slug: Optional[str] = None
-    value: Optional[GenericObject] = None
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[GenericObject] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1476,12 +1488,12 @@ class TaskMeta:
     Definition: TaskMeta
     """
 
-    task_id: Optional[str] = None
-    slug: Optional[str] = None
-    value: Optional[str] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    archived_at: Optional[Date] = None
+    task_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    slug: Optional[str] = dataclass_field(default=None, kw_only=True)
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1490,7 +1502,7 @@ class ThreadInput:
     Definition: threadInput
     """
 
-    content: Optional[str] = None
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1499,8 +1511,8 @@ class ThreadResolveInput:
     Definition: threadResolveInput
     """
 
-    thread_id: Optional[str] = None
-    content: Optional[str] = None
+    thread_id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1509,14 +1521,14 @@ class Thread:
     Definition: Thread
     """
 
-    id: Optional[int] = None
-    label: Optional[str] = None
-    sent_by: Optional[int] = None
-    content: Optional[str] = None
-    created_at: Optional[Date] = None
-    sent_to: Optional[List[int]] = None
-    last_updated_at: Optional[Date] = None
-    archived_at: Optional[Date] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    label: Optional[str] = dataclass_field(default=None, kw_only=True)
+    sent_by: Optional[int] = dataclass_field(default=None, kw_only=True)
+    content: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    sent_to: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
+    last_updated_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    archived_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1525,23 +1537,23 @@ class User:
     Definition: User
     """
 
-    id: Optional[int] = None
-    email: Optional[str] = None
-    username: Optional[str] = None
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    full_name: Optional[str] = None
-    phone: Optional[str] = None
-    job_title: Optional[str] = None
-    job_description: Optional[str] = None
-    profile_pic: Optional[str] = None
-    locale: Optional[str] = None
-    active: Optional[bool] = None
-    is_suspended: Optional[bool] = None
-    country: Optional[str] = None
-    created_at: Optional[Date] = None
-    last_updated: Optional[Date] = None
-    last_login_at: Optional[Date] = None
+    id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    email: Optional[str] = dataclass_field(default=None, kw_only=True)
+    username: Optional[str] = dataclass_field(default=None, kw_only=True)
+    first_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    last_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    full_name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    phone: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_title: Optional[str] = dataclass_field(default=None, kw_only=True)
+    job_description: Optional[str] = dataclass_field(default=None, kw_only=True)
+    profile_pic: Optional[str] = dataclass_field(default=None, kw_only=True)
+    locale: Optional[str] = dataclass_field(default=None, kw_only=True)
+    active: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    is_suspended: Optional[bool] = dataclass_field(default=None, kw_only=True)
+    country: Optional[str] = dataclass_field(default=None, kw_only=True)
+    created_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_updated: Optional[Date] = dataclass_field(default=None, kw_only=True)
+    last_login_at: Optional[Date] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1550,10 +1562,10 @@ class AccessToken:
     Definition: AccessToken
     """
 
-    access_token: Optional[str] = None
-    token_type: Optional[str] = None
-    expire: Optional[int] = None
-    expires_in: Optional[int] = None
+    access_token: Optional[str] = dataclass_field(default=None, kw_only=True)
+    token_type: Optional[str] = dataclass_field(default=None, kw_only=True)
+    expire: Optional[int] = dataclass_field(default=None, kw_only=True)
+    expires_in: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1562,7 +1574,7 @@ class GenericObject:
     Definition: GenericObject
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -1575,8 +1587,8 @@ class Client:
     Definition: Client
     """
 
-    name: Optional[str] = None
-    redirect: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
+    redirect: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -1643,6 +1655,45 @@ class TallyfyClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "tallyfy"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def get_user_tasks(
         self,
@@ -2312,7 +2363,7 @@ class TallyfyClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_organization_users(
+    def list_organization_users(
         self,
         org: str,
         *,
@@ -2320,34 +2371,55 @@ class TallyfyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get organization's users
 
         Get all users belonging to an organization
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/organizations/{quote(str(org), safe='')}/users"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("data", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)

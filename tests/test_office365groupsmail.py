@@ -20,7 +20,7 @@ from azure.connectors.sdk import (
 )
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 async def _invoke_operation(client: Office365groupsmailClient, operation: str):
@@ -99,14 +99,14 @@ async def _invoke_operation(client: Office365groupsmailClient, operation: str):
         return await client.http_request(input=b"request")
     if operation == "forward":
         return await client.forward(
-            input=ForwardPostBody(comment="Forward this"),
+            input=model_instance(ForwardPostBody, comment="Forward this"),
             group_mail="group@contoso.com",
             conversation_id="conv123",
             thread_id="thread123",
             post_id="post123",
         )
     if operation == "list_groups":
-        return await client.list_groups()
+        return await resolve_generated_result(client.list_groups())
 
     raise ValueError(f"Unsupported operation '{operation}'.")
 
@@ -274,7 +274,7 @@ class TestOffice365groupsmailClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.list_groups()
+            await resolve_generated_result(client.list_groups())
 
             call_path = mock_send.call_args[0][1]
             assert "$filter=" in call_path
@@ -359,6 +359,9 @@ class TestOffice365groupsmailTypeSerialization:
 
     def test_forward_post_body_uses_swagger_wire_names(self):
         """Test the current forward-post request preserves Swagger casing."""
-        request = ForwardPostBody(comment="Please review")
+        request = model_instance(ForwardPostBody, comment="Please review")
 
-        assert to_wire(request) == {"Comment": "Please review"}
+        assert to_wire(request) == {
+            "Comment": "Please review",
+            "ToRecipients": [{}],
+        }

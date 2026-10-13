@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -49,7 +51,7 @@ class SearchForDocumentsInFileCabinetInput:
     Search in file cabinet
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -62,10 +64,15 @@ class SearchForDocumentsInFileCabinetResponse:
     Response for Search in file cabinet
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
     """Documents"""
@@ -77,7 +84,11 @@ class GetOrganizationResponse:
     Response for Get organization
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Name"""
 
 
@@ -87,8 +98,9 @@ class GetFileCabinetsResponse:
     Response for Get file cabinets and document trays
     """
 
-    file_cabinets: Optional[List[Dict[str, Any]]] = field(
+    file_cabinets: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinets"},
     )
     """FileCabinets"""
@@ -100,53 +112,63 @@ class GetDocumentInformationResponse:
     Response for Get document information
     """
 
-    sections: Optional[List[Dict[str, Any]]] = field(
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sections"},
     )
     """Sections"""
-    document_id: Optional[int] = field(
+    document_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentId"},
     )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = field(
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IndexFields"},
     )
     """IndexFields"""
-    document_title: Optional[str] = field(
+    document_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentTitle"},
     )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = field(
+    file_cabinet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinetId"},
     )
     """FileCabinetId"""
-    total_pages: Optional[int] = field(
+    total_pages: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TotalPages"},
     )
     """TotalPages"""
-    file_size: Optional[int] = field(
+    file_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileSize"},
     )
     """FileSize"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """ContentType"""
-    version_status: Optional[str] = field(
+    version_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VersionStatus"},
     )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = field(
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentFlags"},
     )
     """DocumentFlags"""
@@ -161,53 +183,63 @@ class UpdateIndexFieldsResponse:
     Response for Update index fields
     """
 
-    sections: Optional[List[Dict[str, Any]]] = field(
+    sections: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Sections"},
     )
     """Sections"""
-    document_id: Optional[int] = field(
+    document_id: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentId"},
     )
     """DocumentId"""
-    index_fields: Optional[Dict[str, Any]] = field(
+    index_fields: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IndexFields"},
     )
     """IndexFields"""
-    document_title: Optional[str] = field(
+    document_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentTitle"},
     )
     """DocumentTitle"""
-    file_cabinet_id: Optional[str] = field(
+    file_cabinet_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileCabinetId"},
     )
     """FileCabinetId"""
-    total_pages: Optional[int] = field(
+    total_pages: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TotalPages"},
     )
     """TotalPages"""
-    file_size: Optional[int] = field(
+    file_size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileSize"},
     )
     """FileSize"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """ContentType"""
-    version_status: Optional[str] = field(
+    version_status: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "VersionStatus"},
     )
     """VersionStatus"""
-    document_flags: Optional[Dict[str, Any]] = field(
+    document_flags: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentFlags"},
     )
     """DocumentFlags"""
@@ -219,22 +251,24 @@ class TransferDocumentInput:
     Transfer documents
     """
 
-    source_file_cabinet_id: Optional[str] = field(
-        default=None,
+    source_file_cabinet_id: str = dataclass_field(
         metadata={"wire_name": "SourceFileCabinetId"},
     )
     """Select the source File Cabinet or Document Tray."""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
-    keep_source: Optional[bool] = field(
+    keep_source: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "KeepSource"},
     )
     """Choose whether the source documents should be deleted or not."""
-    fill_intellix: Optional[bool] = field(
+    fill_intellix: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FillIntellix"},
     )
     """Choose whether intelligent indexing should be used when storing."""
@@ -246,10 +280,15 @@ class TransferDocumentResponse:
     Response for Transfer documents
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
     """Documents"""
@@ -261,40 +300,35 @@ class PlaceAStampInput:
     Place a stamp
     """
 
-    file_number: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "FileNumber"},
-    )
+    file_number: int = dataclass_field(metadata={"wire_name": "FileNumber"})
     """Specify the file/section containing the page to be stamped."""
-    page_number: Optional[int] = field(
-        default=None,
-        metadata={"wire_name": "PageNumber"},
-    )
+    page_number: int = dataclass_field(metadata={"wire_name": "PageNumber"})
     """Specify the page number to place the stamp on."""
-    layer: Optional[int] = field(default=None, metadata={"wire_name": "Layer"})
+    layer: int = dataclass_field(metadata={"wire_name": "Layer"})
     """Specify the document layer to place the stamp on [1-5]"""
-    position_x: Optional[float] = field(
+    position_x: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PositionX"},
     )
     """[Optional] Position from the left edge of the page in mm."""
-    position_y: Optional[float] = field(
+    position_y: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PositionY"},
     )
     """[Optional] Position from the upper edge of the page in mm."""
-    stamp_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "StampId"},
-    )
+    stamp_id: str = dataclass_field(metadata={"wire_name": "StampId"})
     """Select or specify the stamp to be used."""
-    password: Optional[str] = field(
+    password: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Password"},
     )
     """Specify the password for the stamp (if required)."""
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
 
@@ -305,31 +339,47 @@ class PlaceAStampResponse:
     Response for Place a stamp
     """
 
-    created: Optional[Dict[str, Any]] = field(
+    created: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Created"},
     )
     """Created"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    """Type"""
-    color: Optional[str] = field(default=None, metadata={"wire_name": "Color"})
-    """Color"""
-    rotation: Optional[int] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    """Type"""
+    color: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Color"},
+    )
+    """Color"""
+    rotation: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Rotation"},
     )
     """Rotation"""
-    transparent: Optional[bool] = field(
+    transparent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Transparent"},
     )
     """Transparent"""
-    stroke_width: Optional[int] = field(
+    stroke_width: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StrokeWidth"},
     )
     """StrokeWidth"""
-    guid: Optional[str] = field(default=None, metadata={"wire_name": "Guid"})
+    guid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Guid"},
+    )
     """Guid"""
 
 
@@ -339,8 +389,9 @@ class GetDialogsResponse:
     Response for Get dialogs
     """
 
-    dialogs: Optional[List[Dict[str, Any]]] = field(
+    dialogs: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Dialogs"},
     )
     """Dialogs"""
@@ -352,8 +403,9 @@ class GetStampsResponse:
     Response for Get stamps
     """
 
-    stamps: Optional[List[Dict[str, Any]]] = field(
+    stamps: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Stamps"},
     )
     """Stamps"""
@@ -365,8 +417,9 @@ class GetStampFieldsResponse:
     Response for Get stamp fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -378,8 +431,9 @@ class GetFileCabinetFieldsResponse:
     Response for Get file cabinet fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -391,8 +445,9 @@ class GetDialogFieldsResponse:
     Response for Get dialog fields
     """
 
-    fields: Optional[List[Dict[str, Any]]] = field(
+    fields: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Fields"},
     )
     """Fields"""
@@ -404,10 +459,15 @@ class ListDocumentsInDocumentTrayResponse:
     Response for List documents in document tray
     """
 
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    """Count"""
-    documents: Optional[List[Dict[str, Any]]] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    """Count"""
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
 
@@ -476,6 +536,45 @@ class DocuwareClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "docuware"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def search_for_documents_in_file_cabinet(
         self,
@@ -562,7 +661,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_file_cabinets(
+    def list_file_cabinets(
         self,
         file_cabinet_type: str,
         *,
@@ -570,11 +669,14 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get file cabinets and document trays
 
         Gets a list of file cabinets and/or document trays.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/FileCabinets"
         query_params = []
@@ -584,27 +686,45 @@ class DocuwareClient(ConnectorClientBase):
         query_params.append(f"FileCabinetType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("FileCabinets", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_document_information(
         self,
@@ -939,7 +1059,7 @@ class DocuwareClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_dialogs(
+    def list_dialogs(
         self,
         file_cabinet: str,
         *,
@@ -948,11 +1068,14 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get dialogs
 
         Gets a list of dialogs for a file cabinet or document tray.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -966,29 +1089,47 @@ class DocuwareClient(ConnectorClientBase):
             query_params.append(f"DialogType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_stamps(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Dialogs", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_stamps(
         self,
         file_cabinet: str,
         *,
@@ -996,39 +1137,60 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stamps
 
         Gets a list of stamps for a file cabinet or document tray.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/FileCabinets/{quote(str(file_cabinet), safe='')}/Stamps"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_stamp_fields(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Stamps", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_stamp_fields(
         self,
         file_cabinet: str,
         stamp: str,
@@ -1037,11 +1199,14 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get stamp fields
 
         Gets a list of fields for a stamp.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1051,29 +1216,47 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(stamp), safe='')}"
             f"/Fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_file_cabinet_fields(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_file_cabinet_fields(
         self,
         file_cabinet: str,
         *,
@@ -1082,11 +1265,14 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get file cabinet fields
 
         Gets a list of fields for a file cabinet.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1100,29 +1286,47 @@ class DocuwareClient(ConnectorClientBase):
             query_params.append(f"FieldType={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_dialog_fields(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_dialog_fields(
         self,
         file_cabinet: str,
         dialog_id: str,
@@ -1131,11 +1335,14 @@ class DocuwareClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get dialog fields
 
         Gets the fields for a dialog
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1145,27 +1352,45 @@ class DocuwareClient(ConnectorClientBase):
             f"/{quote(str(dialog_id), safe='')}"
             f"/Fields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("Fields", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_documents_in_document_tray(
         self,

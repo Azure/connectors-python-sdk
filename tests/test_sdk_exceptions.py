@@ -1,6 +1,7 @@
 """Unit tests for SDK exceptions module."""
 
 import pytest
+from azure.core.exceptions import HttpResponseError
 
 from azure.connectors.sdk.exceptions import ConnectorException
 
@@ -54,6 +55,13 @@ class TestConnectorException:
         ex = ConnectorException("GET", "/", 500, "error")
 
         assert isinstance(ex, Exception)
+
+    def test_exception_inherits_from_http_response_error(self):
+        """Test that connector failures use the Azure Core HTTP hierarchy."""
+        ex = ConnectorException("GET", "/", 500, "error")
+
+        assert isinstance(ex, HttpResponseError)
+        assert ex.status_code == 500
 
     def test_exception_can_be_raised_and_caught(self):
         """Test that exception can be raised and caught."""

@@ -5,11 +5,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Optional, Dict, List, Any, Mapping
-from urllib.parse import quote
+from dataclasses import dataclass, field as dataclass_field
+from typing import Optional, Iterator, Dict, List, Any, Mapping
+from urllib.parse import quote, urlsplit
 import json
 
+from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -17,6 +18,7 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
+    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -103,70 +105,105 @@ class ClientReceiveMessage:
     Response for Get email
     """
 
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
-    """The mailbox owner and sender of the message"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """The recipients for the message"""
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """The Cc recipients for the message"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """The Bcc recipients for the message"""
-    reply_to: Optional[str] = field(
+    from_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "From"},
+    )
+    """The mailbox owner and sender of the message"""
+    to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """The recipients for the message"""
+    cc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
+    )
+    """The Cc recipients for the message"""
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """The Bcc recipients for the message"""
+    reply_to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """The email addresses to use when replying"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """The subject of the message"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """The body of the message"""
-    importance: Optional[int] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """The body of the message"""
+    importance: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the message (0 - Low, 1 - Normal, 2 - High)"""
-    body_preview: Optional[str] = field(
+    body_preview: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BodyPreview"},
     )
     """The preview of the message"""
-    has_attachment: Optional[bool] = field(
+    has_attachment: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasAttachment"},
     )
     """Indicates whether the message has attachments"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique identifier of the message"""
-    internet_message_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique identifier of the message"""
+    internet_message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "InternetMessageId"},
     )
     """The message ID in the format specified by RFC2822"""
-    conversation_id: Optional[str] = field(
+    conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConversationId"},
     )
     """The Id of the conversation the email belongs to"""
-    date_time_received: Optional[str] = field(
+    date_time_received: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeReceived"},
     )
     """The date and time the message was received"""
-    is_read: Optional[bool] = field(
+    is_read: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRead"},
     )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = field(
+    attachments: Optional[List[ClientReceiveFileAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """The file attachments for the message"""
-    is_html: Optional[bool] = field(
+    is_html: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Is Html?"""
@@ -178,70 +215,105 @@ class ClientReceiveMessageStringEnums:
     Response for Move email
     """
 
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the message"""
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
-    """The mailbox owner and sender of the message"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """The recipients for the message"""
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """The Cc recipients for the message"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """The Bcc recipients for the message"""
-    reply_to: Optional[str] = field(
+    from_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "From"},
+    )
+    """The mailbox owner and sender of the message"""
+    to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """The recipients for the message"""
+    cc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
+    )
+    """The Cc recipients for the message"""
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """The Bcc recipients for the message"""
+    reply_to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """The email addresses to use when replying"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """The subject of the message"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """The body of the message"""
-    body_preview: Optional[str] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """The body of the message"""
+    body_preview: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "BodyPreview"},
     )
     """The preview of the message"""
-    has_attachment: Optional[bool] = field(
+    has_attachment: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasAttachment"},
     )
     """Indicates whether the message has attachments"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The unique identifier of the message"""
-    internet_message_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The unique identifier of the message"""
+    internet_message_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "InternetMessageId"},
     )
     """The message ID in the format specified by RFC2822"""
-    conversation_id: Optional[str] = field(
+    conversation_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ConversationId"},
     )
     """The Id of the conversation the email belongs to"""
-    date_time_received: Optional[str] = field(
+    date_time_received: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeReceived"},
     )
     """The date and time the message was received"""
-    is_read: Optional[bool] = field(
+    is_read: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRead"},
     )
     """Indicates whether the message has been read"""
-    attachments: Optional[List[ClientReceiveFileAttachment]] = field(
+    attachments: Optional[List[ClientReceiveFileAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """The file attachments for the message"""
-    is_html: Optional[bool] = field(
+    is_html: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Is Html?"""
@@ -253,17 +325,19 @@ class SubscriptionResponse:
     Response for Send email with options
     """
 
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the subscription"""
-    resource: Optional[str] = None
+    resource: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Resource of the subscription request"""
-    notification_type: Optional[str] = field(
+    notification_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationType"},
     )
     """Notification Type"""
-    notification_url: Optional[str] = field(
+    notification_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "notificationUrl"},
     )
     """Notification Url"""
@@ -275,7 +349,7 @@ class EntityListResponseTable:
     Response for Get calendars
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
     """List of values"""
 
 
@@ -285,7 +359,7 @@ class EntityListResponseContactResponse:
     Response for Get contacts
     """
 
-    value: Optional[List[ContactResponse]] = None
+    value: Optional[List[ContactResponse]] = dataclass_field(default=None, kw_only=True)
     """List of values"""
 
 
@@ -295,169 +369,210 @@ class ContactResponse:
     Response for Create contact
     """
 
-    given_name: Optional[str] = field(
+    given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "GivenName"},
     )
     """The contact's given name"""
-    home_phones: Optional[List[str]] = field(
+    home_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HomePhones"},
     )
     """The contact's home phone numbers"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The contact's unique identifier."""
+    parent_folder_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ParentFolderId"},
     )
     """The ID of the contact's parent folder"""
-    birthday: Optional[str] = field(
+    birthday: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birthday"},
     )
     """The contact's birthday"""
-    file_as: Optional[str] = field(
+    file_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileAs"},
     )
     """The name the contact is filed under"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The contact's display name"""
-    initials: Optional[str] = field(
+    initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Initials"},
     )
     """The contact's initials"""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MiddleName"},
     )
     """The contact's middle name"""
-    nick_name: Optional[str] = field(
+    nick_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NickName"},
     )
     """The contact's nickname"""
-    surname: Optional[str] = field(
+    surname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Surname"},
     )
     """The contact's surname"""
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
-    """The contact's title"""
-    generation: Optional[str] = field(
+    title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Title"},
+    )
+    """The contact's title"""
+    generation: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Generation"},
     )
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddress]] = field(
+    email_addresses: Optional[List[EmailAddress]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddresses"},
     )
     """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = field(
+    im_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImAddresses"},
     )
     """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobTitle"},
     )
     """The contact's job title"""
-    company_name: Optional[str] = field(
+    company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompanyName"},
     )
     """The name of the contact's company"""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """The contact's department"""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfficeLocation"},
     )
     """The location of the contact's office"""
-    profession: Optional[str] = field(
+    profession: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Profession"},
     )
     """The contact's profession"""
-    business_home_page: Optional[str] = field(
+    business_home_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessHomePage"},
     )
     """The business home page of the contact"""
-    assistant_name: Optional[str] = field(
+    assistant_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AssistantName"},
     )
     """The name of the contact's assistant"""
-    manager: Optional[str] = field(
+    manager: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Manager"},
     )
     """The name of the contact's manager"""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessPhones"},
     )
     """The contact's business phone numbers"""
-    mobile_phone1: Optional[str] = field(
+    mobile_phone1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MobilePhone1"},
     )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = field(
+    home_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HomeAddress"},
     )
-    business_address: Optional[PhysicalAddress] = field(
+    business_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessAddress"},
     )
-    other_address: Optional[PhysicalAddress] = field(
+    other_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherAddress"},
     )
-    yomi_company_name: Optional[str] = field(
+    yomi_company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiCompanyName"},
     )
     """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = field(
+    yomi_given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiGivenName"},
     )
     """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = field(
+    yomi_surname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiSurname"},
     )
     """The phonetic Japanese surname (last name) of the contact"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the contact"""
-    change_key: Optional[str] = field(
+    change_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChangeKey"},
     )
     """Identifies the version of the event object"""
-    date_time_created: Optional[str] = field(
+    date_time_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The time the contact was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The time the contact was modified"""
@@ -469,137 +584,177 @@ class CalendarEventClientReceiveStringEnums:
     Response for Get event
     """
 
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event: Low, Normal, or High"""
-    response_type: Optional[str] = field(
+    response_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseType"},
     )
     """
     The response type of the event: None, Organizer, TentativelyAccepted,
     Accepted, Declined or NotResponded
     """
-    recurrence: Optional[str] = field(
+    recurrence: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
     """The recurrence pattern for the event"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """Status to show during the event"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Event subject"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
-    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
-    """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    response_time: Optional[str] = field(
+    start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Start"},
+    )
+    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
+    end: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "End"},
+    )
+    """End time of the event (example: '2016-11-01T15:30:00Z')"""
+    response_time: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseTime"},
     )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = field(
+    i_cal_u_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ICalUId"},
     )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The event's unique identifier"""
-    date_time_created: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The event's unique identifier"""
+    date_time_created: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = field(
+    organizer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Organizer"},
     )
     """The organizer of the event"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Time zone of the event"""
-    series_master_id: Optional[str] = field(
+    series_master_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SeriesMasterId"},
     )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the event"""
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebLink"},
     )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = field(
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OptionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = field(
+    resource_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceAttendees"},
     )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the message associated with the event"""
-    is_html: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the message associated with the event"""
+    is_html: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Set to true if the body is Html"""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of the event"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = field(
+    recurrence_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecurrenceEnd"},
     )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
     """How many times to repeat the event"""
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
@@ -614,7 +769,7 @@ class CalendarEventListClientReceive:
     Response for Get events
     """
 
-    value: Optional[List[CalendarEventClientReceive]] = None
+    value: Optional[List[CalendarEventClientReceive]] = dataclass_field(default=None, kw_only=True)
     """List of calendar items"""
 
 
@@ -624,7 +779,12 @@ class CalendarEventListWithActionType:
     Response for When an event is added, updated or deleted
     """
 
-    value: Optional[List[CalendarEventClientWithActionType]] = None
+    value: Optional[
+        List[CalendarEventClientWithActionType]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of calendar items"""
 
 
@@ -634,7 +794,7 @@ class BatchResponseClientReceiveMessage:
     Response for Get emails
     """
 
-    value: Optional[List[ClientReceiveMessage]] = None
+    value: Optional[List[ClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
     """A list of the response objects"""
 
 
@@ -644,7 +804,12 @@ class EntityListResponseCalendarEventClientReceiveStringEnums:
     Response for Get calendar view of events
     """
 
-    value: Optional[List[CalendarEventClientReceiveStringEnums]] = None
+    value: Optional[
+        List[CalendarEventClientReceiveStringEnums]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -654,7 +819,7 @@ class TriggerBatchResponseClientReceiveMessage:
     Response for When an email is flagged
     """
 
-    value: Optional[List[ClientReceiveMessage]] = None
+    value: Optional[List[ClientReceiveMessage]] = dataclass_field(default=None, kw_only=True)
     """A list of the response objects"""
 
 
@@ -664,26 +829,30 @@ class TableMetadata:
     Definition: TableMetadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """Url link"""
@@ -695,30 +864,36 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -730,7 +905,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -743,15 +918,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -763,15 +940,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -783,7 +962,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -793,7 +972,7 @@ class CalendarEventList:
     Definition: CalendarEventList
     """
 
-    value: Optional[List[CalendarEventBackend]] = None
+    value: Optional[List[CalendarEventBackend]] = dataclass_field(default=None, kw_only=True)
     """List of calendar items"""
 
 
@@ -803,153 +982,183 @@ class CalendarEventBackend:
     Definition: CalendarEventBackend
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The Event's unique identifier"""
-    attendees: Optional[List[Attendee]] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The Event's unique identifier"""
+    attendees: Optional[List[Attendee]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Attendees"},
     )
     """List of attendees for the event"""
-    body: Optional[ItemBody] = field(
+    body: Optional[ItemBody] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
-    body_preview: Optional[str] = field(
+    body_preview: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BodyPreview"},
     )
     """The preview of the message associated with the event"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the event"""
-    change_key: Optional[str] = field(
+    change_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChangeKey"},
     )
     """
     This property identifies the version of the event object. Every time the
     event is changed, ChangeKey changes as well.
     """
-    date_time_created: Optional[str] = field(
+    date_time_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The date and time that the event was last modified"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
+    end: str = dataclass_field(metadata={"wire_name": "End"})
     """The end time of the event"""
-    end_time_zone: Optional[str] = field(
+    end_time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndTimeZone"},
     )
     """
     This property specifies the time zone of the meeting end time. The value
     must be as defined in Windows (example: 'Pacific Standard Time').
     """
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasAttachments"},
     )
     """Set to true if the event has attachments"""
-    i_cal_u_id: Optional[str] = field(
+    i_cal_u_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ICalUId"},
     )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    is_cancelled: Optional[bool] = field(
+    is_cancelled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsCancelled"},
     )
     """Set to true if the event has been canceled"""
-    is_organizer: Optional[bool] = field(
+    is_organizer: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsOrganizer"},
     )
     """Set to true if the message sender is also the organizer"""
-    location: Optional[Location] = field(
+    location: Optional[Location] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
-    organizer: Optional[Recipient] = field(
+    organizer: Optional[Recipient] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Organizer"},
     )
-    recurrence: Optional[PatternedRecurrence] = field(
+    recurrence: Optional[PatternedRecurrence] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
     Set to true if the sender would like a response when the event is accepted
     or declined
     """
-    response_status: Optional[ResponseStatus] = field(
+    response_status: Optional[ResponseStatus] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseStatus"},
     )
-    series_master_id: Optional[str] = field(
+    series_master_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SeriesMasterId"},
     )
     """Unique identifier for Series Master event type"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """Shows as free or busy"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
+    start: str = dataclass_field(metadata={"wire_name": "Start"})
     """The start time of the event"""
-    start_time_zone: Optional[str] = field(
+    start_time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "StartTimeZone"},
     )
     """
     This property specifies the time zone of the meeting start time. The value
     must be as defined in Windows (example: 'Pacific Standard Time').
     """
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Event subject"""
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
     """
     The event type: Single Instance, Occurrence, Exception, or Series Master
     """
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebLink"},
     )
     """The preview of the message associated with the event"""
-    reason: Optional[str] = field(
+    reason: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reason"},
     )
     """
@@ -964,13 +1173,19 @@ class Attendee:
     Definition: Attendee
     """
 
-    status: Optional[ResponseStatus] = field(
+    status: Optional[ResponseStatus] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Status"},
     )
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    email_address: Optional[EmailAddress] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    email_address: Optional[EmailAddress] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddress"},
     )
 
@@ -981,12 +1196,14 @@ class ItemBody:
     Definition: ItemBody
     """
 
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
-    content: Optional[str] = field(
+    content: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Content"},
     )
 
@@ -997,16 +1214,19 @@ class Location:
     Definition: Location
     """
 
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
-    address: Optional[PhysicalAddress] = field(
+    address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Address"},
     )
-    coordinates: Optional[GeoCoordinates] = field(
+    coordinates: Optional[GeoCoordinates] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Coordinates"},
     )
 
@@ -1017,8 +1237,9 @@ class Recipient:
     Definition: Recipient
     """
 
-    email_address: Optional[EmailAddress] = field(
+    email_address: Optional[EmailAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddress"},
     )
 
@@ -1029,12 +1250,14 @@ class PatternedRecurrence:
     Definition: PatternedRecurrence
     """
 
-    pattern: Optional[RecurrencePattern] = field(
+    pattern: Optional[RecurrencePattern] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Pattern"},
     )
-    range: Optional[RecurrenceRange] = field(
+    range: Optional[RecurrenceRange] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Range"},
     )
 
@@ -1045,11 +1268,16 @@ class ResponseStatus:
     Definition: ResponseStatus
     """
 
-    response: Optional[str] = field(
+    response: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Response"},
     )
-    time: Optional[str] = field(default=None, metadata={"wire_name": "Time"})
+    time: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Time"},
+    )
 
 
 @dataclass
@@ -1058,9 +1286,14 @@ class EmailAddress:
     Definition: EmailAddress
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    address: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    address: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Address"},
     )
 
@@ -1071,18 +1304,29 @@ class PhysicalAddress:
     Definition: PhysicalAddress
     """
 
-    street: Optional[str] = field(
+    street: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Street"},
     )
-    city: Optional[str] = field(default=None, metadata={"wire_name": "City"})
-    state: Optional[str] = field(default=None, metadata={"wire_name": "State"})
-    country_or_region: Optional[str] = field(
+    city: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "City"},
+    )
+    state: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "State"},
+    )
+    country_or_region: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "CountryOrRegion"},
     )
-    postal_code: Optional[str] = field(
+    postal_code: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "PostalCode"},
     )
 
@@ -1093,24 +1337,29 @@ class GeoCoordinates:
     Definition: GeoCoordinates
     """
 
-    altitude: Optional[float] = field(
+    altitude: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Altitude"},
     )
-    latitude: Optional[float] = field(
+    latitude: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Latitude"},
     )
-    longitude: Optional[float] = field(
+    longitude: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Longitude"},
     )
-    accuracy: Optional[float] = field(
+    accuracy: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Accuracy"},
     )
-    altitude_accuracy: Optional[float] = field(
+    altitude_accuracy: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AltitudeAccuracy"},
     )
 
@@ -1121,25 +1370,41 @@ class RecurrencePattern:
     Definition: RecurrencePattern
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    interval: Optional[int] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    interval: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Interval"},
     )
-    month: Optional[int] = field(default=None, metadata={"wire_name": "Month"})
-    day_of_month: Optional[int] = field(
+    month: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Month"},
+    )
+    day_of_month: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DayOfMonth"},
     )
-    days_of_week: Optional[List[str]] = field(
+    days_of_week: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DaysOfWeek"},
     )
-    first_day_of_week: Optional[str] = field(
+    first_day_of_week: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FirstDayOfWeek"},
     )
-    index: Optional[str] = field(default=None, metadata={"wire_name": "Index"})
+    index: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Index"},
+    )
 
 
 @dataclass
@@ -1148,17 +1413,24 @@ class RecurrenceRange:
     Definition: RecurrenceRange
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "Type"})
-    start_date: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Type"},
+    )
+    start_date: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StartDate"},
     )
-    end_date: Optional[str] = field(
+    end_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EndDate"},
     )
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
 
@@ -1169,143 +1441,183 @@ class CalendarEventClientReceive:
     Definition: CalendarEventClientReceive
     """
 
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Event subject"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
-    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
-    """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    show_as: Optional[int] = field(
+    start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Start"},
+    )
+    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
+    end: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "End"},
+    )
+    """End time of the event (example: '2016-11-01T15:30:00Z')"""
+    show_as: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """
     Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
     Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
-    recurrence: Optional[int] = field(
+    recurrence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
     """
     The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
     Monthly - 3, Yearly - 4)
     """
-    response_type: Optional[int] = field(
+    response_type: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseType"},
     )
     """
     The response type of the event (None - 0, Organizer - 1,
     TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
-    response_time: Optional[str] = field(
+    response_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseTime"},
     )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = field(
+    i_cal_u_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ICalUId"},
     )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[int] = field(
+    importance: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The event's unique identifier"""
-    date_time_created: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The event's unique identifier"""
+    date_time_created: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = field(
+    organizer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Organizer"},
     )
     """The organizer of the event"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Time zone of the event"""
-    series_master_id: Optional[str] = field(
+    series_master_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SeriesMasterId"},
     )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the event"""
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebLink"},
     )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = field(
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OptionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = field(
+    resource_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceAttendees"},
     )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the message associated with the event"""
-    is_html: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the message associated with the event"""
+    is_html: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Set to true if the body is Html"""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of the event"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = field(
+    recurrence_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecurrenceEnd"},
     )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
     """How many times to repeat the event"""
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
@@ -1320,8 +1632,9 @@ class PaginatedListResponseCalendarEventClientReceiveStringEnums:
     Definition: PaginatedListResponse[CalendarEventClientReceiveStringEnums]
     """
 
-    values: Optional[List[CalendarEventClientReceiveStringEnums]] = field(
+    values: Optional[List[CalendarEventClientReceiveStringEnums]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Values"},
     )
     """Values"""
@@ -1333,8 +1646,7 @@ class ClientSubscription:
     Definition: ClientSubscription
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationUrl"},
     )
     """
@@ -1349,7 +1661,7 @@ class EntityListResponseFilePickerFile:
     Definition: EntityListResponse[FilePickerFile]
     """
 
-    value: Optional[List[FilePickerFile]] = None
+    value: Optional[List[FilePickerFile]] = dataclass_field(default=None, kw_only=True)
     """List of values"""
 
 
@@ -1359,19 +1671,29 @@ class FilePickerFile:
     Definition: FilePickerFile
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Uniquely identifies the file"""
-    display_name: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Uniquely identifies the file"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Display name for the file"""
-    is_folder: Optional[bool] = field(
+    is_folder: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsFolder"},
     )
     """Set to true if the file is a folder"""
-    path: Optional[str] = field(default=None, metadata={"wire_name": "Path"})
+    path: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Path"},
+    )
     """Path of the file"""
 
 
@@ -1381,42 +1703,51 @@ class ClientSendMessage:
     Definition: ClientSendMessage
     """
 
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """
-    Specify email addresses separated by semicolons like someone@contoso.com
-    """
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """
-    Specify email addresses separated by semicolons like someone@contoso.com
-    """
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """
-    Specify email addresses separated by semicolons like someone@contoso.com
-    """
-    subject: Optional[str] = field(
+    cc: Optional[str] = dataclass_field(
         default=None,
-        metadata={"wire_name": "Subject"},
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
     )
-    """Specify the subject of the mail"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Specify the body of the mail"""
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
+    bcc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
+    to: str = dataclass_field(metadata={"wire_name": "To"})
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
+    """Specify the subject of the mail"""
+    body: str = dataclass_field(metadata={"wire_name": "Body"})
+    """Specify the body of the mail"""
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    reply_to: Optional[str] = field(
+    reply_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """The email addresses to use when replying"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    is_html: Optional[bool] = field(
+    is_html: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Is Html?"""
@@ -1428,10 +1759,9 @@ class ClientSendAttachment:
     Definition: ClientSendAttachment
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: str = dataclass_field(metadata={"wire_name": "Name"})
     """Attachment name"""
-    content_bytes: Optional[str] = field(
-        default=None,
+    content_bytes: str = dataclass_field(
         metadata={"wire_name": "ContentBytes"},
     )
     """Attachment content"""
@@ -1443,34 +1773,51 @@ class ClientReceiveFileAttachment:
     Definition: ClientReceiveFileAttachment
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Attachment Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Attachment name"""
-    content_bytes: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Attachment Id"""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Attachment name"""
+    content_bytes: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentBytes"},
     )
     """Attachment content"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Attachment content type"""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """The size in bytes of the attachment"""
-    is_inline: Optional[bool] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """The size in bytes of the attachment"""
+    is_inline: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsInline"},
     )
     """Set to true if this is an inline attachment"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModifiedDateTime"},
     )
     """The date and time when the attachment was last modified"""
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentId"},
     )
     """Content Id"""
@@ -1482,44 +1829,56 @@ class ClientSendHtmlMessage:
     Definition: ClientSendHtmlMessage
     """
 
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
+    to: str = dataclass_field(metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Specify the subject of the mail"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
+    body: str = dataclass_field(metadata={"wire_name": "Body"})
     """Specify the body of the mail"""
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
+    from_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "From"},
+    )
     """
     Email address to send mail from (requires \"Send as\" or \"Send on behalf
     of\" permission for that mailbox). For more info on granting permissions
     please refer
     https://docs.microsoft.com/office365/admin/manage/send-email-as-distribution-list
     """
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """
-    Specify email addresses separated by semicolons like someone@contoso.com
-    """
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """
-    Specify email addresses separated by semicolons like someone@contoso.com
-    """
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    cc: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
+    )
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """
+    Specify email addresses separated by semicolons like someone@contoso.com
+    """
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    reply_to: Optional[str] = field(
+    reply_to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """The email addresses to use when replying"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
@@ -1531,36 +1890,57 @@ class ReplyMessage:
     Definition: ReplyMessage
     """
 
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    subject: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    cc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    subject: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Email subject (if empty, the original subject used)."""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Content of the email."""
-    reply_all: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Content of the email."""
+    reply_all: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyAll"},
     )
     """True to reply to all recipients. (default: False)"""
-    is_html: Optional[bool] = field(
+    is_html: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """True to send the reply as HTML. (default: True)"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Details of attachments to be sent along with the reply."""
@@ -1572,31 +1952,51 @@ class ReplyHtmlMessage:
     Definition: ReplyHtmlMessage
     """
 
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    cc: Optional[str] = field(default=None, metadata={"wire_name": "Cc"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
-    """Example: recipient1@domain.com; recipient2@domain.com"""
-    subject: Optional[str] = field(
+    to: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    cc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Cc"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
+    """Example: recipient1@domain.com; recipient2@domain.com"""
+    subject: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Email subject (if empty, the original subject used)."""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Content of the email."""
-    reply_all: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Content of the email."""
+    reply_all: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyAll"},
     )
     """True to reply to all recipients. (default: False)"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Pick an importance. (default: Low)"""
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Details of attachments to be sent along with the reply."""
@@ -1608,8 +2008,8 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -1618,25 +2018,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -1648,15 +2052,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -1668,15 +2074,13 @@ class OptionsEmailSubscription:
     Definition: OptionsEmailSubscription
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationUrl"},
     )
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: Optional[MessageWithOptions] = field(
-        default=None,
+    message: MessageWithOptions = dataclass_field(
         metadata={"wire_name": "Message"},
     )
 
@@ -1687,49 +2091,61 @@ class MessageWithOptions:
     Definition: MessageWithOptions
     """
 
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
+    to: str = dataclass_field(metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Subject of the email"""
-    options: Optional[str] = field(
+    options: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Options"},
     )
     """List of comma separated options for the email response"""
-    header_text: Optional[str] = field(
+    header_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HeaderText"},
     )
     """Header text for email body"""
-    selection_text: Optional[str] = field(
+    selection_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SelectionText"},
     )
     """Header text for users options selection"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the email"""
-    importance: Optional[str] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the email"""
+    importance: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = field(
+    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = field(
+    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
     )
     """
@@ -1737,8 +2153,9 @@ class MessageWithOptions:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = field(
+    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},
     )
     """
@@ -1753,8 +2170,9 @@ class ApprovalEmailResponse:
     Definition: ApprovalEmailResponse
     """
 
-    selected_option: Optional[str] = field(
+    selected_option: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SelectedOption"},
     )
     """User response"""
@@ -1766,15 +2184,13 @@ class ApprovalEmailSubscription:
     Definition: ApprovalEmailSubscription
     """
 
-    notification_url: Optional[str] = field(
-        default=None,
+    notification_url: str = dataclass_field(
         metadata={"wire_name": "NotificationUrl"},
     )
     """
     Gets or sets callback url to flow engine. It is expected as part of request
     """
-    message: Optional[ApprovalMessage] = field(
-        default=None,
+    message: ApprovalMessage = dataclass_field(
         metadata={"wire_name": "Message"},
     )
 
@@ -1785,49 +2201,61 @@ class ApprovalMessage:
     Definition: ApprovalMessage
     """
 
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
+    to: str = dataclass_field(metadata={"wire_name": "To"})
     """
     Specify email addresses separated by semicolons like someone@contoso.com
     """
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Subject"""
-    options: Optional[str] = field(
+    options: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Options"},
     )
     """User Options"""
-    header_text: Optional[str] = field(
+    header_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HeaderText"},
     )
     """Header text for email body"""
-    selection_text: Optional[str] = field(
+    selection_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SelectionText"},
     )
     """Header text for users options selection"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body"""
-    importance: Optional[str] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body"""
+    importance: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    attachments: Optional[List[ClientSendAttachment]] = field(
+    attachments: Optional[List[ClientSendAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    use_only_h_t_m_l_message: Optional[bool] = field(
+    use_only_h_t_m_l_message: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "UseOnlyHTMLMessage"},
     )
     """Use only HTML message"""
-    hide_h_t_m_l_message: Optional[bool] = field(
+    hide_h_t_m_l_message: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HideHTMLMessage"},
     )
     """
@@ -1835,8 +2263,9 @@ class ApprovalMessage:
     displayed. Email clients which do not support actionable messages will
     display HTML message regardless of the parameter value.
     """
-    show_h_t_m_l_confirmation_dialog: Optional[bool] = field(
+    show_h_t_m_l_confirmation_dialog: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowHTMLConfirmationDialog"},
     )
     """
@@ -1851,7 +2280,12 @@ class SubscriptionPayloadOutlookReceiveMessage:
     Definition: SubscriptionPayload[OutlookReceiveMessage]
     """
 
-    value: Optional[List[SubscriptionPayloadEntityOutlookReceiveMessage]] = None
+    value: Optional[
+        List[SubscriptionPayloadEntityOutlookReceiveMessage]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -1861,28 +2295,33 @@ class SubscriptionPayloadEntityOutlookReceiveMessage:
     Definition: SubscriptionPayloadEntity[OutlookReceiveMessage]
     """
 
-    sequence_number: Optional[int] = field(
+    sequence_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SequenceNumber"},
     )
     """Sequence number"""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChangeType"},
     )
     """Change type"""
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClientState"},
     )
     """Client state"""
-    resource: Optional[str] = field(
+    resource: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Resource"},
     )
     """Resource"""
-    resource_data: Optional[OutlookReceiveMessage] = field(
+    resource_data: Optional[OutlookReceiveMessage] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceData"},
     )
 
@@ -1893,93 +2332,115 @@ class OutlookReceiveMessage:
     Definition: OutlookReceiveMessage
     """
 
-    internet_message_id: Optional[str] = field(
+    internet_message_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InternetMessageId"},
     )
     """Internet Message Id"""
-    body_preview: Optional[str] = field(
+    body_preview: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BodyPreview"},
     )
     """Body preview"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Id"""
-    conversation_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Id"""
+    conversation_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ConversationId"},
     )
     """Conversation Id"""
-    has_attachments: Optional[bool] = field(
+    has_attachments: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HasAttachments"},
     )
     """Has attachments"""
-    is_read: Optional[bool] = field(
+    is_read: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsRead"},
     )
     """Is read"""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CreatedDateTime"},
     )
     """Created date and time"""
-    received_date_time: Optional[str] = field(
+    received_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReceivedDateTime"},
     )
     """Received date and time"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModifiedDateTime"},
     )
     """Last modified date and time"""
-    attachments: Optional[List[OutlookReceiveAttachment]] = field(
+    attachments: Optional[List[OutlookReceiveAttachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments"""
-    to_recipients: Optional[List[Recipient]] = field(
+    to_recipients: Optional[List[Recipient]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ToRecipients"},
     )
     """To Recipient"""
-    cc_recipients: Optional[List[Recipient]] = field(
+    cc_recipients: Optional[List[Recipient]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CcRecipients"},
     )
     """Cc Recipients"""
-    bcc_recipients: Optional[List[Recipient]] = field(
+    bcc_recipients: Optional[List[Recipient]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BccRecipients"},
     )
     """Bcc Recipients"""
-    reply_to: Optional[List[Recipient]] = field(
+    reply_to: Optional[List[Recipient]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReplyTo"},
     )
     """The email addresses to use when replying"""
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Subject"""
-    body: Optional[ItemBody] = field(
+    body: Optional[ItemBody] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Body"},
     )
-    from_: Optional[Recipient] = field(
+    from_: Optional[Recipient] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "From"},
     )
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance"""
-    internet_message_headers: Optional[List[InternetMessageHeader]] = field(
+    internet_message_headers: Optional[List[InternetMessageHeader]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "InternetMessageHeaders"},
     )
     """Internet message headers"""
@@ -1991,54 +2452,75 @@ class OutlookReceiveAttachment:
     Definition: OutlookReceiveAttachment
     """
 
-    type_: Optional[str] = field(
+    type_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.type"},
     )
     """OData type"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """Attachment Id"""
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Attachment name"""
-    content_bytes: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """Attachment Id"""
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Attachment name"""
+    content_bytes: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentBytes"},
     )
     """Attachment content"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentType"},
     )
     """Attachment content type"""
-    size: Optional[int] = field(default=None, metadata={"wire_name": "Size"})
-    """Attachment size in bytes"""
-    permission: Optional[str] = field(
+    size: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Size"},
+    )
+    """Attachment size in bytes"""
+    permission: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Permission"},
     )
     """Permission associated with a reference attachment"""
-    provider_type: Optional[str] = field(
+    provider_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ProviderType"},
     )
     """Provider for the reference attachment"""
-    source_url: Optional[str] = field(
+    source_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SourceUrl"},
     )
     """Reference attachment source url"""
-    is_inline: Optional[bool] = field(
+    is_inline: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsInline"},
     )
     """Set to true if this is an inline attachment"""
-    last_modified_date_time: Optional[str] = field(
+    last_modified_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "LastModifiedDateTime"},
     )
     """The date and time when the attachment was last modified"""
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentId"},
     )
     """Content Id"""
@@ -2050,9 +2532,17 @@ class InternetMessageHeader:
     Definition: InternetMessageHeader
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
+    name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
     """Header name"""
-    value: Optional[str] = field(default=None, metadata={"wire_name": "Value"})
+    value: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Value"},
+    )
     """Header value"""
 
 
@@ -2062,7 +2552,12 @@ class SubscriptionPayloadSubscriptionEvent:
     Definition: SubscriptionPayload[SubscriptionEvent]
     """
 
-    value: Optional[List[SubscriptionPayloadEntitySubscriptionEvent]] = None
+    value: Optional[
+        List[SubscriptionPayloadEntitySubscriptionEvent]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """List of values"""
 
 
@@ -2072,28 +2567,33 @@ class SubscriptionPayloadEntitySubscriptionEvent:
     Definition: SubscriptionPayloadEntity[SubscriptionEvent]
     """
 
-    sequence_number: Optional[int] = field(
+    sequence_number: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SequenceNumber"},
     )
     """Sequence number"""
-    change_type: Optional[str] = field(
+    change_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChangeType"},
     )
     """Change type"""
-    client_state: Optional[str] = field(
+    client_state: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ClientState"},
     )
     """Client state"""
-    resource: Optional[str] = field(
+    resource: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Resource"},
     )
     """Resource"""
-    resource_data: Optional[SubscriptionEvent] = field(
+    resource_data: Optional[SubscriptionEvent] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceData"},
     )
 
@@ -2104,7 +2604,11 @@ class SubscriptionEvent:
     Definition: SubscriptionEvent
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """The Event's unique identifier"""
 
 
@@ -2114,15 +2618,21 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -2134,7 +2644,7 @@ class EntityListResponseCalendarEventBackend:
     Definition: EntityListResponse[CalendarEventBackend]
     """
 
-    value: Optional[List[CalendarEventBackend]] = None
+    value: Optional[List[CalendarEventBackend]] = dataclass_field(default=None, kw_only=True)
     """List of values"""
 
 
@@ -2144,84 +2654,99 @@ class CalendarEventClient:
     Definition: CalendarEventClient
     """
 
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Event subject"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
+    start: str = dataclass_field(metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
+    end: str = dataclass_field(metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Time zone of the event"""
-    required_attendees: Optional[str] = field(
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OptionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = field(
+    resource_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceAttendees"},
     )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the message associated with the event"""
-    is_html: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the message associated with the event"""
+    is_html: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Set to true if the body is Html"""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of the event"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    recurrence: Optional[str] = field(
+    recurrence: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
     """The recurrence pattern for the event"""
-    recurrence_end: Optional[str] = field(
+    recurrence_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecurrenceEnd"},
     )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
     """How many times to repeat the event"""
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """Status to show during the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
@@ -2236,79 +2761,93 @@ class CalendarEventHtmlClient:
     Definition: CalendarEventHtmlClient
     """
 
-    subject: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "Subject"},
-    )
+    subject: str = dataclass_field(metadata={"wire_name": "Subject"})
     """Event subject"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
+    start: str = dataclass_field(metadata={"wire_name": "Start"})
     """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
+    end: str = dataclass_field(metadata={"wire_name": "End"})
     """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Time zone of the event"""
-    required_attendees: Optional[str] = field(
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OptionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = field(
+    resource_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceAttendees"},
     )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the message associated with the event"""
-    location: Optional[str] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the message associated with the event"""
+    location: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of the event"""
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event: Low, Normal, or High"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    recurrence: Optional[str] = field(
+    recurrence: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
     """The recurrence pattern for the event"""
-    recurrence_end: Optional[str] = field(
+    recurrence_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecurrenceEnd"},
     )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
     """How many times to repeat the event"""
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    show_as: Optional[str] = field(
+    show_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """Status to show during the event"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
@@ -2323,164 +2862,207 @@ class CalendarEventClientWithActionType:
     Definition: CalendarEventClientWithActionType
     """
 
-    action_type: Optional[str] = field(
+    action_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActionType"},
     )
     """Changed action type of the event - added, updated or deleted."""
-    is_added: Optional[bool] = field(
+    is_added: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAdded"},
     )
     """
     Flag that indicates whether the event was added since the last poll of the
     trigger.
     """
-    is_updated: Optional[bool] = field(
+    is_updated: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsUpdated"},
     )
     """
     Flag that indicates whether the event was updated since the last poll of
     the trigger.
     """
-    subject: Optional[str] = field(
+    subject: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Event subject"""
-    start: Optional[str] = field(default=None, metadata={"wire_name": "Start"})
-    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
-    end: Optional[str] = field(default=None, metadata={"wire_name": "End"})
-    """End time of the event (example: '2016-11-01T15:30:00Z')"""
-    show_as: Optional[int] = field(
+    start: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Start"},
+    )
+    """Start time of the event (example: '2016-11-01T14:30:00Z')"""
+    end: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "End"},
+    )
+    """End time of the event (example: '2016-11-01T15:30:00Z')"""
+    show_as: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ShowAs"},
     )
     """
     Status to show during the event (Unknown - -1, Free - 0, Tentative - 1,
     Busy - 2, Oof - 3, WorkingElsewhere - 4)
     """
-    recurrence: Optional[int] = field(
+    recurrence: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Recurrence"},
     )
     """
     The recurrence pattern for the event (None - 0, Daily - 1, Weekly - 2,
     Monthly - 3, Yearly - 4)
     """
-    response_type: Optional[int] = field(
+    response_type: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseType"},
     )
     """
     The response type of the event (None - 0, Organizer - 1,
     TentativelyAccepted - 2, Accepted - 3, Declined - 4, NotResponded - 5)
     """
-    response_time: Optional[str] = field(
+    response_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseTime"},
     )
     """The response time of the event"""
-    i_cal_u_id: Optional[str] = field(
+    i_cal_u_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ICalUId"},
     )
     """
     A unique identifier that is shared by all instances of an event across
     different calendars
     """
-    importance: Optional[int] = field(
+    importance: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """The importance of the event (0 - Low, 1 - Normal, 2 - High)"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The event's unique identifier"""
-    date_time_created: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The event's unique identifier"""
+    date_time_created: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The date and time that the event was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The date and time that the event was last modified"""
-    organizer: Optional[str] = field(
+    organizer: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Organizer"},
     )
     """The organizer of the event"""
-    time_zone: Optional[str] = field(
+    time_zone: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "TimeZone"},
     )
     """Time zone of the event"""
-    series_master_id: Optional[str] = field(
+    series_master_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SeriesMasterId"},
     )
     """Unique identifier for Series Master event type"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the event"""
-    web_link: Optional[str] = field(
+    web_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "WebLink"},
     )
     """The URL to open the event in Outlook Web App"""
-    required_attendees: Optional[str] = field(
+    required_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RequiredAttendees"},
     )
     """Required attendees for the event separated by semicolons"""
-    optional_attendees: Optional[str] = field(
+    optional_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OptionalAttendees"},
     )
     """Optional attendees for the event separated by semicolons"""
-    resource_attendees: Optional[str] = field(
+    resource_attendees: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResourceAttendees"},
     )
     """Resource attendees for the event separated by semicolons"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
-    """Body of the message associated with the event"""
-    is_html: Optional[bool] = field(
+    body: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
+    """Body of the message associated with the event"""
+    is_html: Optional[bool] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "IsHtml"},
     )
     """Set to true if the body is Html"""
-    location: Optional[str] = field(
+    location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Location"},
     )
     """Location of the event"""
-    is_all_day: Optional[bool] = field(
+    is_all_day: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "IsAllDay"},
     )
     """Set to true if the event lasts all day"""
-    recurrence_end: Optional[str] = field(
+    recurrence_end: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "RecurrenceEnd"},
     )
     """End time of the recurrence"""
-    number_of_occurrences: Optional[int] = field(
+    number_of_occurrences: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NumberOfOccurrences"},
     )
     """How many times to repeat the event"""
-    reminder: Optional[int] = field(
+    reminder: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Reminder"},
     )
     """Time in minutes before event start to remind"""
-    response_requested: Optional[bool] = field(
+    response_requested: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ResponseRequested"},
     )
     """
@@ -2495,169 +3077,204 @@ class Contact:
     Definition: Contact
     """
 
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
-    """The contact's unique identifier."""
-    parent_folder_id: Optional[str] = field(
+    id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
+    """The contact's unique identifier."""
+    parent_folder_id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "ParentFolderId"},
     )
     """The ID of the contact's parent folder"""
-    birthday: Optional[str] = field(
+    birthday: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Birthday"},
     )
     """The contact's birthday"""
-    file_as: Optional[str] = field(
+    file_as: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileAs"},
     )
     """The name the contact is filed under"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The contact's display name"""
-    given_name: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "GivenName"},
-    )
+    given_name: str = dataclass_field(metadata={"wire_name": "GivenName"})
     """The contact's given name"""
-    initials: Optional[str] = field(
+    initials: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Initials"},
     )
     """The contact's initials"""
-    middle_name: Optional[str] = field(
+    middle_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MiddleName"},
     )
     """The contact's middle name"""
-    nick_name: Optional[str] = field(
+    nick_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "NickName"},
     )
     """The contact's nickname"""
-    surname: Optional[str] = field(
+    surname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Surname"},
     )
     """The contact's surname"""
-    title: Optional[str] = field(default=None, metadata={"wire_name": "Title"})
-    """The contact's title"""
-    generation: Optional[str] = field(
+    title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Title"},
+    )
+    """The contact's title"""
+    generation: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Generation"},
     )
     """The contact's generation"""
-    email_addresses: Optional[List[EmailAddress]] = field(
+    email_addresses: Optional[List[EmailAddress]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "EmailAddresses"},
     )
     """The contact's email addresses"""
-    im_addresses: Optional[List[str]] = field(
+    im_addresses: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ImAddresses"},
     )
     """The contact's instant messaging (IM) addresses"""
-    job_title: Optional[str] = field(
+    job_title: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "JobTitle"},
     )
     """The contact's job title"""
-    company_name: Optional[str] = field(
+    company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "CompanyName"},
     )
     """The name of the contact's company"""
-    department: Optional[str] = field(
+    department: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Department"},
     )
     """The contact's department"""
-    office_location: Optional[str] = field(
+    office_location: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OfficeLocation"},
     )
     """The location of the contact's office"""
-    profession: Optional[str] = field(
+    profession: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Profession"},
     )
     """The contact's profession"""
-    business_home_page: Optional[str] = field(
+    business_home_page: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessHomePage"},
     )
     """The business home page of the contact"""
-    assistant_name: Optional[str] = field(
+    assistant_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "AssistantName"},
     )
     """The name of the contact's assistant"""
-    manager: Optional[str] = field(
+    manager: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Manager"},
     )
     """The name of the contact's manager"""
-    home_phones: Optional[List[str]] = field(
-        default=None,
+    home_phones: List[str] = dataclass_field(
         metadata={"wire_name": "HomePhones"},
     )
     """The contact's home phone numbers"""
-    business_phones: Optional[List[str]] = field(
+    business_phones: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessPhones"},
     )
     """The contact's business phone numbers"""
-    mobile_phone1: Optional[str] = field(
+    mobile_phone1: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "MobilePhone1"},
     )
     """The contact's mobile phone number"""
-    home_address: Optional[PhysicalAddress] = field(
+    home_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "HomeAddress"},
     )
-    business_address: Optional[PhysicalAddress] = field(
+    business_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "BusinessAddress"},
     )
-    other_address: Optional[PhysicalAddress] = field(
+    other_address: Optional[PhysicalAddress] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "OtherAddress"},
     )
-    yomi_company_name: Optional[str] = field(
+    yomi_company_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiCompanyName"},
     )
     """The phonetic Japanese company name of the contact"""
-    yomi_given_name: Optional[str] = field(
+    yomi_given_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiGivenName"},
     )
     """The phonetic Japanese given name (first name) of the contact"""
-    yomi_surname: Optional[str] = field(
+    yomi_surname: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "YomiSurname"},
     )
     """The phonetic Japanese surname (last name) of the contact"""
-    categories: Optional[List[str]] = field(
+    categories: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Categories"},
     )
     """The categories associated with the contact"""
-    change_key: Optional[str] = field(
+    change_key: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ChangeKey"},
     )
     """Identifies the version of the event object"""
-    date_time_created: Optional[str] = field(
+    date_time_created: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeCreated"},
     )
     """The time the contact was created"""
-    date_time_last_modified: Optional[str] = field(
+    date_time_last_modified: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DateTimeLastModified"},
     )
     """The time the contact was modified"""
@@ -2669,7 +3286,7 @@ class DataSetsList:
     Definition: DataSetsList
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
     """List of datasets"""
 
 
@@ -2679,14 +3296,19 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
     """Pass-through Native Queries"""
 
 
@@ -2696,10 +3318,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -2711,8 +3338,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -2724,13 +3352,15 @@ class ResponseToEventInvite:
     Definition: ResponseToEventInvite
     """
 
-    comment: Optional[str] = field(
+    comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comment"},
     )
     """Comment"""
-    send_response: Optional[bool] = field(
+    send_response: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SendResponse"},
     )
     """Send response to organizer?"""
@@ -2742,13 +3372,13 @@ class DirectForwardMessage:
     Definition: DirectForwardMessage
     """
 
-    comment: Optional[str] = field(
+    comment: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Comment"},
     )
     """Comment"""
-    to_recipients: Optional[str] = field(
-        default=None,
+    to_recipients: str = dataclass_field(
         metadata={"wire_name": "ToRecipients"},
     )
     """Semicolon separated list of recipients to forward the message to"""
@@ -2818,6 +3448,45 @@ class OutlookClient(ConnectorClientBase):
     @property
     def connector_name(self) -> str:
         return "outlook"
+
+    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
+        parsed_next_link = urlsplit(next_link)
+        if not parsed_next_link.scheme or not parsed_next_link.netloc:
+            if next_link.startswith("/"):
+                return f"{self._connection_runtime_url}{next_link}"
+            if next_link.startswith("?"):
+                return f"{current_request_url.partition('?')[0]}{next_link}"
+            return f"{self._connection_runtime_url}/{next_link}"
+
+        parsed_connection = urlsplit(self._connection_runtime_url)
+        next_link_hostname = parsed_next_link.hostname
+        connection_hostname = parsed_connection.hostname
+        if next_link_hostname is None or connection_hostname is None:
+            raise ValueError("Pagination URLs must include a hostname.")
+
+        next_link_port = parsed_next_link.port
+        if next_link_port is None:
+            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
+        connection_port = parsed_connection.port
+        if connection_port is None:
+            connection_port = 443 if parsed_connection.scheme == "https" else 80
+        if next_link_hostname.lower() == connection_hostname.lower():
+            if (
+                parsed_next_link.scheme == parsed_connection.scheme
+                and next_link_port == connection_port
+            ):
+                return next_link
+
+            raise ValueError(
+                "Pagination URL origin "
+                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
+                "must use the connection runtime scheme and port."
+            )
+
+        suffix = parsed_next_link.path
+        if parsed_next_link.query:
+            suffix += f"?{parsed_next_link.query}"
+        return f"{self._connection_runtime_url}{suffix}"
 
     def get_email(
         self,
@@ -3153,43 +3822,64 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def calendar_get_tables(
+    def list_calendar_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get calendars
 
         This operation lists available calendars.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/calendars/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def calendar_delete_item(
         self,
@@ -3232,45 +3922,66 @@ class OutlookClient(ConnectorClientBase):
                 response.text,
             )
 
-    def contact_get_tables(
+    def list_contact_get_tables(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get contact folders
 
         This operation lists available contacts folders.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/contacts/tables"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def contact_get_items(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_contact_get_items(
         self,
         table: str,
         *,
@@ -3282,11 +3993,14 @@ class OutlookClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get contacts
 
         This operation gets contacts from a contacts folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3319,27 +4033,45 @@ class OutlookClient(ConnectorClientBase):
             query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def contact_post_item(
         self,
@@ -3652,7 +4384,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def calendar_get_items(
+    def list_calendar_get_items(
         self,
         table: str,
         *,
@@ -3664,11 +4396,14 @@ class OutlookClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get events
 
         This operation gets events from a calendar.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3702,27 +4437,45 @@ class OutlookClient(ConnectorClientBase):
             query_params.append(f"$skip={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def calendar_patch_item(
         self,
@@ -3818,7 +4571,7 @@ class OutlookClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_emails(
+    def list_emails(
         self,
         *,
         folder_path: Optional[str] = None,
@@ -3837,11 +4590,14 @@ class OutlookClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get emails
 
         This operation gets emails from a folder.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v2/Mail"
         query_params = []
@@ -3908,29 +4664,47 @@ class OutlookClient(ConnectorClientBase):
             query_params.append(f"top={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
 
-    def get_events_calendar_view(
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
+
+    def list_events_calendar_view(
         self,
         calendar_id: str,
         start_date_time_offset: str,
@@ -3945,12 +4719,15 @@ class OutlookClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get calendar view of events
 
         This operation gets all events (including instances of recurrences) in
         a calendar.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3996,27 +4773,45 @@ class OutlookClient(ConnectorClientBase):
             query_params.append(f"search={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def reply_to(
         self,

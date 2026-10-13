@@ -44,7 +44,7 @@ def example_1_list_notebooks():
 
         with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_notebooks()
+                result = client.list_notebooks()
 
                 if result and "value" in result:
                     notebooks = result["value"]
@@ -71,7 +71,7 @@ def example_2_list_sections():
 
         with OnenoteClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_sections_in_notebook(
+                result = client.list_sections_in_notebook(
                     notebook_key=NOTEBOOK_KEY
                 )
 

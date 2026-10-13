@@ -17,6 +17,7 @@ from azure.core.paging import ItemPaged
 from azure.core.polling import AsyncLROPoller, LROPoller
 
 import azure.connectors as connectors_package
+import azure.connectors.aio as aio_package
 from azure.connectors.sdk import ConnectorClientBase as SyncConnectorClientBase
 from azure.connectors.sdk.aio import ConnectorClientBase
 from azure.connectors.sdk.exceptions import ConnectorException
@@ -24,6 +25,7 @@ from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     _representative_value,
+    generated_pager_response_text,
     get_generated_operations,
 )
 
@@ -53,17 +55,17 @@ SHARED_PACKAGE_EXPORT_NAMES = {
 }
 
 
-def test_package_roots_do_not_export_generated_clients() -> None:
-    """Require generated clients to be imported from connector modules."""
-    aio_package = importlib.import_module("azure.connectors.aio")
+def test_package_roots_export_generated_clients_lazily() -> None:
+    """Expose generated clients without importing their modules eagerly."""
+    client_names = set(connectors_package.CLIENT_REGISTRY)
 
-    assert set(connectors_package.__all__) == SHARED_PACKAGE_EXPORT_NAMES
-    assert {
-        name
-        for name in vars(connectors_package)
-        if name.endswith("Client")
-    } <= SHARED_PACKAGE_EXPORT_NAMES
-    assert not any(name.endswith("Client") for name in vars(aio_package))
+    assert SHARED_PACKAGE_EXPORT_NAMES <= set(connectors_package.__all__)
+    assert client_names <= set(connectors_package.__all__)
+    assert client_names <= set(aio_package.__all__)
+    assert client_names <= set(dir(connectors_package))
+    assert client_names <= set(dir(aio_package))
+    assert not (client_names & vars(connectors_package).keys())
+    assert not (client_names & vars(aio_package).keys())
 
 
 def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
@@ -196,11 +198,9 @@ async def test_all_aio_operations_succeed_with_request_controls(
             if get_origin(return_type) is AsyncLROPoller
             else return_type
         )
-        response_text = (
-            '{"value": [{"ok": true}]}'
-            if is_pageable
-            else '{"ok": true}'
-        )
+        response_text = '{"ok": true}'
+        if is_pageable:
+            response_text = generated_pager_response_text(generated_method)
         response_hook = MagicMock()
 
         with patch.object(

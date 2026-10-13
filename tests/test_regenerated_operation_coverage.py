@@ -29,7 +29,10 @@ from azure.connectors.aio.teams import TeamsClient
 from azure.connectors.aio.wdatp import WdatpClient
 from azure.connectors.sdk import ConnectorException
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import invoke_generated_operation
+from tests.generated_connector_test_utils import (
+    generated_pager_response_text,
+    invoke_generated_operation,
+)
 
 
 CONNECTOR_OPERATION_CASES = [
@@ -39,15 +42,15 @@ CONNECTOR_OPERATION_CASES = [
         [
             ("list_subscriptions", "GET", "/subscriptions?", False),
             ("list_resource_groups", "GET", "/resourcegroups?", False),
-            ("automation_accounts_list", "GET", "/automationAccounts?", False),
-            ("runbooks_list", "GET", "/runbooks?", False),
-            ("get_runbook", "GET", "/runbooks/value?", False),
+            ("list_automation_accounts", "GET", "/automationAccounts?", False),
+            ("list_runbooks", "GET", "/runbooks?", False),
+            ("list_runbook", "GET", "/runbooks/value?", False),
         ],
     ),
     (
         azureblob,
         AzureblobClient,
-        [("get_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
+        [("list_data_sets", "GET", "/v2/codeless/GetDataSets", False)],
     ),
     (
         azuredatafactory,
@@ -94,9 +97,9 @@ CONNECTOR_OPERATION_CASES = [
         excelonlinebusiness,
         ExcelonlinebusinessClient,
         [
-            ("get_sources", "GET", "/codeless/v1.0/sources?", False),
-            ("get_drives", "GET", "/codeless/v1.0/drives?", False),
-            ("get_columns", "GET", "/workbook/tables/value/columns?", False),
+            ("list_sources", "GET", "/codeless/v1.0/sources?", False),
+            ("list_drives", "GET", "/codeless/v1.0/drives?", False),
+            ("list_columns", "GET", "/workbook/tables/value/columns?", False),
             ("get_table", "GET", "/workbook/tables/value/metadata?", False),
             (
                 "get_single_script",
@@ -154,6 +157,27 @@ CASE_PARAMETER_NAMES = (
 EXPECTED_PAGEABLE_OPERATIONS = {
     (AzureautomationClient, "list_subscriptions"),
     (AzureautomationClient, "list_resource_groups"),
+    (AzureautomationClient, "list_automation_accounts"),
+    (AzureautomationClient, "list_runbooks"),
+    (AzureautomationClient, "list_runbook"),
+    (AzureblobClient, "list_data_sets"),
+    (AzuredatafactoryClient, "list_subscriptions"),
+    (AzuredatafactoryClient, "list_resource_groups"),
+    (AzuredatafactoryClient, "list_data_factories"),
+    (AzuredatafactoryClient, "list_pipelines"),
+    (AzurevmClient, "list_subscriptions"),
+    (AzurevmClient, "list_resource_groups"),
+    (AzurevmClient, "list_virtual_machine_scale_sets"),
+    (AzurevmClient, "list_virtual_machines_in_scale_set"),
+    (AzurevmClient, "list_virtual_machines"),
+    (ExcelonlinebusinessClient, "list_sources"),
+    (ExcelonlinebusinessClient, "list_drives"),
+    (ExcelonlinebusinessClient, "list_columns"),
+}
+
+CONTINUATION_PAGEABLE_OPERATIONS = {
+    (AzureautomationClient, "list_subscriptions"),
+    (AzureautomationClient, "list_resource_groups"),
     (AzuredatafactoryClient, "list_subscriptions"),
     (AzuredatafactoryClient, "list_resource_groups"),
     (AzuredatafactoryClient, "list_data_factories"),
@@ -170,11 +194,16 @@ PAGEABLE_OPERATION_CASES = [
     if (operation_case[1], operation_case[2]) in EXPECTED_PAGEABLE_OPERATIONS
 ]
 
+CONTINUATION_PAGEABLE_OPERATION_CASES = [
+    operation_case for operation_case in OPERATION_CASES
+    if (operation_case[1], operation_case[2]) in CONTINUATION_PAGEABLE_OPERATIONS
+]
+
 
 def test_expected_pageable_operations_remain_iterator_contracts() -> None:
     """Test every declared pageable operation returns an asynchronous pager."""
     assert {(case[1], case[2]) for case in PAGEABLE_OPERATION_CASES} == EXPECTED_PAGEABLE_OPERATIONS
-    assert len(PAGEABLE_OPERATION_CASES) == 11
+    assert len(PAGEABLE_OPERATION_CASES) == 18
     for client_type, operation in EXPECTED_PAGEABLE_OPERATIONS:
         return_type = get_type_hints(getattr(client_type, operation))["return"]
         assert get_origin(return_type) is AsyncItemPaged, operation
@@ -183,8 +212,11 @@ def test_expected_pageable_operations_remain_iterator_contracts() -> None:
 @pytest.mark.parametrize("empty_first_page", [False, True])
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,
-    PAGEABLE_OPERATION_CASES,
-    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+    CONTINUATION_PAGEABLE_OPERATION_CASES,
+    ids=[
+        f"{case[0].__name__}.{case[2]}"
+        for case in CONTINUATION_PAGEABLE_OPERATION_CASES
+    ],
 )
 @pytest.mark.asyncio
 async def test_newly_generated_pageable_contract_follows_later_pages(
@@ -241,8 +273,11 @@ async def test_newly_generated_pageable_contract_follows_later_pages(
 @pytest.mark.parametrize("status,body", [(200, ""), (200, '{"value": []}'), (204, "")])
 @pytest.mark.parametrize(
     CASE_PARAMETER_NAMES,
-    PAGEABLE_OPERATION_CASES,
-    ids=[f"{case[0].__name__}.{case[2]}" for case in PAGEABLE_OPERATION_CASES],
+    CONTINUATION_PAGEABLE_OPERATION_CASES,
+    ids=[
+        f"{case[0].__name__}.{case[2]}"
+        for case in CONTINUATION_PAGEABLE_OPERATION_CASES
+    ],
 )
 @pytest.mark.asyncio
 async def test_newly_generated_pageable_contract_preserves_empty_response(
@@ -296,13 +331,17 @@ async def test_newly_generated_operation_success_contract(
         credential=mock_credential,
     )
     is_pageable = (client_type, operation) in EXPECTED_PAGEABLE_OPERATIONS
-    response_payload = {"value": [{"id": "item-1"}]} if is_pageable else {"ok": True}
+    response_text = (
+        generated_pager_response_text(getattr(client_type, operation))
+        if is_pageable
+        else '{"ok": true}'
+    )
 
     with patch.object(
         client._http_client,
         "send",
         new_callable=AsyncMock,
-        return_value=MockResponse(status=200, text=json.dumps(response_payload)),
+        return_value=MockResponse(status=200, text=response_text),
     ) as mock_send:
         result = await invoke_generated_operation(
             client,
@@ -315,7 +354,7 @@ async def test_newly_generated_operation_success_contract(
     assert method == expected_method
     assert expected_path in request_url
     assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
-    assert result == (response_payload["value"] if is_pageable else response_payload)
+    assert result == ([{"ok": True}] if is_pageable else {"ok": True})
 
 
 @pytest.mark.parametrize(

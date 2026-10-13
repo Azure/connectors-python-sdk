@@ -18,15 +18,18 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import resolve_generated_result
 
 
 async def _invoke_operation(client: RssClient, operation: str):
     """Invoke an RSS operation by name for shared parameterized tests."""
     if operation == "list_feed_items":
-        return await client.list_feed_items(
-            feed_url="https://contoso.example/feed.xml",
-            since="2026-01-01T00:00:00Z",
-            since_property="UpdatedOn",
+        return await resolve_generated_result(
+            client.list_feed_items(
+                feed_url="https://contoso.example/feed.xml",
+                since="2026-01-01T00:00:00Z",
+                since_property="UpdatedOn",
+            )
         )
 
     raise ValueError(f"Unsupported operation '{operation}'.")
@@ -127,10 +130,12 @@ class TestRssClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.list_feed_items(
-                feed_url="https://contoso.example/feed.xml",
-                since="2026-01-01T00:00:00Z",
-                since_property="UpdatedOn",
+            result = await resolve_generated_result(
+                client.list_feed_items(
+                    feed_url="https://contoso.example/feed.xml",
+                    since="2026-01-01T00:00:00Z",
+                    since_property="UpdatedOn",
+                )
             )
 
             assert len(result) == 1
@@ -179,7 +184,7 @@ class TestRssApiSurface:
         actual_signatures = {
             name: tuple(inspect.signature(method).parameters)
             for name, method in vars(RssClient).items()
-            if inspect.iscoroutinefunction(method)
+            if callable(method) and not name.startswith("_")
         }
 
         assert actual_signatures == {
@@ -213,9 +218,9 @@ class TestRssTypeSerialization:
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
-        feed_item = FeedItem()
+        feed_item = FeedItem(title="Item")
         trigger_response = TriggerBatchResponseFeedItem()
 
         assert feed_item.id is None
-        assert feed_item.title is None
+        assert feed_item.title == "Item"
         assert trigger_response.value is None

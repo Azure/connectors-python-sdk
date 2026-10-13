@@ -180,11 +180,12 @@ class TestMyTrendingDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.my_trending_documents()
+            result = await resolve_generated_result(
+                client.list_my_trending_documents()
+            )
 
             mock_send.assert_called_once()
-            assert "value" in result
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_credential):
@@ -202,7 +203,9 @@ class TestMyTrendingDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.my_trending_documents(filter="resourceVisualization/type eq 'Excel'")
+            await resolve_generated_result(client.list_my_trending_documents(
+                filter="resourceVisualization/type eq 'Excel'"
+            ))
 
             call_args = mock_send.call_args
             assert "$filter=" in call_args[0][1]
@@ -223,8 +226,10 @@ class TestMyTrendingDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.my_trending_documents()
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_my_trending_documents()
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -243,7 +248,9 @@ class TestMyTrendingDocuments:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.my_trending_documents()
+                await resolve_generated_result(
+                    client.list_my_trending_documents()
+                )
 
             assert exc_info.value.status_code == 401
 
@@ -270,12 +277,14 @@ class TestRelevantPeople:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.relevant_people(user_id="user123")
+            result = await resolve_generated_result(
+                client.list_relevant_people(user_id="user123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "users/user123/relevantpeople" in call_args[0][1]
-            assert "value" in result
+            assert result[0]["id"] == "person1"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -294,7 +303,9 @@ class TestRelevantPeople:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.relevant_people(user_id="invalid")
+                await resolve_generated_result(
+                    client.list_relevant_people(user_id="invalid")
+                )
 
             assert exc_info.value.status_code == 404
 
@@ -370,12 +381,14 @@ class TestTrendingDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.trending_documents(id="user123")
+            result = await resolve_generated_result(
+                client.list_trending_documents(id="user123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "users/user123/insights/trending" in call_args[0][1]
-            assert "value" in result
+            assert result[0]["id"] == "doc1"
 
     @pytest.mark.asyncio
     async def test_with_filter_parameter(self, mock_credential):
@@ -393,9 +406,11 @@ class TestTrendingDocuments:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.trending_documents(
-                id="user123",
-                filter="resourceVisualization/type eq 'Word'"
+            await resolve_generated_result(
+                client.list_trending_documents(
+                    id="user123",
+                    filter="resourceVisualization/type eq 'Word'"
+                )
             )
 
             call_args = mock_send.call_args
@@ -418,7 +433,9 @@ class TestTrendingDocuments:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.trending_documents(id="user123")
+                await resolve_generated_result(
+                    client.list_trending_documents(id="user123")
+                )
 
             assert exc_info.value.status_code == 500
 
@@ -517,12 +534,14 @@ class TestDirectReports:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.direct_reports(id="manager123")
+            result = await resolve_generated_result(
+                client.list_direct_reports(id="manager123")
+            )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert "users/manager123/directReports" in call_args[0][1]
-            assert "value" in result
+            assert result[0]["id"] == "report1"
 
     @pytest.mark.asyncio
     async def test_with_select_and_top_parameters(self, mock_credential):
@@ -540,10 +559,12 @@ class TestDirectReports:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.direct_reports(
-                id="manager123",
-                select="displayName,mail",
-                top="10"
+            await resolve_generated_result(
+                client.list_direct_reports(
+                    id="manager123",
+                    select="displayName,mail",
+                    top=10
+                )
             )
 
             call_args = mock_send.call_args
@@ -566,8 +587,10 @@ class TestDirectReports:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.direct_reports(id="manager123")
-            assert result is None
+            result = await resolve_generated_result(
+                client.list_direct_reports(id="manager123")
+            )
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -586,7 +609,9 @@ class TestDirectReports:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.direct_reports(id="manager123")
+                await resolve_generated_result(
+                    client.list_direct_reports(id="manager123")
+                )
 
             assert exc_info.value.status_code == 403
 

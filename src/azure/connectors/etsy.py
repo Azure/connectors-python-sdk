@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, List, Literal, Any, Mapping
 from urllib.parse import quote
 import json
@@ -136,7 +136,7 @@ class Pong:
     Response for Ping
     """
 
-    application_id: Optional[int] = None
+    application_id: int
     """The authenticated application's ID"""
 
 
@@ -146,9 +146,9 @@ class PaymentAccountLedgerEntries:
     Response for Get a shop payment account ledger's entries
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of payment account ledger entry resources found."""
-    results: Optional[List[PaymentAccountLedgerEntry]] = None
+    results: List[PaymentAccountLedgerEntry]
     """The payment account ledger entry resources found."""
 
 
@@ -158,9 +158,9 @@ class Payments:
     Response for Get a payment from a payment account ledger entry ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of payments in the response."""
-    results: Optional[List[Payment]] = None
+    results: List[Payment]
     """A list of payments."""
 
 
@@ -170,52 +170,52 @@ class ShopReceipt:
     Response for Get a receipt
     """
 
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    receipt_type: Optional[int] = None
+    receipt_type: int
     """
     The numeric value for the Etsy channel that serviced the purchase: 0 for
     Etsy.com, 1 for a Pattern shop.
     """
-    seller_user_id: Optional[int] = None
+    seller_user_id: int
     """The numeric ID for the user (seller) fulfilling the purchase."""
-    seller_email: Optional[str] = None
+    seller_email: str
     """The email address string for the seller of the listing."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric ID for the user making the purchase."""
-    buyer_email: Optional[str] = None
+    buyer_email: str
     """The email address string for the buyer of the listing."""
-    name: Optional[str] = None
+    name: str
     """The name string for the recipient in the shipping address."""
-    first_line: Optional[str] = None
+    first_line: str
     """
     The first address line string for the recipient in the shipping address.
     """
-    second_line: Optional[str] = None
+    second_line: str
     """
     The optional second address line string for the recipient in the shipping
     address.
     """
-    city: Optional[str] = None
+    city: str
     """The city string for the recipient in the shipping address."""
-    state: Optional[str] = None
+    state: str
     """The state string for the recipient in the shipping address."""
-    zip: Optional[str] = None
+    zip: str
     """
     The zip code string (not necessarily a number) for the recipient in the
     shipping address.
     """
-    formatted_address: Optional[str] = None
+    formatted_address: str
     """
     The formatted shipping address string for the recipient in the shipping
     address.
     """
-    country_iso: Optional[str] = None
+    country_iso: str
     """
     The ISO-3166 alpha-2 country code string for the recipient in the shipping
     address.
     """
-    payment_method: Optional[str] = None
+    payment_method: str
     """
     The payment method string identifying purchaser's payment method, which
     must be one of: 'cc' (credit card), 'paypal', 'check', 'mo' (money order),
@@ -223,36 +223,36 @@ class ShopReceipt:
     'android_pay', 'google_pay', 'klarna', 'k_pay_in_4' (klarna), or
     'k_financing' (klarna).
     """
-    payment_email: Optional[str] = None
+    payment_email: str
     """
     The email address string for the email address to which to send payment
     confirmation
     """
-    message_from_seller: Optional[str] = None
+    message_from_seller: str
     """An optional message string from the seller."""
-    message_from_buyer: Optional[str] = None
+    message_from_buyer: str
     """An optional message string from the buyer."""
-    message_from_payment: Optional[str] = None
+    message_from_payment: str
     """The machine-generated acknowledgement string from the payment system."""
-    is_paid: Optional[bool] = None
+    is_paid: bool
     """When true, buyer paid for this purchase."""
-    is_shipped: Optional[bool] = None
+    is_shipped: bool
     """When true, seller shipped the products."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The receipt's creation time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """The time of the last update to the receipt, in epoch seconds."""
-    gift_message: Optional[str] = None
+    gift_message: str
     """A gift message string the buyer requests delivered with the product."""
-    grandtotal: Optional[Money] = None
-    subtotal: Optional[Money] = None
-    total_price: Optional[Money] = None
-    total_shipping_cost: Optional[Money] = None
-    total_tax_cost: Optional[Money] = None
-    total_vat_cost: Optional[Money] = None
-    discount_amt: Optional[Money] = None
-    gift_wrap_price: Optional[Money] = None
-    shipments: Optional[List[ShopReceiptShipment]] = None
+    grandtotal: Money
+    subtotal: Money
+    total_price: Money
+    total_shipping_cost: Money
+    total_tax_cost: Money
+    total_vat_cost: Money
+    discount_amt: Money
+    gift_wrap_price: Money
+    shipments: List[ShopReceiptShipment]
     """A list of shipment statements for this receipt."""
 
 
@@ -262,9 +262,9 @@ class ShopReceipts:
     Response for Get receipts
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of Shop Receipts found."""
-    results: Optional[List[ShopReceipt]] = None
+    results: List[ShopReceipt]
     """
     List of Shop Receipt resources found, with all Shop Receipt fields for each
     resource.
@@ -277,11 +277,11 @@ class ReceiptCreateShipmentInput:
     Create a Shipment Receipt
     """
 
-    tracking_code: Optional[str] = None
+    tracking_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tracking code for this receipt."""
-    carrier_name: Optional[str] = None
+    carrier_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The carrier name for this receipt."""
-    send_bcc: Optional[bool] = None
+    send_bcc: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """If true, the shipping notification will be sent to the seller as well"""
 
 
@@ -291,9 +291,9 @@ class ShopReceiptTransactions:
     Response for Retrieve a listing's transactions
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop receipt transaction resources found."""
-    results: Optional[List[ShopReceiptTransaction]] = None
+    results: List[ShopReceiptTransaction]
     """The shop receipt transaction resources found."""
 
 
@@ -303,42 +303,42 @@ class ShopReceiptTransaction:
     Response for Get a transaction
     """
 
-    transaction_id: Optional[int] = None
+    transaction_id: int
     """The unique numeric ID for a transaction."""
-    title: Optional[str] = None
+    title: str
     """The title string of the listing purchased in this transaction."""
-    description: Optional[str] = None
+    description: str
     """The description string of the listing purchased in this transaction."""
-    seller_user_id: Optional[int] = None
+    seller_user_id: int
     """The numeric user ID for the seller in this transaction."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric user ID for the buyer in this transaction."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    paid_timestamp: Optional[int] = None
+    paid_timestamp: int
     """The transaction's paid date and time, in epoch seconds."""
-    shipped_timestamp: Optional[int] = None
+    shipped_timestamp: int
     """The transaction's shipping date and time, in epoch seconds."""
-    quantity: Optional[int] = None
+    quantity: int
     """The numeric quantity of products purchased in this transaction."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: int
     """The numeric ID of the primary listing image for this transaction."""
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    is_digital: Optional[bool] = None
+    is_digital: bool
     """
     When true, the transaction recorded the purchase of a digital listing.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files purchased in this transaction."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    transaction_type: Optional[str] = None
+    transaction_type: str
     """The type string for the transaction, usually listing"""
-    product_id: Optional[int] = None
+    product_id: int
     """The numeric ID for a specific product purchased from a listing."""
-    price: Optional[Money] = None
-    shipping_cost: Optional[Money] = None
+    price: Money
+    shipping_cost: Money
 
 
 @dataclass
@@ -347,9 +347,9 @@ class TransactionReviews:
     Response for Get reviews
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of TransactionReview resources found."""
-    results: Optional[List[TransactionReview]] = None
+    results: List[TransactionReview]
     """The TransactionReview resources found."""
 
 
@@ -359,8 +359,8 @@ class ShippingCarriers:
     Response for Get shipping carriers
     """
 
-    count: Optional[int] = None
-    results: Optional[List[ShippingCarrier]] = None
+    count: int
+    results: List[ShippingCarrier]
 
 
 @dataclass
@@ -369,37 +369,37 @@ class ShopShippingProfile:
     Response for Get shipping profiles
     """
 
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile."""
-    title: Optional[str] = None
+    title: str
     """The name string of this shipping profile."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user who owns the shipping profile."""
-    min_processing_days: Optional[int] = None
+    min_processing_days: int
     """The minimum number of days for processing the listing."""
-    max_processing_days: Optional[int] = None
+    max_processing_days: int
     """The maximum number of days for processing the listing."""
-    processing_days_display_label: Optional[str] = None
+    processing_days_display_label: str
     """Translated display label string for processing days."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """When true, someone deleted this shipping profile."""
-    shipping_profile_destinations: Optional[List[ShopShippingProfileDestination]] = None
+    shipping_profile_destinations: List[ShopShippingProfileDestination]
     """
     A list of shipping profile destinations available for this shipping
     profile.
     """
-    shipping_profile_upgrades: Optional[List[ShopShippingProfileUpgrade]] = None
+    shipping_profile_upgrades: List[ShopShippingProfileUpgrade]
     """
     A list of shipping profile upgrades available for this shipping profile.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: str
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
     """
-    profile_type: Optional[ProfileType] = None
+    profile_type: Optional[ProfileType] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -408,38 +408,38 @@ class ShippingCreateProfileInput:
     Create a shipping profile
     """
 
-    title: Optional[str] = None
+    title: str
     """The name string of this shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    primary_cost: Optional[float] = None
+    primary_cost: float
     """
     The cost of shipping to this country/region alone, measured in the store's
     default currency.
     """
-    secondary_cost: Optional[float] = None
+    secondary_cost: float
     """
     The cost of shipping to this country/region with another item, measured in
     the store's default currency.
     """
-    min_processing_time: Optional[int] = None
+    min_processing_time: int
     """
     The minimum time required to process to ship listings with this shipping
     profile.
     """
-    max_processing_time: Optional[int] = None
+    max_processing_time: int
     """The maximum processing time the listing needs to ship."""
-    processing_time_unit: Optional[str] = None
+    processing_time_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unit used to represent how long a processing time is. A week is
     equivalent to 5 business days.
     """
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The ISO code of the country to which the listing ships. If null, request
     sets destination to destination region.
     """
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The code of the region to which the listing ships. A region represents a
     set of countries. Supported regions are Europe Union and Non-Europe Union
@@ -447,27 +447,27 @@ class ShippingCreateProfileInput:
     destination country ISO, or everywhere if destination country ISO is also
     null.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an estimated delivery date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -480,24 +480,24 @@ class ShippingUpdateProfileInput:
     Update a shipping profile
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name string of this shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ISO code of the country from which the listing ships."""
-    min_processing_time: Optional[int] = None
+    min_processing_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The minimum time required to process to ship listings with this shipping
     profile.
     """
-    max_processing_time: Optional[int] = None
+    max_processing_time: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum processing time the listing needs to ship."""
-    processing_time_unit: Optional[str] = None
+    processing_time_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unit used to represent how long a processing time is. A week is
     equivalent to 5 business days. If none is provided, the unit is set to
     business_days.
     """
-    origin_postal_code: Optional[str] = None
+    origin_postal_code: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The postal code string (not necessarily a number) for the location from
     which the listing ships.
@@ -510,9 +510,9 @@ class ShopShippingProfileDestinations:
     Response for Get profile destinations by shipping profile
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopShippingProfileDestination]] = None
+    results: List[ShopShippingProfileDestination]
     """The list of requested resources."""
 
 
@@ -522,27 +522,27 @@ class ShippingCreateDestinationInput:
     Create a shipping profile destination
     """
 
-    primary_cost: Optional[float] = None
+    primary_cost: float
     """
     The cost of shipping to this country/region alone, measured in the store's
     default currency.
     """
-    secondary_cost: Optional[str] = None
+    secondary_cost: str
     """
     The cost of shipping to this country/region with another item, measured in
     the store's default currency.
     """
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_country_iso"""
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_region"""
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """shipping_carrier_id"""
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail_class"""
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """max_delivery_days"""
 
 
@@ -552,39 +552,39 @@ class ShopShippingProfileDestination:
     Response for Create a shipping profile destination
     """
 
-    shipping_profile_destination_id: Optional[int] = None
+    shipping_profile_destination_id: int
     """
     The numeric ID of the shipping profile destination in the shipping profile
     associated with the listing.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile."""
-    origin_country_iso: Optional[str] = None
+    origin_country_iso: str
     """The ISO code of the country from which the listing ships."""
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: str
     """
     The ISO code of the country to which the listing ships. If null, request
     sets destination to destination_region
     """
-    destination_region: Optional[DestinationRegion] = None
-    primary_cost: Optional[Money] = None
-    secondary_cost: Optional[Money] = None
-    shipping_carrier_id: Optional[int] = None
+    destination_region: DestinationRegion
+    primary_cost: Money
+    secondary_cost: Money
+    shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: str
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: int
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: int
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -597,21 +597,21 @@ class ShippingUpdateProfileDestinationInput:
     Update a shipping profile destination
     """
 
-    primary_cost: Optional[str] = None
+    primary_cost: Optional[str] = dataclass_field(default=None, kw_only=True)
     """primary_cost"""
-    secondary_cost: Optional[str] = None
+    secondary_cost: Optional[str] = dataclass_field(default=None, kw_only=True)
     """secondary_cost"""
-    destination_country_iso: Optional[str] = None
+    destination_country_iso: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_country_iso"""
-    destination_region: Optional[str] = None
+    destination_region: Optional[str] = dataclass_field(default=None, kw_only=True)
     """destination_region"""
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """shipping_carrier_id"""
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """mail_class"""
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """max_delivery_days"""
 
 
@@ -621,9 +621,9 @@ class ShopShippingProfileUpgrades:
     Response for Get shipping profile upgrades
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopShippingProfileUpgrade]] = None
+    results: List[ShopShippingProfileUpgrade]
     """The list of requested resources."""
 
 
@@ -633,32 +633,32 @@ class ShippingCreateUpgradeInput:
     Create a shipping profile upgrade
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: str = dataclass_field(metadata={"wire_name": "type"})
     """The type of the shipping upgrade. Domestic (0) or international (1)."""
-    upgrade_name: Optional[str] = None
+    upgrade_name: str
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    price: Optional[float] = None
+    price: float
     """Additional cost of adding the shipping upgrade."""
-    secondary_price: Optional[float] = None
+    secondary_price: float
     """
     Additional cost of adding the shipping upgrade for each additional item.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -671,45 +671,45 @@ class ShopShippingProfileUpgrade:
     Response for Create a shipping profile upgrade
     """
 
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the base shipping profile."""
-    upgrade_id: Optional[int] = None
+    upgrade_id: int
     """The numeric ID that is associated with a shipping upgrade"""
-    upgrade_name: Optional[str] = None
+    upgrade_name: str
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    type_: Optional[Type] = field(default=None, metadata={"wire_name": "type"})
-    rank: Optional[int] = None
+    type_: Type = dataclass_field(metadata={"wire_name": "type"})
+    rank: int
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the language of the shipping profile. Ex: de, en,
     es, fr, it, ja, nl, pl, pt, ru.
     """
-    price: Optional[Money] = None
-    secondary_price: Optional[Money] = None
-    shipping_carrier_id: Optional[int] = None
+    price: Money
+    secondary_price: Money
+    shipping_carrier_id: int
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: str
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: int
     """
     The minimum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
     """
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: int
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -722,32 +722,36 @@ class ShippingUpdateProfileUpgradeInput:
     Update a shipping profile upgrade
     """
 
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """The type of the shipping upgrade. Domestic (0) or international (1)."""
-    upgrade_name: Optional[str] = None
+    upgrade_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Name for the shipping upgrade shown to shoppers at checkout, e.g. USPS
     Priority.
     """
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Additional cost of adding the shipping upgrade."""
-    secondary_price: Optional[float] = None
+    secondary_price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     Additional cost of adding the shipping upgrade for each additional item.
     """
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID of a supported shipping carrier, which is used to calculate
     an Estimated Delivery Date.
     """
-    mail_class: Optional[str] = None
+    mail_class: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The unique ID string of a shipping carrier's mail class, which is used to
     calculate an estimated delivery date.
     """
-    min_delivery_days: Optional[int] = None
+    min_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """min_delivery_days"""
-    max_delivery_days: Optional[int] = None
+    max_delivery_days: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The maximum number of business days a buyer can expect to wait to receive
     their purchased item once it has shipped.
@@ -760,17 +764,17 @@ class ShopUpdateInput:
     Update a shop
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A brief heading string for the shop's main page."""
-    announcement: Optional[str] = None
+    announcement: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An announcement string to buyers that displays on the shop's homepage.
     """
-    sale_message: Optional[str] = None
+    sale_message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message string sent to users who complete a purchase from this shop.
     """
-    digital_sale_message: Optional[str] = None
+    digital_sale_message: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A message string sent to users who purchase a digital item from this shop.
     """
@@ -782,120 +786,119 @@ class Shop:
     Response for Update a shop
     """
 
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric user ID of the user who owns this shop."""
-    shop_name: Optional[str] = None
+    shop_name: str
     """The shop's name string."""
-    create_date: Optional[int] = None
+    create_date: int
     """The date and time this shop was created, in epoch seconds."""
-    title: Optional[str] = None
+    title: str
     """A brief heading string for the shop's main page."""
-    announcement: Optional[str] = None
+    announcement: str
     """
     An announcement string to buyers that displays on the shop's homepage.
     """
-    currency_code: Optional[str] = None
+    currency_code: str
     """
     The ISO (alphabetic) code for the shop's currency. The shop displays all
     prices in this currency by default.
     """
-    is_vacation: Optional[bool] = None
+    is_vacation: bool
     """When true, this shop is not accepting purchases."""
-    vacation_message: Optional[str] = None
+    vacation_message: str
     """The shop's message string displayed when is_vacation is true."""
-    sale_message: Optional[str] = None
+    sale_message: str
     """
     A message string sent to users who complete a purchase from this shop.
     """
-    digital_sale_message: Optional[str] = None
+    digital_sale_message: str
     """
     A message string sent to users who purchase a digital item from this shop.
     """
-    update_date: Optional[int] = None
+    update_date: int
     """The date and time of the last update to the shop, in epoch seconds."""
-    listing_active_count: Optional[int] = None
+    listing_active_count: int
     """The number of active listings in the shop."""
-    digital_listing_count: Optional[int] = None
+    digital_listing_count: int
     """The number of digital listings in the shop."""
-    login_name: Optional[str] = None
+    login_name: str
     """The shop owner's login name string."""
-    accepts_custom_requests: Optional[bool] = None
+    accepts_custom_requests: bool
     """When true, the shop accepts customization requests."""
-    policy_welcome: Optional[str] = None
+    policy_welcome: str
     """The shop's policy welcome string (may be blank)."""
-    policy_payment: Optional[str] = None
+    policy_payment: str
     """The shop's payment policy string (may be blank)."""
-    policy_shipping: Optional[str] = None
+    policy_shipping: str
     """The shop's shipping policy string (may be blank)."""
-    policy_refunds: Optional[str] = None
+    policy_refunds: str
     """The shop's refund policy string (may be blank)."""
-    policy_additional: Optional[str] = None
+    policy_additional: str
     """The shop's additional policies string (may be blank)."""
-    policy_seller_info: Optional[str] = None
+    policy_seller_info: str
     """The shop's seller infomation string (may be blank)."""
-    policy_update_date: Optional[int] = None
+    policy_update_date: int
     """
     The date and time of the last update to the shop's policies, in epoch
     seconds.
     """
-    policy_has_private_receipt_info: Optional[bool] = None
+    policy_has_private_receipt_info: bool
     """When true, EU receipts display private info."""
-    has_unstructured_policies: Optional[bool] = None
+    has_unstructured_policies: bool
     """When true, the shop displays additional unstructured policy fields."""
-    policy_privacy: Optional[str] = None
+    policy_privacy: str
     """The shop's privacy policy string (may be blank)."""
-    vacation_autoreply: Optional[str] = None
+    vacation_autoreply: str
     """
     The shop's automatic reply string displayed in new conversations when
     is_vacation is true.
     """
-    url: Optional[str] = None
+    url: str
     """The URL string for this shop."""
-    image_url760x100: Optional[str] = field(
-        default=None,
+    image_url760x100: str = dataclass_field(
         metadata={"wire_name": "image_url_760x100"},
     )
     """The URL string for this shop's banner image."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this shop a favorite."""
-    languages: Optional[List[str]] = None
+    languages: List[str]
     """A list of language strings for the shop's enrolled languages."""
-    icon_url_fullxfull: Optional[str] = None
+    icon_url_fullxfull: str
     """The URL string for this shop's icon image."""
-    is_using_structured_policies: Optional[bool] = None
+    is_using_structured_policies: bool
     """When true, the shop accepted using structured policies."""
-    has_onboarded_structured_policies: Optional[bool] = None
+    has_onboarded_structured_policies: bool
     """
     When true, the shop accepted OR declined after viewing structured policies
     onboarding.
     """
-    include_dispute_form_link: Optional[bool] = None
+    include_dispute_form_link: bool
     """
     When true, this shop's policies include a link to an EU online dispute
     form.
     """
-    is_direct_checkout_onboarded: Optional[bool] = None
+    is_direct_checkout_onboarded: bool
     """When true, the shop has onboarded onto Etsy Payments."""
-    is_calculated_eligible: Optional[bool] = None
+    is_calculated_eligible: bool
     """
     When true, the shop is elegible for calculated shipping profiles. (Only
     available in the US and Canada)
     """
-    is_opted_in_to_buyer_promise: Optional[bool] = None
+    is_opted_in_to_buyer_promise: bool
     """When true, the shop opted in to buyer promise."""
-    is_shop_us_based: Optional[bool] = None
+    is_shop_us_based: bool
     """When true, the shop is based in the US."""
-    transaction_sold_count: Optional[int] = None
+    transaction_sold_count: int
     """The total number of sales transactions for this shop"""
-    shipping_from_country_iso: Optional[str] = None
+    shipping_from_country_iso: str
     """The country iso the shop is shipping from."""
-    shop_location_country_iso: Optional[str] = None
+    shop_location_country_iso: str
     """The country iso where the shop is located."""
-    review_count: Optional[int] = None
+    review_count: int
     """Number of reviews of shop listings in the past year."""
-    review_average: Optional[float] = None
+    review_average: float
     """Average rating based on reviews of shop listings in the past year."""
 
 
@@ -905,9 +908,9 @@ class Shops:
     Response for Search shops
     """
 
-    count: Optional[int] = None
+    count: int
     """The total number of Shops"""
-    results: Optional[List[Shop]] = None
+    results: List[Shop]
     """The Shop resources."""
 
 
@@ -917,9 +920,9 @@ class ShopSections:
     Response for Get shop sections
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopSection]] = None
+    results: List[ShopSection]
     """The list of requested resources."""
 
 
@@ -929,7 +932,7 @@ class ShopCreateSectionInput:
     Create a shop section
     """
 
-    title: Optional[str] = None
+    title: str
     """The title string for a shop section."""
 
 
@@ -939,18 +942,18 @@ class ShopSection:
     Response for Create a shop section
     """
 
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    title: Optional[str] = None
+    title: str
     """The title string for a shop section."""
-    rank: Optional[int] = None
+    rank: int
     """
     The positive non-zero numeric position of this section in the section
     display order for a shop, with rank 1 sections appearing first.
     """
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID of the user who owns this shop section."""
-    active_listing_count: Optional[int] = None
+    active_listing_count: int
     """The number of active listings in one section of a specific Etsy shop."""
 
 
@@ -960,38 +963,38 @@ class User:
     Response for Get user
     """
 
-    user_id: Optional[int] = None
+    user_id: int
     """
     The numeric ID of a user. This number is also a valid shop ID for the
     user's shop.
     """
-    login_name: Optional[str] = None
+    login_name: str
     """The user's login name string."""
-    primary_email: Optional[str] = None
+    primary_email: str
     """An email address string for the user's primary email address."""
-    first_name: Optional[str] = None
+    first_name: str
     """The user's first name."""
-    last_name: Optional[str] = None
+    last_name: str
     """The user's last name."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The date and time the user created their account, in epoch seconds."""
-    referred_by_user_id: Optional[int] = None
+    referred_by_user_id: int
     """The numeric ID of the user who referred this user."""
-    use_new_inventory_endpoints: Optional[bool] = None
+    use_new_inventory_endpoints: bool
     """Deprecated. Always true."""
-    is_seller: Optional[bool] = None
+    is_seller: bool
     """True if the user is seller."""
-    bio: Optional[str] = None
+    bio: str
     """The user's biography."""
-    gender: Optional[str] = None
+    gender: str
     """The user's gender."""
-    birth_month: Optional[str] = None
+    birth_month: str
     """The user's month of birth."""
-    birth_day: Optional[str] = None
+    birth_day: str
     """The user's day of birth."""
-    transaction_buy_count: Optional[int] = None
+    transaction_buy_count: int
     """The number of transactions where the user has bought."""
-    transaction_sold_count: Optional[int] = None
+    transaction_sold_count: int
     """The number of transactions where the user has sold."""
 
 
@@ -1001,27 +1004,27 @@ class UserAddress:
     Response for Get user's address
     """
 
-    user_address_id: Optional[int] = None
+    user_address_id: int
     """The numeric ID of the user's address."""
-    user_id: Optional[int] = None
+    user_id: int
     """The user's numeric ID."""
-    name: Optional[str] = None
+    name: str
     """The user's name for this address."""
-    first_line: Optional[str] = None
+    first_line: str
     """The first line of the user's address."""
-    second_line: Optional[str] = None
+    second_line: str
     """The second line of the user's address."""
-    city: Optional[str] = None
+    city: str
     """The city field of the user's address."""
-    state: Optional[str] = None
+    state: str
     """The state field of the user's address."""
-    zip: Optional[str] = None
+    zip: str
     """The zip code field of the user's address."""
-    iso_country_code: Optional[str] = None
+    iso_country_code: str
     """The ISO code of the country in this address."""
-    country_name: Optional[str] = None
+    country_name: str
     """The name of the user's country."""
-    is_default_shipping_address: Optional[bool] = None
+    is_default_shipping_address: bool
     """Is this the user's default shipping address."""
 
 
@@ -1031,9 +1034,9 @@ class UserAddresses:
     Response for Get user addresses
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of UserAddress records being returned."""
-    results: Optional[List[UserAddress]] = None
+    results: List[UserAddress]
     """An array of UserAddress resources."""
 
 
@@ -1043,9 +1046,9 @@ class SellerTaxonomyNodes:
     Response for Get seller taxonomy nodes
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[SellerTaxonomyNode]] = None
+    results: List[SellerTaxonomyNode]
     """The list of requested resources."""
 
 
@@ -1055,9 +1058,9 @@ class TaxonomyNodeProperties:
     Response for Get product properties by taxonomy ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[TaxonomyNodeProperty]] = None
+    results: List[TaxonomyNodeProperty]
     """The list of requested resources."""
 
 
@@ -1067,9 +1070,9 @@ class ShopListings:
     Response for Get listings by shop
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ShopListing]] = None
+    results: List[ShopListing]
     """The shop listing resources found."""
 
 
@@ -1079,126 +1082,126 @@ class ListingCreateInput:
     Create a draft listing
     """
 
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing.
     """
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\p{L}\\p{Nd}\\p{P}\\p{Sm}\\p{Zs}™©®]/u) You can only
     use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    price: Optional[float] = None
+    price: float
     """
     The positive non-zero price of the product. (Sold product listings are
     private) Note: The price is the minimum possible price.
     """
-    who_made: Optional[str] = None
+    who_made: str
     """
     An string inidcated who made the product. Helps buyers locate the listing
     under the Handmade heading. Requires 'is_supply' and 'when_made'.
     """
-    when_made: Optional[str] = None
+    when_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string for the era in which the maker made the product in this listing.
     Helps buyers locate the listing under the Vintage heading. Requires
     'is_supply' and 'who_made'.
     """
-    taxonomy_id: Optional[int] = None
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    materials: Optional[str] = None
+    materials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A array of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shop section for this listing."""
-    processing_min: Optional[int] = None
+    processing_min: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The minimum number of days required to process this listing."""
-    processing_max: Optional[int] = None
+    processing_max: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum number of days required to process this listing."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\p{L}\\p{Nd}\\p{Zs}-'™©®]/u)
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating a person for whom this product would make an
     appropriate gift.
     """
-    occasion: Optional[str] = None
+    occasion: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating an occassion for which this product would make an
     appropriate gift.
     """
-    styles: Optional[str] = None
+    styles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
     Valid style strings contain only letters, numbers, and whitespace
     characters. (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    item_weight: Optional[float] = None
+    item_weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric weight of the product measured in units set in item weight
     unit.
     """
-    item_length: Optional[int] = None
+    item_length: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric length of the product measured in units set in item dimensions
     unit.
     """
-    item_width: Optional[float] = None
+    item_width: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric width of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_height: Optional[float] = None
+    item_height: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric height of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_weight_unit: Optional[str] = None
+    item_weight_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the weight of the product.
     """
-    item_dimensions_unit: Optional[str] = None
+    item_dimensions_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the dimensions of the product.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this listing is personalizable."""
-    image_ids: Optional[str] = None
+    image_ids: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of numeric image IDs of the images in a listing, which can include
     up to 10 images.
     """
-    is_supply: Optional[bool] = None
+    is_supply: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who made' and 'when made'.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_taxable: Optional[bool] = None
+    is_taxable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, applicable shop tax rates apply to this listing at checkout.
     """
@@ -1210,146 +1213,146 @@ class ShopListing:
     Response for Create a draft listing
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user posting the listing."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{P}\\\\p{Sm}\\\\p{Zs}™©®]/u) You
     can only use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    state: Optional[State] = None
-    creation_timestamp: Optional[int] = None
+    state: State
+    creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    ending_timestamp: Optional[int] = None
+    ending_timestamp: int
     """The listing's expiration time, in epoch seconds."""
-    original_creation_timestamp: Optional[int] = None
+    original_creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    last_modified_timestamp: Optional[int] = None
+    last_modified_timestamp: int
     """The time of the last update to the listing, in epoch seconds."""
-    state_timestamp: Optional[int] = None
+    state_timestamp: int
     """The date and time of the last state change of this listing."""
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing. Note: The listing quantity is the sum of available offering
     quantities. You can request the quantities for individual offerings from
     the ListingInventory resource using the get listing inventory endpoint.
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    featured_rank: Optional[int] = None
+    featured_rank: int
     """
     The positive non-zero numeric position in the featured listings of the
     shop, with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    url: Optional[str] = None
+    url: str
     """The full URL to the listing's page on Etsy."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this listing a favorite."""
-    non_taxable: Optional[bool] = None
+    non_taxable: bool
     """
     When true, applicable shop tax rates do not apply to this listing at
     checkout.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: bool
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: bool
     """When true, this listing is personalizable. The default value is null."""
-    personalization_is_required: Optional[bool] = None
+    personalization_is_required: bool
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    personalization_char_count_max: Optional[int] = None
+    personalization_char_count_max: int
     """
     This an integer value representing the maximum length for the
     personalization message entered by the buyer.
     """
-    personalization_instructions: Optional[str] = None
+    personalization_instructions: str
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    listing_type: Optional[bool] = None
+    listing_type: bool
     """
     An enumerated type string that indicates whether the listing is physical or
     a digital download.
     """
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """
     A list of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}\\\\-'™©®]/u) Default value is null.
     """
-    materials: Optional[List[str]] = None
+    materials: List[str]
     """
     A list of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is null.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    processing_min: Optional[int] = None
+    processing_min: int
     """
     The minimum number of days required to process this listing. Default value
     is null.
     """
-    processing_max: Optional[int] = None
+    processing_max: int
     """
     The maximum number of days required to process this listing. Default value
     is null.
     """
-    who_made: Optional[WhoMade] = None
-    when_made: Optional[WhenMade] = None
-    is_supply: Optional[bool] = None
+    who_made: WhoMade
+    when_made: WhenMade
+    is_supply: bool
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who_made' and 'when_made'.
     """
-    item_weight: Optional[float] = None
+    item_weight: float
     """
     The numeric weight of the product measured in units set in item weight
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_weight_unit: Optional[ItemWeightUnit] = None
-    item_length: Optional[float] = None
+    item_weight_unit: ItemWeightUnit
+    item_length: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_width: Optional[float] = None
+    item_width: float
     """
     The numeric width of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_height: Optional[float] = None
+    item_height: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_dimensions_unit: Optional[ItemDimensionsUnit] = None
-    is_private: Optional[bool] = None
+    item_dimensions_unit: ItemDimensionsUnit
+    is_private: bool
     """
     When true, this is a private listing intendend for a specific buyer and
     hidden from shop view.
     """
-    recipient: Optional[Recipient] = None
-    occasion: Optional[Occasion] = None
-    style: Optional[List[str]] = None
+    recipient: Recipient
+    occasion: Occasion
+    style: List[str]
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
@@ -1357,11 +1360,11 @@ class ShopListing:
     characters. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is
     null.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files attached to a digital listing."""
-    has_variations: Optional[bool] = None
+    has_variations: bool
     """When true, the listing has variations."""
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: bool
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -1369,13 +1372,13 @@ class ShopListing:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Optional[Money] = None
-    taxonomy_id: Optional[int] = None
+    price: Money
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop. See seller taxonomy for more information.
@@ -1388,9 +1391,9 @@ class ShopListingsWithAssociations:
     Response for Get listings by ID
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ShopListing]] = None
+    results: List[ShopListing]
     """The shop listing resources found."""
 
 
@@ -1400,11 +1403,11 @@ class ListingUpdatePropertyInput:
     Update a listing property
     """
 
-    value_ids: Optional[int] = None
+    value_ids: int
     """The numeric ID of a single Etsy.com measurement scale."""
-    values: Optional[str] = None
+    values: str
     """An array of value strings for multiple Etsy listing property values."""
-    scale_id: Optional[int] = None
+    scale_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of a single Etsy.com measurement scale."""
 
 
@@ -1414,17 +1417,17 @@ class ListingPropertyValue:
     Response for Update a listing property
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The numeric ID of the Property."""
-    property_name: Optional[str] = None
+    property_name: str
     """The name of the Property."""
-    scale_id: Optional[int] = None
+    scale_id: int
     """The numeric ID of the scale (if any)."""
-    scale_name: Optional[str] = None
+    scale_name: str
     """The label used to describe the chosen scale (if any)."""
-    value_ids: Optional[List[int]] = None
+    value_ids: List[int]
     """The numeric IDs of the property values"""
-    values: Optional[List[str]] = None
+    values: List[str]
     """The property values"""
 
 
@@ -1434,9 +1437,9 @@ class ListingPropertyValues:
     Response for Get a listing's properties
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of shop listing resources found."""
-    results: Optional[List[ListingPropertyValue]] = None
+    results: List[ListingPropertyValue]
     """The shop listing resources found."""
 
 
@@ -1446,136 +1449,136 @@ class ListingUpdateInput:
     Update a listing
     """
 
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero number of products available for purchase in the
     listing.
     """
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\p{L}\\p{Nd}\\p{P}\\p{Sm}\\p{Zs}™©®]/u) You can only
     use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """A description string of the product for sale in the listing."""
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero price of the product. (Sold product listings are
     private) Note: The price is the minimum possible price.
     """
-    who_made: Optional[str] = None
+    who_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An string inidcated who made the product. Helps buyers locate the listing
     under the Handmade heading. Requires 'is_supply' and 'when_made'.
     """
-    when_made: Optional[str] = None
+    when_made: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string for the era in which the maker made the product in this listing.
     Helps buyers locate the listing under the Vintage heading. Requires
     'is_supply' and 'who_made'.
     """
-    taxonomy_id: Optional[int] = None
+    taxonomy_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shipping profile associated with the listing."""
-    materials: Optional[str] = None
+    materials: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A array of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the shop section for this listing."""
-    processing_min: Optional[int] = None
+    processing_min: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The minimum number of days required to process this listing."""
-    processing_max: Optional[int] = None
+    processing_max: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The maximum number of days required to process this listing."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\p{L}\\p{Nd}\\p{Zs}-'™©®]/u)
     """
-    recipient: Optional[str] = None
+    recipient: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating a person for whom this product would make an
     appropriate gift.
     """
-    occasion: Optional[str] = None
+    occasion: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string indicating an occassion for which this product would make an
     appropriate gift.
     """
-    styles: Optional[str] = None
+    styles: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
     Valid style strings contain only letters, numbers, and whitespace
     characters. (regex: /[^\\p{L}\\p{Nd}\\p{Zs}]/u)
     """
-    item_weight: Optional[float] = None
+    item_weight: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric weight of the product measured in units set in item weight
     unit.
     """
-    item_length: Optional[int] = None
+    item_length: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric length of the product measured in units set in item dimensions
     unit.
     """
-    item_width: Optional[float] = None
+    item_width: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric width of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_height: Optional[float] = None
+    item_height: Optional[float] = dataclass_field(default=None, kw_only=True)
     """
     The numeric height of the product measured in units set in 'item dimensions
     unit'.
     """
-    item_weight_unit: Optional[str] = None
+    item_weight_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the weight of the product.
     """
-    item_dimensions_unit: Optional[str] = None
+    item_dimensions_unit: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     A string defining the units used to measure the dimensions of the product.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this listing is personalizable."""
-    image_ids: Optional[str] = None
+    image_ids: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of numeric image IDs of the images in a listing, which can include
     up to 10 images.
     """
-    is_supply: Optional[bool] = None
+    is_supply: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who made' and 'when made'.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_taxable: Optional[bool] = None
+    is_taxable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, applicable shop tax rates apply to this listing at checkout.
     """
-    featured_rank: Optional[int] = None
+    featured_rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the featured listings of the shop
     with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -1583,9 +1586,13 @@ class ListingUpdateInput:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    type_: Optional[str] = field(default=None, metadata={"wire_name": "type"})
+    type_: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "type"},
+    )
     """Indicates whether the listing is physical or a digital download."""
-    channels: Optional[str] = None
+    channels: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of enumerated channel ID strings. A channel is a venue for sellers
     to reach buyers in order to make sales.
@@ -1598,24 +1605,24 @@ class ShopListingFile:
     Response for Get a file from a listing
     """
 
-    listing_file_id: Optional[int] = None
+    listing_file_id: int
     """The unique numeric ID of a file associated with a digital listing."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    rank: Optional[int] = None
+    rank: int
     """
     The numeric index of the display order position of this file in the
     listing, starting at 1.
     """
-    filename: Optional[str] = None
+    filename: str
     """The file name string for a file associated with a digital listing."""
-    filesize: Optional[str] = None
+    filesize: str
     """A human-readable format size string for the size of a file."""
-    size_bytes: Optional[int] = None
+    size_bytes: int
     """A number indicating the size of a file, measured in bytes."""
-    filetype: Optional[str] = None
+    filetype: str
     """A type string indicating a file's MIME type."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """
     The unique numeric timestamp of a file associated with a digital listing.
     """
@@ -1627,9 +1634,9 @@ class ShopListingFiles:
     Response for Get all listing files
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of ShopListingFiles being returned.."""
-    results: Optional[List[ShopListingFile]] = None
+    results: List[ShopListingFile]
     """An array of ShopListingFile resources."""
 
 
@@ -1639,13 +1646,13 @@ class ListingUploadInput:
     Upload a listing file
     """
 
-    listing_file_id: Optional[int] = None
+    listing_file_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique numeric ID of a file associated with a digital listing."""
-    file: Optional[str] = None
+    file: str
     """A binary file to upload."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The file name string of a file to upload"""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
@@ -1659,80 +1666,71 @@ class ListingImage:
     Response for Get a listing image
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: int
     """The numeric ID of the primary listing image for this transaction."""
-    hex_code: Optional[str] = None
+    hex_code: str
     """The webhex string for the image's average color, in webhex notation."""
-    red: Optional[int] = None
+    red: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    green: Optional[int] = None
+    green: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    blue: Optional[int] = None
+    blue: int
     """
     The numeric red value equal to the image's average red value, from 0-255
     (RGB color).
     """
-    hue: Optional[int] = None
+    hue: int
     """
     The numeric hue equal to the image's average hue, from 0-360 (HSV color).
     """
-    saturation: Optional[int] = None
+    saturation: int
     """
     The numeric saturation equal to the image's average saturation, from 0-100
     (HSV color).
     """
-    brightness: Optional[int] = None
+    brightness: int
     """
     The numeric brightness equal to the image's average brightness, from 0-100
     (HSV color).
     """
-    is_black_and_white: Optional[bool] = None
+    is_black_and_white: bool
     """When true, the image is in black & white."""
-    creation_tsz: Optional[int] = None
+    creation_tsz: int
     """The listing image's creation time, in epoch seconds."""
-    rank: Optional[int] = None
+    rank: int
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    url75x75: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_75x75"},
-    )
+    url75x75: str = dataclass_field(metadata={"wire_name": "url_75x75"})
     """The url string for a 75x75 pixel thumbnail of the image."""
-    url170x135: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_170x135"},
-    )
+    url170x135: str = dataclass_field(metadata={"wire_name": "url_170x135"})
     """The url string for a 170x135 pixel thumbnail of the image."""
-    url570x_n: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "url_570xN"},
-    )
+    url570x_n: str = dataclass_field(metadata={"wire_name": "url_570xN"})
     """
     The url string for a thumbnail of the image, no more than 570 pixels wide
     with variable height.
     """
-    url_fullxfull: Optional[str] = None
+    url_fullxfull: str
     """
     The url string for the full-size image, up to 3000 pixels in each
     dimension.
     """
-    full_height: Optional[int] = None
+    full_height: int
     """
     The numeric height, measured in pixels, of the full-sized image referenced
     in url_fullxfull.
     """
-    full_width: Optional[int] = None
+    full_width: int
     """
     The numeric width, measured in pixels, of the full-sized image referenced
     in url_fullxfull.
@@ -1745,9 +1743,9 @@ class ListingImages:
     Response for Get a listing's images
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ListingImage]] = None
+    results: List[ListingImage]
     """The list of requested resources."""
 
 
@@ -1757,19 +1755,19 @@ class ListingUploadImageInput:
     Upload a listing image
     """
 
-    image: Optional[str] = None
+    image: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The file name string of a file to upload."""
-    listing_image_id: Optional[int] = None
+    listing_image_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric ID of the primary listing image for this transaction."""
-    rank: Optional[int] = None
+    rank: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The positive non-zero numeric position in the images displayed in a
     listing, with rank 1 images appearing in the left-most position in a
     listing.
     """
-    overwrite: Optional[bool] = None
+    overwrite: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, this request replaces the existing image at a given rank."""
-    is_watermarked: Optional[bool] = None
+    is_watermarked: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """When true, indicates that the uploaded image has a watermark."""
 
 
@@ -1779,33 +1777,33 @@ class ListingInventoryWithAssociations:
     Response for Get a listing's inventory
     """
 
-    products: Optional[List[ListingInventoryProduct]] = None
+    products: List[ListingInventoryProduct]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
     different colored products in the same listing, then this array contains
     the property ID for color.
     """
-    listing: Optional[ShopListing] = None
+    listing: ShopListing
 
 
 @dataclass
@@ -1814,26 +1812,26 @@ class ListingUpdateInventoryInput:
     Update a listing's inventory
     """
 
-    products: Optional[str] = None
+    products: str
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[str] = None
+    price_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[str] = None
+    quantity_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[str] = None
+    sku_on_property: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -1848,26 +1846,26 @@ class ListingInventory:
     Response for Update a listing's inventory
     """
 
-    products: Optional[List[ListingInventoryProduct]] = None
+    products: List[ListingInventoryProduct]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: List[int]
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -1882,15 +1880,15 @@ class ListingInventoryProductOffering:
     Response for Get a listing's offering
     """
 
-    offering_id: Optional[int] = None
+    offering_id: int
     """The ID for the product offering"""
-    quantity: Optional[int] = None
+    quantity: int
     """The quantity the product offering"""
-    is_enabled: Optional[bool] = None
+    is_enabled: bool
     """Whether or not the offering can be shown to buyers."""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """Whether or not the offering has been deleted."""
-    price: Optional[Money] = None
+    price: Money
 
 
 @dataclass
@@ -1899,15 +1897,15 @@ class ListingInventoryProduct:
     Response for Get a listing's product
     """
 
-    product_id: Optional[int] = None
+    product_id: int
     """The numeric ID for a specific product purchased from a listing."""
-    sku: Optional[str] = None
+    sku: str
     """The SKU string for the product"""
-    is_deleted: Optional[bool] = None
+    is_deleted: bool
     """When true, someone deleted this product."""
-    offerings: Optional[List[ListingInventoryProductOffering]] = None
+    offerings: List[ListingInventoryProductOffering]
     """A list of product offering entries for this product."""
-    property_values: Optional[List[ListingPropertyValue]] = None
+    property_values: List[ListingPropertyValue]
     """A list of property value entries for this product."""
 
 
@@ -1917,17 +1915,17 @@ class ListingTranslation:
     Response for Get a listing's translation
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the Listing."""
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag (e.g. 'fr') for the language of this translation.
     """
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """The tags of the Listing of this Translation."""
 
 
@@ -1937,11 +1935,11 @@ class ListingCreateTranslationInput:
     Create a listing translation
     """
 
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags of the Listing of this Translation."""
 
 
@@ -1951,11 +1949,11 @@ class ListingUpdateTranslationInput:
     Update a listing translation
     """
 
-    title: Optional[str] = None
+    title: str
     """The title of the Listing of this Translation."""
-    description: Optional[str] = None
+    description: str
     """The description of the Listing of this Translation."""
-    tags: Optional[str] = None
+    tags: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The tags of the Listing of this Translation."""
 
 
@@ -1965,9 +1963,9 @@ class ListingVariationImages:
     Response for Get listing's variation images
     """
 
-    count: Optional[int] = None
+    count: int
     """The count of variation images."""
-    results: Optional[List[ListingVariationImage]] = None
+    results: List[ListingVariationImage]
     """The variation images results."""
 
 
@@ -1977,7 +1975,7 @@ class ListingUpdateVariationInput:
     Update a listing's variation images
     """
 
-    variation_images: Optional[str] = None
+    variation_images: str
     """A array of variation image data."""
 
 
@@ -1987,11 +1985,11 @@ class Money:
     Definition: Money
     """
 
-    amount: Optional[int] = None
+    amount: int
     """The amount of represented by this data."""
-    divisor: Optional[int] = None
+    divisor: int
     """The divisor to render the amount."""
-    currency_code: Optional[str] = None
+    currency_code: str
     """The ISO currency code for this data."""
 
 
@@ -2001,7 +1999,7 @@ class ErrorSchema:
     Definition: ErrorSchema
     """
 
-    error: Optional[str] = None
+    error: str
     """The error code."""
 
 
@@ -2011,146 +2009,146 @@ class ShopListingWithAssociations:
     Definition: ShopListingWithAssociations
     """
 
-    listing_id: Optional[int] = None
+    listing_id: int
     """The numeric ID for the listing associated to this transaction."""
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user posting the listing."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    title: Optional[str] = None
+    title: str
     """
     The listing's title string. Valid title strings contain only letters,
     numbers, punctuation marks, mathematical symbols, whitespace characters, ™,
     ©, and ®. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{P}\\\\p{Sm}\\\\p{Zs}™©®]/u) You
     can only use the %, :, & and + characters once each.
     """
-    description: Optional[str] = None
+    description: str
     """A description string of the product for sale in the listing."""
-    state: Optional[State] = None
-    creation_timestamp: Optional[int] = None
+    state: State
+    creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    ending_timestamp: Optional[int] = None
+    ending_timestamp: int
     """The listing's expiration time, in epoch seconds."""
-    original_creation_timestamp: Optional[int] = None
+    original_creation_timestamp: int
     """The listing's creation time, in epoch seconds."""
-    last_modified_timestamp: Optional[int] = None
+    last_modified_timestamp: int
     """The time of the last update to the listing, in epoch seconds."""
-    state_timestamp: Optional[int] = None
+    state_timestamp: int
     """The date and time of the last state change of this listing."""
-    quantity: Optional[int] = None
+    quantity: int
     """
     The positive non-zero number of products available for purchase in the
     listing. Note: The listing quantity is the sum of available offering
     quantities. You can request the quantities for individual offerings from
     the ListingInventory resource using the get listing inventory endpoint.
     """
-    shop_section_id: Optional[int] = None
+    shop_section_id: int
     """The numeric ID of a section in a specific Etsy shop."""
-    featured_rank: Optional[int] = None
+    featured_rank: int
     """
     The positive non-zero numeric position in the featured listings of the
     shop, with rank 1 listings appearing in the left-most position in featured
     listing on a shop's home page.
     """
-    url: Optional[str] = None
+    url: str
     """The full URL to the listing's page on Etsy."""
-    num_favorers: Optional[int] = None
+    num_favorers: int
     """The number of users who marked this listing a favorite."""
-    non_taxable: Optional[bool] = None
+    non_taxable: bool
     """
     When true, applicable shop tax rates do not apply to this listing at
     checkout.
     """
-    is_customizable: Optional[bool] = None
+    is_customizable: bool
     """
     When true, a buyer may contact the seller for a customized order. The
     default value is true when a shop accepts custom orders. Does not apply to
     shops that do not accept custom orders.
     """
-    is_personalizable: Optional[bool] = None
+    is_personalizable: bool
     """When true, this listing is personalizable. The default value is null."""
-    personalization_is_required: Optional[bool] = None
+    personalization_is_required: bool
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    personalization_char_count_max: Optional[int] = None
+    personalization_char_count_max: int
     """
     This an integer value representing the maximum length for the
     personalization message entered by the buyer.
     """
-    personalization_instructions: Optional[str] = None
+    personalization_instructions: str
     """
     When true, this listing requires personalization. The default value is
     null.
     """
-    listing_type: Optional[bool] = None
+    listing_type: bool
     """
     An enumerated type string that indicates whether the listing is physical or
     a digital download.
     """
-    tags: Optional[List[str]] = None
+    tags: List[str]
     """
     A list of tag strings for the listing. Valid tag strings contain only
     letters, numbers, whitespace characters, -, ', ™, ©, and ®. (regex:
     /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}\\\\-'™©®]/u) Default value is null.
     """
-    materials: Optional[List[str]] = None
+    materials: List[str]
     """
     A list of material strings for materials used in the product. Valid
     materials strings contain only letters, numbers, and whitespace characters.
     (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is null.
     """
-    shipping_profile_id: Optional[int] = None
+    shipping_profile_id: int
     """The numeric ID of the shipping profile associated with the listing."""
-    processing_min: Optional[int] = None
+    processing_min: int
     """
     The minimum number of days required to process this listing. Default value
     is null.
     """
-    processing_max: Optional[int] = None
+    processing_max: int
     """
     The maximum number of days required to process this listing. Default value
     is null.
     """
-    who_made: Optional[WhoMade] = None
-    when_made: Optional[WhenMade] = None
-    is_supply: Optional[bool] = None
+    who_made: WhoMade
+    when_made: WhenMade
+    is_supply: bool
     """
     When true, tags the listing as a supply product, else indicates that it's a
     finished product. Helps buyers locate the listing under the Supplies
     heading. Requires 'who_made' and 'when_made'.
     """
-    item_weight: Optional[float] = None
+    item_weight: float
     """
     The numeric weight of the product measured in units set in item weight
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_weight_unit: Optional[ItemWeightUnit] = None
-    item_length: Optional[float] = None
+    item_weight_unit: ItemWeightUnit
+    item_length: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_width: Optional[float] = None
+    item_width: float
     """
     The numeric width of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_height: Optional[float] = None
+    item_height: float
     """
     The numeric length of the product measured in units set in item dimensions
     unit. Default value is null. If set, the value must be greater than 0.
     """
-    item_dimensions_unit: Optional[ItemDimensionsUnit] = None
-    is_private: Optional[bool] = None
+    item_dimensions_unit: ItemDimensionsUnit
+    is_private: bool
     """
     When true, this is a private listing intendend for a specific buyer and
     hidden from shop view.
     """
-    recipient: Optional[Recipient] = None
-    occasion: Optional[Occasion] = None
-    style: Optional[List[str]] = None
+    recipient: Recipient
+    occasion: Occasion
+    style: List[str]
     """
     An array of style strings for this listing, each of which is free-form text
     string such as Formal, or Steampunk. A Listing may have up to two styles.
@@ -2158,11 +2156,11 @@ class ShopListingWithAssociations:
     characters. (regex: /[^\\\\p{L}\\\\p{Nd}\\\\p{Zs}]/u) Default value is
     null.
     """
-    file_data: Optional[str] = None
+    file_data: str
     """A string describing the files attached to a digital listing."""
-    has_variations: Optional[bool] = None
+    has_variations: bool
     """When true, the listing has variations."""
-    should_auto_renew: Optional[bool] = None
+    should_auto_renew: bool
     """
     When true, renews a listing for four months upon expriation. If set to true
     when previously false, etsy.com renews the listing before it expires, but
@@ -2170,25 +2168,25 @@ class ShopListingWithAssociations:
     expiration date. Any unused time remaining on the listing is lost. Renewals
     result in charges to a user's bill.
     """
-    language: Optional[str] = None
+    language: str
     """
     The IETF language tag for the default language of the listing. Ex: `de`,
     `en`, `es`, `fr`, `it`, `ja`, `nl`, `pl`, `pt`, `ru`.
     """
-    price: Optional[Money] = None
-    taxonomy_id: Optional[int] = None
+    price: Money
+    taxonomy_id: int
     """
     The numeric taxonomy ID of the listing. The seller manages listing taxonomy
     IDs for their shop. See seller taxonomy for more information.
     """
-    user: Optional[User] = None
-    shop: Optional[Shop] = None
-    images: Optional[List[ListingImage]] = None
+    user: User
+    shop: Shop
+    images: List[ListingImage]
     """
     Represents a list of listing image resources, each of which contains the
     reference URLs and metadata for an image
     """
-    production_partners: Optional[List[ShopProductionPartner]] = None
+    production_partners: List[ShopProductionPartner]
     """Represents a list of production partners for a shop."""
 
 
@@ -2198,11 +2196,11 @@ class ShopProductionPartner:
     Definition: ShopProductionPartner
     """
 
-    production_partner_id: Optional[int] = None
+    production_partner_id: int
     """The numeric ID of a production partner."""
-    partner_name: Optional[str] = None
+    partner_name: str
     """The name or title of the production partner."""
-    location: Optional[str] = None
+    location: str
     """A string representing the production partner location."""
 
 
@@ -2212,11 +2210,11 @@ class ListingVariationImage:
     Definition: ListingVariationImage
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The numeric ID of the Property."""
-    value_id: Optional[int] = None
+    value_id: int
     """The numeric ID of the Value."""
-    image_id: Optional[int] = None
+    image_id: int
     """The numeric ID of the Image."""
 
 
@@ -2226,31 +2224,31 @@ class PaymentAccountLedgerEntry:
     Definition: PaymentAccountLedgerEntry
     """
 
-    entry_id: Optional[int] = None
+    entry_id: int
     """The ledger entry's numeric ID."""
-    ledger_id: Optional[int] = None
+    ledger_id: int
     """The ledger's numeric ID."""
-    sequence_number: Optional[int] = None
+    sequence_number: int
     """
     The sequence allows ledger entries to be sorted chronologically. The higher
     the sequence, the more recent the entry.
     """
-    amount: Optional[int] = None
+    amount: int
     """The amount of money credited to the ledger."""
-    currency: Optional[str] = None
+    currency: str
     """The currency of the entry on the ledger."""
-    description: Optional[str] = None
+    description: str
     """
     Details what kind of ledger entry this is: a payment, refund, reversal of a
     failed refund, disbursement, returned disbursement, recoupment,
     miscellaneous credit, miscellaneous debit, or bill payment.
     """
-    balance: Optional[int] = None
+    balance: int
     """
     The amount of money in the shop's ledger the moment after this entry was
     applied.
     """
-    create_date: Optional[int] = None
+    create_date: int
     """The date and time the ledger entry was created in Epoch seconds.."""
 
 
@@ -2260,53 +2258,53 @@ class Payment:
     Definition: Payment
     """
 
-    payment_id: Optional[int] = None
+    payment_id: int
     """A unique numeric ID for a payment to a specific Etsy shop."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """The numeric ID for the user who paid the purchase."""
-    shop_id: Optional[int] = None
+    shop_id: int
     """The unique positive non-zero numeric ID for an Etsy Shop."""
-    receipt_id: Optional[int] = None
+    receipt_id: int
     """The numeric ID for the receipt associated to this transaction."""
-    amount_gross: Optional[Money] = None
-    amount_fees: Optional[Money] = None
-    amount_net: Optional[Money] = None
-    posted_gross: Optional[Money] = None
-    posted_fees: Optional[Money] = None
-    posted_net: Optional[Money] = None
-    adjusted_gross: Optional[Money] = None
-    adjusted_fees: Optional[Money] = None
-    adjusted_net: Optional[Money] = None
-    currency: Optional[str] = None
+    amount_gross: Money
+    amount_fees: Money
+    amount_net: Money
+    posted_gross: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    posted_fees: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    posted_net: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    adjusted_gross: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    adjusted_fees: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    adjusted_net: Optional[Money] = dataclass_field(default=None, kw_only=True)
+    currency: str
     """The ISO (alphabetic) code string for the payment's currency."""
-    shop_currency: Optional[str] = None
+    shop_currency: str
     """
     The ISO (alphabetic) code for the shop's currency. The shop displays all
     prices in this currency by default.
     """
-    buyer_currency: Optional[str] = None
+    buyer_currency: str
     """The currency string of the buyer."""
-    shipping_user_id: Optional[int] = None
+    shipping_user_id: int
     """The numeric ID of the user to which the seller ships the order."""
-    shipping_address_id: Optional[int] = None
+    shipping_address_id: int
     """The numeric id identifying the shipping address."""
-    billing_address_id: Optional[int] = None
+    billing_address_id: int
     """The numeric ID identifying the billing address of the buyer."""
-    status: Optional[str] = None
+    status: str
     """
     A string indicating the current status of the payment, most commonly
     settled or authed.
     """
-    shipped_timestamp: Optional[int] = None
+    shipped_timestamp: int
     """The transaction's shipping date and time, in epoch seconds."""
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """
     The date and time of the last change to the payment adjustment in epoch
     seconds.
     """
-    payment_adjustments: Optional[List[PaymentAdjustment]] = None
+    payment_adjustments: List[PaymentAdjustment]
     """
     List of refund objects on an Etsy Payments transaction. All monetary
     amounts are in USD pennies unless otherwise specified.
@@ -2319,35 +2317,35 @@ class PaymentAdjustment:
     Definition: PaymentAdjustment
     """
 
-    payment_adjustment_id: Optional[int] = None
+    payment_adjustment_id: int
     """The numeric ID for a payment adjustment."""
-    payment_id: Optional[int] = None
+    payment_id: int
     """A unique numeric ID for a payment to a specific Etsy shop."""
-    status: Optional[str] = None
+    status: str
     """The status string of the payment adjustment."""
-    is_success: Optional[bool] = None
+    is_success: bool
     """
     When true, the payment adjustment was or is likely to complete
     successfully.
     """
-    user_id: Optional[int] = None
+    user_id: int
     """The numeric ID for the user (seller) fulfilling the purchase."""
-    reason_code: Optional[str] = None
+    reason_code: str
     """A human-readable string describing the reason for the refund."""
-    total_adjustment_amount: Optional[int] = None
+    total_adjustment_amount: int
     """The total numeric amount of the refund in the payment currency."""
-    shop_total_adjustment_amount: Optional[int] = None
+    shop_total_adjustment_amount: int
     """The numeric amount of the refund in the shop currency."""
-    buyer_total_adjustment_amount: Optional[int] = None
+    buyer_total_adjustment_amount: int
     """The numeric amount of the refund in the buyer currency."""
-    total_fee_adjustment_amount: Optional[int] = None
+    total_fee_adjustment_amount: int
     """
     The numeric amount of card processing fees associated with a payment
     adjustment.
     """
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The transaction's creation date and time, in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """
     The date and time of the last change to the payment adjustment in epoch
     seconds.
@@ -2360,19 +2358,19 @@ class ShopReceiptShipment:
     Definition: ShopReceiptShipment
     """
 
-    receipt_shipping_id: Optional[int] = None
+    receipt_shipping_id: int
     """The unique numeric ID of a Shop Receipt Shipment record."""
-    shipment_notification_timestamp: Optional[int] = None
+    shipment_notification_timestamp: int
     """
     The time at which Etsy notified the buyer of the shipment event, in epoch
     seconds.
     """
-    carrier_name: Optional[str] = None
+    carrier_name: str
     """
     The name string for the carrier/company responsible for delivering the
     shipment.
     """
-    tracking_code: Optional[str] = None
+    tracking_code: str
     """
     The tracking code string provided by the carrier/company for the shipment.
     """
@@ -2384,29 +2382,29 @@ class TransactionReview:
     Definition: TransactionReview
     """
 
-    shop_id: Optional[int] = None
+    shop_id: int
     """The shop's numeric ID."""
-    listing_id: Optional[int] = None
+    listing_id: int
     """The ID of the shop listing that the TransactionReview belongs to."""
-    buyer_user_id: Optional[int] = None
+    buyer_user_id: int
     """
     The numeric ID of the user who was the buyer in this transaction. Note:
     This field may be absent, depending on the buyer's privacy settings.
     """
-    rating: Optional[int] = None
+    rating: int
     """Rating value on scale from 1 to 5"""
-    review: Optional[str] = None
+    review: str
     """A message left by the author, explaining the feedback."""
-    language: Optional[str] = None
+    language: str
     """The language of the TransactionReview"""
-    image_url_fullxfull: Optional[str] = None
+    image_url_fullxfull: str
     """
     The url to a photo provided with the feedback, dimensions fullxfull. Note:
     This field may be absent, depending on the buyer's privacy settings.
     """
-    create_timestamp: Optional[int] = None
+    create_timestamp: int
     """The date and time the TransactionReview was created in epoch seconds."""
-    update_timestamp: Optional[int] = None
+    update_timestamp: int
     """The date and time the TransactionReview was updated in epoch seconds."""
 
 
@@ -2416,7 +2414,7 @@ class SellerTaxonomyNode:
     Definition: SellerTaxonomyNode
     """
 
-    id: Optional[int] = None
+    id: int
     """
     The unique numeric ID of an Etsy taxonomy node, which is a metadata
     category for listings organized into the seller taxonomy hierarchy tree.
@@ -2428,21 +2426,21 @@ class SellerTaxonomyNode:
     associated property names and IDs for EU shoe sizes, such as property
     `value_id`:1394, and `name`:38.
     """
-    level: Optional[int] = None
+    level: int
     """
     The integer depth of this taxonomy node in the seller taxonomy tree, with
     roots at level 0.
     """
-    name: Optional[str] = None
+    name: str
     """The name string for this taxonomy node."""
-    parent_id: Optional[int] = None
+    parent_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The numeric taxonomy ID of the parent of this node."""
-    children: Optional[List[SellerTaxonomyNode]] = None
+    children: List[SellerTaxonomyNode]
     """
     An array of taxonomy nodes for all the direct children of this taxonomy
     node in the seller taxanomy tree.
     """
-    full_path_taxonomy_ids: Optional[List[int]] = None
+    full_path_taxonomy_ids: List[int]
     """
     An array of taxonomy IDs including this node and all of its direct parents
     in the seller taxonomy tree up to a root node. They are listed in order
@@ -2456,27 +2454,27 @@ class TaxonomyNodeProperty:
     Definition: TaxonomyNodeProperty
     """
 
-    property_id: Optional[int] = None
+    property_id: int
     """The unique numeric ID of this product property."""
-    name: Optional[str] = None
+    name: str
     """The name string for this taxonomy node."""
-    display_name: Optional[str] = None
+    display_name: str
     """The human-readable product property name string."""
-    scales: Optional[List[TaxonomyPropertyScale]] = None
+    scales: List[TaxonomyPropertyScale]
     """A list of available scales."""
-    is_required: Optional[bool] = None
+    is_required: bool
     """
     When true, listings assigned eligible taxonomy IDs require this property.
     """
-    supports_attributes: Optional[bool] = None
+    supports_attributes: bool
     """When true, you can use this property in listing attributes."""
-    supports_variations: Optional[bool] = None
+    supports_variations: bool
     """When true, you can use this property in listing variations."""
-    is_multivalued: Optional[bool] = None
+    is_multivalued: bool
     """When true, you can assign multiple property values to this property"""
-    possible_values: Optional[List[TaxonomyPropertyValue]] = None
+    possible_values: List[TaxonomyPropertyValue]
     """A list of supported property value strings for this property."""
-    selected_values: Optional[List[TaxonomyPropertyValue]] = None
+    selected_values: List[TaxonomyPropertyValue]
     """
     A list of property value strings automatically and always selected for the
     given property.
@@ -2489,11 +2487,11 @@ class TaxonomyPropertyScale:
     Definition: TaxonomyPropertyScale
     """
 
-    scale_id: Optional[int] = None
+    scale_id: int
     """The unique numeric ID of a scale."""
-    display_name: Optional[str] = None
+    display_name: str
     """The name string for a scale."""
-    description: Optional[str] = None
+    description: str
     """The description string for a scale."""
 
 
@@ -2503,15 +2501,15 @@ class TaxonomyPropertyValue:
     Definition: TaxonomyPropertyValue
     """
 
-    value_id: Optional[int] = None
+    value_id: int
     """The numeric ID of this property value."""
-    name: Optional[str] = None
+    name: str
     """The name string of this property value."""
-    scale_id: Optional[int] = None
+    scale_id: int
     """
     The numeric scale ID of the scale to which this property value belongs.
     """
-    equal_to: Optional[List[int]] = None
+    equal_to: List[int]
     """
     A list of numeric property value IDs this property value is equal to (if
     any).
@@ -2524,13 +2522,13 @@ class ShippingCarrier:
     Definition: ShippingCarrier
     """
 
-    shipping_carrier_id: Optional[int] = None
+    shipping_carrier_id: int
     """The numeric ID of this shipping carrier."""
-    name: Optional[str] = None
+    name: str
     """The name of this shipping carrier."""
-    domestic_classes: Optional[List[ShippingCarrierMailClass]] = None
+    domestic_classes: List[ShippingCarrierMailClass]
     """Set of domestic mail classes of this shipping carrier."""
-    international_classes: Optional[List[ShippingCarrierMailClass]] = None
+    international_classes: List[ShippingCarrierMailClass]
     """Set of international mail classes of this shipping carrier."""
 
 
@@ -2540,9 +2538,9 @@ class ShippingCarrierMailClass:
     Definition: ShippingCarrierMailClass
     """
 
-    mail_class_key: Optional[str] = None
+    mail_class_key: str
     """The unique identifier of this mail class."""
-    name: Optional[str] = None
+    name: str
     """The name of this mail class."""
 
 
@@ -2552,9 +2550,9 @@ class ShopProductionPartners:
     Definition: ShopProductionPartners
     """
 
-    count: Optional[int] = None
+    count: int
     """The number of results."""
-    results: Optional[List[ShopProductionPartner]] = None
+    results: List[ShopProductionPartner]
     """The list of requested resources."""
 
 
@@ -2564,8 +2562,8 @@ class ShopShippingProfiles:
     Definition: ShopShippingProfiles
     """
 
-    count: Optional[int] = None
-    results: Optional[List[ShopShippingProfile]] = None
+    count: int
+    results: List[ShopShippingProfile]
 
 
 Channel = Literal["etsy.com", "wholesale", "pattern", "sell_on_facebook"]
@@ -2641,11 +2639,11 @@ class Offering:
     Definition: Offering
     """
 
-    price: Optional[float] = None
+    price: Optional[float] = dataclass_field(default=None, kw_only=True)
     """The price of the product."""
-    quantity: Optional[int] = None
+    quantity: Optional[int] = dataclass_field(default=None, kw_only=True)
     """How many of this product are available?"""
-    is_enabled: Optional[bool] = None
+    is_enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the offering is shown to buyers"""
 
 
@@ -2658,11 +2656,11 @@ class Product:
     Definition: Product
     """
 
-    sku: Optional[str] = None
+    sku: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The SKU string for the product"""
-    property_values: Optional[List[PropertyValue]] = None
+    property_values: Optional[List[PropertyValue]] = dataclass_field(default=None, kw_only=True)
     """A list of property value entries for this product."""
-    offerings: Optional[List[Offering]] = None
+    offerings: Optional[List[Offering]] = dataclass_field(default=None, kw_only=True)
     """A list of product offering entries for this product."""
 
 
@@ -2675,23 +2673,23 @@ class PropertyValue:
     Definition: PropertyValue
     """
 
-    property_id: Optional[int] = None
+    property_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """The unique ID of an Etsy listing property."""
-    value_ids: Optional[List[int]] = None
+    value_ids: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique IDs of multiple Etsy listing property values. For
     example, if your listing offers different sizes of a product, then the
     value ID list contains value IDs for each size.
     """
-    scale_id: Optional[int] = None
+    scale_id: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     The numeric ID of a single Etsy.com measurement scale. For example, for
     shoe size, there are three `scale_id`s available - *UK*, *US/Canada*, and
     *EU*, where *US/Canada* has `scale_id` 19.
     """
-    property_name: Optional[str] = None
+    property_name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The name of the property, in the requested locale language."""
-    values: Optional[List[str]] = None
+    values: Optional[List[str]] = dataclass_field(default=None, kw_only=True)
     """A list of property value entries for this product."""
 
 
@@ -2740,26 +2738,26 @@ class ApplicationListingsInventoryRequest:
     Definition: V3ApplicationListingsInventoryRequest
     """
 
-    products: Optional[List[Product]] = None
+    products: List[Product]
     """
     A JSON array of products available in a listing, even if only one product.
     All field names in the JSON blobs are lowercase.
     """
-    price_on_property: Optional[List[int]] = None
+    price_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change product prices, if any. For example, if you charge specific prices
     for different sized products in the same listing, then this array contains
     the property ID for size.
     """
-    quantity_on_property: Optional[List[int]] = None
+    quantity_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the quantity of the products, if any. For example, if you stock
     specific quantities of different colored products in the same listing, then
     this array contains the property ID for color.
     """
-    sku_on_property: Optional[List[int]] = None
+    sku_on_property: Optional[List[int]] = dataclass_field(default=None, kw_only=True)
     """
     An array of unique listing property ID integers for the properties that
     change the product SKU, if any. For example, if you use specific skus for
@@ -2774,7 +2772,7 @@ class ApplicationShopsListingsVariationImagesRequest:
     Definition: V3ApplicationShopsListingsVariationImagesRequest
     """
 
-    variation_images: Optional[List[VariationImage]] = None
+    variation_images: List[VariationImage]
     """A list of variation image data."""
 
 
@@ -2784,9 +2782,9 @@ class VariationImage:
     Definition: VariationImage
     """
 
-    property_id: Optional[int] = None
-    value_id: Optional[int] = None
-    image_id: Optional[int] = None
+    property_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    value_id: Optional[int] = dataclass_field(default=None, kw_only=True)
+    image_id: Optional[int] = dataclass_field(default=None, kw_only=True)
 
 
 WhenMade2 = Literal[

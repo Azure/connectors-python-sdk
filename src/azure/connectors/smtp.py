@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, List, Any, Mapping
 
 from azure.core.credentials import AzureKeyCredential, TokenCredential
@@ -32,23 +32,19 @@ class Attachment:
     Definition: Attachment
     """
 
-    content_data: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ContentData"},
-    )
+    content_data: str = dataclass_field(metadata={"wire_name": "ContentData"})
     """Content data"""
-    content_type: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "ContentType"},
-    )
+    content_type: str = dataclass_field(metadata={"wire_name": "ContentType"})
     """Content type"""
-    file_name: Optional[str] = field(
+    file_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "FileName"},
     )
     """File name"""
-    content_id: Optional[str] = field(
+    content_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContentId"},
     )
     """Content id"""
@@ -60,47 +56,72 @@ class Email:
     Definition: Email
     """
 
-    from_: Optional[str] = field(default=None, metadata={"wire_name": "From"})
-    """Email address of sender like sender@domain.com"""
-    to: Optional[str] = field(default=None, metadata={"wire_name": "To"})
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    c_c: Optional[str] = field(default=None, metadata={"wire_name": "CC"})
-    """
-    Specify email addresses separated by semicolons like
-    recipient1@domain.com;recipient2@domain.com
-    """
-    subject: Optional[str] = field(
+    from_: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "From"},
+    )
+    """Email address of sender like sender@domain.com"""
+    to: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "To"},
+    )
+    """
+    Specify email addresses separated by semicolons like
+    recipient1@domain.com;recipient2@domain.com
+    """
+    c_c: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "CC"},
+    )
+    """
+    Specify email addresses separated by semicolons like
+    recipient1@domain.com;recipient2@domain.com
+    """
+    subject: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Subject"},
     )
     """Email subject"""
-    body: Optional[str] = field(default=None, metadata={"wire_name": "Body"})
+    body: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Body"},
+    )
     """Email body"""
-    bcc: Optional[str] = field(default=None, metadata={"wire_name": "Bcc"})
+    bcc: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Bcc"},
+    )
     """
     Specify email addresses separated by semicolons like
     recipient1@domain.com;recipient2@domain.com.
     """
-    importance: Optional[str] = field(
+    importance: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Importance"},
     )
     """Importance of the email (High, Normal, or Low)"""
-    read_receipt: Optional[str] = field(
+    read_receipt: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ReadReceipt"},
     )
     """Specify email address for Read receipt"""
-    delivery_receipt: Optional[str] = field(
+    delivery_receipt: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DeliveryReceipt"},
     )
     """Specify email address for Delivery receipt"""
-    attachments: Optional[List[Attachment]] = field(
+    attachments: Optional[List[Attachment]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Attachments"},
     )
     """Attachments to be sent along with the email"""

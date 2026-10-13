@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -53,7 +53,7 @@ class UnassignUsersInput:
     Remove assignees from a task
     """
 
-    assignments: Optional[str] = None
+    assignments: str
     """
     Semi-colon separated ids or email addresses of users who should be
     unassigned to this task.
@@ -66,65 +66,77 @@ class GetTaskResponseV2:
     Response for Remove assignees from a task
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    assignments: Optional[List[Dict[str, Any]]] = field(
+    assignments: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_assignments"},
     )
 
@@ -135,7 +147,7 @@ class AssignUsersInput:
     Add assignees to a task
     """
 
-    assignments: Optional[str] = None
+    assignments: str
     """
     Semi-colon separated ids or email addresses of users who should be assigned
     to this task.
@@ -148,7 +160,7 @@ class ListMyPlansResponse:
     Response for List plans for a group
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -157,11 +169,12 @@ class GetPlanDetailsResponse:
     Response for Get plan details
     """
 
-    category_descriptions: Optional[Dict[str, Any]] = field(
+    category_descriptions: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "categoryDescriptions"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The ID of the plan details"""
 
 
@@ -171,17 +184,11 @@ class CreateBucketInput:
     Create a bucket
     """
 
-    name: Optional[str] = None
+    name: str
     """Name of the bucket"""
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "planId"},
-    )
+    plan_id: str = dataclass_field(metadata={"wire_name": "planId"})
     """The plan for the new bucket."""
 
 
@@ -191,19 +198,21 @@ class CreateBucketResponse:
     Response for Create a bucket
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the bucket"""
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """Plan ID to which the bucket belongs"""
-    order_hint: Optional[str] = field(
+    order_hint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "orderHint"},
     )
     """Hint used to order items of this type in a list view"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID of the bucket"""
 
 
@@ -213,64 +222,75 @@ class GetTaskResponseV3:
     Response for Create a task
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Priority of the task. Valid range of values is between 0 and 10
     (inclusive), with increasing value being lower priority (0 has the highest
@@ -280,8 +300,9 @@ class GetTaskResponseV3:
     value 1 for \"urgent\", 3 for \"important\", 5 for \"medium\", and 9 for
     \"low\".
     """
-    assignments: Optional[List[Dict[str, Any]]] = field(
+    assignments: Optional[List[Dict[str, Any]]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_assignments"},
     )
 
@@ -292,13 +313,13 @@ class GetTaskDetailsResponse:
     Response for Get task details
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
-    references: Optional[List[Dict[str, Any]]] = None
+    references: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of references on the task"""
-    checklist: Optional[List[Dict[str, Any]]] = None
+    checklist: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of checklist items on the task."""
 
 
@@ -308,7 +329,7 @@ class ListBucketsResponse:
     Response for List buckets
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -317,9 +338,10 @@ class ListTasksResponse:
     Response for List my tasks
     """
 
-    value: Optional[List[GetTaskResponseV2]] = None
-    next_link: Optional[str] = field(
+    value: Optional[List[GetTaskResponseV2]] = dataclass_field(default=None, kw_only=True)
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
@@ -331,7 +353,7 @@ class ListGroupsResponse:
     Response for List groups that I am member of
     """
 
-    value: Optional[List[Dict[str, Any]]] = None
+    value: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """value"""
 
 
@@ -341,11 +363,11 @@ class UpdateTaskDetailsRequest:
     Definition: UpdateTaskDetails_Request
     """
 
-    description: Optional[str] = None
+    description: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The description of the task."""
-    references: Optional[List[Dict[str, Any]]] = None
+    references: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of references on the task"""
-    checklist: Optional[List[Dict[str, Any]]] = None
+    checklist: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """The collection of checklist items on the task"""
 
 
@@ -355,30 +377,35 @@ class UpdateTaskRequest:
     Definition: UpdateTask_Request
     """
 
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the plan (maximum of 255 chars)."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The bucket to place this task in."""
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
 
@@ -389,43 +416,41 @@ class CreateTaskRequest:
     Definition: CreateTask_Request
     """
 
-    group_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "groupId"},
-    )
+    group_id: str = dataclass_field(metadata={"wire_name": "groupId"})
     """The group to retrieve the plan."""
-    plan_id: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "planId"},
-    )
+    plan_id: str = dataclass_field(metadata={"wire_name": "planId"})
     """The plan for the new task."""
-    title: Optional[str] = None
+    title: str
     """The title of the new task (maximum of 255 chars)."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The bucket to place this task in."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The datetime the task starts (Ex. '2018-04-13T00:42:19.284Z')."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due (Ex. '2018-04-13T00:42:19.284Z')."""
-    assignments: Optional[str] = None
+    assignments: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Semi-colon separated ids or email addresses of users to assign this task
     to.
     """
-    applied_categories: Optional[AppliedCategories] = field(
+    applied_categories: Optional[AppliedCategories] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "appliedCategories"},
     )
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """
     Priority of the task. Valid range of values is between 0 and 10
     (inclusive), with increasing value being lower priority (0 has the highest
@@ -443,55 +468,55 @@ class AppliedCategories:
     Definition: AppliedCategories
     """
 
-    category1: Optional[bool] = None
+    category1: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Pink category."""
-    category2: Optional[bool] = None
+    category2: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Red category."""
-    category3: Optional[bool] = None
+    category3: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Yellow category."""
-    category4: Optional[bool] = None
+    category4: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Green category."""
-    category5: Optional[bool] = None
+    category5: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Blue category."""
-    category6: Optional[bool] = None
+    category6: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Purple category."""
-    category7: Optional[bool] = None
+    category7: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Bronze category."""
-    category8: Optional[bool] = None
+    category8: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Lime category."""
-    category9: Optional[bool] = None
+    category9: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Aqua category."""
-    category10: Optional[bool] = None
+    category10: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Gray category."""
-    category11: Optional[bool] = None
+    category11: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Silver category."""
-    category12: Optional[bool] = None
+    category12: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Brown category."""
-    category13: Optional[bool] = None
+    category13: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Cranberry category."""
-    category14: Optional[bool] = None
+    category14: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Orange category."""
-    category15: Optional[bool] = None
+    category15: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Peach category."""
-    category16: Optional[bool] = None
+    category16: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Marigold category."""
-    category17: Optional[bool] = None
+    category17: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light green category."""
-    category18: Optional[bool] = None
+    category18: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark green category."""
-    category19: Optional[bool] = None
+    category19: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Teal category."""
-    category20: Optional[bool] = None
+    category20: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light blue category."""
-    category21: Optional[bool] = None
+    category21: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark blue category."""
-    category22: Optional[bool] = None
+    category22: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Lavender category."""
-    category23: Optional[bool] = None
+    category23: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Plum category."""
-    category24: Optional[bool] = None
+    category24: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Light gray category."""
-    category25: Optional[bool] = None
+    category25: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """True if the task has the Dark gray category."""
 
 
@@ -501,58 +526,68 @@ class GetTaskResponse:
     Definition: GetTask_Response
     """
 
-    created_by: Optional[Dict[str, Any]] = field(
+    created_by: Optional[Dict[str, Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdBy"},
     )
-    plan_id: Optional[str] = field(
+    plan_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "planId"},
     )
     """The id of the plan this task belongs to."""
-    bucket_id: Optional[str] = field(
+    bucket_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "bucketId"},
     )
     """The id of the bucket this task belongs to."""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The title of the task."""
-    percent_complete: Optional[int] = field(
+    percent_complete: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "percentComplete"},
     )
     """The completion percentage of the task."""
-    start_date_time: Optional[str] = field(
+    start_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "startDateTime"},
     )
     """The start datetime of the task."""
-    created_date_time: Optional[str] = field(
+    created_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDateTime"},
     )
     """The datetime the task was created."""
-    due_date_time: Optional[str] = field(
+    due_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dueDateTime"},
     )
     """The datetime the task is due."""
-    has_description: Optional[bool] = field(
+    has_description: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "hasDescription"},
     )
     """Set to true if the task has a description."""
-    completed_date_time: Optional[str] = field(
+    completed_date_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "completedDateTime"},
     )
     """The datetime the task was completed."""
-    reference_count: Optional[int] = field(
+    reference_count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referenceCount"},
     )
     """The number of external references that exist on the task."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The id of the task."""
 
 
@@ -562,8 +597,8 @@ class ErrorResponse:
     Definition: ErrorResponse
     """
 
-    code: Optional[str] = None
-    message: Optional[str] = None
+    code: Optional[str] = dataclass_field(default=None, kw_only=True)
+    message: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 # Client Class
@@ -795,37 +830,58 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List plans for a group
 
         List plans owned by the group specified.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
             f"/v1.0/groups/{quote(str(group_id), safe='')}/planner/plans"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_plan_details(
         self,
@@ -1030,11 +1086,14 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List buckets
 
         List the buckets in a plan.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1047,27 +1106,45 @@ class PlannerClient(ConnectorClientBase):
         query_params.append(f"groupId={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def list_my_tasks(
         self,
@@ -1296,34 +1373,55 @@ class PlannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         List groups that I am member of
 
         Get groups that the user is a direct member of.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/memberOf"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
 
 # Trigger Operations

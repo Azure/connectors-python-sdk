@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -77,10 +77,11 @@ class TablesList:
     Response for Get object types
     """
 
-    value: Optional[List[Table]] = None
+    value: Optional[List[Table]] = dataclass_field(default=None, kw_only=True)
     """List of Tables"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -92,7 +93,7 @@ class GetItemByExternalIdResponse:
     Response for Get a Record by External ID
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -105,10 +106,11 @@ class ItemsList:
     Response for Get records
     """
 
-    value: Optional[List[Item]] = None
+    value: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
     """List of Items"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -120,7 +122,7 @@ class ObjectEntity:
     Response for Execute a SOQL query
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -133,11 +135,12 @@ class GetAllJobsResponse:
     Response for Get all jobs
     """
 
-    done: Optional[bool] = None
+    done: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Done"""
-    records: Optional[List[JobInfo]] = None
-    next_record_url: Optional[str] = field(
+    records: Optional[List[JobInfo]] = dataclass_field(default=None, kw_only=True)
+    next_record_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextRecordUrl"},
     )
     """Next Record URL"""
@@ -149,82 +152,96 @@ class CheckJobResponse:
     Response for Get job info
     """
 
-    apex_processing_time: Optional[float] = field(
+    apex_processing_time: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apexProcessingTime"},
     )
     """APEX Processing Time"""
-    api_active_processing_time: Optional[float] = field(
+    api_active_processing_time: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiActiveProcessingTime"},
     )
     """API Active Processing Time"""
-    api_version: Optional[float] = field(
+    api_version: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersion"},
     )
     """API Version"""
-    column_delimiter: Optional[str] = field(
+    column_delimiter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnDelimiter"},
     )
     """Column Delimiter"""
-    concurrency_mode: Optional[str] = field(
+    concurrency_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "concurrencyMode"},
     )
     """Concurrency Mode"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content Type"""
-    content_url: Optional[str] = field(
+    content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentUrl"},
     )
     """Content URL"""
-    created_by_id: Optional[str] = field(
+    created_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdById"},
     )
     """Created By ID"""
-    created_date: Optional[str] = field(
+    created_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDate"},
     )
     """Created Date"""
-    external_field_name: Optional[str] = field(
+    external_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalFieldName"},
     )
     """External Field Name"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID"""
-    job_type: Optional[str] = field(
+    job_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobType"},
     )
     """Job Type"""
-    line_ending: Optional[str] = field(
+    line_ending: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineEnding"},
     )
     """Line Ending"""
-    object: Optional[str] = None
+    object: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Object"""
-    operation: Optional[str] = None
+    operation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Operation"""
-    retries: Optional[float] = None
+    retries: Optional[float] = dataclass_field(default=None, kw_only=True)
     """Retries"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State"""
-    system_mod_stamp: Optional[str] = field(
+    system_mod_stamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "systemModStamp"},
     )
-    total_processing_time: Optional[float] = field(
+    total_processing_time: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "totalProcessingTime"},
     )
     """Total Processing Time"""
@@ -236,66 +253,77 @@ class JobInfo:
     Response for Close or abort a job
     """
 
-    api_version: Optional[float] = field(
+    api_version: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersion"},
     )
     """API Version"""
-    column_delimiter: Optional[str] = field(
+    column_delimiter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnDelimiter"},
     )
     """Column Delimiter"""
-    concurrency_mode: Optional[str] = field(
+    concurrency_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "concurrencyMode"},
     )
     """Concurrency Mode"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content Type"""
-    content_url: Optional[str] = field(
+    content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentUrl"},
     )
     """Content URL"""
-    created_by_id: Optional[str] = field(
+    created_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdById"},
     )
     """Created By ID"""
-    created_date: Optional[str] = field(
+    created_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDate"},
     )
     """Created Date"""
-    external_id_field_name: Optional[str] = field(
+    external_id_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalIdFieldName"},
     )
     """External ID Field Name"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """ID"""
-    job_type: Optional[str] = field(
+    job_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobType"},
     )
     """Job Type"""
-    line_ending: Optional[str] = field(
+    line_ending: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineEnding"},
     )
     """Line Ending"""
-    object: Optional[str] = None
+    object: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Object"""
-    operation: Optional[str] = None
+    operation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Operation"""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """State"""
-    system_modstamp: Optional[str] = field(
+    system_modstamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "systemModstamp"},
     )
     """System Mod Stamp"""
@@ -307,12 +335,13 @@ class SOSLSearchQueryResponse:
     Response for Execute SOSL search query
     """
 
-    search_records: Optional[List[SearchRecordObject]] = field(
+    search_records: Optional[List[SearchRecordObject]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "searchRecords"},
     )
     """A list of search records returned by an SOSL search query"""
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Metadata of the result returned from the query"""
 
 
@@ -322,7 +351,7 @@ class ObjectWithoutType:
     Response for Send an HTTP request
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -335,12 +364,12 @@ class MCPQueryResponse:
     Response for MCP server for Salesforce
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -349,72 +378,83 @@ class CreateJobResponse:
     Response for Create a job
     """
 
-    object: Optional[str] = None
+    object: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The object type for the data being processed."""
-    operation: Optional[str] = None
+    operation: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The processing operation for the job."""
-    column_delimiter: Optional[str] = field(
+    column_delimiter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnDelimiter"},
     )
     """The column delimiter used for CSV job data."""
-    external_id_field_name: Optional[str] = field(
+    external_id_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalIdFieldName"},
     )
     """
     The external ID field in the object being updated. Only needed for upsert
     operations. Field values must also exist in CSV job data.
     """
-    line_ending: Optional[str] = field(
+    line_ending: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineEnding"},
     )
     """The line ending used for CSV job data, marking the end of a data row."""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """The content type for the job."""
-    api_version: Optional[float] = field(
+    api_version: Optional[float] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "apiVersion"},
     )
     """The API version that the job was created in."""
-    concurrency_mode: Optional[str] = field(
+    concurrency_mode: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "concurrencyMode"},
     )
     """The concurrency mode for the job."""
-    content_url: Optional[str] = field(
+    content_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentUrl"},
     )
     """
     The URL to use for Upload Job Data requests for this job. Only valid if the
     job is in 'Open' state.
     """
-    created_by_id: Optional[str] = field(
+    created_by_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdById"},
     )
     """The ID of the user who created the job."""
-    created_date: Optional[str] = field(
+    created_date: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdDate"},
     )
     """The date and time in the UTC time zone when the job was created."""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID for this job."""
-    job_type: Optional[str] = field(
+    job_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "jobType"},
     )
     """The job's type."""
-    state: Optional[str] = None
+    state: Optional[str] = dataclass_field(default=None, kw_only=True)
     """The current state of processing for the job."""
-    system_modstamp: Optional[str] = field(
+    system_modstamp: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "systemModstamp"},
     )
     """Date and time in the UTC time zone when the job finished."""
@@ -426,7 +466,7 @@ class GetItemResponse:
     Response for Get record
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -439,7 +479,7 @@ class PatchItemInput:
     Update record
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -452,7 +492,7 @@ class PatchItemResponse:
     Response for Update record
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -465,7 +505,7 @@ class PatchItemByExternalIdInput:
     Insert or Update (Upsert) a Record by External ID
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -478,7 +518,7 @@ class PatchItemByExternalIdResponse:
     Response for Insert or Update (Upsert) a Record by External ID
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -491,7 +531,7 @@ class PostItemInput:
     Create record
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -504,7 +544,7 @@ class PostItemResponse:
     Response for Create record
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -517,7 +557,7 @@ class ExternalIdFieldsList:
     Response for Get External ID Fields
     """
 
-    value: Optional[List[ExternalIdField]] = None
+    value: Optional[List[ExternalIdField]] = dataclass_field(default=None, kw_only=True)
     """List of external ID fields."""
 
 
@@ -527,26 +567,30 @@ class TableMetadata:
     Response for GetMetadataForGetItem
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table name"""
-    title: Optional[str] = None
+    title: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Table title"""
-    x_ms_permission: Optional[str] = field(
+    x_ms_permission: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-permission"},
     )
     """Table permission"""
-    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = field(
+    x_ms_capabilities: Optional[TableCapabilitiesMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "x-ms-capabilities"},
     )
-    schema: Optional[ObjectEntity] = None
-    referenced_entities: Optional[ObjectEntity] = field(
+    schema: Optional[ObjectEntity] = dataclass_field(default=None, kw_only=True)
+    referenced_entities: Optional[ObjectEntity] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "referencedEntities"},
     )
-    web_url: Optional[str] = field(
+    web_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "webUrl"},
     )
     """URL link"""
@@ -558,15 +602,17 @@ class BlobDataSetsMetadata:
     Definition: BlobDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Blob dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Blob dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Blob dataset url encoding"""
@@ -578,30 +624,34 @@ class CreateJobParameters:
     Definition: CreateJobParameters
     """
 
-    object: Optional[str] = None
+    object: str
     """The object type for the data being processed."""
-    operation: Optional[str] = None
+    operation: str
     """The processing operation for the job."""
-    column_delimiter: Optional[str] = field(
+    column_delimiter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnDelimiter"},
     )
     """The column delimiter used for CSV job data."""
-    external_id_field_name: Optional[str] = field(
+    external_id_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalIdFieldName"},
     )
     """
     The external ID field in the object being updated. Only needed for upsert
     operations. Field values must also exist in CSV job data.
     """
-    line_ending: Optional[str] = field(
+    line_ending: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineEnding"},
     )
     """The line ending used for CSV job data, marking the end of a data row."""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """The content type for the job."""
@@ -613,14 +663,19 @@ class DataSet:
     Definition: DataSet
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Dataset name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Dataset name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Dataset display name"""
-    query: Optional[List[PassThroughNativeQuery]] = None
+    query: Optional[List[PassThroughNativeQuery]] = dataclass_field(default=None, kw_only=True)
     """Pass-through Native Queries"""
 
 
@@ -630,7 +685,7 @@ class DataSetsList:
     Definition: DataSetsList
     """
 
-    value: Optional[List[DataSet]] = None
+    value: Optional[List[DataSet]] = dataclass_field(default=None, kw_only=True)
     """List of datasets"""
 
 
@@ -640,8 +695,8 @@ class DataSetsMetadata:
     Definition: DataSetsMetadata
     """
 
-    tabular: Optional[TabularDataSetsMetadata] = None
-    blob: Optional[BlobDataSetsMetadata] = None
+    tabular: Optional[TabularDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
+    blob: Optional[BlobDataSetsMetadata] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -650,12 +705,12 @@ class ExecuteSoqlQueryParameters:
     Definition: ExecuteSoqlQueryParameters
     """
 
-    query: Optional[str] = None
+    query: str
     """
     SOQL Query text. Dynamic parameters can be specified using '@paramName'
     syntax.
     """
-    parameters: Optional[Dict[str, str]] = None
+    parameters: Optional[Dict[str, str]] = dataclass_field(default=None, kw_only=True)
     """
     SOQL Query dynamic parameters. Key is parameter name (without '@' at sign),
     value is parameter value.
@@ -668,10 +723,15 @@ class ExternalIdField:
     Definition: ExternalIdField
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Name of the external ID field, used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Name of the external ID field, used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Display name of the external ID field."""
@@ -683,8 +743,9 @@ class Item:
     Definition: Item
     """
 
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "dynamicProperties"},
     )
 
@@ -695,8 +756,9 @@ class PassThroughNativeQuery:
     Definition: PassThroughNativeQuery
     """
 
-    language: Optional[str] = field(
+    language: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Language"},
     )
     """Query language"""
@@ -708,10 +770,15 @@ class Procedure:
     Definition: Procedure
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """Procedure name"""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """Procedure name"""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """Procedure display name"""
@@ -723,15 +790,21 @@ class Table:
     Definition: Table
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the table. The name is used at runtime."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the table. The name is used at runtime."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the table."""
-    dynamic_properties: Optional[Dict[str, ObjectEntity]] = field(
+    dynamic_properties: Optional[Dict[str, ObjectEntity]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "DynamicProperties"},
     )
     """Additional table properties provided by the connector to the clients."""
@@ -743,30 +816,36 @@ class TableCapabilitiesMetadata:
     Definition: TableCapabilitiesMetadata
     """
 
-    sort_restrictions: Optional[TableSortRestrictionsMetadata] = field(
+    sort_restrictions: Optional[TableSortRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sortRestrictions"},
     )
-    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = field(
+    filter_restrictions: Optional[TableFilterRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterRestrictions"},
     )
-    select_restrictions: Optional[TableSelectRestrictionsMetadata] = field(
+    select_restrictions: Optional[TableSelectRestrictionsMetadata] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "selectRestrictions"},
     )
-    is_only_server_pagable: Optional[bool] = field(
+    is_only_server_pagable: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isOnlyServerPagable"},
     )
     """Server paging restrictions"""
-    filter_function_support: Optional[List[str]] = field(
+    filter_function_support: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "filterFunctionSupport"},
     )
     """List of supported filter capabilities"""
-    server_paging_options: Optional[List[str]] = field(
+    server_paging_options: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "serverPagingOptions"},
     )
     """List of supported server-driven paging capabilities"""
@@ -778,15 +857,17 @@ class TableFilterRestrictionsMetadata:
     Definition: TableFilterRestrictionsMetadata
     """
 
-    filterable: Optional[bool] = None
+    filterable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has filterable columns"""
-    non_filterable_properties: Optional[List[str]] = field(
+    non_filterable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nonFilterableProperties"},
     )
     """List of non filterable properties"""
-    required_properties: Optional[List[str]] = field(
+    required_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "requiredProperties"},
     )
     """List of required properties"""
@@ -798,7 +879,7 @@ class TableSelectRestrictionsMetadata:
     Definition: TableSelectRestrictionsMetadata
     """
 
-    selectable: Optional[bool] = None
+    selectable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has selectable columns"""
 
 
@@ -808,15 +889,17 @@ class TableSortRestrictionsMetadata:
     Definition: TableSortRestrictionsMetadata
     """
 
-    sortable: Optional[bool] = None
+    sortable: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """Indicates whether this table has sortable columns"""
-    unsortable_properties: Optional[List[str]] = field(
+    unsortable_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "unsortableProperties"},
     )
     """List of unsortable properties"""
-    ascending_only_properties: Optional[List[str]] = field(
+    ascending_only_properties: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ascendingOnlyProperties"},
     )
     """List of properties which support ascending order only"""
@@ -828,25 +911,29 @@ class TabularDataSetsMetadata:
     Definition: TabularDataSetsMetadata
     """
 
-    source: Optional[str] = None
+    source: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Dataset source"""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """Dataset display name"""
-    url_encoding: Optional[str] = field(
+    url_encoding: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "urlEncoding"},
     )
     """Dataset url encoding"""
-    table_display_name: Optional[str] = field(
+    table_display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tableDisplayName"},
     )
     """Table display name"""
-    table_plural_name: Optional[str] = field(
+    table_plural_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "tablePluralName"},
     )
     """Table plural display name"""
@@ -858,24 +945,27 @@ class CreateJobRequest:
     Definition: CreateJobRequest
     """
 
-    column_delimiter: Optional[str] = field(
+    column_delimiter: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "columnDelimiter"},
     )
     """Column Delimiter"""
-    external_id_field_name: Optional[str] = field(
+    external_id_field_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "externalIdFieldName"},
     )
     """External ID Field Name"""
-    line_ending: Optional[str] = field(
+    line_ending: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lineEnding"},
     )
     """Line Ending"""
-    object: Optional[str] = None
+    object: str
     """Object"""
-    operation: Optional[str] = None
+    operation: str
     """Operation"""
 
 
@@ -885,8 +975,9 @@ class InstanceUrlResponse:
     Definition: InstanceUrlResponse
     """
 
-    instance_url: Optional[str] = field(
+    instance_url: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "instanceUrl"},
     )
     """Instance Url"""
@@ -898,7 +989,7 @@ class GetCurrentUserInfoResponse:
     Definition: GetCurrentUserInfoResponse
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -911,9 +1002,13 @@ class SearchRecordObject:
     Definition: SearchRecordObject
     """
 
-    attributes: Optional[Dict[str, Any]] = None
+    attributes: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """Attributes of a search record"""
-    id: Optional[str] = field(default=None, metadata={"wire_name": "Id"})
+    id: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "Id"},
+    )
     """Unique identifier of the record"""
 
 
@@ -923,7 +1018,7 @@ class CloseJobRequest:
     Definition: CloseJobRequest
     """
 
-    state: Optional[str] = None
+    state: str
     """state"""
 
 
@@ -933,14 +1028,15 @@ class MCPQueryRequest:
     Definition: MCPQueryRequest
     """
 
-    jsonrpc: Optional[str] = None
-    id: Optional[str] = None
-    method: Optional[str] = None
-    params: Optional[Dict[str, Any]] = None
-    result: Optional[Dict[str, Any]] = None
-    error: Optional[Dict[str, Any]] = None
-    callback_endpoint: Optional[str] = field(
+    jsonrpc: Optional[str] = dataclass_field(default=None, kw_only=True)
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    method: Optional[str] = dataclass_field(default=None, kw_only=True)
+    params: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    result: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    error: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
+    callback_endpoint: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "callbackEndpoint"},
     )
 
@@ -2589,7 +2685,7 @@ class SalesforceClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_external_id_fields(
+    def list_external_id_fields(
         self,
         table: str,
         *,
@@ -2597,11 +2693,14 @@ class SalesforceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get External ID Fields
 
         This operation retrieves external ID fields of Salesforce object type.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2611,27 +2710,45 @@ class SalesforceClient(ConnectorClientBase):
             f"/{quote(quote(str(table), safe=''), safe='')}"
             f"/externalIdFields"
         )
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_metadata_for_get_item(
         self,

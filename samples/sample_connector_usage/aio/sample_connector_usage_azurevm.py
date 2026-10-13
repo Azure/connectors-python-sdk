@@ -56,7 +56,7 @@ async def example_1_get_virtual_machine():
                     virtual_machine_name=VM_NAME
                 )
 
-                if result:
+                if items:
                     print(f"VM Name: {result.get('name')}")
                     print(f"VM ID: {result.get('id')}")
                     props = result.get('properties', {})
@@ -153,7 +153,7 @@ async def example_5_get_vm_in_scale_set():
                     virtual_machine_in_scale_set_instance_id=VMSS_INSTANCE_ID
                 )
 
-                if result:
+                if items:
                     print(f"VMSS Instance Name: {result.get('name')}")
                     print(f"Instance ID: {result.get('instanceId')}")
                     props = result.get('properties', {})

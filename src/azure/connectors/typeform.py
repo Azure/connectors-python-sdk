@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Dict, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -41,9 +41,9 @@ class NewResponseWebhookInput:
     When a response is submitted
     """
 
-    url: Optional[str] = None
+    url: str
     """Webhook URL."""
-    enabled: Optional[bool] = None
+    enabled: bool
     """
     Yes if you want to send responses to the webhook immediately. Otherwise,
     no.
@@ -56,25 +56,25 @@ class WebhookCreationResponse:
     Response for When a response is submitted
     """
 
-    id: Optional[str] = None
+    id: str
     """Unique ID of the webhook"""
-    form_id: Optional[str] = None
+    form_id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique ID of the typeform"""
-    tag: Optional[str] = None
+    tag: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Unique name you want to use for the webhook"""
-    url: Optional[str] = None
+    url: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Webhook URL"""
-    enabled: Optional[bool] = None
+    enabled: Optional[bool] = dataclass_field(default=None, kw_only=True)
     """
     True if you want to send responses to the webhook immediately. Otherwise,
     false.
     """
-    created_at: Optional[str] = None
+    created_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date and time when webhook was created. In ISO 8601 format, UTC time, to
     the second, with T as a delimiter between the date and time.
     """
-    updated_at: Optional[str] = None
+    updated_at: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Date of last update to webhook. In ISO 8601 format, UTC time, to the
     second, with T as a delimeter between the date and time.
@@ -87,11 +87,11 @@ class ListFormsResponse:
     Response for List forms
     """
 
-    total_items: Optional[int] = None
+    total_items: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Total number of forms."""
-    page_count: Optional[int] = None
+    page_count: Optional[int] = dataclass_field(default=None, kw_only=True)
     """Number of pages of results."""
-    items: Optional[List[Dict[str, Any]]] = None
+    items: Optional[List[Dict[str, Any]]] = dataclass_field(default=None, kw_only=True)
     """Forms in response."""
 
 
@@ -104,7 +104,7 @@ class ResponseList:
     Definition: ResponseList
     """
 
-    responses: Optional[List[Item]] = None
+    responses: Optional[List[Item]] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -113,8 +113,9 @@ class Item:
     Definition: Item
     """
 
-    item_internal_id: Optional[str] = field(
+    item_internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemInternalId"},
     )
 
@@ -125,8 +126,9 @@ class ItemNew:
     Definition: Item-New
     """
 
-    item_internal_id: Optional[str] = field(
+    item_internal_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ItemInternalId"},
     )
 
@@ -137,11 +139,11 @@ class WebhookPayload:
     Definition: WebhookPayload
     """
 
-    event_id: Optional[str] = None
+    event_id: str
     """Unique ID for the webhook. Automatically assigned by Typeform."""
-    event_type: Optional[str] = None
+    event_type: str
     """Reason the webhook is being sent."""
-    form_response: Optional[Dict[str, Any]] = None
+    form_response: Optional[Dict[str, Any]] = dataclass_field(default=None, kw_only=True)
     """
     Object that contains information about the typeform and account associated
     with the webhook.

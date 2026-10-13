@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
+- **Swagger-required model fields are now required constructor arguments** — generated dataclasses no longer default required properties to `None`.
+- **All collection operations now return Azure Core pagers** — bounded collection responses without continuation metadata now use `ItemPaged` or `AsyncItemPaged` consistently with pageable operations.
 - **Client timeout configuration now uses `timeout`** — generated sync and aio
   client constructors use the same keyword as per-operation request controls.
 - **Location-backed operations now return pollers** — 44 Kusto and Plumsail operations move from immediate operation names to `begin_*`. Call `poller.result()` for root clients or await `poller.result()` for aio clients while the connector client remains open.
@@ -42,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Generated connector clients are available as lazy exports from `azure.connectors` and `azure.connectors.aio`, with matching package type stubs for static analysis.
 - Added a synchronous Azure Core runtime alongside the asynchronous runtime and generated 99 matching connector modules for each mode.
 - Replaced the single asynchronous sample catalog with 99 synchronous root samples and 99 asynchronous `aio` samples using identical unsuffixed operation names.
 - Expanded the generated API reference to publish separate sync and aio client and runtime sections.
@@ -52,6 +55,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.
+- **Reproducible generation**: committed Swagger snapshots, a pinned generator/compiler manifest, and offline regeneration tooling now make the complete 99-connector catalog independently verifiable.
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
   now bound the complete network operation, including retries, response loading,
   and body reads across Azure Core async transports. Zero and negative values

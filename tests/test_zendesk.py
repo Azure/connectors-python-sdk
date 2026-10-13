@@ -22,8 +22,8 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 async def _invoke_operation(client: ZendeskClient, operation: str):
     """Invoke a Zendesk operation by name for shared tests."""
-    if operation == "get_tables":
-        return await client.get_tables()
+    if operation == "list_tables":
+        return await resolve_generated_result(client.list_tables())
     if operation == "list_items":
         return await resolve_generated_result(client.list_items(table="tickets"))
     if operation == "post_item":
@@ -34,8 +34,10 @@ async def _invoke_operation(client: ZendeskClient, operation: str):
         return await client.delete_item(table="tickets", id="1")
     if operation == "patch_item":
         return await client.patch_item(input=Item(), table="tickets", id="1")
-    if operation == "search_articles":
-        return await client.search_articles(query="password")
+    if operation == "list_search_articles":
+        return await resolve_generated_result(
+            client.list_search_articles(query="password")
+        )
     if operation == "get_table":
         return await client.get_table(table="tickets")
 
@@ -146,9 +148,9 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_tables()
+            result = await resolve_generated_result(client.list_tables())
 
-            assert result["value"][0]["name"] == "tickets"
+            assert result == [{"name": "tickets"}]
             assert mock_send.call_args[0][0] == "GET"
             assert "/datasets/default/tables" in mock_send.call_args[0][1]
 
@@ -282,13 +284,17 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            await client.search_articles(query="password reset", locale="en-us")
+            result = await resolve_generated_result(client.list_search_articles(
+                query="password reset",
+                locale="en-us",
+            ))
 
             request_url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
             assert "/api/v2/help_center/articles/search" in request_url
             assert "query=password%20reset" in request_url
             assert "locale=en-us" in request_url
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_table_success(self, mock_credential):
@@ -326,9 +332,9 @@ class TestZendeskClientMethods:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_tables()
+            result = await resolve_generated_result(client.list_tables())
 
-            assert result is None
+            assert result == []
 
 
 class TestZendeskClientErrorHandling:
@@ -338,13 +344,13 @@ class TestZendeskClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "get_tables",
+            "list_tables",
             "list_items",
             "post_item",
             "get_item",
             "delete_item",
             "patch_item",
-            "search_articles",
+            "list_search_articles",
             "get_table",
         ],
     )
@@ -375,14 +381,14 @@ class TestZendeskClientSignatures:
 
     def test_search_articles_query_required_and_annotated_str(self):
         """Test the query parameter is required and annotated as str, not Optional."""
-        signature = inspect.signature(ZendeskClient.search_articles)
+        signature = inspect.signature(ZendeskClient.list_search_articles)
 
         assert signature.parameters["query"].default is inspect.Parameter.empty
         assert signature.parameters["query"].annotation == "str"
 
     def test_search_articles_optional_params_default_to_none(self):
         """Test optional search params default to None."""
-        signature = inspect.signature(ZendeskClient.search_articles)
+        signature = inspect.signature(ZendeskClient.list_search_articles)
 
         assert signature.parameters["locale"].default is None
 
@@ -395,18 +401,18 @@ class TestZendeskClientSignatures:
         )
 
         with pytest.raises(TypeError):
-            await client.search_articles()
+            await resolve_generated_result(client.list_search_articles())
 
     @pytest.mark.parametrize(
         "method_name",
         [
-            "get_tables",
+            "list_tables",
             "list_items",
             "post_item",
             "get_item",
             "delete_item",
             "patch_item",
-            "search_articles",
+            "list_search_articles",
             "get_table",
         ],
     )

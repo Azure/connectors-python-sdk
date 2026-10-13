@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, List, Any, Mapping
 from urllib.parse import quote
 import json
@@ -41,10 +41,11 @@ class KeyMetadataCollection:
     Response for List keys
     """
 
-    value: Optional[List[KeyMetadata]] = None
+    value: Optional[List[KeyMetadata]] = dataclass_field(default=None, kw_only=True)
     """The keys"""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation token"""
@@ -56,42 +57,49 @@ class KeyMetadata:
     Response for Get key metadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the key"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the key"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the key is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the key was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the key was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the key validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the key validity ends."""
-    allowed_operations: Optional[List[str]] = field(
+    allowed_operations: Optional[List[str]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "allowedOperations"},
     )
     """Operations allowed using the key"""
-    key_type: Optional[str] = field(
+    key_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "keyType"},
     )
     """Type of the key"""
@@ -103,8 +111,9 @@ class KeyEncryptOutput:
     Response for Encrypt data with key
     """
 
-    encrypted_data: Optional[str] = field(
+    encrypted_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "encryptedData"},
     )
     """Encrypted data"""
@@ -116,8 +125,9 @@ class KeyDecryptOutput:
     Response for Decrypt data with key
     """
 
-    raw_data: Optional[str] = field(
+    raw_data: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "rawData"},
     )
     """Raw data"""
@@ -129,10 +139,11 @@ class SecretMetadataCollection:
     Response for List secrets
     """
 
-    value: Optional[List[SecretMetadata]] = None
+    value: Optional[List[SecretMetadata]] = dataclass_field(default=None, kw_only=True)
     """The secrets"""
-    continuation_token: Optional[str] = field(
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "continuationToken"},
     )
     """Continuation token"""
@@ -144,37 +155,43 @@ class SecretMetadata:
     Response for Get secret metadata
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the secret"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the secret"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the secret validity ends."""
@@ -186,39 +203,45 @@ class Secret:
     Response for Get secret
     """
 
-    value: Optional[str] = None
+    value: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Value of the secret"""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name of the secret"""
-    version: Optional[str] = None
+    version: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Version of the secret"""
-    content_type: Optional[str] = field(
+    content_type: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "contentType"},
     )
     """Content type of the secret"""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """A flag indicating whether the secret is enabled"""
-    created_time: Optional[str] = field(
+    created_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "createdTime"},
     )
     """Time when the secret was created"""
-    last_updated_time: Optional[str] = field(
+    last_updated_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "lastUpdatedTime"},
     )
     """Time when the secret was last updated"""
-    validity_start_time: Optional[str] = field(
+    validity_start_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityStartTime"},
     )
     """Time when the secret validity starts."""
-    validity_end_time: Optional[str] = field(
+    validity_end_time: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "validityEndTime"},
     )
     """Time when the secret validity ends."""
@@ -230,12 +253,9 @@ class KeyEncryptInput:
     Definition: KeyEncryptInput
     """
 
-    algorithm: Optional[str] = None
+    algorithm: str
     """Algorithm to use for encrypting the data"""
-    raw_data: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "rawData"},
-    )
+    raw_data: str = dataclass_field(metadata={"wire_name": "rawData"})
     """Data to encrypt"""
 
 
@@ -245,10 +265,9 @@ class KeyDecryptInput:
     Definition: KeyDecryptInput
     """
 
-    algorithm: Optional[str] = None
+    algorithm: str
     """Algorithm to use for decrypting the data"""
-    encrypted_data: Optional[str] = field(
-        default=None,
+    encrypted_data: str = dataclass_field(
         metadata={"wire_name": "encryptedData"},
     )
     """Data to decrypt"""

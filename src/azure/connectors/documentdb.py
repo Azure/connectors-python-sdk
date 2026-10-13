@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -61,15 +61,32 @@ class PostDocumentsResponse:
     Response for Create or update document
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
-    attachments: Optional[str] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
+    attachments: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_attachments"},
     )
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -78,11 +95,11 @@ class CreateStoredProcedureInput:
     Create stored procedure
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Function that defines the stored procedure, e.g. 'function(params){ ... }'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """New id of the stored procedure."""
 
 
@@ -92,17 +109,33 @@ class CreateStoredProcedureResponse:
     Response for Create stored procedure
     """
 
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
     """_etag"""
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
     """_rid"""
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
     """_self"""
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
     """_ts"""
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """body"""
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """id"""
 
 
@@ -115,7 +148,7 @@ class ObjectWithoutType:
     Response for Execute stored procedure
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -128,8 +161,9 @@ class GetDocumentResponse:
     Response for Get a document
     """
 
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
@@ -141,13 +175,19 @@ class GetDocumentsResponse:
     Response for Get all documents
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    documents: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    documents: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
@@ -159,15 +199,21 @@ class GetStoredProceduresResponse:
     Response for Get stored procedures
     """
 
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
     """_count"""
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    """_rid"""
-    stored_procedures: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    """_rid"""
+    stored_procedures: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "StoredProcedures"},
     )
     """StoredProcedures"""
@@ -179,31 +225,41 @@ class QueryDocumentsResponse:
     Response for Query documents
     """
 
-    value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = field(
+    value: Optional[List[ObjectWithoutType]] = dataclass_field(default=None, kw_only=True)
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContinuationToken"},
     )
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    request_charge: Optional[float] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    request_charge: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestCharge"},
     )
-    session_token: Optional[str] = field(
+    session_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionToken"},
     )
-    activity_id: Optional[str] = field(
+    activity_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActivityId"},
     )
-    metadata: Optional[List[DataWithSensitivityLabelInfo]] = field(
+    metadata: Optional[List[DataWithSensitivityLabelInfo]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@metadata"},
     )
     """List of columns along with their Sensitivity Labels"""
-    next_link: Optional[str] = field(
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "nextLink"},
     )
     """The URL to retrieve the next page."""
@@ -215,8 +271,12 @@ class PutDocumentResponse:
     Response for Replace a document
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    id: Optional[str] = None
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -225,11 +285,11 @@ class ReplaceStoredProcedureInput:
     Replace stored procedure
     """
 
-    body: Optional[str] = None
+    body: Optional[str] = dataclass_field(default=None, kw_only=True)
     """
     Function that defines the stored procedure, e.g. 'function(params){ ... }'
     """
-    id: Optional[str] = None
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Id of the existing stored procedure."""
 
 
@@ -239,7 +299,7 @@ class CosmosDbAccountList:
     Response for Get Cosmos DB accounts
     """
 
-    value: Optional[List[CosmosDbAccount]] = None
+    value: Optional[List[CosmosDbAccount]] = dataclass_field(default=None, kw_only=True)
     """List of Azure Cosmos DB account names"""
 
 
@@ -249,13 +309,19 @@ class GetDatabasesResponse:
     Response for Get all databases
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    databases: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    databases: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "Databases"},
     )
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
 
@@ -266,13 +332,19 @@ class GetCollectionsResponse:
     Response for Get all collections
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    document_collections: Optional[List[Dict[str, Any]]] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    document_collections: Optional[List[Dict[str, Any]]] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DocumentCollections"},
     )
-    count: Optional[int] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
 
@@ -283,8 +355,9 @@ class DocumentsQuery:
     Definition: DocumentsQuery
     """
 
-    query_text: Optional[str] = field(
+    query_text: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "QueryText"},
     )
     """SQL Syntax Query over documents"""
@@ -296,7 +369,7 @@ class ObjectEntity:
     Definition: Object
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -309,22 +382,30 @@ class DocumentsCollection:
     Definition: DocumentsCollection
     """
 
-    value: Optional[List[ObjectWithoutType]] = None
-    continuation_token: Optional[str] = field(
+    value: Optional[List[ObjectWithoutType]] = dataclass_field(default=None, kw_only=True)
+    continuation_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ContinuationToken"},
     )
-    count: Optional[int] = field(default=None, metadata={"wire_name": "Count"})
-    request_charge: Optional[float] = field(
+    count: Optional[int] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Count"},
+    )
+    request_charge: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "RequestCharge"},
     )
-    session_token: Optional[str] = field(
+    session_token: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "SessionToken"},
     )
-    activity_id: Optional[str] = field(
+    activity_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "ActivityId"},
     )
 
@@ -335,9 +416,17 @@ class GetAccountResponse:
     Definition: getAccountResponse
     """
 
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    id: Optional[str] = None
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    rid: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -346,19 +435,37 @@ class GetDatabaseResponse:
     Definition: getDatabaseResponse
     """
 
-    id: Optional[str] = None
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    self: Optional[str] = field(default=None, metadata={"wire_name": "_self"})
-    etag: Optional[str] = field(default=None, metadata={"wire_name": "_etag"})
-    colls: Optional[str] = field(
+    id: Optional[str] = dataclass_field(default=None, kw_only=True)
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    self: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_self"},
+    )
+    etag: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_etag"},
+    )
+    colls: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_colls"},
     )
-    users: Optional[str] = field(
+    users: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "_users"},
     )
-    ts: Optional[int] = field(default=None, metadata={"wire_name": "_ts"})
+    ts: Optional[int] = dataclass_field(
+        default=None,
+        kw_only=True,
+        metadata={"wire_name": "_ts"},
+    )
 
 
 GetCollectionResponse = List[Dict[str, Any]]
@@ -370,7 +477,7 @@ class PostDocumentsRequest:
     Definition: postDocumentsRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -383,7 +490,7 @@ class PutDocumentRequest:
     Definition: putDocumentRequest
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -396,7 +503,7 @@ class QueryRequest:
     Definition: queryRequest
     """
 
-    query: Optional[str] = None
+    query: Optional[str] = dataclass_field(default=None, kw_only=True)
 
 
 @dataclass
@@ -405,13 +512,19 @@ class QueryResponse:
     Definition: queryResponse
     """
 
-    rid: Optional[str] = field(default=None, metadata={"wire_name": "_rid"})
-    count: Optional[float] = field(
+    rid: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "_rid"},
+    )
+    count: Optional[float] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "_count"},
     )
-    documents: Optional[List[Any]] = field(
+    documents: Optional[List[Any]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "Documents"},
     )
 
@@ -422,10 +535,11 @@ class DataWithSensitivityLabelInfo:
     Definition: DataWithSensitivityLabelInfo
     """
 
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """Name"""
-    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = field(
+    sensitivity_label_info: Optional[List[SensitivityLabelMetadata]] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelInfo"},
     )
     """List of Sensitivity Label Information"""
@@ -437,41 +551,47 @@ class SensitivityLabelMetadata:
     Definition: SensitivityLabelMetadata
     """
 
-    sensitivity_label_id: Optional[str] = field(
+    sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "sensitivityLabelId"},
     )
     """SensitivityLabel Id."""
-    name: Optional[str] = None
+    name: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel name."""
-    display_name: Optional[str] = field(
+    display_name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "displayName"},
     )
     """SensitivityLabel displayName info"""
-    tooltip: Optional[str] = None
+    tooltip: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel details on tooltip."""
-    priority: Optional[int] = None
+    priority: Optional[int] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel priority."""
-    color: Optional[str] = None
+    color: Optional[str] = dataclass_field(default=None, kw_only=True)
     """SensitivityLabel color."""
-    is_encrypted: Optional[bool] = field(
+    is_encrypted: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEncrypted"},
     )
     """ is  SensitivityLabel Encrypted."""
-    is_enabled: Optional[bool] = field(
+    is_enabled: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isEnabled"},
     )
     """Whether  SensitivityLabel is Enabled."""
-    is_parent: Optional[bool] = field(
+    is_parent: Optional[bool] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "isParent"},
     )
     """Whether  SensitivityLabel is Parent."""
-    parent_sensitivity_label_id: Optional[str] = field(
+    parent_sensitivity_label_id: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "parentSensitivityLabelId"},
     )
     """Parent  SensitivityLabel Id."""
@@ -483,10 +603,15 @@ class CosmosDbAccount:
     Definition: CosmosDbAccount
     """
 
-    name: Optional[str] = field(default=None, metadata={"wire_name": "Name"})
-    """The name of the Azure Cosmos DB account."""
-    display_name: Optional[str] = field(
+    name: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
+        metadata={"wire_name": "Name"},
+    )
+    """The name of the Azure Cosmos DB account."""
+    display_name: Optional[str] = dataclass_field(
+        default=None,
+        kw_only=True,
         metadata={"wire_name": "DisplayName"},
     )
     """The display name of the Azure Cosmos DB account."""
@@ -846,7 +971,7 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_document(
+    def list_document(
         self,
         cosmos_db_account_name: str,
         database_id: str,
@@ -859,11 +984,14 @@ class DocumentdbClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get a document
 
         Get a document.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -890,27 +1018,45 @@ class DocumentdbClient(ConnectorClientBase):
             query_params.append(f"purviewAccountName={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("@metadata", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_documents(
         self,
@@ -1250,41 +1396,62 @@ class DocumentdbClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def get_cosmos_db_accounts(
+    def list_cosmos_db_accounts(
         self,
         *,
         timeout: Optional[float] = None,
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> ItemPaged[dict[str, Any]]:
         """
         Get Cosmos DB accounts
 
         This operation list the user's Azure Cosmos DB accounts.
+
+        Returns an Azure Core pager that follows the connector continuation
+        URL.
         """
         request_url = f"{self._connection_runtime_url}/cosmosdbaccounts"
+        initial_request_url = request_url
+        request_body = None
 
-        response = self.http_client.send(
-            "GET", request_url, body=None,
-            timeout=timeout,
-            headers=headers,
-            client_request_id=client_request_id,
-            response_hook=response_hook,
-        )
-
-        if not (200 <= response.status < 300):
-            raise ConnectorException(
-                "GET",
-                request_url,
-                response.status,
-                response.text,
+        def get_next(
+            continuation_token: Optional[str],
+        ) -> tuple[ConnectorResponseSnapshot, str]:
+            request_url = continuation_token or initial_request_url
+            body = request_body if continuation_token is None else None
+            response = self.http_client.send(
+                "GET", request_url, body=body,
+                timeout=timeout,
+                headers=headers,
+                client_request_id=client_request_id,
+                response_hook=response_hook,
             )
 
-        if not response.text:
-            return None
+            if not (200 <= response.status < 300):
+                raise ConnectorException(
+                    "GET",
+                    request_url,
+                    response.status,
+                    response.text,
+                )
 
-        return json.loads(response.text)
+            return response, request_url
+
+        def extract_data(
+            page_response: tuple[ConnectorResponseSnapshot, str],
+        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+            response, request_url = page_response
+            page = json.loads(response.text) if response.text else {}
+
+            def items() -> Iterator[dict[str, Any]]:
+                for item in page.get("value", []):
+                    yield item
+
+            return None, items()
+
+        return ItemPaged(get_next, extract_data)
 
     def get_databases(
         self,

@@ -19,7 +19,7 @@ def main() -> None:
     with DefaultAzureCredential() as credential:
         try:
             with WaywedoClient(CONNECTION_RUNTIME_URL, credential) as client:
-                checklists = client.find_checklist()
+                checklists = client.list_find_checklist()
                 print(f"Checklists: {checklists}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

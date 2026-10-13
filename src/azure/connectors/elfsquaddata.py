@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field as dataclass_field
 from typing import Optional, Iterator, Dict, List, Any, Mapping
 from urllib.parse import quote, urlsplit
 import json
@@ -43,10 +43,7 @@ class CreateTriggerInput:
     Custom trigger
     """
 
-    callback_url: Optional[str] = field(
-        default=None,
-        metadata={"wire_name": "callbackUrl"},
-    )
+    callback_url: str = dataclass_field(metadata={"wire_name": "callbackUrl"})
 
 
 @dataclass
@@ -55,9 +52,10 @@ class GetEntitiesResponse:
     Response for Get entities
     """
 
-    value: Optional[List[Any]] = None
-    next_link: Optional[str] = field(
+    value: Optional[List[Any]] = dataclass_field(default=None, kw_only=True)
+    next_link: Optional[str] = dataclass_field(
         default=None,
+        kw_only=True,
         metadata={"wire_name": "@odata.nextLink"},
     )
     """Link to get next page of results"""
@@ -69,7 +67,7 @@ class PostEntityByIdInput:
     Create entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -82,7 +80,7 @@ class PostEntityByIdResponse:
     Response for Create entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -95,7 +93,7 @@ class GetEntityByIdResponse:
     Response for Get entity by id
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -108,7 +106,7 @@ class PutEntityByIdInput:
     Update entity
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -121,7 +119,7 @@ class InvokeFunctionInput:
     Invoke function
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])
@@ -134,7 +132,7 @@ class InvokeFunctionResponse:
     Response for Invoke function
     """
 
-    additional_properties: Dict[str, Any] = field(default_factory=dict)
+    additional_properties: Dict[str, Any] = dataclass_field(default_factory=dict, kw_only=True)
     """
     Dynamic properties determined at runtime
     (similar to .NET [JsonExtensionData])

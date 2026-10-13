@@ -17,6 +17,10 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
+from tests.generated_connector_test_utils import (
+    model_instance,
+    resolve_generated_result,
+)
 
 
 class TestWordonlinebusinessClientInitialization:
@@ -451,7 +455,7 @@ class TestGetFilePDF:
         ) as mock_send:
             mock_send.return_value = mock_response
 
-            await client.get_drives()
+            await resolve_generated_result(client.list_drives())
 
             call_args = mock_send.call_args
             assert "source=me" in call_args[0][1]
@@ -473,10 +477,10 @@ class TestDataclasses:
         assert input_data.additional_properties["field1"] == "value1"
         assert input_data.additional_properties["templateId"] == "abc123"
 
-    def test_content_body_defaults(self):
-        """Test ContentBody default values."""
-        body = ContentBody()
-        assert body.content is None
+    def test_content_body_required_content(self):
+        """Test ContentBody requires document content."""
+        body = model_instance(ContentBody)
+        assert body.content == "value"
 
     def test_content_body_with_content(self):
         """Test ContentBody with content."""

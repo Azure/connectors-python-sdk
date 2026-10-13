@@ -14,7 +14,10 @@ from azure.connectors.zeptomail import (
     SendTemplateMailInput,
 )
 from azure.connectors.sdk.serialization import to_wire
-from tests.generated_connector_test_utils import GeneratedConnectorContractTests
+from tests.generated_connector_test_utils import (
+    GeneratedConnectorContractTests,
+    model_instance,
+)
 from tests.conftest import MockResponse
 
 
@@ -42,7 +45,8 @@ async def test_send_template_mail_preserves_mixed_values(
 ) -> None:
     """Test the template-mail request serializes mixed merge values unchanged."""
     type_hints = get_type_hints(SendTemplateMailInput)
-    model = SendTemplateMailInput(
+    model = model_instance(
+        SendTemplateMailInput,
         merge_key_detail=[{"key": "customer", "value": "Ada", "rank": 2}]
     )
     client = ZeptomailClient(

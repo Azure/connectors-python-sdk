@@ -53,7 +53,7 @@ def example_1_list_servers_and_databases():
     with DefaultAzureCredential() as credential:
 
         with SqlClient(CONNECTION_RUNTIME_URL, credential) as client:
-            servers = client.get_servers()
+            servers = client.list_servers()
             server_values = servers.get("value", []) if servers else []
             print(f"Found {len(server_values)} server(s).")
 
@@ -61,7 +61,7 @@ def example_1_list_servers_and_databases():
                 print("Set SQL_SERVER to list databases and tables.")
                 return
 
-            databases = client.get_databases(server=SERVER)
+            databases = client.list_databases(server=SERVER)
             database_values = databases.get("value", []) if databases else []
             print(f"Found {len(database_values)} database(s) on '{SERVER}'.")
 
@@ -166,7 +166,7 @@ def example_4_query_and_procedures():
                 result_sets = (query_result or {}).get("resultSets", {})
                 print(f"Query returned {len(result_sets)} result set(s).")
 
-                procedures = client.get_procedures_v2(
+                procedures = client.list_procedures_v2(
                     server=SERVER,
                     database=DATABASE,
                 )

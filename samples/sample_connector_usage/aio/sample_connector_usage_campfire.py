@@ -38,7 +38,7 @@ async def example_1_list_accounts() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            accounts = await client.list_accounts()
+            accounts = [item async for item in client.list_accounts()]
             print(f"Accounts: {accounts}")
 
 
@@ -48,7 +48,7 @@ async def example_2_list_rooms() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with CampfireClient(CONNECTION_RUNTIME_URL, credential) as client:
-            rooms = await client.list_rooms(account="ACCOUNT_ID")
+            rooms = [item async for item in client.list_rooms(account="ACCOUNT_ID")]
             print(f"Rooms: {rooms}")
 
 

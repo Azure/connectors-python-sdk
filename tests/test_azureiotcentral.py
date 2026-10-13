@@ -24,7 +24,7 @@ from azure.connectors.sdk import (
     ConnectorException,
 )
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import resolve_generated_result
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 BASE_URL = "https://example.azure.com/connections/test"
@@ -194,18 +194,18 @@ OPERATION_ARGS = {
     "list_device_templates_2": {"application": "app-1"},
     "device_templates_remove": {"template_id": "tpl-1", "application": "app-1"},
     "roles_get": {"role_id": "role-1", "application": "app-1"},
-    "roles_list": {"application": "app-1"},
+    "list_roles": {"application": "app-1"},
     "users_create": {"input": {}, "user_id": "u-1", "application": "app-1"},
     "users_get": {"user_id": "u-1", "application": "app-1"},
-    "users_list": {"application": "app-1"},
+    "list_users": {"application": "app-1"},
     "users_remove": {"user_id": "u-1", "application": "app-1"},
     "users_update": {"input": {}, "user_id": "u-1", "application": "app-1"},
     "list_applications": {},
-    "workflow_get_components": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_capabilities": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_capabilities_v1": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_components_v1": {"application": "app-1", "template": "tpl-1"},
-    "workflow_get_modules": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_components": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_capabilities": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_capabilities_v1": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_components_v1": {"application": "app-1", "template": "tpl-1"},
+    "list_workflow_get_modules": {"application": "app-1", "template": "tpl-1"},
     "schema_device_cloud_properties": {"application": "app-1"},
     "schema_device_command": {"application": "app-1"},
     "schema_device_command_v1": {"application": "app-1"},
@@ -363,7 +363,7 @@ class TestAzureiotcentralClientMethods:
         """Test device_groups_set_async issues a PUT and forwards the body."""
         client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text='{"id":"dg-1"}')
-        body = DeviceGroup(display_name="group")
+        body = model_instance(DeviceGroup, display_name="group")
 
         with patch.object(
             client._http_client,
@@ -417,7 +417,7 @@ class TestAzureiotcentralClientMethods:
         """Test device_relationships_update_async forwards the PATCH body."""
         client = _make_client(mock_credential)
         mock_response = MockResponse(status=200, text="{}")
-        body = DeviceRelationship()
+        body = model_instance(DeviceRelationship)
 
         with patch.object(
             client._http_client,
@@ -468,7 +468,7 @@ class TestAzureiotcentralClientMethods:
             return_value=mock_response,
         ) as mock_send:
             await client.jobs_set(
-                input=Job(display_name="job"),
+                input=model_instance(Job, display_name="job"),
                 job_id="j-1",
                 application="app-1",
                 job_type="cloudProperty",
@@ -566,16 +566,16 @@ class TestAzureiotcentralTypeSerialization:
 
     def test_dataclass_instances_initialize_expected_defaults(self):
         """Test generated dataclasses initialize with expected default values."""
-        device_group = DeviceGroup()
-        device = Device()
-        device_command = DeviceCommand()
-        cloud_properties = DeviceCloudProperties()
-        relationship = DeviceRelationship()
-        job = Job()
-        organization = Organization()
-        scheduled_job = ScheduledJob()
-        user = User()
-        trigger = WorkflowTrigger()
+        device_group = model_instance(DeviceGroup)
+        device = model_instance(Device)
+        device_command = model_instance(DeviceCommand)
+        cloud_properties = model_instance(DeviceCloudProperties)
+        relationship = model_instance(DeviceRelationship)
+        job = model_instance(Job)
+        organization = model_instance(Organization)
+        scheduled_job = model_instance(ScheduledJob)
+        user = model_instance(User)
+        trigger = model_instance(WorkflowTrigger)
 
         assert device_group.id is None
         assert device.id is None

@@ -44,7 +44,7 @@ def example_1_get_tables():
 
         with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_tables()
+                result = client.list_tables()
 
                 tables = (result or {}).get("value", []) if isinstance(result, dict) else []
                 print(f"Found {len(tables)} table(s).")
@@ -110,7 +110,7 @@ def example_4_search_articles():
 
         with ZendeskClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.search_articles(
+                result = client.list_search_articles(
                     query="password reset",
                     locale="en-us",
                 )
