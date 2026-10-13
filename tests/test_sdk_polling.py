@@ -79,6 +79,44 @@ def test_sync_poller_follows_location_and_forwards_request_controls() -> None:
     assert poller.status() == "Succeeded"
 
 
+@pytest.mark.parametrize(
+    ("updated_location", "expected_url"),
+    [
+        ("43", "https://runtime.example/connections/1/jobs/pending/43"),
+        ("../43", "https://runtime.example/connections/1/jobs/43"),
+    ],
+)
+def test_sync_poller_resolves_relative_location_against_current_url(
+    updated_location: str,
+    expected_url: str,
+) -> None:
+    """Resolve sync Location updates relative to the current polling request."""
+    http_client = MagicMock()
+    http_client.send.side_effect = [
+        create_response(202, {"Location": updated_location, "Retry-After": "0"}),
+        create_response(200),
+    ]
+    client = MagicMock()
+    client._connection_runtime_url = "https://runtime.example/connections/1"
+
+    with patch("azure.connectors.sdk.polling.time.sleep"):
+        poller = LROPoller(
+            client,
+            create_response(
+                202,
+                {"Location": "/jobs/pending/42", "Retry-After": "0"},
+            ),
+            lambda response: response.text,
+            ConnectorPollingMethod(http_client, "Location"),
+        )
+        poller.result()
+
+    assert [call.args[1] for call in http_client.send.call_args_list] == [
+        "https://runtime.example/connections/1/jobs/pending/42",
+        expected_url,
+    ]
+
+
 @pytest.mark.asyncio
 async def test_async_poller_updates_location_until_terminal_response() -> None:
     """Poll asynchronously and honor a changed Location header."""
@@ -117,6 +155,53 @@ async def test_async_poller_updates_location_until_terminal_response() -> None:
     ]
     assert poller.done() is True
     assert poller.status() == "Succeeded"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("updated_location", "expected_url"),
+    [
+        ("43", "https://runtime.example/connections/1/jobs/pending/43"),
+        ("../43", "https://runtime.example/connections/1/jobs/43"),
+    ],
+)
+async def test_async_poller_resolves_relative_location_against_current_url(
+    updated_location: str,
+    expected_url: str,
+) -> None:
+    """Resolve async Location updates relative to the current polling request."""
+    http_client = MagicMock()
+    http_client.send = AsyncMock(
+        side_effect=[
+            create_response(
+                202,
+                {"Location": updated_location, "Retry-After": "0"},
+            ),
+            create_response(200),
+        ]
+    )
+    client = MagicMock()
+    client._connection_runtime_url = "https://runtime.example/connections/1"
+    poller = AsyncLROPoller(
+        client,
+        create_response(
+            202,
+            {"Location": "/jobs/pending/42", "Retry-After": "0"},
+        ),
+        lambda response: response.text,
+        AsyncConnectorPollingMethod(http_client, "Location"),
+    )
+
+    with patch(
+        "azure.connectors.sdk.aio.polling.asyncio.sleep",
+        new_callable=AsyncMock,
+    ):
+        await poller.result()
+
+    assert [call.args[1] for call in http_client.send.await_args_list] == [
+        "https://runtime.example/connections/1/jobs/pending/42",
+        expected_url,
+    ]
 
 
 def test_immediate_success_requires_no_polling() -> None:

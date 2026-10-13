@@ -5,7 +5,7 @@
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Mapping, Optional
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from .response import ConnectorResponseSnapshot
 
@@ -38,13 +38,11 @@ def resolve_polling_url(
     """Route a connector polling URL through the authenticated runtime origin."""
     if polling_url.startswith("/"):
         return f"{connection_runtime_url}{polling_url}"
-    if polling_url.startswith("?"):
-        base_url = current_polling_url or connection_runtime_url
-        return f"{base_url.partition('?')[0]}{polling_url}"
 
     parsed_polling_url = urlsplit(polling_url)
     if not parsed_polling_url.scheme and not parsed_polling_url.netloc:
-        return f"{connection_runtime_url}/{polling_url}"
+        base_url = current_polling_url or f"{connection_runtime_url.rstrip('/')}/"
+        return urljoin(base_url, polling_url)
 
     parsed_connection = urlsplit(connection_runtime_url)
     polling_hostname = parsed_polling_url.hostname

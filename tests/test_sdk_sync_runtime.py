@@ -3,11 +3,15 @@
 """Tests for the Azure Core synchronous connector runtime."""
 
 import json
+import threading
+import time
 from dataclasses import dataclass
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import MagicMock
 
 import pytest
 from azure.core.credentials import AccessToken, AzureKeyCredential
+from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline.policies import HeadersPolicy, RetryPolicy, SansIOHTTPPolicy
 from azure.core.pipeline.transport import HttpTransport
 
@@ -159,6 +163,65 @@ def test_request_controls_and_serialization_are_applied() -> None:
     assert request.headers["x-ms-client-request-id"] == "request-id"
     assert json.loads(request.content) == {"item_name": "item"}
     hook.assert_called_once_with(response, response.headers)
+
+
+@pytest.mark.parametrize(
+    ("default_timeout", "request_timeout"),
+    [
+        (0.1, None),
+        (1.0, 0.1),
+    ],
+)
+def test_timeout_bounds_slow_drip_response_body(
+    default_timeout: float,
+    request_timeout: float | None,
+) -> None:
+    """Bound total response time even while bytes arrive within the idle timeout."""
+
+    class SlowDripHandler(BaseHTTPRequestHandler):
+        """Send a response body slowly without exceeding the socket idle timeout."""
+
+        def do_GET(self) -> None:
+            """Write ten bytes at intervals shorter than the request timeout."""
+            self.send_response(200)
+            self.send_header("Content-Length", "10")
+            self.end_headers()
+            try:
+                for _ in range(10):
+                    self.wfile.write(b"x")
+                    self.wfile.flush()
+                    time.sleep(0.04)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def log_message(self, format: str, *args: object) -> None:
+            """Suppress local test-server request logging."""
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), SlowDripHandler)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        timeout_seconds=default_timeout,
+    )
+    started_at = time.monotonic()
+
+    try:
+        with pytest.raises(ServiceResponseTimeoutError):
+            client.send(
+                "GET",
+                f"http://127.0.0.1:{server.server_port}/",
+                timeout=request_timeout,
+            )
+        elapsed = time.monotonic() - started_at
+    finally:
+        client.close()
+        server.shutdown()
+        server.server_close()
+        server_thread.join(timeout=1.0)
+
+    assert elapsed < 0.3
 
 
 def test_unsafe_method_does_not_retry_by_default() -> None:
