@@ -274,6 +274,8 @@ class TestTextrequestClientOperations:
                 "bulk_update_contacts",
                 "list_custom_fields",
             } | PAGED_OPERATIONS
+            else None
+            if operation.startswith("delete_")
             else {"ok": True}
         )
         assert result == expected_result
@@ -394,7 +396,7 @@ class TestTextrequestClientOperations:
 
             assert mock_send.call_args[0][0] == "DELETE"
             assert "/dashboards/7/contacts/%2B15551112222" in mock_send.call_args[0][1]
-            assert result == {"ok": True}
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_create_contact_success(self, mock_credential):

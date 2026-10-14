@@ -565,7 +565,7 @@ non-2xx responses raise `ConnectorException`.
 | POST with body | At least 1 test asserting body is forwarded + 1 error test |
 | PUT with body | At least 1 test asserting body is forwarded + 1 error test |
 | PATCH with body | At least 1 test asserting body is forwarded + 1 error test |
-| DELETE | At least 1 success test + 1 error test verifying exception raised |
+| DELETE | At least 1 success test + 1 error test verifying exception raised; `delete_*` resource methods must also cover HTTP 404 as success |
 
 **Connectors with >20 public methods** are not required to have a test class per method. Representative coverage — one test group per HTTP verb type used by the connector — satisfies the acceptance criteria, provided the body-forwarding and non-2xx paths are both covered.
 
@@ -635,6 +635,8 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Pageable item properties and bounded collection envelopes misclassified | Fixed in generator | `azuredigitaltwins`, `insightly`, `jira`, `documentdb`, `sql`, and other collection connectors | Fixed | Explicit pageable operations infer omitted item names and use recognized continuation fields present in the response schema. Bounded read envelopes select conventional primary arrays over auxiliary array metadata and emit `list_*` pagers, while mutation/action arrays remain eager. |
 | Caller continuation URLs bypassed pagination origin normalization | Fixed in generator | All pageable connectors | Fixed | `by_page(continuation_token=...)` now routes caller tokens through the same URL resolver as service-provided next links before transport receives the request. |
 | Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
+| HTTP verb used as a proxy for resource-delete semantics | Fixed in generator | `clicksendsms`, `servicebus`, `zohosign`, and other delete operations | Fixed | Generated `delete_*` methods return `None` and accept HTTP 404 even when the transport verb is PUT. DELETE-backed actions retain ordinary non-2xx failure behavior. |
+| Successful response discarded when Swagger omits its schema | Fixed in generator | `orderful` | Fixed | The Python-specific `ListTransactions` override preserves the runtime JSON payload without changing other language emitters. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
 **Adding a new defect:**

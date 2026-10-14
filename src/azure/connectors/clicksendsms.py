@@ -777,7 +777,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete List
 
@@ -794,7 +794,8 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -822,11 +823,6 @@ class ClicksendsmsClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def create_list_contact(
         self,
@@ -952,7 +948,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete a Contact
 
@@ -970,7 +966,8 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1001,11 +998,6 @@ class ClicksendsmsClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def send_mms(
         self,

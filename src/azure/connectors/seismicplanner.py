@@ -2633,7 +2633,7 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete projects
 
@@ -2651,7 +2651,8 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2702,11 +2703,6 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def create_project(
         self,
@@ -2856,7 +2852,7 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete project
 
@@ -2874,7 +2870,8 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2915,11 +2912,6 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def update_project(
         self,
@@ -3369,7 +3361,7 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete requests
 
@@ -3387,7 +3379,8 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3415,11 +3408,6 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def create_request(
         self,
@@ -4383,7 +4371,7 @@ class SeismicplannerClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete task
 
@@ -4400,7 +4388,8 @@ class SeismicplannerClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -4433,11 +4422,6 @@ class SeismicplannerClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def update_task(
         self,

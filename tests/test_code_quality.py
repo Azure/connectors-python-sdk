@@ -108,8 +108,8 @@ class TestCodeQuality(unittest.TestCase):
                 f"{violation_text}"
             )
 
-    def test_delete_operations_accept_not_found(self):
-        """Verify every generated DELETE operation treats HTTP 404 as success."""
+    def test_resource_delete_operations_accept_not_found(self):
+        """Verify generated resource deletes, but not actions, accept HTTP 404."""
         connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
         connector_paths = [
             *connector_dir.glob('*.py'),
@@ -126,30 +126,34 @@ class TestCodeQuality(unittest.TestCase):
                 node for node in ast.walk(tree)
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
             ):
-                if not self._sends_delete(function):
+                if not self._sends_request(function):
                     continue
 
-                if not self._accepts_not_found(function):
+                is_resource_delete = function.name.startswith('delete_')
+                accepts_not_found = self._accepts_not_found(function)
+                if is_resource_delete and not accepts_not_found:
                     violations.append(
                         f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
-                        f'{function.lineno}: {function.name}'
+                        f'{function.lineno}: {function.name} does not accept 404'
+                    )
+                elif not is_resource_delete and accepts_not_found:
+                    violations.append(
+                        f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
+                        f'{function.lineno}: {function.name} accepts 404'
                     )
 
         assert not violations, (
-            'Generated DELETE operations missing HTTP 404 success guards:\n'
+            'Generated HTTP 404 guards do not match resource-delete semantics:\n'
             + '\n'.join(violations)
         )
 
     @staticmethod
-    def _sends_delete(function: ast.AST) -> bool:
-        """Return whether a function sends an HTTP DELETE request."""
+    def _sends_request(function: ast.AST) -> bool:
+        """Return whether a function sends an HTTP request."""
         return any(
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
             and node.func.attr == 'send'
-            and bool(node.args)
-            and isinstance(node.args[0], ast.Constant)
-            and node.args[0].value == 'DELETE'
             for node in ast.walk(function)
         )
 

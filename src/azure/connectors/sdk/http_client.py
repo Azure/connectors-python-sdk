@@ -4,10 +4,12 @@
 
 import json
 import random
+import time
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
 from azure.core.credentials import AzureKeyCredential, TokenCredential
+from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline import Pipeline
 from azure.core.pipeline.policies import (
     AzureKeyCredentialPolicy,
@@ -111,7 +113,7 @@ class ConnectorHttpClient:
         self._credential = credential
         self._timeout_seconds = timeout_seconds
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
-        self._transport = transport or RequestsTransport()
+        self._transport = transport or RequestsTransport(**kwargs)
         policy_options = dict(kwargs)
         per_call_policies = self._as_policy_list(
             policy_options.pop("per_call_policies", [])
@@ -386,28 +388,140 @@ class ConnectorHttpClient:
         if client_request_id is not None:
             request_options["request_id"] = client_request_id
 
-        return self._run_pipeline(pipeline, request, request_options)
+        enforce_total_timeout = (
+            selected_timeout > 0 and isinstance(self._transport, RequestsTransport)
+        )
+        if enforce_total_timeout:
+            request_options["stream"] = True
+
+        return self._run_pipeline(
+            pipeline,
+            request,
+            request_options,
+            total_timeout=selected_timeout if enforce_total_timeout else None,
+            url=url,
+        )
 
     @staticmethod
     def _run_pipeline(
         pipeline: Pipeline,
         request: HttpRequest,
         request_options: Dict[str, Any],
+        *,
+        total_timeout: Optional[float] = None,
+        url: Optional[str] = None,
     ) -> ConnectorResponseSnapshot:
-        """Run the pipeline and buffer its response."""
+        """Run the pipeline and buffer its response within an optional deadline."""
+        started_at = time.monotonic()
         pipeline_response = pipeline.run(request, **request_options)
-        return ConnectorHttpClient._snapshot_response(
-            pipeline_response.http_response
+        http_response = pipeline_response.http_response
+        if total_timeout is None:
+            return ConnectorHttpClient._snapshot_response(http_response)
+
+        deadline = started_at + total_timeout
+        try:
+            response_chunks = []
+            while True:
+                if time.monotonic() >= deadline:
+                    raise ConnectorHttpClient._create_timeout_error(
+                        url=url,
+                        total_timeout=total_timeout,
+                    )
+
+                response_chunk = ConnectorHttpClient._read_response_chunk(
+                    http_response
+                )
+                if not response_chunk:
+                    break
+                response_chunks.append(response_chunk)
+
+            if time.monotonic() >= deadline:
+                raise ConnectorHttpClient._create_timeout_error(
+                    url=url,
+                    total_timeout=total_timeout,
+                )
+
+            response_content = b"".join(response_chunks)
+            return ConnectorHttpClient._snapshot_response(
+                http_response,
+                response_content=response_content,
+                response_text=ConnectorHttpClient._decode_response_content(
+                    response_content,
+                    encoding=http_response.encoding,
+                ),
+            )
+        except Exception as ex:
+            if (
+                time.monotonic() >= deadline
+                and not isinstance(ex, ServiceResponseTimeoutError)
+            ):
+                raise ConnectorHttpClient._create_timeout_error(
+                    url=url,
+                    total_timeout=total_timeout,
+                    error=ex,
+                ) from ex
+            raise
+        finally:
+            http_response.close()
+
+    @staticmethod
+    def _create_timeout_error(
+        *,
+        url: Optional[str],
+        total_timeout: float,
+        error: Optional[Exception] = None,
+    ) -> ServiceResponseTimeoutError:
+        """Create the standard Azure Core total-timeout exception."""
+        return ServiceResponseTimeoutError(
+            message=(
+                f"Request to '{url}' exceeded the total timeout of "
+                f"'{total_timeout}' seconds."
+            ),
+            error=error,
         )
 
     @staticmethod
-    def _snapshot_response(http_response: Any) -> ConnectorResponseSnapshot:
+    def _read_response_chunk(http_response: Any) -> bytes:
+        """Read one available chunk from an Azure Core Requests response."""
+        internal_response = getattr(http_response, "_internal_response", None)
+        raw_response = getattr(internal_response, "raw", None)
+        read_chunk = getattr(raw_response, "read1", None)
+        if not callable(read_chunk):
+            raise RuntimeError(
+                "The Azure Core Requests response does not expose incremental "
+                "body reads required for total timeout enforcement."
+            )
+
+        return read_chunk(64 * 1024, decode_content=True)
+
+    @staticmethod
+    def _decode_response_content(
+        response_content: bytes,
+        *,
+        encoding: Optional[str],
+    ) -> str:
+        """Decode buffered response content using Azure Core encoding metadata."""
+        try:
+            return response_content.decode(encoding or "utf-8", errors="replace")
+        except LookupError:
+            return response_content.decode("utf-8", errors="replace")
+
+    @staticmethod
+    def _snapshot_response(
+        http_response: Any,
+        *,
+        response_content: Optional[bytes] = None,
+        response_text: Optional[str] = None,
+    ) -> ConnectorResponseSnapshot:
         """Buffer an Azure Core response into an immutable snapshot."""
-        response_content = http_response.body()
+        if response_content is None:
+            response_content = http_response.body()
+        if response_text is None:
+            response_text = http_response.text()
         return ConnectorResponseSnapshot(
             status=http_response.status_code,
             headers=dict(http_response.headers),
-            text=http_response.text(),
+            text=response_text,
             content=response_content,
         )
 

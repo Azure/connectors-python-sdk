@@ -355,8 +355,8 @@ class TestAttachmentDeleteAttachmentAsync:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_not_found_returns_none(self, mock_credential):
-        """Test that deleting an absent attachment succeeds."""
+    async def test_not_found_raises_connector_exception(self, mock_credential):
+        """Test that a DELETE-backed action preserves a not-found failure."""
         client = SigninghubClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -369,13 +369,14 @@ class TestAttachmentDeleteAttachmentAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.attachment_delete_attachment(
-                package_id="pkg-1",
-                document_id="doc-1",
-                attachment_id="missing",
-            )
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.attachment_delete_attachment(
+                    package_id="pkg-1",
+                    document_id="doc-1",
+                    attachment_id="missing",
+                )
 
-            assert result is None
+        assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_server_error_raises_connector_exception(self, mock_credential):

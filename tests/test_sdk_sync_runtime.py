@@ -4,11 +4,14 @@
 
 import json
 import threading
+import time
 from dataclasses import dataclass
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import MagicMock
 
 import pytest
 from azure.core.credentials import AccessToken, AzureKeyCredential
+from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline.policies import HeadersPolicy, RetryPolicy, SansIOHTTPPolicy
 from azure.core.pipeline.transport import HttpTransport
 
@@ -205,6 +208,67 @@ def test_timeout_request_runs_transport_on_calling_thread(
 
     assert transport.send_thread_id == threading.get_ident()
     assert transport.closed is True
+
+
+def test_timeout_bounds_slow_drip_response_body() -> None:
+    """Enforce one elapsed deadline while a response body keeps producing data."""
+
+    class SlowDripHandler(BaseHTTPRequestHandler):
+        """Write response bytes frequently enough to evade a socket idle timeout."""
+
+        def do_GET(self) -> None:
+            """Write one byte per interval until the client closes the response."""
+            self.send_response(200)
+            self.send_header("Content-Length", "10")
+            self.end_headers()
+            try:
+                for _ in range(10):
+                    self.wfile.write(b"x")
+                    self.wfile.flush()
+                    time.sleep(0.04)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def log_message(self, format: str, *args: object) -> None:
+            """Suppress local server request logs."""
+            del format, args
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), SlowDripHandler)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        timeout_seconds=0.1,
+    )
+
+    try:
+        started_at = time.monotonic()
+        with pytest.raises(ServiceResponseTimeoutError):
+            client.send("GET", f"http://127.0.0.1:{server.server_port}/")
+        elapsed = time.monotonic() - started_at
+    finally:
+        client.close()
+        server.shutdown()
+        server.server_close()
+        server_thread.join()
+
+    assert elapsed < 0.3
+
+
+def test_default_transport_uses_standard_tls_options() -> None:
+    """Apply standard Azure Core TLS options to the owned Requests transport."""
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        connection_verify=False,
+        connection_cert="client.pem",
+    )
+
+    try:
+        assert client._transport.connection_config.verify is False
+        assert client._transport.connection_config.cert == "client.pem"
+    finally:
+        client.close()
 
 
 def test_unsafe_method_does_not_retry_by_default() -> None:

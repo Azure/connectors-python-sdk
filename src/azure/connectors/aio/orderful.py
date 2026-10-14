@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Optional, Any, Mapping
 from urllib.parse import quote
+import json
 
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
@@ -112,7 +113,7 @@ class OrderfulClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         List Transactions
 
@@ -128,7 +129,7 @@ class OrderfulClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            None: The operation completes without a response body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -150,6 +151,11 @@ class OrderfulClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def create_transaction(
         self,

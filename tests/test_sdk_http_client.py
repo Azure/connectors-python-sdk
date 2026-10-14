@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from azure.core.pipeline.transport import AsyncHttpTransport
+from azure.core.pipeline.transport import AioHttpTransport, AsyncHttpTransport
 
 from azure.connectors.sdk.exceptions import ConnectorException
 from azure.connectors.sdk.aio.http_client import ConnectorHttpClient, ConnectorResponse
@@ -114,6 +114,21 @@ class TestConnectorHttpClient:
         """Reject a missing Azure Core credential."""
         with pytest.raises(ValueError, match="credential cannot be None"):
             ConnectorHttpClient(None)
+
+    def test_default_transport_uses_standard_tls_options(
+        self,
+        mock_credential,
+    ) -> None:
+        """Forward standard TLS options to the owned aio transport."""
+        client = ConnectorHttpClient(
+            mock_credential,
+            connection_verify=False,
+            connection_cert="client.pem",
+        )
+
+        assert isinstance(client._transport, AioHttpTransport)
+        assert client._transport.connection_config.verify is False
+        assert client._transport.connection_config.cert == "client.pem"
 
     def test_api_hub_scopes_constant(self) -> None:
         """Keep the fixed API Hub token scope."""

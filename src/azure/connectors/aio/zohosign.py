@@ -582,6 +582,9 @@ class ZohosignClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "PUT",

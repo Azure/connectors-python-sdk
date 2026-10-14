@@ -475,7 +475,7 @@ class GooglecalendarClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete an event
 
@@ -492,7 +492,8 @@ class GooglecalendarClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -523,11 +524,6 @@ class GooglecalendarClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def update_event(
         self,

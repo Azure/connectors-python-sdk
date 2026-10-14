@@ -2599,7 +2599,7 @@ class InsightlyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete task
 
@@ -2615,7 +2615,8 @@ class InsightlyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2643,11 +2644,6 @@ class InsightlyClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def follow_task(
         self,
@@ -2712,7 +2708,7 @@ class InsightlyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete project
 
@@ -2728,7 +2724,8 @@ class InsightlyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2757,11 +2754,6 @@ class InsightlyClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     def delete_lead(
         self,
         lead_id: int,
@@ -2770,7 +2762,7 @@ class InsightlyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete lead
 
@@ -2786,7 +2778,8 @@ class InsightlyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2815,11 +2808,6 @@ class InsightlyClient(ConnectorClientBase):
                 response.text,
             )
 
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
-
     def delete_contact(
         self,
         contact_id: int,
@@ -2828,7 +2816,7 @@ class InsightlyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete contact
 
@@ -2844,7 +2832,8 @@ class InsightlyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2872,11 +2861,6 @@ class InsightlyClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def add_organization(
         self,

@@ -114,7 +114,7 @@ class ConnectorHttpClient:
         self._credential = credential
         self._timeout_seconds = timeout_seconds
         self._retry_unsafe_http_methods = retry_unsafe_http_methods
-        self._transport = transport or AioHttpTransport()
+        self._transport = transport or AioHttpTransport(**kwargs)
         policy_options = dict(kwargs)
         per_call_policies = self._as_policy_list(
             policy_options.pop("per_call_policies", [])

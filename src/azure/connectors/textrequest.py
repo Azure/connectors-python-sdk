@@ -1390,7 +1390,7 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Deletes the contact with the specified phone number
 
@@ -1409,7 +1409,8 @@ class TextrequestClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1440,11 +1441,6 @@ class TextrequestClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def create_contact(
         self,
@@ -1935,7 +1931,7 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Deletes the group with the specified id
 
@@ -1956,7 +1952,8 @@ class TextrequestClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1987,11 +1984,6 @@ class TextrequestClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def update_group(
         self,
@@ -2921,7 +2913,7 @@ class TextrequestClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Deletes the specified dashboard
 
@@ -2939,7 +2931,8 @@ class TextrequestClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2967,11 +2960,6 @@ class TextrequestClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def update_dashboards_name(
         self,
