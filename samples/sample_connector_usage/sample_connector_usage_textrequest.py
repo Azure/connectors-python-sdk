@@ -60,10 +60,12 @@ def example_2_get_conversations() -> None:
 
     with DefaultAzureCredential() as credential:
         with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            conversations = client.get_conversations(
-                dashboard_id=DASHBOARD_ID,
-                page=1,
-                page_size=20,
+            conversations = list(
+                client.list_conversations(
+                    dashboard_id=DASHBOARD_ID,
+                    page=1,
+                    page_size=20,
+                )
             )
             print(f"Conversations: {conversations}")
 
@@ -92,7 +94,7 @@ def example_4_get_dashboards() -> None:
 
     with DefaultAzureCredential() as credential:
         with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            dashboards = client.get_dashboards(page=1, page_size=20)
+            dashboards = list(client.list_dashboards(page=1, page_size=20))
             print(f"Dashboards: {dashboards}")
 
 

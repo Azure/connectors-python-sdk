@@ -30,10 +30,10 @@ def example_1_list_joined_teams():
         client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            teams = client.get_all_teams()
+            teams = list(client.list_all_teams())
 
-            print(f"Found {len(teams.get('value', []))} teams")
-            for team in teams.get('value', [])[:3]:  # Show first 3
+            print(f"Found {len(teams)} teams")
+            for team in teams[:3]:  # Show first 3
                 print(f"  - {team.get('displayName')} ({team.get('id')})")
 
         except Exception as ex:
@@ -48,10 +48,10 @@ def example_2_list_associated_teams():
         client = TeamsClient(CONNECTION_RUNTIME_URL, credential)
 
         try:
-            teams = client.get_all_associated_teams()
+            teams = list(client.list_all_associated_teams())
 
-            print(f"Found {len(teams.get('value', []))} associated teams")
-            for team in teams.get('value', [])[:3]:  # Show first 3
+            print(f"Found {len(teams)} associated teams")
+            for team in teams[:3]:  # Show first 3
                 print(f"  - {team.get('displayName')}")
 
         except Exception as ex:

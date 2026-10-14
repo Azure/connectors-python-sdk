@@ -69,8 +69,9 @@ def example_1_list_servers_and_databases():
                 print("Set SQL_DATABASE to list tables.")
                 return
 
-            tables = client.get_tables(server=SERVER, database=DATABASE)
-            table_values = tables.get("value", []) if tables else []
+            table_values = list(
+                client.list_tables(server=SERVER, database=DATABASE)
+            )
             print(f"Found {len(table_values)} table(s) in '{DATABASE}'.")
             for table in table_values[:10]:
                 print(f"  - {table.get('DisplayName', table.get('Name', 'N/A'))}")

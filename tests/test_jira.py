@@ -155,6 +155,47 @@ class TestListResourcesAsync:
                 await resolve_generated_result(client.list_resources())
 
 
+class TestListFiltersAsync:
+    """Tests for list_filters paging behavior."""
+
+    @pytest.mark.asyncio
+    async def test_follows_next_page_url(self, mock_credential):
+        """Test Jira's schema continuation URL is followed to the second page."""
+        client = JiraClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
+        )
+        next_page_url = (
+            "https://example.azure.com/connections/test/v2/filter/search"
+            "?startAt=50"
+        )
+        responses = [
+            MockResponse(
+                status=200,
+                text=(
+                    '{"values": [{"id": "filter-1"}], '
+                    f'"nextPage": "{next_page_url}"}}'
+                ),
+            ),
+            MockResponse(
+                status=200,
+                text='{"values": [{"id": "filter-2"}]}',
+            ),
+        ]
+
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            side_effect=responses,
+        ) as transport:
+            result = await resolve_generated_result(client.list_filters())
+
+        assert result == [{"id": "filter-1"}, {"id": "filter-2"}]
+        assert transport.await_count == 2
+        assert transport.await_args_list[1].args[1] == next_page_url
+
+
 class TestListIssuesAsync:
     """Tests for list_issues_async method."""
 

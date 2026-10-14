@@ -23,7 +23,7 @@ def main() -> None:
                 CONNECTION_RUNTIME_URL,
                 credential,
             ) as client:
-                projects = client.get_projects(space_id=SPACE_ID)
+                projects = list(client.list_projects(space_id=SPACE_ID))
                 print(f"Projects: {projects}")
         except ConnectorException as ex:
             print(f"Connector error: {ex}")

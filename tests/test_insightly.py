@@ -42,7 +42,7 @@ async def _invoke_operation(client: InsightlyClient, operation: str):
     if operation == "add_task":
         return await client.add_task(input=model_instance(TaskRequest))
     if operation == "list_projects":
-        return await client.list_projects()
+        return await resolve_generated_result(client.list_projects())
     if operation == "update_project":
         return await client.update_project(
             input=model_instance(ProjectRequest),

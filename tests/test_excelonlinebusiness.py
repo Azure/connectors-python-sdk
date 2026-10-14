@@ -797,7 +797,7 @@ class TestRunScriptProd:
 
 
 class TestGetAllWorksheets:
-    """Tests for get_all_worksheets_async method."""
+    """Tests for list_all_worksheets method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -818,17 +818,19 @@ class TestGetAllWorksheets:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_all_worksheets(
-                drive="drive-id",
-                file="file-id",
-                source="me"
+            result = await resolve_generated_result(
+                client.list_all_worksheets(
+                    drive="drive-id",
+                    file="file-id",
+                    source="me"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/worksheets" in call_args[0][1]
-            assert result["value"][0]["name"] == "Sheet1"
+            assert result[0]["name"] == "Sheet1"
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -847,10 +849,12 @@ class TestGetAllWorksheets:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_worksheets(
-                    drive="drive-id",
-                    file="nonexistent",
-                    source="me"
+                await resolve_generated_result(
+                    client.list_all_worksheets(
+                        drive="drive-id",
+                        file="nonexistent",
+                        source="me"
+                    )
                 )
 
             assert exc_info.value.status_code == 404
@@ -921,7 +925,7 @@ class TestCreateWorksheet:
 
 
 class TestGetTables:
-    """Tests for get_tables_async method."""
+    """Tests for list_tables method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -942,17 +946,19 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_tables(
-                drive="drive-id",
-                file="file-id",
-                source="me"
+            result = await resolve_generated_result(
+                client.list_tables(
+                    drive="drive-id",
+                    file="file-id",
+                    source="me"
+                )
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/tables" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -971,10 +977,12 @@ class TestGetTables:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables(
-                    drive="drive-id",
-                    file="nonexistent",
-                    source="me"
+                await resolve_generated_result(
+                    client.list_tables(
+                        drive="drive-id",
+                        file="nonexistent",
+                        source="me"
+                    )
                 )
 
             assert exc_info.value.status_code == 404

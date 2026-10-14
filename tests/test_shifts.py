@@ -143,14 +143,13 @@ class TestGetAllTeamsAsync:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_all_teams()
+            result = await resolve_generated_result(client.list_all_teams())
 
             mock_send.assert_called_once()
             method, path = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v1.0/me/joinedTeams" in path
-            assert result is not None
-            assert "value" in result
+            assert result == [{"id": "team-1", "displayName": "Store Team"}]
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -168,7 +167,7 @@ class TestGetAllTeamsAsync:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException):
-                await client.get_all_teams()
+                await resolve_generated_result(client.list_all_teams())
 
 
 class TestGetScheduleAsync:

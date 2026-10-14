@@ -36,8 +36,7 @@ def example_1_list_teams() -> list[dict]:
 
     with DefaultAzureCredential() as credential:
         with ShiftsClient(CONNECTION_RUNTIME_URL, credential) as client:
-            teams_response = client.get_all_teams()
-            teams = teams_response.get("value", []) if teams_response else []
+            teams = list(client.list_all_teams())
 
             print(f"Found {len(teams)} teams")
             for team in teams[:10]:

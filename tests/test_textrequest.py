@@ -28,6 +28,7 @@ from tests.conftest import MockResponse
 from tests.generated_connector_test_utils import (
     get_generated_operations,
     invoke_generated_operation,
+    resolve_generated_result,
 )
 
 
@@ -55,33 +56,33 @@ SUCCESS_CONTRACTS = {
         "/dashboards/1/contacts/value",
         False,
     ),
-    "get_contacts": (
+    "list_contacts": (
         "GET",
         "/dashboards/1/contacts?page=1&page_size=1",
         False,
     ),
-    "get_conversations": ("GET", "/dashboards/1/conversations", False),
+    "list_conversations": ("GET", "/dashboards/1/conversations", False),
     "list_custom_fields": ("GET", "/dashboards/1/fields", False),
     "get_dashboard": ("GET", "/dashboards/1", False),
-    "get_dashboards": ("GET", "/dashboards", False),
+    "list_dashboards": ("GET", "/dashboards", False),
     "get_group_by_id": ("GET", "/dashboards/1/groups/1", False),
-    "get_groups": (
+    "list_groups": (
         "GET",
         "/dashboards/1/groups?page=1&page_size=1",
         False,
     ),
-    "get_messages_by_contact_phone": (
+    "list_messages_by_contact_phone": (
         "GET",
         "/dashboards/1/contacts/value/messages?page=1&page_size=1",
         False,
     ),
     "get_payment": ("GET", "/dashboards/1/payments/1", False),
-    "get_payments": (
+    "list_payments": (
         "GET",
         "/dashboards/1/payments?page=1&page_size=1",
         False,
     ),
-    "get_tags": (
+    "list_tags": (
         "GET",
         "/dashboards/1/tags?page=1&page_size=1",
         False,
@@ -110,6 +111,15 @@ SUCCESS_CONTRACTS = {
     "update_group": ("PUT", "/dashboards/1/groups/1", True),
 }
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
+PAGED_OPERATIONS = {
+    "list_contacts",
+    "list_conversations",
+    "list_dashboards",
+    "list_groups",
+    "list_messages_by_contact_phone",
+    "list_payments",
+    "list_tags",
+}
 
 
 class TestTextrequestClientInitialization:
@@ -242,6 +252,8 @@ class TestTextrequestClientOperations:
                         "list_bulk_update_contacts",
                         "list_custom_fields",
                     }
+                    else '{"items": [{"ok": true}]}'
+                    if operation in PAGED_OPERATIONS
                     else '{"ok": true}'
                 ),
             ),
@@ -261,7 +273,7 @@ class TestTextrequestClientOperations:
             if operation in {
                 "list_bulk_update_contacts",
                 "list_custom_fields",
-            }
+            } | PAGED_OPERATIONS
             else {"ok": True}
         )
         assert result == expected_result
@@ -276,8 +288,13 @@ class TestTextrequestClientOperations:
             client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_messages_by_contact_phone(
-                dashboard_id="7", phone_number="+15551112222", page="1", page_size="20"
+            result = await resolve_generated_result(
+                client.list_messages_by_contact_phone(
+                    dashboard_id="7",
+                    phone_number="+15551112222",
+                    page="1",
+                    page_size="20",
+                )
             )
 
             url = mock_send.call_args[0][1]
@@ -285,7 +302,7 @@ class TestTextrequestClientOperations:
             assert "/dashboards/7/contacts/%2B15551112222/messages" in url
             assert "page=1" in url
             assert "page_size=20" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_send_message_by_phone_number_success(self, mock_credential):
@@ -409,8 +426,13 @@ class TestTextrequestClientOperations:
             client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_contacts(
-                dashboard_id="7", page="1", page_size="20", is_resolved="true"
+            result = await resolve_generated_result(
+                client.list_contacts(
+                    dashboard_id="7",
+                    page="1",
+                    page_size="20",
+                    is_resolved="true",
+                )
             )
 
             url = mock_send.call_args[0][1]
@@ -418,7 +440,7 @@ class TestTextrequestClientOperations:
             assert "/dashboards/7/contacts" in url
             assert "is_resolved=true" in url
             assert "page=1" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_group_by_id_success(self, mock_credential):
@@ -539,13 +561,15 @@ class TestTextrequestClientOperations:
             client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_dashboards(page="1", page_size="20")
+            result = await resolve_generated_result(
+                client.list_dashboards(page="1", page_size="20")
+            )
 
             url = mock_send.call_args[0][1]
             assert mock_send.call_args[0][0] == "GET"
             assert "/dashboards" in url
             assert "page=1" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_create_dashboard_success(self, mock_credential):
@@ -593,9 +617,9 @@ class TestTextrequestClientOperations:
             client._http_client, "send", new_callable=AsyncMock,
             return_value=mock_response,
         ):
-            result = await client.get_dashboards()
+            result = await resolve_generated_result(client.list_dashboards())
 
-            assert result is None
+            assert result == []
 
 
 class TestTextrequestClientErrorHandling:
@@ -605,33 +629,33 @@ class TestTextrequestClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "get_messages_by_contact_phone",
+            "list_messages_by_contact_phone",
             "send_message_by_phone_number",
             "archive_conversation",
             "unarchive_conversation",
             "get_contact_by_phone_number",
             "delete_contact",
             "create_contact",
-            "get_contacts",
+            "list_contacts",
             "list_bulk_update_contacts",
             "get_group_by_id",
             "delete_group",
             "update_group",
-            "get_groups",
+            "list_groups",
             "create_group",
-            "get_tags",
+            "list_tags",
             "list_custom_fields",
             "get_payment",
             "mark_payment_paid",
             "send_payment_reminder",
             "cancel_payment",
-            "get_payments",
+            "list_payments",
             "create_payment",
             "get_dashboard",
             "delete_dashboard",
             "update_dashboards_name",
-            "get_conversations",
-            "get_dashboards",
+            "list_conversations",
+            "list_dashboards",
             "create_dashboard",
         ],
     )
@@ -648,84 +672,11 @@ class TestTextrequestClientErrorHandling:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                if operation == "get_messages_by_contact_phone":
-                    await client.get_messages_by_contact_phone(
-                        dashboard_id="7", phone_number="p", page="1", page_size="20"
-                    )
-                elif operation == "send_message_by_phone_number":
-                    await client.send_message_by_phone_number(
-                        input=SendMessageByPhoneNumberInput(), dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "archive_conversation":
-                    await client.archive_conversation(dashboard_id="7", phone_number="p")
-                elif operation == "unarchive_conversation":
-                    await client.unarchive_conversation(dashboard_id="7", phone_number="p")
-                elif operation == "get_contact_by_phone_number":
-                    await client.get_contact_by_phone_number(
-                        dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "delete_contact":
-                    await client.delete_contact(dashboard_id="7", phone_number="p")
-                elif operation == "create_contact":
-                    await client.create_contact(
-                        input=CreateContactInput(), dashboard_id="7", phone_number="p"
-                    )
-                elif operation == "get_contacts":
-                    await client.get_contacts(
-                        dashboard_id="7", page="1", page_size="20"
-                    )
-                elif operation == "list_bulk_update_contacts":
-                    await invoke_generated_operation(
-                        client,
-                        operation,
-                        textrequest_module,
-                    )
-                elif operation == "get_group_by_id":
-                    await client.get_group_by_id(dashboard_id="7", group_id="3")
-                elif operation == "delete_group":
-                    await client.delete_group(dashboard_id="7", group_id="3")
-                elif operation == "update_group":
-                    await client.update_group(
-                        input=UpdateGroupInput(), dashboard_id="7", group_id="3"
-                    )
-                elif operation == "get_groups":
-                    await client.get_groups(dashboard_id="7", page="1", page_size="20")
-                elif operation == "create_group":
-                    await client.create_group(input=CreateGroupInput(), dashboard_id="7")
-                elif operation == "get_tags":
-                    await client.get_tags(dashboard_id="7", page="1", page_size="20")
-                elif operation == "list_custom_fields":
-                    await invoke_generated_operation(
-                        client,
-                        operation,
-                        textrequest_module,
-                    )
-                elif operation == "get_payment":
-                    await client.get_payment(dashboard_id="7", payment_id="9")
-                elif operation == "mark_payment_paid":
-                    await client.mark_payment_paid(dashboard_id="7", payment_id="9")
-                elif operation == "send_payment_reminder":
-                    await client.send_payment_reminder(dashboard_id="7", payment_id="9")
-                elif operation == "cancel_payment":
-                    await client.cancel_payment(dashboard_id="7", payment_id="9")
-                elif operation == "get_payments":
-                    await client.get_payments(dashboard_id="7", page="1", page_size="20")
-                elif operation == "create_payment":
-                    await client.create_payment(input=CreatePaymentInput(), dashboard_id="7")
-                elif operation == "get_dashboard":
-                    await client.get_dashboard(dashboard_id="7")
-                elif operation == "delete_dashboard":
-                    await client.delete_dashboard(dashboard_id="7")
-                elif operation == "update_dashboards_name":
-                    await client.update_dashboards_name(
-                        input=UpdateDashboardsNameInput(), dashboard_id="7"
-                    )
-                elif operation == "get_conversations":
-                    await client.get_conversations(dashboard_id="7")
-                elif operation == "get_dashboards":
-                    await client.get_dashboards()
-                else:
-                    await client.create_dashboard(input=CreateDashboardInput())
+                await invoke_generated_operation(
+                    client,
+                    operation,
+                    textrequest_module,
+                )
 
             assert exc_info.value.status_code == 500
 

@@ -61,20 +61,18 @@ async def example_1_list_tables():
 
         async with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                tables_response = await client.get_tables(
-                    storage_account_name=STORAGE_ACCOUNT
-                )
+                tables = [
+                    table
+                    async for table in client.list_tables(
+                        storage_account_name=STORAGE_ACCOUNT
+                    )
+                ]
 
-                if tables_response:
+                if tables:
                     print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
-                    # Response contains 'value' with list of tables
-                    tables = tables_response.get("value", [])
-                    if tables:
-                        for table in tables:
-                            table_name = table.get("TableName", table)
-                            print(f"  - {table_name}")
-                    else:
-                        print("  No tables found.")
+                    for table in tables:
+                        table_name = table.get("TableName", table)
+                        print(f"  - {table_name}")
                 else:
                     print("No tables found or empty response.")
 

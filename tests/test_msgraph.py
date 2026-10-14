@@ -458,13 +458,15 @@ class TestGetMemberLicenseDetails:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.get_member_license_details(
-                id="user-123",
-                select="skuId,servicePlans"
+            result = await resolve_generated_result(
+                client.list_member_license_details(
+                    id="user-123",
+                    select="skuId,servicePlans"
+                )
             )
 
             assert result is not None
-            assert result["value"][0]["skuId"] == "sku1"
+            assert result[0]["skuId"] == "sku1"
             call_path = mock_send.call_args[0][1]
             assert "/v1.0/users/user-123/licenseDetails" in call_path
             assert "$select=skuId%2CservicePlans" in call_path
@@ -487,7 +489,9 @@ class TestGetMemberLicenseDetails:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.get_member_license_details(id="user-456")
+            result = await resolve_generated_result(
+                client.list_member_license_details(id="user-456")
+            )
 
             assert result is not None
             call_path = mock_send.call_args[0][1]
@@ -509,7 +513,9 @@ class TestGetMemberLicenseDetails:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_member_license_details(id="user-123")
+                await resolve_generated_result(
+                    client.list_member_license_details(id="user-123")
+                )
 
             assert exc_info.value.status_code == 400
 
@@ -615,13 +621,15 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            result = await client.get_member_groups(
-                input=input_data,
-                member_id="user-123"
+            result = await resolve_generated_result(
+                client.list_member_groups(
+                    input=input_data,
+                    member_id="user-123"
+                )
             )
 
             assert result is not None
-            assert len(result["value"]) == 3
+            assert len(result) == 3
             mock_send.assert_called_once_with(
                 "POST",
                 "https://example.azure.com/connections/test/v1.0/users/user-123/getMemberGroups",
@@ -652,13 +660,15 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ):
-            result = await client.get_member_groups(
-                input=input_data,
-                member_id="user-456"
+            result = await resolve_generated_result(
+                client.list_member_groups(
+                    input=input_data,
+                    member_id="user-456"
+                )
             )
 
             assert result is not None
-            assert result["value"] == []
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_member_id_in_path(self, mock_credential, mock_response_success):
@@ -678,9 +688,11 @@ class TestGetMemberGroups:
             new_callable=AsyncMock,
             return_value=mock_response_success
         ) as mock_send:
-            await client.get_member_groups(
-                input=input_data,
-                member_id="member-789"
+            await resolve_generated_result(
+                client.list_member_groups(
+                    input=input_data,
+                    member_id="member-789"
+                )
             )
 
             call_path = mock_send.call_args[0][1]
@@ -703,9 +715,11 @@ class TestGetMemberGroups:
             return_value=mock_response_error
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_member_groups(
-                    input=input_data,
-                    member_id="user-123"
+                await resolve_generated_result(
+                    client.list_member_groups(
+                        input=input_data,
+                        member_id="user-123"
+                    )
                 )
 
             assert exc_info.value.status_code == 400
@@ -942,5 +956,7 @@ class TestEdgeCases:
 
             # POST method
             input_data = GetMemberGroupsInput(security_enabled_only=True)
-            await client.get_member_groups(input=input_data, member_id="user-123")
+            await resolve_generated_result(
+                client.list_member_groups(input=input_data, member_id="user-123")
+            )
             assert mock_send.call_args[0][0] == "POST"

@@ -590,7 +590,7 @@ class TestGetTable:
 
 
 class TestGetTables:
-    """Tests for get_tables_async method."""
+    """Tests for list_tables method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -611,15 +611,15 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            result = await client.get_tables(
-                storage_account_name="mystorageaccount"
+            result = await resolve_generated_result(
+                client.list_tables(storage_account_name="mystorageaccount")
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "GET"
             assert "/storageAccounts/mystorageaccount/tables" in call_args[0][1]
-            assert len(result["value"]) == 2
+            assert len(result) == 2
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_none(self, mock_credential):
@@ -637,10 +637,10 @@ class TestGetTables:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_tables(
-                storage_account_name="mystorageaccount"
+            result = await resolve_generated_result(
+                client.list_tables(storage_account_name="mystorageaccount")
             )
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -659,8 +659,8 @@ class TestGetTables:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_tables(
-                    storage_account_name="nonexistent"
+                await resolve_generated_result(
+                    client.list_tables(storage_account_name="nonexistent")
                 )
 
             assert exc_info.value.status_code == 404
@@ -1091,8 +1091,12 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await client.get_tables(storage_account_name="account1")
-            await client.get_tables(storage_account_name="account2")
+            await resolve_generated_result(
+                client.list_tables(storage_account_name="account1")
+            )
+            await resolve_generated_result(
+                client.list_tables(storage_account_name="account2")
+            )
 
             assert mock_send.call_count == 2
 

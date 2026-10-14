@@ -24,7 +24,7 @@ from azure.connectors.teams import (
 from azure.connectors.sdk import ConnectorException
 from azure.connectors.sdk.serialization import to_wire
 from tests.conftest import MockResponse
-from tests.generated_connector_test_utils import model_instance
+from tests.generated_connector_test_utils import model_instance, resolve_generated_result
 
 
 class TestTeamsClientInitialization:
@@ -212,10 +212,9 @@ class TestTeamsListOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_teams()
+            result = await resolve_generated_result(client.list_all_teams())
 
-            assert "value" in result
-            assert len(result["value"]) == 1
+            assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_get_all_teams_empty_response(self, mock_credential):
@@ -233,9 +232,9 @@ class TestTeamsListOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_teams()
+            result = await resolve_generated_result(client.list_all_teams())
 
-            assert result is None
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_all_associated_teams_success(self, mock_credential):
@@ -256,9 +255,11 @@ class TestTeamsListOperations:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.get_all_associated_teams()
+            result = await resolve_generated_result(
+                client.list_all_associated_teams()
+            )
 
-            assert "value" in result
+            assert result[0]["teamId"] == "team1"
 
     @pytest.mark.asyncio
     async def test_get_all_teams_error_response(self, mock_credential):
@@ -280,7 +281,9 @@ class TestTeamsListOperations:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_associated_teams()
+                await resolve_generated_result(
+                    client.list_all_associated_teams()
+                )
 
             assert exc_info.value.status_code == 401
 
@@ -672,8 +675,8 @@ class TestEdgeCases:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result1 = await client.get_all_teams()
-            result2 = await client.get_all_teams()
+            result1 = await resolve_generated_result(client.list_all_teams())
+            result2 = await resolve_generated_result(client.list_all_teams())
 
             assert result1 is not None
             assert result2 is not None
@@ -695,7 +698,7 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(Exception):
-                await client.get_all_teams()
+                await resolve_generated_result(client.list_all_teams())
 
     @pytest.mark.asyncio
     async def test_url_construction_with_multiple_trailing_slashes(self, mock_credential):
@@ -735,7 +738,7 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_teams()
+                await resolve_generated_result(client.list_all_teams())
 
             assert exc_info.value.status_code == 500
 
@@ -756,6 +759,6 @@ class TestEdgeCases:
             return_value=mock_response
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                await client.get_all_teams()
+                await resolve_generated_result(client.list_all_teams())
 
             assert exc_info.value.status_code == 404

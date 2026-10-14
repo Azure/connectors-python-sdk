@@ -230,13 +230,13 @@ class TestWebexClientOperations:
             new_callable=AsyncMock,
             return_value=mock_response,
         ) as mock_send:
-            result = await client.get_people(email="a@b.com")
+            result = await resolve_generated_result(client.list_people(email="a@b.com"))
 
             method, url = mock_send.call_args[0][0], mock_send.call_args[0][1]
             assert method == "GET"
             assert "/v1/people" in url
             assert "email=a%40b.com" in url
-            assert result == {"items": []}
+            assert result == []
 
     @pytest.mark.asyncio
     async def test_get_my_own_details_success(self, mock_credential):
@@ -389,7 +389,7 @@ class TestWebexClientErrorHandling:
             "list_messages",
             "send_message",
             "get_message_details",
-            "get_people",
+            "list_people",
             "get_my_own_details",
             "list_spaces",
             "create_space",
@@ -424,8 +424,8 @@ class TestWebexClientErrorHandling:
                     await client.send_message(input=SendMessageInput())
                 elif operation == "get_message_details":
                     await client.get_message_details(message_id="msg1")
-                elif operation == "get_people":
-                    await client.get_people(email="a@b.com")
+                elif operation == "list_people":
+                    await resolve_generated_result(client.list_people(email="a@b.com"))
                 elif operation == "get_my_own_details":
                     await client.get_my_own_details()
                 elif operation == "list_spaces":

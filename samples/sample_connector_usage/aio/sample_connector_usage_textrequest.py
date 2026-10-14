@@ -62,11 +62,14 @@ async def example_2_get_conversations() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            conversations = await client.get_conversations(
-                dashboard_id=DASHBOARD_ID,
-                page=1,
-                page_size=20,
-            )
+            conversations = [
+                conversation
+                async for conversation in client.list_conversations(
+                    dashboard_id=DASHBOARD_ID,
+                    page=1,
+                    page_size=20,
+                )
+            ]
             print(f"Conversations: {conversations}")
 
 
@@ -94,7 +97,13 @@ async def example_4_get_dashboards() -> None:
 
     async with DefaultAzureCredential() as credential:
         async with TextrequestClient(CONNECTION_RUNTIME_URL, credential) as client:
-            dashboards = await client.get_dashboards(page=1, page_size=20)
+            dashboards = [
+                dashboard
+                async for dashboard in client.list_dashboards(
+                    page=1,
+                    page_size=20,
+                )
+            ]
             print(f"Dashboards: {dashboards}")
 
 

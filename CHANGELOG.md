@@ -56,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded collection envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`.
 - **Idempotent deletes** — generated `DELETE` operations now succeed when the resource is already absent and the service returns HTTP 404.
 - **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
 - **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.

@@ -63,8 +63,10 @@ async def _invoke_operation(client: SqlClient, operation: str):
         return await resolve_generated_result(
             client.list_items(server="srv", database="db", table="tbl")
         )
-    if operation == "get_tables":
-        return await client.get_tables(server="srv", database="db")
+    if operation == "list_tables":
+        return await resolve_generated_result(
+            client.list_tables(server="srv", database="db")
+        )
     if operation == "patch_item":
         return await client.patch_item(
             input=PatchItemInput(),
@@ -139,7 +141,7 @@ ALL_OPERATIONS = [
     "execute_procedure",
     "get_item",
     "list_items",
-    "get_tables",
+    "list_tables",
     "patch_item",
     "post_item",
     "list_servers",
@@ -651,7 +653,7 @@ class TestSqlTriggerOperations:
                 "extract_sensitivity_label", "purview_account_name"
             ),
             "get_table_for_patch": ("self", "server", "database", "table"),
-            "get_tables": (
+            "list_tables": (
                 "self", "server", "database", "extract_sensitivity_label",
                 "purview_account_name"
             ),

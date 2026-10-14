@@ -22,7 +22,7 @@ OPERATION_CONTRACTS = {
     "list_find_checklist_instances": ("GET", False),
     "list_find_user": ("GET", False),
     "users": ("POST", True),
-    "get_all_checklist_instances": ("GET", False),
+    "list_all_checklist_instances": ("GET", False),
 }
 
 

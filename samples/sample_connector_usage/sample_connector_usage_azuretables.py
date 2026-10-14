@@ -59,20 +59,15 @@ def example_1_list_tables():
 
         with AzuretablesClient(CONNECTION_RUNTIME_URL, credential) as client:
             try:
-                result = client.get_tables(
-                    storage_account_name=STORAGE_ACCOUNT
+                tables = list(
+                    client.list_tables(storage_account_name=STORAGE_ACCOUNT)
                 )
 
-                if result:
+                if tables:
                     print(f"Tables in storage account '{STORAGE_ACCOUNT}':")
-                    # Response contains 'value' with list of tables
-                    tables = result.get("value", [])
-                    if tables:
-                        for table in tables:
-                            table_name = table.get("TableName", table)
-                            print(f"  - {table_name}")
-                    else:
-                        print("  No tables found.")
+                    for table in tables:
+                        table_name = table.get("TableName", table)
+                        print(f"  - {table_name}")
                 else:
                     print("No tables found or empty response.")
 

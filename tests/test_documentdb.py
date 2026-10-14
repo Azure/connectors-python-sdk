@@ -332,6 +332,41 @@ class TestQueryDocuments:
             assert exc_info.value.status_code == 401
 
 
+class TestListDocuments:
+    """Tests for list_documents collection selection."""
+
+    @pytest.mark.asyncio
+    async def test_ignores_auxiliary_metadata_array(self, mock_credential):
+        """Test the pager yields documents rather than auxiliary metadata."""
+        client = DocumentdbClient(
+            "https://example.azure.com/connections/test",
+            credential=mock_credential,
+        )
+        mock_response = MockResponse(
+            status=200,
+            text=(
+                '{"Documents": [{"id": "doc-1"}], '
+                '"@metadata": [{"name": "classification"}]}'
+            ),
+        )
+
+        with patch.object(
+            client._http_client,
+            "send",
+            new_callable=AsyncMock,
+            return_value=mock_response,
+        ):
+            result = await resolve_generated_result(
+                client.list_documents(
+                    cosmos_db_account_name="mycosmosdb",
+                    database_id="mydb",
+                    collection_id="mycollection",
+                )
+            )
+
+        assert result == [{"id": "doc-1"}]
+
+
 class TestDataClasses:
     """Tests for data class creation and attributes."""
 

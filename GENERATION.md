@@ -622,6 +622,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Operation methods corrected Swagger spelling or split acronym letters | Fixed in generator | `docusign`, `github`, `googletasks`, `pdfco`, `salesforce`, `signinghub`, `slack`, `wordonlinebusiness`, `zohosign` | Fixed | Python applies deterministic acronym-aware snake_case and connector-scoped corrections for known malformed operation IDs. |
 | Colliding wire names dropped after Python normalization | Fixed in generator | `teams`, `shifts`, `todo` | Fixed | Distinct generated fields preserve both `id` and `@odata.id`; serializer tests set both values together. |
 | String-encoded integer enum tokens emitted as string literals | Fixed in generator | `etsy` | Fixed | Python now normalizes quoted enum tokens to the declared integer schema type. All Phase 6 and 7 clients were regenerated; only `etsy` changed. |
+| Pageable item properties and bounded collection envelopes misclassified | Fixed in generator | `insightly`, `jira`, `documentdb`, `sql`, and other collection connectors | Fixed | Explicit pageable operations infer omitted item names and use recognized continuation fields present in the response schema. Bounded envelopes select conventional primary arrays over auxiliary array metadata and emit `list_*` pagers. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
 **Adding a new defect:**
