@@ -4,14 +4,11 @@
 
 import json
 import threading
-import time
 from dataclasses import dataclass
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import MagicMock
 
 import pytest
 from azure.core.credentials import AccessToken, AzureKeyCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline.policies import HeadersPolicy, RetryPolicy, SansIOHTTPPolicy
 from azure.core.pipeline.transport import HttpTransport
 
@@ -172,56 +169,42 @@ def test_request_controls_and_serialization_are_applied() -> None:
         (1.0, 0.1),
     ],
 )
-def test_timeout_bounds_slow_drip_response_body(
+def test_timeout_request_runs_transport_on_calling_thread(
     default_timeout: float,
     request_timeout: float | None,
 ) -> None:
-    """Bound total response time even while bytes arrive within the idle timeout."""
+    """Keep timed synchronous transport work on the caller thread."""
 
-    class SlowDripHandler(BaseHTTPRequestHandler):
-        """Send a response body slowly without exceeding the socket idle timeout."""
+    class ThreadRecordingTransport(RecordingTransport):
+        """Record the thread that executes the transport request."""
 
-        def do_GET(self) -> None:
-            """Write ten bytes at intervals shorter than the request timeout."""
-            self.send_response(200)
-            self.send_header("Content-Length", "10")
-            self.end_headers()
-            try:
-                for _ in range(10):
-                    self.wfile.write(b"x")
-                    self.wfile.flush()
-                    time.sleep(0.04)
-            except (BrokenPipeError, ConnectionResetError):
-                pass
+        def __init__(self, *responses: object) -> None:
+            """Initialize the transport."""
+            super().__init__(*responses)
+            self.send_thread_id: int | None = None
 
-        def log_message(self, format: str, *args: object) -> None:
-            """Suppress local test-server request logging."""
+        def send(self, request: object, **kwargs: object) -> MagicMock:
+            """Record the current thread before sending the request."""
+            self.send_thread_id = threading.get_ident()
+            return super().send(request, **kwargs)
 
-    server = ThreadingHTTPServer(("127.0.0.1", 0), SlowDripHandler)
-    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
-    server_thread.start()
+    transport = ThreadRecordingTransport(create_response())
     client = ConnectorHttpClient(
         AzureKeyCredential("test-key"),
         max_retry_attempts=1,
         timeout_seconds=default_timeout,
+        transport=transport,
     )
-    started_at = time.monotonic()
 
-    try:
-        with pytest.raises(ServiceResponseTimeoutError):
-            client.send(
-                "GET",
-                f"http://127.0.0.1:{server.server_port}/",
-                timeout=request_timeout,
-            )
-        elapsed = time.monotonic() - started_at
-    finally:
-        client.close()
-        server.shutdown()
-        server.server_close()
-        server_thread.join(timeout=1.0)
+    client.send(
+        "GET",
+        "https://example.test/items",
+        timeout=request_timeout,
+    )
+    client.close()
 
-    assert elapsed < 0.3
+    assert transport.send_thread_id == threading.get_ident()
+    assert transport.closed is True
 
 
 def test_unsafe_method_does_not_retry_by_default() -> None:

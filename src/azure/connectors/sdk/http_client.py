@@ -4,13 +4,10 @@
 
 import json
 import random
-import threading
-from contextvars import copy_context
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Dict, Generic, List, Mapping, Optional, TypeVar
 
 from azure.core.credentials import AzureKeyCredential, TokenCredential
-from azure.core.exceptions import ServiceResponseTimeoutError
 from azure.core.pipeline import Pipeline
 from azure.core.pipeline.policies import (
     AzureKeyCredentialPolicy,
@@ -318,7 +315,7 @@ class ConnectorHttpClient:
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
     ) -> ConnectorResponseSnapshot:
-        """Send an HTTP request within the selected total network timeout."""
+        """Send an HTTP request with the selected network timeout."""
         is_binary_body = isinstance(body, (bytes, bytearray))
         if content_type is None:
             content_type = (
@@ -359,7 +356,7 @@ class ConnectorHttpClient:
         client_request_id: Optional[str] = None,
         timeout: Optional[float] = None,
     ) -> ConnectorResponseSnapshot:
-        """Send a request within one total Azure Core pipeline timeout."""
+        """Send a request with Azure Core retry and transport timeouts."""
         normalized_method = method.upper()
         request = HttpRequest(normalized_method, url, headers=headers, content=body)
         selected_timeout = (
@@ -389,15 +386,6 @@ class ConnectorHttpClient:
         if client_request_id is not None:
             request_options["request_id"] = client_request_id
 
-        if selected_timeout > 0:
-            request_options["stream"] = True
-            return self._run_with_deadline(
-                pipeline,
-                request,
-                request_options,
-                selected_timeout,
-            )
-
         return self._run_pipeline(pipeline, request, request_options)
 
     @staticmethod
@@ -422,53 +410,6 @@ class ConnectorHttpClient:
             text=http_response.text(),
             content=response_content,
         )
-
-    @classmethod
-    def _run_with_deadline(
-        cls,
-        pipeline: Pipeline,
-        request: HttpRequest,
-        request_options: Dict[str, Any],
-        timeout: float,
-    ) -> ConnectorResponseSnapshot:
-        """Run and buffer the pipeline response within one wall-clock deadline."""
-        completed = threading.Event()
-        result: Dict[str, Any] = {}
-        caller_context = copy_context()
-
-        def run_pipeline() -> None:
-            try:
-                pipeline_response = caller_context.run(
-                    pipeline.run,
-                    request,
-                    **request_options,
-                )
-                result["http_response"] = pipeline_response.http_response
-                result["response"] = cls._snapshot_response(
-                    pipeline_response.http_response
-                )
-            except BaseException as error:
-                result["error"] = error
-            finally:
-                completed.set()
-
-        worker = threading.Thread(target=run_pipeline, daemon=True)
-        worker.start()
-        if not completed.wait(timeout):
-            http_response = result.get("http_response")
-            if http_response is not None:
-                threading.Thread(
-                    target=http_response.close,
-                    daemon=True,
-                ).start()
-            raise ServiceResponseTimeoutError(
-                f"Response exceeded the total timeout of '{timeout}' seconds."
-            )
-
-        error = result.get("error")
-        if error is not None:
-            raise error
-        return result["response"]
 
     def get(self, request_uri: str) -> Any:
         """Send a GET request."""

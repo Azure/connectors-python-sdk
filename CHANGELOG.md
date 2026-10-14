@@ -62,9 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.
 - **Reproducible generation**: committed Swagger snapshots, a pinned generator/compiler manifest, and offline regeneration tooling now make the complete 99-connector catalog independently verifiable.
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
-  now bound the complete network operation, including retries, response loading,
-  and body reads across Azure Core async transports. Zero and negative values
-  disable SDK and transport deadlines.
+  configures Azure Core retry and transport deadlines. Async clients also bound
+  the complete network operation, including response loading and body reads.
+  Sync clients no longer run timed requests on uncancellable daemon threads, so
+  closing a client cannot race a request still using its transport. Zero and
+  negative values disable SDK and transport deadlines.
 - **Async transport compatibility**: Empty buffered responses now produce normal
   snapshots and connector errors without re-reading consumed streams. Injected
   transports receive only supported timeout options and close through their
