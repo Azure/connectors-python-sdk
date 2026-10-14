@@ -171,6 +171,23 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `UserTimeline`.
+
+        Args:
+            user_name: X handle for the user.
+            max_results: Maximum number of tweets to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/usertimeline"
         query_params = []
@@ -242,6 +259,22 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `HomeTimeline`.
+
+        Args:
+            max_results: Maximum number of tweets to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/hometimeline"
         query_params = []
@@ -311,6 +344,25 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `SearchTweet`.
+
+        Args:
+            search_query: Search term like \"happy hour\", #haiku,
+                from:@username, love OR hate.
+            max_results: Maximum number of tweets to return.
+            since_id: Return tweets after the specified tweet ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/searchtweets"
         query_params = []
@@ -387,6 +439,23 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Followers`.
+
+        Args:
+            user_name: X handle for the user.
+            max_results: Maximum number of users to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/followers"
         query_params = []
@@ -457,6 +526,22 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `MyFollowers`.
+
+        Args:
+            max_results: Maximum number of users to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/myfollowers"
         query_params = []
@@ -524,6 +609,23 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Following`.
+
+        Args:
+            user_name: X handle for the user.
+            max_results: Maximum number of users to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/friends"
         query_params = []
@@ -594,6 +696,22 @@ class TwitterClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `MyFollowing`.
+
+        Args:
+            max_results: Maximum number of users to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/myfriends"
         query_params = []
@@ -658,6 +776,21 @@ class TwitterClient(ConnectorClientBase):
 
         This operation gets the profile details for a given user, such as user
         name, description, followers count, and more.
+
+        Swagger operation ID: `User`.
+
+        Args:
+            user_name: X handle for the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user"
         query_params = []
@@ -703,6 +836,22 @@ class TwitterClient(ConnectorClientBase):
         Post a tweet
 
         This operation posts a new tweet.
+
+        Swagger operation ID: `Tweet`.
+
+        Args:
+            input: The binary request body.
+            tweet_text: Text to be posted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/posttweet"
         query_params = []
@@ -752,6 +901,22 @@ class TwitterClient(ConnectorClientBase):
         Retweet
 
         This operation retweets a tweet.
+
+        Swagger operation ID: `Retweet`.
+
+        Args:
+            tweet_id: Tweet to be retweeted.
+            trim_user: Boolean to indicate whether to trim user information.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/retweet"
         query_params = []

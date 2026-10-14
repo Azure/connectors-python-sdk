@@ -187,6 +187,26 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         Returns each row as its own object. Use this action when you want to
         work with each row separately in the rest of the workflow.
+
+        Swagger operation ID: `QueryDataV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/queryDataV2"
         query_params = []
@@ -250,6 +270,27 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Returns all rows in the result set as a single formatted object. Use
         this action when you want to use the result set together in the rest of
         the workflow.
+
+        Swagger operation ID: `VisualizeQueryV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            vis_type: Specify the resulting chart type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/visualizeQueryV2"
         query_params = []
@@ -312,6 +353,21 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSubscriptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listSubscriptions"
         initial_request_url = request_url
@@ -376,6 +432,22 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListResourceGroups`.
+
+        Args:
+            subscriptions: Select subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listResourceGroups"
         query_params = []
@@ -449,6 +521,24 @@ class AzuremonitorlogsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListResources`.
+
+        Args:
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listResources"
         query_params = []
@@ -529,6 +619,25 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Get query schema
 
         Gets the schema for a specific query.
+
+        Swagger operation ID: `QuerySchemaV2`.
+
+        Args:
+            input: The request body.
+            subscriptions: Select subscription.
+            resourcegroups: Select resource group.
+            resourcetype: Select Resource Type.
+            resourcename: Select Resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/querySchemaV2"
         query_params = []
@@ -585,6 +694,21 @@ class AzuremonitorlogsClient(ConnectorClientBase):
         Returns the control schema according to to the given time range type
 
         Returns the Relative\\Absolute\\Set in query time range control.
+
+        Swagger operation ID: `getTimeRangeSelectionControl`.
+
+        Args:
+            timerangetype: The Time Range type that the control represents.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getTimeRangeSelectionControl"

@@ -330,6 +330,20 @@ class ZeptomailClient(ConnectorClientBase):
         created.\\n- status: Status of the Mail Agent.\\n\\nExample 1: To
         retrieve details of all Mail Agents in the ZeptoMail account. Sample
         prompt 1: Get me details of all the Mail Agents in the account.
+
+        Swagger operation ID: `GetMailAgent`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/portal/v1.0/mailagents"
 
@@ -379,6 +393,31 @@ class ZeptomailClient(ConnectorClientBase):
         Subject, From Address, Sent time and Request ID for emails sent for the
         time range. The mailagent_key parameter should match the Mail Agent key
         of the Mail Agent as listed in our system.
+
+        Swagger operation ID: `Get_Processed_Emails`.
+
+        Args:
+            mailagent_key: Choose Mail Agent or enter the Mail Agent key.
+            subject: Enter subject of the email.
+            from_: Enter sender address of the email.
+            to: Enter recipient address of the email.
+            date_from: Enter from date for search in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            date_to: Enter to date for search in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            request_id: Enter Request ID of the email.
+            is_hb: Include hardbounces in results.
+            is_sb: Include softbounces in results.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email"
         query_params = []
@@ -463,6 +502,22 @@ class ZeptomailClient(ConnectorClientBase):
         Send mail
 
         To send an email to the desired recipient.
+
+        Swagger operation ID: `SendMail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email"
 
@@ -500,6 +555,22 @@ class ZeptomailClient(ConnectorClientBase):
         Send template mail
 
         Sending a single email using Templates.
+
+        Swagger operation ID: `SendTemplateMail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/email/template"
 
@@ -543,6 +614,25 @@ class ZeptomailClient(ConnectorClientBase):
         count of Hardbounce, Softbounce and Sent statistics over a period of
         time and each day . The mailagent parameter should match the Mail Agent
         name as listed in our system.
+
+        Swagger operation ID: `Processed_Mail_Stats`.
+
+        Args:
+            mailagent: Choose or enter Mail agent name.
+            from_time: Enter statics from date in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            to_time: Enter statics to date in the format
+                yyyy-MM-ddTHH:mm:sszzz.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/stats/email"
         query_params = []

@@ -160,6 +160,22 @@ class InfusionsoftClient(ConnectorClientBase):
         Create a task
 
         Create a new task.
+
+        Swagger operation ID: `CreateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/crm/rest/v1/tasks/"
 
@@ -198,6 +214,23 @@ class InfusionsoftClient(ConnectorClientBase):
         Update a task
 
         Update an existing task.
+
+        Swagger operation ID: `UpdateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Id of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -240,6 +273,21 @@ class InfusionsoftClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTasks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/crm/rest/v1/tasks/search"

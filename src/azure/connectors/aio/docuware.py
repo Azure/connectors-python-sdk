@@ -184,6 +184,23 @@ class DocuwareClient(ConnectorClientBase):
         Search in file cabinet
 
         Search a file cabinet for documents matching the specified criteria.
+
+        Swagger operation ID: `SearchForDocumentsInFileCabinet`.
+
+        Args:
+            input: The request body.
+            file_cabinet: Select the File Cabinet to search.
+            search_dialog_id: Select the search dialog to use for searching.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -230,6 +247,20 @@ class DocuwareClient(ConnectorClientBase):
         Get organization
 
         Get the organization name.
+
+        Swagger operation ID: `GetOrganization`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Organization"
 
@@ -270,6 +301,22 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetFileCabinets`.
+
+        Args:
+            file_cabinet_type: Select which types you want returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/FileCabinets"
         query_params = []
@@ -333,6 +380,24 @@ class DocuwareClient(ConnectorClientBase):
         Get document information
 
         Gets information about a document.
+
+        Swagger operation ID: `GetDocumentInformation`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want information
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -377,6 +442,23 @@ class DocuwareClient(ConnectorClientBase):
         Delete a document
 
         Deletes a document from a file cabinet or document tray.
+
+        Swagger operation ID: `DeleteDocument`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -422,6 +504,27 @@ class DocuwareClient(ConnectorClientBase):
 
         Downloads a file/section of a document stored in a file cabinet or
         document tray.
+
+        Swagger operation ID: `DownloadFile`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document with the file you want
+                to download.
+            file_number: Specify the file number of the file you want to
+                download.
+            document_format: Select the format for the downloaded document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -474,6 +577,24 @@ class DocuwareClient(ConnectorClientBase):
         Download a document
 
         Downloads a document from a file cabinet or document tray.
+
+        Swagger operation ID: `DownloadDocument`.
+
+        Args:
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to download.
+            document_format: Select the format for the downloaded document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -524,6 +645,24 @@ class DocuwareClient(ConnectorClientBase):
         Update index fields
 
         Updates the index fields of a document.
+
+        Swagger operation ID: `UpdateIndexFields`.
+
+        Args:
+            input: The request body.
+            file_cabinet_id: Select the File Cabinet with the document to
+                update.
+            document_id: Specify the ID of the document to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -571,6 +710,26 @@ class DocuwareClient(ConnectorClientBase):
 
         Moves one or more documents from one file cabinet/document tray to
         another.
+
+        Swagger operation ID: `TransferDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            destination_file_cabinet_id: Select the destination File Cabinet or
+                Document Tray.
+            store_dialog_id: Select the store dialog for indexing the documents
+                being moved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -624,6 +783,25 @@ class DocuwareClient(ConnectorClientBase):
         Place a stamp
 
         Places a stamp on a document.
+
+        Swagger operation ID: `PlaceAStamp`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            file_cabinet_id: Select the File Cabinet or Document Tray with your
+                document.
+            document_id: Specify the ID of the document you want to stamp.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -672,6 +850,24 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDialogs`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray to get
+                dialogs from.
+            dialog_type: Select the type of dialogs to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -741,6 +937,23 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetStamps`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray to get
+                stamps from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -803,6 +1016,24 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetStampFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet or Document Tray with the
+                desired stamp.
+            stamp: Select the stamp to get its fields.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -869,6 +1100,23 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetFileCabinetFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet to get fields for.
+            field_type: Select the type of fields to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -939,6 +1187,23 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDialogFields`.
+
+        Args:
+            file_cabinet: Select the File Cabinet.
+            dialog_id: Select the dialog to get the fields for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1004,6 +1269,22 @@ class DocuwareClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListDocumentsInDocumentTray`.
+
+        Args:
+            document_tray: Select the Document Tray to search.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

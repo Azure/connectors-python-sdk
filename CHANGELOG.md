@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Generated sync and aio operations now document their arguments, return types,
+  connector operation IDs, and `ConnectorException` failure contract.
 - Generated connector clients are available as lazy exports from `azure.connectors` and `azure.connectors.aio`, with matching package type stubs for static analysis.
 - Added a synchronous Azure Core runtime alongside the asynchronous runtime and generated 99 matching connector modules for each mode.
 - Replaced the single asynchronous sample catalog with 99 synchronous root samples and 99 asynchronous `aio` samples using identical unsuffixed operation names.
@@ -64,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
   configures Azure Core retry and transport deadlines. Async clients also bound
   the complete network operation, including response loading and body reads.
+  Sync clients preserve transport timeouts for explicit policy chains without a
+  retry policy.
   Sync clients no longer run timed requests on uncancellable daemon threads, so
   closing a client cannot race a request still using its transport. Zero and
   negative values disable SDK and transport deadlines.

@@ -1206,6 +1206,21 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/tables"
         initial_request_url = request_url
@@ -1269,6 +1284,24 @@ class SalesforceClient(ConnectorClientBase):
         Get a Record by External ID
 
         This operation retrieves a record using an external ID.
+
+        Swagger operation ID: `GetItemByExternalId`.
+
+        Args:
+            table: The Salesforce object type like 'Leads'.
+            external_id_field: Field marked as external ID field on Salesforce
+                object.
+            external_id: External ID of the record to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1324,6 +1357,29 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            table: The Salesforce object type like 'Leads'.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1427,6 +1483,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_account`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1526,6 +1604,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_user`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1625,6 +1725,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_case`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1724,6 +1846,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_opportunity`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1823,6 +1967,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_product2`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1922,6 +2088,28 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_table_contact`.
+
+        Args:
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2015,6 +2203,22 @@ class SalesforceClient(ConnectorClientBase):
         Delete record
 
         This operation deletes a record.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            table: The Salesforce object type like 'Leads'.
+            id: The unique identifier of record to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2058,6 +2262,22 @@ class SalesforceClient(ConnectorClientBase):
         Execute a SOQL query
 
         Execute a SOQL query.
+
+        Swagger operation ID: `ExecuteSoqlQuery`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/soql/executesoqlquery"
 
@@ -2101,6 +2321,25 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllJobs`.
+
+        Args:
+            concurreny_mode: Concurrency Mode.
+            is_pk_chunking_enabled: Is PK Chunking Enabled.
+            job_type: Job Type.
+            query_locator: Query Locator.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/jobs/ingest"
         query_params = []
@@ -2180,6 +2419,22 @@ class SalesforceClient(ConnectorClientBase):
         Upload job data
 
         Uploads data for a job using CSV data.
+
+        Swagger operation ID: `UploadJobData`.
+
+        Args:
+            input: The binary request body.
+            job_id: Job ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2218,6 +2473,21 @@ class SalesforceClient(ConnectorClientBase):
         Get job info
 
         Retrieves detailed information about a job.
+
+        Swagger operation ID: `GetJobInfo`.
+
+        Args:
+            job_id: Job ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2262,6 +2532,23 @@ class SalesforceClient(ConnectorClientBase):
         to abort a job. If you close a job, Salesforce queues the job and
         uploaded data for processing, and you can't add any additional job
         data. If you abort a job, the job does not get queued or processed.
+
+        Swagger operation ID: `CloseJob`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            job_id: Job ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2303,6 +2590,21 @@ class SalesforceClient(ConnectorClientBase):
 
         Deletes a job. To be deleted, a job must have a state of
         UploadComplete, JobComplete, Aborted, or Failed.
+
+        Swagger operation ID: `DeleteJob`.
+
+        Args:
+            job_id: Job ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2343,6 +2645,22 @@ class SalesforceClient(ConnectorClientBase):
 
         Retrieves a list of records based on the result type for a completed
         job.
+
+        Swagger operation ID: `GetJobRecordResults`.
+
+        Args:
+            job_id: Job ID.
+            result_type: Result Type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2390,6 +2708,21 @@ class SalesforceClient(ConnectorClientBase):
         Execute SOSL search query
 
         Execute the specified SOSL search qyery
+
+        Swagger operation ID: `ExecuteSOSLQuery`.
+
+        Args:
+            q: SOSL search string.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/search"
         query_params = []
@@ -2434,6 +2767,21 @@ class SalesforceClient(ConnectorClientBase):
         Send an HTTP request
 
         Construct a Salesforce REST API request to invoke
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
@@ -2475,6 +2823,23 @@ class SalesforceClient(ConnectorClientBase):
         MCP server for Salesforce
 
         MCP server for Salesforce
+
+        Swagger operation ID: `mcp_SalesforceManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/mcp/SalesforceManagement"
@@ -2524,6 +2889,22 @@ class SalesforceClient(ConnectorClientBase):
         Creates a job, which represents a bulk operation (and associated data)
         that is sent to Salesforce for asynchronous processing. Provide job
         data via an Upload Job Data request.
+
+        Swagger operation ID: `CreateJobV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/bulk/createjob"
 
@@ -2563,6 +2944,23 @@ class SalesforceClient(ConnectorClientBase):
         Get record
 
         This operation gets a record.
+
+        Swagger operation ID: `GetItem_V2`.
+
+        Args:
+            table: table name.
+            id: item key.
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2620,6 +3018,25 @@ class SalesforceClient(ConnectorClientBase):
         Update record
 
         This operation updates a record and allows null values.
+
+        Swagger operation ID: `PatchItem_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: table name.
+            id: item key.
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2678,6 +3095,26 @@ class SalesforceClient(ConnectorClientBase):
 
         This operation inserts or updates (upserts) a record using an external
         ID.
+
+        Swagger operation ID: `PatchItemByExternalIdV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: The Salesforce object type like 'Leads'.
+            external_id_field: Field marked as external ID field on Salesforce
+                object.
+            external_id: External ID of the record to upsert.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2726,6 +3163,23 @@ class SalesforceClient(ConnectorClientBase):
         Create record
 
         This operation creates a record and allows null values.
+
+        Swagger operation ID: `PostItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: table name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2774,6 +3228,22 @@ class SalesforceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetExternalIdFields`.
+
+        Args:
+            table: The Salesforce object type like 'Leads'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2834,6 +3304,21 @@ class SalesforceClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         GetMetadataForGetItem
+
+        Swagger operation ID: `GetMetadataForGetItem`.
+
+        Args:
+            table: table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2877,6 +3362,21 @@ class SalesforceClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         GetMetadataForPatchItem
+
+        Swagger operation ID: `GetMetadataForPatchItem`.
+
+        Args:
+            table: table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2920,6 +3420,21 @@ class SalesforceClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         GetMetadataForPostItem
+
+        Swagger operation ID: `GetMetadataForPostItem`.
+
+        Args:
+            table: table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2965,6 +3480,21 @@ class SalesforceClient(ConnectorClientBase):
         Get object metadata
 
         This operation gets the object metadata for a Salesforce object type.
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            table: Salesforce object type like 'Leads'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

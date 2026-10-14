@@ -910,6 +910,22 @@ class Office365usersClient(ConnectorClientBase):
         Update my profile
 
         Updates the profile of the current user
+
+        Swagger operation ID: `UpdateMyProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
 
@@ -943,6 +959,21 @@ class Office365usersClient(ConnectorClientBase):
 
         Updates the profile photo of the current user. The size of the photo
         must be less than 4 MB.
+
+        Swagger operation ID: `UpdateMyPhoto`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/photo/$value"
@@ -985,6 +1016,28 @@ class Office365usersClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `MyTrendingDocuments`.
+
+        Args:
+            filter: An OData filter to filter the resources selected. Filter
+                selected resources on ResourceVisualization/Type or
+                ResourceVisualization/containerType.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1064,6 +1117,22 @@ class Office365usersClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `RelevantPeople`.
+
+        Args:
+            user_id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1122,6 +1191,21 @@ class Office365usersClient(ConnectorClientBase):
         Get user photo metadata
 
         Get user photo metadata.
+
+        Swagger operation ID: `UserPhotoMetadata`.
+
+        Args:
+            user_id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/photo"
         query_params = []
@@ -1172,6 +1256,29 @@ class Office365usersClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `TrendingDocuments`.
+
+        Args:
+            id: User principal name or id.
+            filter: An OData filter to filter the resources selected. Filter
+                selected resources on ResourceVisualization/Type or
+                ResourceVisualization/containerType.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1252,6 +1359,21 @@ class Office365usersClient(ConnectorClientBase):
         messages, mailFolders, events, calendar, calendars, outlook,
         inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
@@ -1299,6 +1421,26 @@ class Office365usersClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `DirectReports_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            top: Limit on the number of results to return. By default returns
+                all entries.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1373,6 +1515,23 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of the specified user's manager. Learn more about
         available fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `Manager_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1423,6 +1582,22 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of the current user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `MyProfile_V2`.
+
+        Args:
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/me"
         query_params = []
@@ -1473,6 +1648,28 @@ class Office365usersClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SearchUserV2`.
+
+        Args:
+            search_term: Search string (applies to: display name, given name,
+                surname, mail, mail nickname and user principal name).
+            top: Limit on the number of results to return. Minimum value is 1.
+                Default value is 1000.
+            is_search_term_required: If set to 'Yes' then no user profiles will
+                be returned when the search term is empty. If set to 'No' then
+                no filtering will be applied when the search term is empty.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/users"
         query_params = []
@@ -1552,6 +1749,21 @@ class Office365usersClient(ConnectorClientBase):
         Get user photo
 
         Retrieves the photo of the specified user if they have one
+
+        Swagger operation ID: `UserPhoto_V2`.
+
+        Args:
+            id: User principal name or id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1592,6 +1804,23 @@ class Office365usersClient(ConnectorClientBase):
         Retrieves the profile of a specific user. Learn more about available
         fields to select:
         https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/resources/user#properties
+
+        Swagger operation ID: `UserProfile_V2`.
+
+        Args:
+            id: User principal name or id.
+            select: Comma separated list of fields to select. Example: surname,
+                department, jobTitle.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

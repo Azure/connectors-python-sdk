@@ -234,6 +234,21 @@ class AzureeventgridClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
@@ -293,6 +308,21 @@ class AzureeventgridClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `TopicTypes_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

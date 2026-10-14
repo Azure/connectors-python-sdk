@@ -230,6 +230,20 @@ class PlumsailClient(ConnectorClientBase):
         Get Profile Info
 
         Get Profile Info returns information about current user and license.
+
+        Swagger operation ID: `ProfilesMeGet`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/profiles/me"
 
@@ -270,6 +284,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/document-generation/docx/index.html
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsApplyDocxTemplatePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -322,6 +353,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/document-generation/xlsx/index.html
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsApplyXlsxTemplatePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -374,6 +422,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/document-generation/pptx/index.html
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsApplyPptxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyPptx"
@@ -432,6 +497,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-merge-fields-in-docx-document
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsApplyDocxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyDocx"
@@ -490,6 +572,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#create-html-from-template
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsApplyHtmlPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ApplyHtml"
@@ -546,6 +645,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsHtml2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Pdf"
@@ -602,6 +718,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-html-to-docx
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsHtml2DocxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Html2Docx"
@@ -658,6 +791,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-docx-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsDocx2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Docx2Pdf"
@@ -714,6 +864,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xlsx-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsXslx2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xslx2Pdf"
@@ -766,6 +933,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pptx-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsPptx2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Pptx2Pdf"
@@ -817,6 +1001,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsAny2PdfV2Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Any2PdfV2"
@@ -868,6 +1069,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-email-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsEmail2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Email2Pdf"
@@ -920,6 +1138,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-doc-to-docx
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsDoc2DocxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Doc2Docx"
@@ -972,6 +1207,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-xls-to-xlsx
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsXls2XlsxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Xls2Xlsx"
@@ -1024,6 +1276,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-ppt-to-pptx
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsPpt2PptxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Ppt2Pptx"
@@ -1076,6 +1345,24 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#split-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsSplitPdfV2Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            type_: How to split the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/SplitPdfV2"
@@ -1139,6 +1426,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-any-files-into-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsMergeAnyToPdfV2Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1192,6 +1496,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#extract-text-from-pdf-document
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsExtractTextFromPdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1249,6 +1570,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#convert-pdf-to-image
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsPdf2ImageV2Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1304,6 +1642,23 @@ class PlumsailClient(ConnectorClientBase):
         It takes images and converts them to a PDF document
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsImage2PdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Image2Pdf"
@@ -1355,6 +1710,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#fill-in-pdf-form
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsFillInPdfFormPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1412,6 +1784,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-form-from-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsGetPdfFormPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/GetPdfForm"
@@ -1468,6 +1857,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#protect-pdf-document
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsProtectPdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ProtectPdf"
@@ -1524,6 +1930,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#get-pdf-protection-information
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsGetPdfProtectionInfoPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1580,6 +2003,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#compress-pdf-document
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsCompressPdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1633,6 +2073,24 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#add-watermark-to-pdf
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsAddWatermarkToPdfPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            type_: The type of the watermark.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1697,6 +2155,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-docx-files
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsMergeDocxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeDocx"
@@ -1752,6 +2227,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#parse-csv
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsParseCsvPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/ParseCsv"
@@ -1807,6 +2299,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#csv-to-excel
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsCsv2XlsxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Csv2Xlsx"
@@ -1858,6 +2367,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-excel
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsJson2XlsxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Xlsx"
@@ -1909,6 +2435,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#json-to-csv
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsJson2CsvPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/Json2Csv"
@@ -1963,6 +2506,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-match
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsRegExpMatchPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2022,6 +2582,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-replace
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsRegExpReplacePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2081,6 +2658,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#regular-expression-test
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsRegExpTestPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/RegExpTest"
@@ -2135,6 +2729,23 @@ class PlumsailClient(ConnectorClientBase):
         Compresses and adds files to a ZIP archive.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsCreateArchivePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2190,6 +2801,23 @@ class PlumsailClient(ConnectorClientBase):
         Extract files from archive.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsExtractArchivePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2247,6 +2875,23 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#merge-xlsx-files
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1DocumentsJobsMergeXlsxPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/v1/Documents/jobs/MergeXlsx"
@@ -2305,6 +2950,24 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html##start-process-json
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `FlowV1ProcessesFlowJobsExecuteProcessPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            process_id: The name of process to be started.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2367,6 +3030,25 @@ class PlumsailClient(ConnectorClientBase):
         https://plumsail.com/docs/documents/v1.x/flow/actions/document-processing.html#start-document-generation-process
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID:
+        `FlowV1ProcessesFlowJobsExecuteProcessWithGeneratedDataPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            process_id: The name of process to be started.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[bytes]: An Azure Core poller for the connector
+                operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2423,6 +3105,21 @@ class PlumsailClient(ConnectorClientBase):
         SplitPdfSchema
 
         System
+
+        Swagger operation ID: `FlowV1DocumentsFlowSchemaSplitPdfPost`.
+
+        Args:
+            type_: How to split the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2465,6 +3162,21 @@ class PlumsailClient(ConnectorClientBase):
         AddWatermarkToPdfSchema
 
         System
+
+        Swagger operation ID: `FlowV1DocumentsFlowSchemaAddWatermarkToPdfPost`.
+
+        Args:
+            type_: The type of the watermark.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2506,6 +3218,20 @@ class PlumsailClient(ConnectorClientBase):
         GetProcessesSchema
 
         System
+
+        Swagger operation ID: `FlowV1ProcessesFlowSchemaGetProcessesPost`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2541,6 +3267,21 @@ class PlumsailClient(ConnectorClientBase):
         ParseCsv
 
         System
+
+        Swagger operation ID: `FlowV1DocumentsFlowSchemaParseCsvPost`.
+
+        Args:
+            headers_parameter: headers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2583,6 +3324,21 @@ class PlumsailClient(ConnectorClientBase):
         GetJsonSchema
 
         System
+
+        Swagger operation ID: `FlowV1ProcessesFlowSchemaGetJsonDataPost`.
+
+        Args:
+            process_id: The name of process to be started.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2625,6 +3381,22 @@ class PlumsailClient(ConnectorClientBase):
         Get schema of a process
 
         Returns schema of a process
+
+        Swagger operation ID:
+        `FlowV1ProcessesFlowTriggersByProcessIdSchemaGet`.
+
+        Args:
+            process_id: processId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2665,6 +3437,21 @@ class PlumsailClient(ConnectorClientBase):
         RegexMatchSchema
 
         System
+
+        Swagger operation ID: `FlowV1DocumentsFlowSchemaRegExpMatchPost`.
+
+        Args:
+            pattern: pattern.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

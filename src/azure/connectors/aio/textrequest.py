@@ -218,6 +218,31 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesByContactPhone`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to get messages for.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -294,6 +319,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Sends a message (starting a new conversation if the given phone number
         has no message history).
+
+        Swagger operation ID: `SendMessageByPhoneNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to send a message to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -346,6 +391,24 @@ class TextrequestClient(ConnectorClientBase):
         you don't plan on talking to in the future. Note that if a customer
         texts in \"STOP\" to prevent you from sending them any further SMS
         messages, the conversation is automatically archived.
+
+        Swagger operation ID: `ArchiveConversation`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the conversation to archive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -395,6 +458,24 @@ class TextrequestClient(ConnectorClientBase):
         once again appear in the queue. it will also appear in conversations
         returned by the /conversations endpoint. If a conversation is already
         unarchived, this method has no effect.
+
+        Swagger operation ID: `UnarchiveConversation`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the conversation to archive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -441,6 +522,24 @@ class TextrequestClient(ConnectorClientBase):
         Gets the contact with the specified phone number
 
         Gets the contact with the specified phone number
+
+        Swagger operation ID: `GetContactByPhoneNumber`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -485,6 +584,24 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the contact with the specified phone number
 
         Deletes the contact with the specified phone number
+
+        Swagger operation ID: `DeleteContact`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -534,6 +651,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Creates or updates a contact (depending on whether one already exists
         with the given phone number).
+
+        Swagger operation ID: `CreateContact`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            phone_number: Phone number of the contact to create or update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -606,6 +743,87 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetContacts`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            contact_phone_number: Phone number to filter contacts by.
+            last_message_timestamp_before_utc: Cutoff time for searching
+                contacts by the last message sent or received. No contacts who
+                sent messages after this time will be shown.
+            last_message_timestamp_after_utc: Cutoff time for searching
+                contacts by the last message sent or received. No contacts
+                whose last sent message is before this time will be shown.
+            contact_created_before: Cutoff time for searching contacts by when
+                they were created. No contacts created after this time will be
+                shown.
+            contact_created_after: Cutoff time for searching contacts by when
+                they were created. No contacts created before this time will be
+                shown.
+            is_resolved: Whether to search for contacts whose conversations
+                have been resolved.
+            is_blocked: Whether to search for contacts who have been blocked.
+            is_archived: Whether to search for contacts who have been archived.
+            is_suppressed: Whether to search for contacts who have been
+                suppressed.
+            has_opted_out: Whether to search for contacts who have opted out of
+                receiving texts.
+            last_message_sent_before: Cutoff time for searching contacts by
+                when the last message was sent to the customer. No contacts who
+                sent messages after this time will be shown. Uses timestamp as
+                local time. To filter by time stamp in UTC time, use
+                last_message_sent_before_utc.
+            last_message_sent_after: Cutoff time for searching contacts by when
+                the last message was sent to the customer. No contacts whose
+                last sent message is before this time will be shown. Uses
+                timestamp as local time. To filter by time stamp in UTC time,
+                use last_message_sent_after_utc.
+            last_message_received_before: Cutoff time for searching contacts by
+                the last message received from the customer. No contacts who
+                received messages after this time will be shown. Uses timestamp
+                as local time. To filter by time stamp in UTC time, use
+                last_message_sent_before_utc.
+            last_message_received_after: Cutoff time for searching contacts by
+                the last message received from the customer. No contacts whose
+                last sent message is before this time will be shown. Uses
+                timestamp as local time. To filter by time stamp in UTC time,
+                use last_message_sent_before_utc.
+            tags: Comma-separated list of guids referring to tags to filter
+                contacts by.
+            groups: Comma-separated list of integer ids referring to groups to
+                filter contacts by.
+            custom_field_id1: Guid referring to custom field to filter contacts
+                by.
+            custom_field_value1: Value referring to custom field to filter
+                contacts by.
+            custom_field_id2: Guid referring to second custom field to filter
+                contacts by.
+            custom_field_value2: Value referring to second custom field to
+                filter contacts by.
+            custom_field_id3: Guid referring to third custom field to filter
+                contacts by.
+            custom_field_value3: Value referring to third custom field to
+                filter contacts by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -791,6 +1009,25 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `BulkUpdateContacts`.
+
+        Args:
+            input: The request body.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -850,6 +1087,24 @@ class TextrequestClient(ConnectorClientBase):
         Get a group by its id
 
         Gets the group with the specified id.
+
+        Swagger operation ID: `GetGroupById`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -896,6 +1151,24 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the group with the specified id. This will succeed even if
         there are contacts that are members of the group (the contacts will not
         be deleted).
+
+        Swagger operation ID: `DeleteGroup`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -945,6 +1218,26 @@ class TextrequestClient(ConnectorClientBase):
 
         Updates a group's name using the group's numerical id. If the passed in
         group id does not exist, the call will fail.
+
+        Swagger operation ID: `UpdateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            group_id: The numerical id of the group to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -993,6 +1286,30 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetGroups`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1063,6 +1380,25 @@ class TextrequestClient(ConnectorClientBase):
         Creates a new group
 
         Creates a new group with the provided name.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1109,6 +1445,30 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTags`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1182,6 +1542,24 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetCustomFields`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1241,6 +1619,24 @@ class TextrequestClient(ConnectorClientBase):
         Gets the payment with the specified id
 
         Gets the payment with the specified id.
+
+        Swagger operation ID: `GetPayment`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1290,6 +1686,24 @@ class TextrequestClient(ConnectorClientBase):
         endpoint is not required for payments paid through the payments-portal
         sent through Text Request; that will automatically mark a payment as
         paid.
+
+        Swagger operation ID: `MarkPaymentPaid`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1337,6 +1751,24 @@ class TextrequestClient(ConnectorClientBase):
         Sends a reminder to the contact to pay the specified payment. The
         content of the message is auto-generated. To avoid spam, only one
         reminder can be sent per payment
+
+        Swagger operation ID: `SendPaymentReminder`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1384,6 +1816,24 @@ class TextrequestClient(ConnectorClientBase):
         Cancels the specified payment, texting the user that the payment has
         been canceled. Payments cannot be edited, so canceling and issuing a
         new payment is the best way to correct a payment.
+
+        Swagger operation ID: `CancelPayment`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            payment_id: The numerical id of the payment to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1438,6 +1888,38 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetPayments`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            reference_number: User-defined id defined when payments are created
+                that can be used to quickly find payments. Reference numbers
+                are not unique; many payments can have the same reference.
+            phone_number: Phone number of the contact this payment was sent to.
+            sort_type: Property to sort payments by. Can be \"amount\",
+                \"contact\", \"date\", \"status\".
+            sort_direction: Direction to sort payments in. Can be \"desc\" for
+                greatest to smallest, or \"asc\" for smallest to greatest.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1529,6 +2011,25 @@ class TextrequestClient(ConnectorClientBase):
 
         Creates a new payment with the provided message to the provided
         contact.
+
+        Swagger operation ID: `CreatePayment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1569,6 +2070,23 @@ class TextrequestClient(ConnectorClientBase):
         Get info on this specific dashboard
 
         Returns the name and phone of the dashboard.
+
+        Swagger operation ID: `GetDashboard`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1609,6 +2127,23 @@ class TextrequestClient(ConnectorClientBase):
         Deletes the specified dashboard
 
         Deletes the specified dashboard.
+
+        Swagger operation ID: `DeleteDashboard`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1656,6 +2191,25 @@ class TextrequestClient(ConnectorClientBase):
         If you want a new number with another dashboard's contacts, you will
         have to create a new dashboard with a POST and add the contacts with a
         bulk export/import.
+
+        Swagger operation ID: `UpdateDashboardsName`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1706,6 +2260,41 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetConversations`.
+
+        Args:
+            dashboard_id: The phone number dashboard to work on. A single
+                account can have several dashboards, representing different
+                phone lines for customers.
+            tags: Comma-separated list of guids referring to tags to filter
+                conversations by.
+            show_unresolved_only: Whether to only search for contacts whose
+                conversations have been resolved. If this is false, both
+                resolved and unresolved conversations will be shown.
+            include_archived: Whether to include conversations with contacts
+                that have been archived.
+            search: Search term for filtering conversations by phone number or
+                display name. If the search term is less than a full name or
+                phone number, the search will return all conversations that
+                partially match it.
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1801,6 +2390,27 @@ class TextrequestClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDashboards`.
+
+        Args:
+            page: The page of entities to get. When getting values, there is a
+                max size per page, defined by page_size. If page is greater
+                than the last page, an empty array will be returned.
+            page_size: The size of each page to get. When getting values, this
+                is a max size per page, with accessing subsequent pages done by
+                the page parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dashboards"
         query_params = []
@@ -1874,6 +2484,22 @@ class TextrequestClient(ConnectorClientBase):
         search for provisioned numbers in a specific area code using GET
         /dashboards/provisioning. If the phone number is already in use, a Bad
         Request exception will be thrown.
+
+        Swagger operation ID: `CreateDashboard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dashboards"
 

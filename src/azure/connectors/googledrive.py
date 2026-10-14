@@ -622,6 +622,21 @@ class GoogledriveClient(ConnectorClientBase):
         Get file metadata using id
 
         Retrieves file metadata from Google Drive using id
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            id: Specify the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -666,6 +681,22 @@ class GoogledriveClient(ConnectorClientBase):
         Update file
 
         Updates a file in Google Drive
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            id: Specify the file to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -712,6 +743,21 @@ class GoogledriveClient(ConnectorClientBase):
         Delete file
 
         Deletes a file from Google Drive
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            id: Specify the file to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -753,6 +799,21 @@ class GoogledriveClient(ConnectorClientBase):
         Get file metadata using path
 
         Retrieves file metadata from Google Drive using path
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            path: Path of the file in Google Drive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
@@ -801,6 +862,22 @@ class GoogledriveClient(ConnectorClientBase):
         Get file content using path
 
         Retrieves file content from Google Drive using path
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            path: Path of the file in Google Drive.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -852,6 +929,22 @@ class GoogledriveClient(ConnectorClientBase):
         Get file content using id
 
         Retrieves file content from Google Drive using id
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            id: Unique identifier of the file to retrieve in Google Drive.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -903,6 +996,24 @@ class GoogledriveClient(ConnectorClientBase):
         Copy file
 
         Copies a file on Google Drive
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            source: Url to source file.
+            destination: Destination file path in Google Drive, including
+                target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/copyFile"
@@ -962,6 +1073,22 @@ class GoogledriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            id: Specify the folder in Google Drive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1025,6 +1152,21 @@ class GoogledriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/folders"
@@ -1084,6 +1226,23 @@ class GoogledriveClient(ConnectorClientBase):
         Create file
 
         Uploads a file to a Google Drive folder selected by its identifier
+
+        Swagger operation ID: `CreateFileV2`.
+
+        Args:
+            input: The binary request body.
+            folder_id: Folder to upload the file to Google Drive.
+            name: Name of the file to create in Google Drive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/v2/files"
@@ -1143,6 +1302,24 @@ class GoogledriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            source: Path to the archive file.
+            destination: Path in Google Drive to extract the archive contents.
+            overwrite: Overwrites the destination files if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"

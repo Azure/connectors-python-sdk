@@ -868,6 +868,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListResources`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/oauth/token/accessible-resources"
@@ -929,6 +944,28 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListIssues`.
+
+        Args:
+            jql: The JQL query used to search for issues. If left blank,
+                returns all issues created in the last 10 years.
+            fields: Optional comma-separated list of Jira field IDs or keys to
+                return, for example summary,status,attachment. For custom
+                fields, use the field ID, such as customfield_10042. Also
+                supports *all, *navigable, and exclusions such as
+                *all,-attachment. If omitted, all fields are returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/2/search"
         query_params = []
@@ -1000,6 +1037,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListIssues_Datacenter`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datacenter/search"
         initial_request_url = request_url
@@ -1059,6 +1111,23 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTransitions`.
+
+        Args:
+            issue_id_or_key: ID or key of the issue to retrieve transitions
+                for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1118,6 +1187,23 @@ class JiraClient(ConnectorClientBase):
         Performs an issue transition
 
         Transitions an issue to a new status.
+
+        Swagger operation ID: `UpdateTransition`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_id_or_key: ID or key of the issue to be transitioned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1158,6 +1244,26 @@ class JiraClient(ConnectorClientBase):
         Get current user
 
         This operation returns details for the current user
+
+        Swagger operation ID: `GetCurrentUser`.
+
+        Args:
+            expand: Use expand to include additional information about users in
+                the response. This parameter accepts a comma-separated list.
+                Expand options include: * `groups` includes all groups and
+                nested groups to which the user belongs. * `applicationRoles`
+                includes details of all the applications to which the user has
+                access.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/3/myself"
         query_params = []
@@ -1204,6 +1310,23 @@ class JiraClient(ConnectorClientBase):
         Jira MCP Server
 
         Jira MCP Server
+
+        Swagger operation ID: `mcp_JiraIssueManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp/JiraIssueManagement"
         query_params = []
@@ -1250,6 +1373,23 @@ class JiraClient(ConnectorClientBase):
         Add comment
 
         This operation is used to add a comment to an existing Jira issue.
+
+        Swagger operation ID: `AddComment_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_key: Unique Key of the issue to add a comment to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1291,6 +1431,21 @@ class JiraClient(ConnectorClientBase):
 
         Cancels a task. Permissions required: either of: Administer Jira or
         Creator of the task.
+
+        Swagger operation ID: `CancelTask_V2`.
+
+        Args:
+            task_id: The ID of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1333,6 +1488,24 @@ class JiraClient(ConnectorClientBase):
         Create a new issue
 
         This operation is used to create a new issue.
+
+        Swagger operation ID: `CreateIssue_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            project_key: Pick a project to create the issue in.
+            issue_type_ids: Pick an issue type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/issue"
         query_params = []
@@ -1381,6 +1554,22 @@ class JiraClient(ConnectorClientBase):
         Create a new project
 
         This operation is used to create a new Jira project.
+
+        Swagger operation ID: `CreateProject_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/project"
 
@@ -1419,6 +1608,22 @@ class JiraClient(ConnectorClientBase):
 
         Creates a project category. Permissions required: Administer Jira
         (global permissions)
+
+        Swagger operation ID: `CreateProjectCategory_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
 
@@ -1458,6 +1663,23 @@ class JiraClient(ConnectorClientBase):
 
         Deletes a project. Permissions required: Administer Jira (global
         permissions)
+
+        Swagger operation ID: `DeleteProject_V2`.
+
+        Args:
+            project_id_or_key: The project ID or project key (case sensitive).
+            enable_undo: Whether this project is placed in the Jira recycle bin
+                where it will be available for restoration.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1510,6 +1732,28 @@ class JiraClient(ConnectorClientBase):
         Edits an issue. A transition may be applied and issue properties
         updated as part of the edit. The edits to the issue's fields are
         defined using update and fields.
+
+        Swagger operation ID: `EditIssue_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            issue_id_or_key: Provide the Issue ID or Key for the issue you wish
+                to edit.
+            notify_users: Do you want to notify users?
+            override_screen_security: Do you want to override the screen
+                security?
+            override_editable_flag: Do you want to override the editable flag?
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1570,6 +1814,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllProjectCategories_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/projectCategory"
         initial_request_url = request_url
@@ -1626,6 +1885,21 @@ class JiraClient(ConnectorClientBase):
 
         This operation is used to retrieve the issue object for a given issue
         Key.
+
+        Swagger operation ID: `GetIssue_V2`.
+
+        Args:
+            issue_key: Unique Key of the issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1667,6 +1941,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns the status of a long-running asynchronous task. When a task has
         finished, this operation returns the JSON blob applicable to the task.
+
+        Swagger operation ID: `GetTask_V2`.
+
+        Args:
+            task_id: The ID of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1708,6 +1997,29 @@ class JiraClient(ConnectorClientBase):
         Get User
 
         Returns a user. Permissions required: Browse users and groups.
+
+        Swagger operation ID: `GetUser_V2`.
+
+        Args:
+            account_id: The account ID of the user, which uniquely identifies
+                the user across all Atlassian products. For example,
+                *5b10ac8d82e05b22cc7d4ef5*. Required.
+            expand: Use expand to include additional information about users in
+                the response. This parameter accepts a comma-separated list.
+                Expand options include: * `groups` includes all groups and
+                nested groups to which the user belongs. * `applicationRoles`
+                includes details of all the applications to which the user has
+                access.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/user"
         query_params = []
@@ -1759,6 +2071,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFilters_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/filter/search"
         initial_request_url = request_url
@@ -1823,6 +2150,21 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListProjects_V3`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/project/search"
         initial_request_url = request_url
@@ -1888,6 +2230,22 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListProjectUsers_V2`.
+
+        Args:
+            project_key: Unique key of the project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/user/permission/search"
@@ -1953,6 +2311,21 @@ class JiraClient(ConnectorClientBase):
 
         Deletes a project category. Permissions required: Administer Jira
         (global permissions)
+
+        Swagger operation ID: `RemoveProjectCategory_V2`.
+
+        Args:
+            id: ID of the project category to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1992,6 +2365,24 @@ class JiraClient(ConnectorClientBase):
         Update Project
 
         Updates the project details of a project.
+
+        Swagger operation ID: `UpdateProject_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            project_id_or_key: Provide the project ID or Key you want to
+                update1.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2036,6 +2427,22 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListIssueTypes_V2`.
+
+        Args:
+            project_key: Project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/types/issue/createmeta"
@@ -2105,6 +2512,23 @@ class JiraClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListIssueTypesFields_V2`.
+
+        Args:
+            project_key: Project.
+            issuetype_ids: Issue Types.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/issue/createmeta"
         query_params = []

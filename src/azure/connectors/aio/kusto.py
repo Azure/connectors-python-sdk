@@ -142,6 +142,23 @@ class KustoClient(ConnectorClientBase):
         iterated over in the following connectors e.g TableName | take 10.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `listKustoResultsPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResults/false"
 
@@ -196,6 +213,23 @@ class KustoClient(ConnectorClientBase):
         TableName policy caching.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `listKustoShowCommandResultsPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/ListKustoShowCommandResults"
@@ -251,6 +285,23 @@ class KustoClient(ConnectorClientBase):
         TableName | where Timestamp > ago(1h) | project timestamp, value.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `runKustoQueryAndVisualizeResultsPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/false"
@@ -306,6 +357,23 @@ class KustoClient(ConnectorClientBase):
         choice e.g .clear table TableName data.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `runKustoCommandAndVisualizeResultsPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/RunKustoAndVisualizeResults/true"
@@ -362,6 +430,23 @@ class KustoClient(ConnectorClientBase):
         is mandatory e.g .set-or-append async TargetTable <| SourceTable.
 
         Returns an Azure Core async poller for the connector operation.
+
+        Swagger operation ID: `runAsyncControlCommandAndWait`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncLROPoller[dict[str, Any] | None]: An Azure Core poller for the
+                connector operation.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/RunAsyncControlCommandAndWait"
@@ -415,6 +500,23 @@ class KustoClient(ConnectorClientBase):
         Kusto Query MCP Server
 
         This MCP server runs Kusto queries and manages the results.
+
+        Swagger operation ID: `mcp_KustoQueryManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/mcp/KustoQueryManagement"
@@ -462,6 +564,22 @@ class KustoClient(ConnectorClientBase):
         Query schema
 
         Gets the schema for a query
+
+        Swagger operation ID: `listKustoResultsSchemaPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/ListKustoResultsSchema"
 

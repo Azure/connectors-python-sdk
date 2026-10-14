@@ -168,6 +168,38 @@ class UniversalprintClient(ConnectorClientBase):
         Print PDF
 
         Prints the given pdf.
+
+        Swagger operation ID: `PrintFile`.
+
+        Args:
+            input: The binary request body.
+            printer: The name of the printer.
+            file_name: The name of file.
+            configuration_copies: The number of copies that should be printed.
+            configuration_orientation: The direction in which document is
+                displayed.
+            configuration_color_mode: The color configuration to print the job.
+            configuration_media_size: The page size for the paper or other
+                print media.
+            configuration_duplex_mode: The setting to print one-sided jobs or
+                double-sided jobs.
+            configuration_pages_per_sheet: The number of input Pages to impose
+                upon a single Impression.
+            configuration_dpi: The resolution to use when printing the job.
+            configuration_quality: The print quality to process a print job.
+            configuration_media_type: The type of media to use.
+            configuration_finishings: The finishing processes to apply to the
+                printed document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/print/shares"
         query_params = []
@@ -277,6 +309,21 @@ class UniversalprintClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListRecentShares`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/print/recentPrinterShares"

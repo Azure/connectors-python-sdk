@@ -955,6 +955,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Create table
 
         Create a new table in the Excel workbook.
+
+        Swagger operation ID: `CreateTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1011,6 +1033,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Add a key column to an Excel table. The new column will be appended to
         the right.
+
+        Swagger operation ID: `CreateIdColumn`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Provide the key column name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1079,6 +1123,40 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            filter: An ODATA filter query to restrict the entries returned.
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Comma-separated list of columns to retrieve (first 500 by
+                default).
+            date_time_format: DateTime Format.
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1201,6 +1279,27 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetComments`.
+
+        Args:
+            drive: Ask user to select a document library from the drop-down.
+            file: Ask user to select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1275,6 +1374,27 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get a comment present in a workbook
 
         Get a comment present in a workbook.
+
+        Swagger operation ID: `GetComment`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            commentid: Provide a comment Id .
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1333,6 +1453,29 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Reply to a comment present in a workbook
 
         Reply to a comment present in a workbook.
+
+        Swagger operation ID: `ReplyComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Ask user to select a document library from the drop-down.
+            file: Ask user to select an Excel file through File Browse.
+            commentid: Provide a comment Id .
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1396,6 +1539,34 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get a row
 
         Get a row using a key column.
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1474,6 +1645,29 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Delete a row
 
         Delete a row using a key column.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1540,6 +1734,32 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         specified cells and columns left blank will not be updated. In order to
         append (instead of overwrite) a value, use the \"Get a row\" action to
         retrieve the content first.
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (the colons are required).
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1610,6 +1830,31 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllWorksheets`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1695,6 +1940,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Create worksheet
 
         Create a new worksheet in the Excel workbook.
+
+        Swagger operation ID: `CreateWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1756,6 +2023,31 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1843,6 +2135,30 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Add a row into a table
 
         Add a new row into the Excel table.
+
+        Swagger operation ID: `AddRowV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1911,6 +2227,37 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Runs an Office Script against an Excel workbook. Use this action when
         the script is saved outside of the default location.
+
+        Swagger operation ID: `RunScriptProdV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel workbook through File Browse.
+            script_drive: Select the SharePoint library of your Office Script
+                file (.osts) from the drop-down.
+            script_id: Select an Office Script file (.osts) in a SharePoint
+                library from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            script_source: Select from the drop-down or specify one of the
+                following: - \"me\" - \"SharePoint Site URL\" -
+                \"users/someone's UPN\" - \"groups/group Id\" -
+                \"sites/SharePoint Site URL:/teams/team name:\" (the colons are
+                required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1973,6 +2320,22 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSources`.
+
+        Args:
+            top: Top.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
@@ -2039,6 +2402,25 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetDrives`.
+
+        Args:
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
@@ -2107,6 +2489,28 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetColumns`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2184,6 +2588,27 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Get metadata of a table
 
         Get metadata of a table.
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2242,6 +2667,23 @@ class ExcelonlinebusinessClient(ConnectorClientBase):
         Gets one script
 
         Gets one of the scripts.
+
+        Swagger operation ID: `GetSingleScriptV2`.
+
+        Args:
+            script_source: script source.
+            script_drive: script drive.
+            script_id: Script chosen to use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

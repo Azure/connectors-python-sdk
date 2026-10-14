@@ -684,6 +684,23 @@ class TodoClient(ConnectorClientBase):
         Update a to-do list
 
         This operation is used to update a specific to-do list.
+
+        Swagger operation ID: `UpdateToDoList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -724,6 +741,21 @@ class TodoClient(ConnectorClientBase):
         Delete a to-do list
 
         This operation is used to delete a specific to-do list.
+
+        Swagger operation ID: `DeleteToDoList`.
+
+        Args:
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -763,6 +795,23 @@ class TodoClient(ConnectorClientBase):
         Add a to-do
 
         This operation is used to create a to-do in the specified to-do list.
+
+        Swagger operation ID: `CreateToDoV3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -803,6 +852,22 @@ class TodoClient(ConnectorClientBase):
         Create a to-do list
 
         This operation is used to create a new to-do list.
+
+        Swagger operation ID: `CreateToDoListV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
@@ -841,6 +906,22 @@ class TodoClient(ConnectorClientBase):
         Delete to-do
 
         This operation is used to delete a task.
+
+        Swagger operation ID: `DeleteToDoV2`.
+
+        Args:
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -884,6 +965,21 @@ class TodoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllTodoListsV2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
         initial_request_url = request_url
@@ -940,6 +1036,22 @@ class TodoClient(ConnectorClientBase):
         Get a to-do
 
         This operation is used to get the to-do with the given Id.
+
+        Swagger operation ID: `GetToDoV3`.
+
+        Args:
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -983,6 +1095,21 @@ class TodoClient(ConnectorClientBase):
         Get a to-do list
 
         This operation is used to get a specific to-do list.
+
+        Swagger operation ID: `GetToDoListV2`.
+
+        Args:
+            folder_id: To-do list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1027,6 +1154,24 @@ class TodoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListToDosByFolderV2`.
+
+        Args:
+            folder_id: To-do list.
+            top: Total number of entries to retrieve (default = 10, maximum =
+                999).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1095,6 +1240,24 @@ class TodoClient(ConnectorClientBase):
         Update to-do
 
         This operation is used to update a specific to-do.
+
+        Swagger operation ID: `UpdateToDoV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder_id: To-do list.
+            id: To-do task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

@@ -426,6 +426,26 @@ class AzurevmClient(ConnectorClientBase):
         Get virtual machine in a VM scale set
 
         Gets a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Get`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -485,6 +505,26 @@ class AzurevmClient(ConnectorClientBase):
         the virtual machine and releases the compute resources it uses. You are
         not billed for the compute resources of this virtual machine once it is
         deallocated.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Deallocate`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -539,6 +579,26 @@ class AzurevmClient(ConnectorClientBase):
         Power off (stop) a virtual machine in a VM scale set. Note that
         resources are still attached and you are getting charged for the
         resources.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_PowerOff`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -592,6 +652,26 @@ class AzurevmClient(ConnectorClientBase):
 
         Shuts down the virtual machine in the VM scale set, moves it to a new
         node, and powers it back on.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Redeploy`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -645,6 +725,26 @@ class AzurevmClient(ConnectorClientBase):
 
         Reimages (upgrade the operating system) a specific virtual machine in a
         VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Reimage`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -697,6 +797,26 @@ class AzurevmClient(ConnectorClientBase):
         Restart virtual machine in a VM scale set
 
         Restarts a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Restart`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -749,6 +869,26 @@ class AzurevmClient(ConnectorClientBase):
         Start virtual machine in a VM scale set
 
         Starts a virtual machine in a VM scale set.
+
+        Swagger operation ID: `VirtualMachineInScaleSet_Start`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            virtual_machine_in_scale_set_instance_id: The name of the virtual
+                machine in a VM scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -800,6 +940,23 @@ class AzurevmClient(ConnectorClientBase):
         Get virtual machine
 
         Gets a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Get`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -853,6 +1010,23 @@ class AzurevmClient(ConnectorClientBase):
         Start virtual machine
 
         Starts a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Start`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -904,6 +1078,23 @@ class AzurevmClient(ConnectorClientBase):
         Shuts down the virtual machine and releases the compute resources. You
         are not billed for the compute resources that this virtual machine
         uses.
+
+        Swagger operation ID: `VirtualMachine_Deallocate`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -955,6 +1146,23 @@ class AzurevmClient(ConnectorClientBase):
         Power off (stop) a virtual machine. The virtual machine can be
         restarted with the same provisioned resources. You are still charged
         for this virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Poweroff`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1004,6 +1212,23 @@ class AzurevmClient(ConnectorClientBase):
         Reapply virtual machine
 
         Reapply a virtual machine's state.
+
+        Swagger operation ID: `VirtualMachine_Reapply`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1054,6 +1279,23 @@ class AzurevmClient(ConnectorClientBase):
 
         Shuts down the virtual machine, moves it to a new node, and powers it
         back on.
+
+        Swagger operation ID: `VirtualMachine_Redeploy`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1103,6 +1345,23 @@ class AzurevmClient(ConnectorClientBase):
         Restart virtual machine
 
         Restarts a virtual machine.
+
+        Swagger operation ID: `VirtualMachine_Restart`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_name: The name of the virtual machine.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1152,6 +1411,21 @@ class AzurevmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
@@ -1220,6 +1494,22 @@ class AzurevmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ResourceGroups_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1294,6 +1584,23 @@ class AzurevmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `VirtualMachineScaleSets_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1373,6 +1680,25 @@ class AzurevmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `VirtualMachinesInScaleSet_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            virtual_machine_scale_set_name: The name of the virtual machine
+                scale set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1453,6 +1779,23 @@ class AzurevmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `VirtualMachines_List`.
+
+        Args:
+            subscription_id: Microsoft Azure subscription.
+            resource_group_name: The name of the resource group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

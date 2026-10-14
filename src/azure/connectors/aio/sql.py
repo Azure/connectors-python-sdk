@@ -263,6 +263,24 @@ class SqlClient(ConnectorClientBase):
         Delete row
 
         This operation deletes a row from a table.
+
+        Swagger operation ID: `DeleteItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            id: Unique identifier of the row to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -312,6 +330,24 @@ class SqlClient(ConnectorClientBase):
         Execute a SQL query
 
         Execute a SQL query
+
+        Swagger operation ID: `ExecutePassThroughNativeQuery_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -362,6 +398,25 @@ class SqlClient(ConnectorClientBase):
         Execute stored procedure
 
         This operation runs a stored procedure.
+
+        Swagger operation ID: `ExecuteProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            procedure: Name of stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -412,6 +467,24 @@ class SqlClient(ConnectorClientBase):
         Get row
 
         This operation gets a row from a table.
+
+        Swagger operation ID: `GetItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of SQL table.
+            id: Unique identifier of the row to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -475,6 +548,37 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of SQL table.
+            apply: A sequence of OData aggregation transformations.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            skip: The number of entries to skip (default = 0).
+            top: Total number of entries to retrieve (default = all).
+            select: Specific fields to retrieve from entries (default = all).
+            count: Option to specify if only total entity count should be
+                returned in the query (default = false).
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -601,6 +705,26 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTables_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -682,6 +806,26 @@ class SqlClient(ConnectorClientBase):
         Update row
 
         This operation updates an existing row in a table.
+
+        Swagger operation ID: `PatchItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            id: Unique identifier of the row to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -734,6 +878,25 @@ class SqlClient(ConnectorClientBase):
         Insert row
 
         This operation inserts a new row into a table.
+
+        Swagger operation ID: `PostItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            table: Name of table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -784,6 +947,21 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetServers`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/servers"
         initial_request_url = request_url
@@ -842,6 +1020,22 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDatabases`.
+
+        Args:
+            server: Server name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/databases"
         query_params = []
@@ -908,6 +1102,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForDeleteItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -981,6 +1192,24 @@ class SqlClient(ConnectorClientBase):
         Get pass-through native SQL query metadata
 
         Retrieves metadata for a pass-through native SQL query.
+
+        Swagger operation ID: `GetPassThroughNativeQueryMetadata_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1033,6 +1262,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetProcedures_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1099,6 +1345,23 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a Procedure
 
         Get metadata of a Procedure.
+
+        Swagger operation ID: `GetProcedure_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            procedure: Procedure name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1151,6 +1414,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForGetItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1226,6 +1506,26 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a table
 
         Get metadata of a table.
+
+        Swagger operation ID: `GetTable_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: table name.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1291,6 +1591,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForGetOnNewItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1366,6 +1683,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForGetOnUpdatedItems_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1441,6 +1775,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForPatchItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1514,6 +1865,23 @@ class SqlClient(ConnectorClientBase):
         Get metadata of a table for Patch operation
 
         Get metadata of a table for Patch operation.
+
+        Swagger operation ID: `GetTableForPatch_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            table: table name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1567,6 +1935,23 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTablesForPostItem_V2`.
+
+        Args:
+            server: Name of SQL server.
+            database: Database name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1638,6 +2023,21 @@ class SqlClient(ConnectorClientBase):
         Get procedure metadata
 
         This operation gets metadata for a stored procedure.
+
+        Swagger operation ID: `GetProcedure`.
+
+        Args:
+            procedure: Name of stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1684,6 +2084,21 @@ class SqlClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetProcedures`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/procedures"

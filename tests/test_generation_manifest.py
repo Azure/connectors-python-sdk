@@ -20,7 +20,7 @@ MANIFEST_PATH = REPOSITORY_ROOT / "generation.manifest.json"
 CONNECTOR_DIRECTORY = REPOSITORY_ROOT / "src" / "azure" / "connectors"
 ASYNC_CONNECTOR_DIRECTORY = CONNECTOR_DIRECTORY / "aio"
 SNAPSHOT_DIRECTORY = REPOSITORY_ROOT / "swagger-cache"
-EXPECTED_GENERATOR_REVISION = "59a7dc6f849348e2c7e664f8ab33b6c006e4be9e"
+EXPECTED_GENERATOR_REVISION = "d180efdf721b96b6b96dae3a7a070d1461686faf"
 
 
 def canonical_sha256(path: Path) -> str:
@@ -126,3 +126,55 @@ def test_generated_registry_and_type_stubs_cover_every_client() -> None:
     assert stub_client_names(
         ASYNC_CONNECTOR_DIRECTORY / "__init__.pyi"
     ) == expected_client_names
+
+
+def test_generated_operations_have_structured_docstrings() -> None:
+    """Require structured public API documentation in both client surfaces."""
+    operation_count = 0
+    violations: list[str] = []
+    connector_paths = [
+        *CONNECTOR_DIRECTORY.glob("*.py"),
+        *ASYNC_CONNECTOR_DIRECTORY.glob("*.py"),
+    ]
+
+    for path in connector_paths:
+        if path.name.startswith("_"):
+            continue
+
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for client in (
+            node
+            for node in tree.body
+            if isinstance(node, ast.ClassDef)
+            and any(
+                isinstance(base, ast.Name) and base.id == "ConnectorClientBase"
+                for base in node.bases
+            )
+        ):
+            for method in (
+                node
+                for node in client.body
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                and not node.name.startswith("_")
+                and any(
+                    isinstance(descendant, ast.Call)
+                    and isinstance(descendant.func, ast.Attribute)
+                    and descendant.func.attr == "send"
+                    for descendant in ast.walk(node)
+                )
+            ):
+                operation_count += 1
+                docstring = ast.get_docstring(method) or ""
+                if not all(
+                    section in docstring
+                    for section in ("Args:", "Returns:", "Raises:")
+                ):
+                    violations.append(
+                        f"{path.relative_to(REPOSITORY_ROOT).as_posix()}:"
+                        f"{method.lineno}: {method.name}"
+                    )
+
+    assert operation_count > 0
+    assert not violations, "Generated operations missing structured docs:\n" + "\n".join(
+        violations
+    )

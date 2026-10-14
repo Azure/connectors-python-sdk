@@ -167,6 +167,26 @@ class AzureautomationClient(ConnectorClientBase):
         Get job output
 
         Get outputs of an Azure Automation job.
+
+        Swagger operation ID: `GetJobOutput`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            automation_account: The name of the Azure Automation Account.
+            job_id: GUID for the ID of the run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -221,6 +241,26 @@ class AzureautomationClient(ConnectorClientBase):
         Get status of job
 
         Get Status of a Job
+
+        Swagger operation ID: `GetStatusOfJob`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            automation_account: The name of the Azure Automation Account.
+            job_id: GUID for the ID of the run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -279,6 +319,29 @@ class AzureautomationClient(ConnectorClientBase):
         Create job
 
         Create Job to run on hybrid worker
+
+        Swagger operation ID: `CreateJob`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            automation_account: The name of the Azure Automation Account.
+            runbook_name: Name of the runbook to run.
+            wait: Wait for the job to finish before completing the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -343,6 +406,21 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
@@ -412,6 +490,24 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ResourceGroups_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -486,6 +582,25 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `AutomationAccounts_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -559,6 +674,26 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Runbooks_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            automation_account: The name of the Azure Automation Account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -635,6 +770,27 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetRunbook`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the Azure Resource Group.
+            automation_account: The name of the Azure Automation Account.
+            runbook_name: The name of the Azure Automation runbook.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

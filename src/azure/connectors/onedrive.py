@@ -388,6 +388,21 @@ class OnedriveClient(ConnectorClientBase):
         Get file metadata
 
         This operation gets the metadata for a file.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -432,6 +447,22 @@ class OnedriveClient(ConnectorClientBase):
         Update file
 
         This operation updates a file.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -478,6 +509,21 @@ class OnedriveClient(ConnectorClientBase):
         Delete file
 
         This operation deletes a file.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -519,6 +565,21 @@ class OnedriveClient(ConnectorClientBase):
         Get file metadata using path
 
         This operation gets the metadata of a file using the path.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            path: The unique path of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
@@ -566,6 +627,23 @@ class OnedriveClient(ConnectorClientBase):
         Get file content using path
 
         This operation gets the content of a file using the path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            path: The unique path of the file.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -616,6 +694,23 @@ class OnedriveClient(ConnectorClientBase):
         Get file content
 
         This operation gets the content of a file.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            id: The unique identifier of the file.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -667,6 +762,24 @@ class OnedriveClient(ConnectorClientBase):
         Create file
 
         This operation creates a file.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            folder_path: The unique path of the folder.
+            name: The name of the file. Certain characters are disallowed by
+                OneDrive and will be replaced by underscores.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
@@ -720,6 +833,23 @@ class OnedriveClient(ConnectorClientBase):
         Upload file from URL
 
         This operation uploads a file from a URL to OneDrive.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            source: The url to the source file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/copyFile"
@@ -777,6 +907,23 @@ class OnedriveClient(ConnectorClientBase):
         Copy file
 
         This operation copies a file within OneDrive.
+
+        Swagger operation ID: `CopyDriveFile`.
+
+        Args:
+            id: The unique identifier of the file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -835,6 +982,23 @@ class OnedriveClient(ConnectorClientBase):
         Copy file using path
 
         This operation copies a file within OneDrive by path.
+
+        Swagger operation ID: `CopyDriveFileByPath`.
+
+        Args:
+            source: The unique path of the file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/CopyFileByPath"
@@ -892,6 +1056,23 @@ class OnedriveClient(ConnectorClientBase):
         Move or rename a file
 
         This operation moves or renames a file.
+
+        Swagger operation ID: `MoveFile`.
+
+        Args:
+            id: The unique identifier of the file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -950,6 +1131,23 @@ class OnedriveClient(ConnectorClientBase):
         Move or rename a file using path
 
         This operation moves or renames a file using the path.
+
+        Swagger operation ID: `MoveFileByPath`.
+
+        Args:
+            source: The unique path of the file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/MoveFileByPath"
@@ -1007,6 +1205,22 @@ class OnedriveClient(ConnectorClientBase):
 
         This operation converts a file to another format. The list of supported
         conversions can be found at https://aka.ms/onedriveconversions
+
+        Swagger operation ID: `ConvertFile`.
+
+        Args:
+            id: The unique identifier of the file.
+            type_: The target file type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1059,6 +1273,22 @@ class OnedriveClient(ConnectorClientBase):
         This operation converts a file to another format using the path. The
         list of supported conversions can be found at
         https://aka.ms/onedriveconversions
+
+        Swagger operation ID: `ConvertFileByPath`.
+
+        Args:
+            path: The unique path of the file.
+            type_: The target file type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1111,6 +1341,22 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetFileTags`.
+
+        Args:
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1177,6 +1423,23 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `AddFileTag`.
+
+        Args:
+            id: The unique identifier of the file.
+            tag: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1247,6 +1510,22 @@ class OnedriveClient(ConnectorClientBase):
         Remove file tag
 
         This operation removes a tag from a file.
+
+        Swagger operation ID: `RemoveFileTag`.
+
+        Args:
+            id: The unique identifier of the file.
+            tag: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1298,6 +1577,22 @@ class OnedriveClient(ConnectorClientBase):
 
         This operation gets the thumbnail of a file. The thumbnail will only be
         valid for 6 hours.
+
+        Swagger operation ID: `GetFileThumbnail`.
+
+        Args:
+            id: The unique identifier of the file.
+            size: The size of the thumbnail to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1352,6 +1647,21 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/folders"
@@ -1416,6 +1726,29 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `FindFiles`.
+
+        Args:
+            id: The unique identifier of the folder.
+            query: The search query to use.
+            find_mode: The search method to use. \"Search\" mode searches your
+                OneDrive using the search query (similar a normal search
+                engine). When \"Regular Expression Pattern Match\" mode is
+                selected, the search query will be treated as a regex pattern,
+                and it will return files with names that match the query.
+            max_file_count: Maximum number of files to return (1-100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1501,6 +1834,29 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `FindFilesByPath`.
+
+        Args:
+            query: The search query to use.
+            path: The unique path of the folder.
+            find_mode: The search method to use. \"Search\" mode searches your
+                OneDrive using the search query (similar a normal search
+                engine). When \"Regular Expression Pattern Match\" mode is
+                selected, the search query will be treated as a regex pattern,
+                and it will return files with names that match the query.
+            max_file_count: Maximum number of files to return (1-100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/findFile"
@@ -1579,6 +1935,22 @@ class OnedriveClient(ConnectorClientBase):
         Create share link
 
         This operation creates a share link for a file.
+
+        Swagger operation ID: `CreateShareLinkV2`.
+
+        Args:
+            id: The unique identifier of the file.
+            type_: The type of link.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1631,6 +2003,22 @@ class OnedriveClient(ConnectorClientBase):
         Create share link by path
 
         This operation creates a share link for a file using the path.
+
+        Swagger operation ID: `CreateShareLinkByPathV2`.
+
+        Args:
+            path: The unique path of the file.
+            type_: The type of link.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1688,6 +2076,24 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            source: The path to the archive file.
+            destination: The path to extract the archive contents.
+            overwrite: Overwrites the destination files if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"
@@ -1764,6 +2170,22 @@ class OnedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFolderV2`.
+
+        Args:
+            id: The unique identifier of the folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

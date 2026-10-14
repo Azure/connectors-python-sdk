@@ -114,6 +114,20 @@ class FormstackformsClient(ConnectorClientBase):
         Get Available Forms
 
         Returns all available forms
+
+        Swagger operation ID: `GetAvailableForms`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v2/form/"
 
@@ -151,6 +165,21 @@ class FormstackformsClient(ConnectorClientBase):
         Returns Form Schema from Webhook API
 
         Used for the x-ms-dynamic-schema
+
+        Swagger operation ID: `GetFormSchema`.
+
+        Args:
+            form_id: form_id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

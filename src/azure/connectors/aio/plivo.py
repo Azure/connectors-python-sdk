@@ -161,6 +161,23 @@ class PlivoClient(ConnectorClientBase):
         Make a call
 
         This operation is used to make a call.
+
+        Swagger operation ID: `MakeCall`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -205,6 +222,22 @@ class PlivoClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListMessages`.
+
+        Args:
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -264,6 +297,23 @@ class PlivoClient(ConnectorClientBase):
         Send SMS
 
         This operation is used to send a text message.
+
+        Swagger operation ID: `SendSMS`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            auth_id: Auth ID of your Plivo account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -306,6 +356,23 @@ class PlivoClient(ConnectorClientBase):
 
         This operation is used to fetch the details of a message, given the
         message ID.
+
+        Swagger operation ID: `GetMessage`.
+
+        Args:
+            auth_id: Auth ID of your Plivo account.
+            message_uuid: UUID of the message for which the details need to be
+                fetched.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

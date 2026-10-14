@@ -2028,6 +2028,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Use this action to create documents based on modern templates in a
         Agreements Solution workspace. This is behind a payment wall currently
         in planning (either license or PayG).
+
+        Swagger operation ID: `CreateAgreementsSolutionDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            template: Agreements Solution template.
+            document_name: Document file name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2084,6 +2103,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllTables`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2147,6 +2182,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Approve hub site join request. This will return an approval token that
         can be used to complete the join request using the join hub site
         action.
+
+        Swagger operation ID: `ApproveHubSiteJoin`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            joining_site_id: Id of the requesting site.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2199,6 +2250,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Cancel hub join request. If applicable, you should specify the same
         Approval Correlation Id as used in the \"Set hub site join status to
         pending\" action.
+
+        Swagger operation ID: `CancelHubSiteJoinApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2247,6 +2315,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Create sharing link for a file or folder
 
         Create sharing link for a file or folder.
+
+        Swagger operation ID: `CreateSharingLink`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the file or folder item.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2302,6 +2389,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Copy file (deprecated)
 
         Copies a file to a SharePoint site.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            source: Path to the source file.
+            destination: Path to the destination file.
+            overwrite: Whether or not to overwrite the destination file if it
+                exists.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2364,6 +2470,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Copies a file. Works in a similar way to the \"Copy to\" command in
         SharePoint libraries. Returns information about the new file after
         copy.
+
+        Swagger operation ID: `CopyFileAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2409,6 +2532,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Copies a folder. Works in a similar way to the \"Copy to\" command in
         SharePoint libraries. Returns information about the new folder after
         copy.
+
+        Swagger operation ID: `CopyFolderAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2455,6 +2595,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Uploads a file to a SharePoint site. Make sure to pick an existing
         library.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            folder_path: Must start with an existing library. Add folders if
+                needed.
+            name: Name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2513,6 +2672,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Gets information about the file such as size, etag, created date, etc.
         Uses a file identifier to pick the file. Use \"Get file properties\"
         action to get to the values stored in the columns in the library.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2558,6 +2733,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Update file
 
         Updates the contents of the file specified by the file identifier.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2605,6 +2797,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete file
 
         Deletes the file specified by the file identifier.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2649,6 +2857,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2700,6 +2925,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get file thumbnail
 
         Gets the thumbnail of a file by its file identifier.
+
+        Swagger operation ID: `GetFileThumbnail`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a file.
+            size: The size of the thumbnail to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2751,6 +2993,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2813,6 +3071,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Unique identifier of the folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2877,6 +3152,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Gets information about the file such as size, etag, created date, etc.
         Uses a file path to pick the file. Use \"Get file properties\" action
         to get to the values stored in the columns in the library.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2929,6 +3220,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get file content using path
 
         Gets file contents using the file path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2983,6 +3291,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets information about the folder. Uses a file identifier to pick the
         folder.
+
+        Swagger operation ID: `GetFolderMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            id: Select a folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3034,6 +3358,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Gets information about the folder. Uses a folder path to pick the
         folder.
+
+        Swagger operation ID: `GetFolderMetadataByPath`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            path: Select a folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3087,6 +3427,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Construct a SharePoint REST API to invoke. Note - This action may
         execute any SharePoint REST API you have access to. Please proceed with
         caution.
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3130,6 +3487,25 @@ class SharepointonlineClient(ConnectorClientBase):
         to complete the join successfully if that hub requires approval. If
         applicable, you should specify the same Approval Correlation Id as used
         in the \"Set hub site join status to pending\" action.
+
+        Swagger operation ID: `JoinHubSite`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            hub_site_id: Id of the hub site.
+            approval_token: Approval token for this request.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3187,6 +3563,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Moves a file. Works in a similar way to the \"Move to\" command in
         SharePoint libraries. Returns information about the new file after
         move.
+
+        Swagger operation ID: `MoveFileAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3232,6 +3625,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Moves a folder. Works in a similar way to the \"Move to\" command in
         SharePoint libraries. Returns information about the new folder after
         move.
+
+        Swagger operation ID: `MoveFolderAsync`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3278,6 +3688,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Approval Correlation Id is an optional parameter that helps SharePoint
         identify a particular hub join request. The requesting site can only
         have one pending request at a given time.
+
+        Swagger operation ID: `NotifyHubSiteJoinApprovalStarted`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            approval_correlation_id: Approval correlation identifier for this
+                request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3326,6 +3753,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3386,6 +3829,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Create new document set
 
         Creates a new document set list item.
+
+        Swagger operation ID: `CreateNewDocumentSet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3433,6 +3894,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create new folder
 
         Creates a new folder or folder path.
+
+        Swagger operation ID: `CreateNewFolder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3491,6 +3972,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Returns a single matching user value so it can be assigned to a column
         of type person. If there are no matches, or multiple matches, this
         action will error out.
+
+        Swagger operation ID: `SearchForUser`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: Pick the list or library that the column is in.
+            entity_id: Pick the column you want to assign the value to.
+            search_value: Use the email address, or the full name of the user.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3556,6 +4057,23 @@ class SharepointonlineClient(ConnectorClientBase):
         part of AI in SharePoint Public Preview. For more info on getting
         started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+
+        Swagger operation ID: `GetTableForm`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            form: Form identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3609,6 +4127,26 @@ class SharepointonlineClient(ConnectorClientBase):
         data source. Document generation forms is a part of AI in SharePoint
         Public Preview. For more info on getting started, see:
         https://learn.microsoft.com/sharepoint/dev/declarative-customization/structured-documents.
+
+        Swagger operation ID: `SubmitDocGenForm`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            form: Form identifier.
+            view: This parameter does nothing. Please do not use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3678,6 +4216,33 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetFileItems`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            folder_path: Select a folder, or leave blank for the whole library.
+            view_scope_option: Return entries contained in sub-folders (default
+                = true).
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3789,6 +4354,33 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            folder_path: Select a folder, or leave blank for the whole list.
+            view_scope_option: Return entries contained in sub-folders (default
+                = true).
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3893,6 +4485,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create item
 
         Creates a new item in a SharePoint list.
+
+        Swagger operation ID: `PostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3948,6 +4560,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Get item
 
         Gets a single item by its id from a SharePoint list.
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be retrieved.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4003,6 +4634,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete item
 
         Deletes an item from a SharePoint list.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4050,6 +4698,27 @@ class SharepointonlineClient(ConnectorClientBase):
         Update item
 
         Updates an item in a SharePoint list.
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            id: Unique identifier of item to be updated.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4107,6 +4776,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Create an approval request for an item or file
 
         Creates an approval request for an item or file.
+
+        Swagger operation ID: `CreateApprovalRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Id of the item the approval request is being created for.
+            approval_type: Select an approval type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4167,6 +4856,31 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns information about columns that have changed within a given time
         window. Note: The list must have Versioning turned on.
+
+        Swagger operation ID: `GetItemChanges`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Id of the item you want to fetch changes for.
+            since: Trigger Window Start token or an item version label (ex:
+                3.0) or an ISO 8601 date (YYYY-MM-DDThh:mmZ).
+            until: Trigger Window End token or an item version label (ex: 3.0)
+                or an ISO 8601 date (YYYY-MM-DDThh:mmZ). If blank, defaults to
+                latest version.
+            include_drafts: Boolean for whether to consider changes from minor
+                (draft) versions.
+            view: Returns only columns defined in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4239,6 +4953,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Check in a checked out file in a document library, which makes the
         version of the document available to others.
+
+        Swagger operation ID: `CheckInFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4284,6 +5017,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Check out a file in a document library to prevent others from editing
         the document, and your changes from being visible until the documented
         is checked in.
+
+        Swagger operation ID: `CheckOutFile`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4332,6 +5082,23 @@ class SharepointonlineClient(ConnectorClientBase):
         versions, a new version is created each time you check a file back into
         the library. By discarding the checkout, you can avoid making new
         versions when you haven't made any changes to the file.
+
+        Swagger operation ID: `DiscardFileCheckOut`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the list item the file is attached to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4381,6 +5148,25 @@ class SharepointonlineClient(ConnectorClientBase):
         the contents of the file. When using this with the On-Premises Data
         Gateway, the name of the library to connect to may need to be entered
         manually.
+
+        Swagger operation ID: `GetFileItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Unique identifier of item to be retrieved.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4438,6 +5224,26 @@ class SharepointonlineClient(ConnectorClientBase):
         Grant access to an item or a folder
 
         Grant access to an item or a folder in SharePoint to specific people.
+
+        Swagger operation ID: `GrantAccess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Unique identifier of the item or folder you want to grant
+                access to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4486,6 +5292,27 @@ class SharepointonlineClient(ConnectorClientBase):
         specified by the item id. Use \"Update file\" action to update file
         contents. When using this with the On-Premises Data Gateway, the name
         of the library to connect to may need to be entered manually.
+
+        Swagger operation ID: `PatchFileItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Unique identifier of item to be updated.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4544,6 +5371,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Updates the values stored in library columns for a file analyzed by the
         model specified by the ModelId.
+
+        Swagger operation ID: `PatchFileItemWithPredictedValues`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: Library Name.
+            id: Unique identifier of item to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4598,6 +5444,26 @@ class SharepointonlineClient(ConnectorClientBase):
         has content approval turned on. You must provide an ETag for pages and
         files. You can get the ETag using the Get File Metadata action. This
         action is only available for SharePoint Online and SharePoint 2019.
+
+        Swagger operation ID: `SetApprovalStatus`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint library name.
+            id: Id of the item you are setting the status of.
+            approval_action: Pick the approval action.
+            comments: Add the comments from the approver.
+            entity_tag: Add an ETag (required for files and pages).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4664,6 +5530,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Delete all links giving access to an item or a file and remove all
         people with direct access except for owners.
+
+        Swagger operation ID: `UnshareItem`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            id: Unique identifier of the item or file you want to stop sharing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4712,6 +5595,24 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItemAttachments`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item to get attachments from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4780,6 +5681,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Add attachment
 
         Adds a new attachment to the specified list item.
+
+        Swagger operation ID: `CreateAttachment`.
+
+        Args:
+            input: The binary request body.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item to attach the file to.
+            display_name: File name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4839,6 +5759,24 @@ class SharepointonlineClient(ConnectorClientBase):
         Delete attachment
 
         Deletes the specified attachment.
+
+        Swagger operation ID: `DeleteAttachment`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item the file is attached to.
+            attachment_id: File identifier for the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4888,6 +5826,24 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns file contents using the file identifier. The contents can be
         copied somewhere else, or be used as an attachment.
+
+        Swagger operation ID: `GetAttachmentContent`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            item_id: Id of the list item the file is attached to.
+            attachment_id: File identifier for the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4942,6 +5898,28 @@ class SharepointonlineClient(ConnectorClientBase):
         Microsoft Syntex. This preview requires a Syntex license. Pricing is
         subject to change. For more info see:
         https://docs.microsoft.com/en-us/microsoft-365/contentunderstanding/content-assembly.
+
+        Swagger operation ID: `CreateContentAssemblyDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            template: Document template.
+            folder_path: Must start with an existing library.
+            file_name: Document file name.
+            view: This parameter does nothing. Please do not use.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5010,6 +5988,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTableViews`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5078,6 +6073,26 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            source: Path to the source file.
+            destination: Path to the destination folder.
+            overwrite: Whether or not to overwrite the destination file if it
+                exists.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5157,6 +6172,21 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetDataSets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets"
         initial_request_url = request_url
@@ -5215,6 +6245,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAgreementsSolutionTemplates`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5277,6 +6323,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Agreements Solution - Get template fields
 
         Gets fields from template in a Agreements Solution workspace.
+
+        Swagger operation ID: `GetAgreementsSolutionTemplateFields`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            template: Agreements Solution template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5325,6 +6387,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTablesForLibraries`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5385,6 +6463,20 @@ class SharepointonlineClient(ConnectorClientBase):
         Get thumbnail size options
 
         Internal operation to get thumbnail size options.
+
+        Swagger operation ID: `GetThumbnailSizeOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getThumbnailSizeOptions"
 
@@ -5425,6 +6517,25 @@ class SharepointonlineClient(ConnectorClientBase):
         Get list metadata
 
         Gets metadata from a SharePoint list.
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            content_type_id: Contentype Id to filter columns by content type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5485,6 +6596,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTablesForListsAndLibraries`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5551,6 +6678,25 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEntitiesForUser`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            view: Avoid column threshold issues by only using columns defined
+                in a view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5626,6 +6772,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTableForms`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5693,6 +6856,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetDocGenForms`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5757,6 +6937,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get document generation form fields
 
         Gets fields from a document generation form in a SharePoint list.
+
+        Swagger operation ID: `GetDocGenFormFields`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list name.
+            form: Form identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5807,6 +7004,21 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetViewScopeOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getViewScopeOptions"
         initial_request_url = request_url
@@ -5865,6 +7077,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTablesForLightweightApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5925,6 +7153,20 @@ class SharepointonlineClient(ConnectorClientBase):
         Get available approval request types
 
         Internal operation to get the available approval request types.
+
+        Swagger operation ID: `GetApprovalTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getApprovalTypes"
 
@@ -5963,6 +7205,21 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Internal operation to fetch the schema for approval request creation
         based on the approval type.
+
+        Swagger operation ID: `GetApprovalSchema`.
+
+        Args:
+            approval_type: Type of approval request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getApprovalSchema"
         query_params = []
@@ -6008,6 +7265,22 @@ class SharepointonlineClient(ConnectorClientBase):
         Get metadata about the return type of the GetItemChanges operation
 
         Get metadata about the return type of the GetItemChanges operation.
+
+        Swagger operation ID: `GetItemChangesMetadata`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint list or library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6057,6 +7330,22 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTablesForApproval`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6117,6 +7406,20 @@ class SharepointonlineClient(ConnectorClientBase):
         When to send updates
 
         Internal operation to get day of week options.
+
+        Swagger operation ID: `GetDayOfWeekOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getDayOfWeekOptions"
 
@@ -6158,6 +7461,23 @@ class SharepointonlineClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetContentAssemblyTemplates`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6222,6 +7542,23 @@ class SharepointonlineClient(ConnectorClientBase):
         Get placeholders from template
 
         Gets placeholders from template in a SharePoint document library.
+
+        Swagger operation ID: `GetContentAssemblyPlaceholders`.
+
+        Args:
+            dataset: Example: https://contoso.sharepoint.com/sites/sitename.
+            table: SharePoint document library name.
+            template: Document template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

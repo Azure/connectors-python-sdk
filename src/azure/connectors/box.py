@@ -405,6 +405,21 @@ class BoxClient(ConnectorClientBase):
         Get file metadata using id
 
         Retrieves the file metadata from Box using file id.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            id: The unique identifier of the file in Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -449,6 +464,22 @@ class BoxClient(ConnectorClientBase):
         Update file
 
         Updates an existing file in Box.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            id: The unique identifier of the file to update in Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -495,6 +526,21 @@ class BoxClient(ConnectorClientBase):
         Delete file
 
         Deletes an existing file from Box.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            id: The unique identifier of the file to delete from Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -536,6 +582,21 @@ class BoxClient(ConnectorClientBase):
         Get file metadata using path
 
         Retrieves the file metadata from Box using path.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            path: The unique path to the file in Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
@@ -584,6 +645,23 @@ class BoxClient(ConnectorClientBase):
         Get file content using path
 
         Retrieves the file contents from Box using path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            path: The unique path to the file in Box.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -635,6 +713,23 @@ class BoxClient(ConnectorClientBase):
         Get file content using id
 
         Retrieves the file content from Box using id.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            id: The unique identifier of the file in Box.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -686,6 +781,23 @@ class BoxClient(ConnectorClientBase):
         Create file
 
         Uploads a file to Box.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            folder_path: The folder path to upload the file to Box.
+            name: The name of the file to create in Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
@@ -740,6 +852,24 @@ class BoxClient(ConnectorClientBase):
         Copy file
 
         Copy a file to a file path in Box.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            source: The url to source file.
+            destination: The destination file path in Box, including target
+                filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/copyFile"
@@ -799,6 +929,22 @@ class BoxClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            id: The unique identifier of the folder in Box.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -862,6 +1008,21 @@ class BoxClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/folders"
@@ -924,6 +1085,24 @@ class BoxClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            source: The path to the archive file.
+            destination: The path in Box to extract the archive contents.
+            overwrite: Overwrites the destination files if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"

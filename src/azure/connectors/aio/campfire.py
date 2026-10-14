@@ -174,6 +174,23 @@ class CampfireClient(ConnectorClientBase):
         Create a message
 
         Sends a message to the given room.
+
+        Swagger operation ID: `CreateMessage`.
+
+        Args:
+            room_id: A room associated with the account.
+            account: Account in Campfire.
+            message: Message text to be created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -226,6 +243,22 @@ class CampfireClient(ConnectorClientBase):
         Get user by ID
 
         Retrieves information about a user by given ID
+
+        Swagger operation ID: `GetUser`.
+
+        Args:
+            user_id: User ID.
+            account: Account in Campfire.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -276,6 +309,22 @@ class CampfireClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListAccounts`.
+
+        Args:
+            parent_operation: parentOperation.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/authorization.json"
         query_params = []
@@ -342,6 +391,22 @@ class CampfireClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRooms`.
+
+        Args:
+            account: Account in Campfire.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/rooms.json"
         query_params = []

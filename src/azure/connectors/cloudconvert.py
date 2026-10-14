@@ -201,6 +201,22 @@ class CloudconvertClient(ConnectorClientBase):
         Convert File
 
         Convert a file to another format
+
+        Swagger operation ID: `ConvertFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/convertfile"
 
@@ -235,6 +251,22 @@ class CloudconvertClient(ConnectorClientBase):
         Compress File
 
         Compress a PDF, PNG or JPG file
+
+        Swagger operation ID: `OptimizeFile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/optimize"
 
@@ -269,6 +301,22 @@ class CloudconvertClient(ConnectorClientBase):
         Create Website Screenshot
 
         Create a website screenshot as PDF, PNG or JPG
+
+        Swagger operation ID: `CaptureWebsite`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/jobs/capture-website"
@@ -305,6 +353,22 @@ class CloudconvertClient(ConnectorClientBase):
         Merge Files
 
         Merge multiple files in one PDF
+
+        Swagger operation ID: `MergeFiles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/jobs/merge"
 
@@ -338,6 +402,22 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Convert Options
+
+        Swagger operation ID: `GetConvertOptions`.
+
+        Args:
+            input_format: input_format.
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/convert"
         query_params = []
@@ -386,6 +466,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Optimize Options
+
+        Swagger operation ID: `GetOptimizeOptions`.
+
+        Args:
+            input_format: input_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/optimize"
         query_params = []
@@ -429,6 +524,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Capture Website Options
+
+        Swagger operation ID: `GetCaptureWebsiteOptions`.
+
+        Args:
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/flow/options/capture-website"
@@ -474,6 +584,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Merge Inputs
+
+        Swagger operation ID: `GetMergeInputs`.
+
+        Args:
+            number_of_inputs: number_of_inputs.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/inputs/merge"
         query_params = []
@@ -517,6 +642,21 @@ class CloudconvertClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Get Merge Options
+
+        Swagger operation ID: `GetMergeOptions`.
+
+        Args:
+            output_format: output_format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/flow/options/merge"
         query_params = []

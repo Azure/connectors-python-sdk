@@ -366,9 +366,9 @@ class ConnectorHttpClient:
         if selected_timeout > 0:
             if self._has_retry_policy:
                 request_options["timeout"] = selected_timeout
-            if self._has_retry_policy and isinstance(
-                self._transport, RequestsTransport
-            ):
+            else:
+                request_options["connection_timeout"] = selected_timeout
+            if isinstance(self._transport, RequestsTransport):
                 request_options["read_timeout"] = selected_timeout
         else:
             if self._has_retry_policy:

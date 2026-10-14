@@ -4893,6 +4893,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Abandoned Checkouts
 
         Get Abandoned Checkouts
+
+        Swagger operation ID: `GetAbandonedCheckouts`.
+
+        Args:
+            page_number: Page Number.
+            abandoned_from: Abandoned From.
+            product_code: Product Code.
+            customer_record_number: Customer Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4958,6 +4976,23 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Exhibitors`.
+
+        Args:
+            exhibit_code: Exhibit Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5030,6 +5065,32 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-of-Exams`.
+
+        Args:
+            page_number: The page number of the result set.
+            code: A specific Exam code.
+            category_name: A specific Exam Category name.
+            is_public: When set to true, only public Exams will be displayed;
+                If it's not specified will display all.
+            changed_since: When a date (yyyy-MM-ddTHH:mm:ss (UTC)) is
+                specified, only Exams modified after this date will be
+                displayed.
+            tag: Tag.
+            include_prices: When set to true, add the active price list for
+                every product.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5128,6 +5189,26 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-Registrants`.
+
+        Args:
+            event_code: Event Code.
+            page_number: Page Number.
+            session_code: Session Code.
+            include_details: Include Details.
+            registered_since: Registered Since.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5210,6 +5291,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Course Attendees
 
         Get Course Attendees
+
+        Swagger operation ID: `Get-Course-Attendees`.
+
+        Args:
+            code: Course Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5259,6 +5356,23 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Add-Exam-Scores`.
+
+        Args:
+            input: The request body.
+            exam_code: Exam Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5318,6 +5432,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members by Name
 
         Find Members by Name
+
+        Swagger operation ID: `Find-Members-by-Name`.
+
+        Args:
+            name: Individual or Organization name.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5368,6 +5498,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get Purchases for an Individual
 
         Get Purchases for an Individual
+
+        Swagger operation ID: `Get-Purchases-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            product_code: Product Code.
+            purchased_since: yyyy-MM-ddTHH:mm:ss.
+            product_category_code: Product Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5435,6 +5584,24 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID:
+        `Add-or-Update-a-List-of-Custom-Fields-Per-Organization`.
+
+        Args:
+            input: The request body.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5498,6 +5665,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Nominee
 
         Add Nominee
+
+        Swagger operation ID: `Add-Nominee`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5536,6 +5720,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Get-Individual-Custom-Field-Values`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5595,6 +5795,23 @@ class ImpexiumClient(ConnectorClientBase):
         Update Individual Custom Field Values
 
         Update Individual Custom Field Values.
+
+        Swagger operation ID: `Update-custom-field-value`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Customer ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5636,6 +5853,27 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Event-Cancellations-by-Event`.
+
+        Args:
+            event_code: A valid Event Code.
+            page_number: Page Number.
+            include_details: Indicates if additional information should be
+                returned.
+            cancelled_since: The initial date to search cancellations
+                (yyyy-MM-ddTHH:mm:ss).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5716,6 +5954,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Open Orders for an Individual
 
         Get All Open Orders for an Individual
+
+        Swagger operation ID: `Get-All-Open-Orders-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            include_line_items: Include Line Items.
+            from_date: From Date.
+            to_date: To Date.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5784,6 +6041,23 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-Completed-User-Tasks-by-User-ID-or-Email`.
+
+        Args:
+            user_id_or_email: A valid User ID or Email.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5852,6 +6126,23 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-Pending-User-Tasks-by-User-ID-or-Email`.
+
+        Args:
+            user_id_or_email: A valid User ID or Email.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5917,6 +6208,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Sales Opportunity
 
         Add Note to Sales Opportunity
+
+        Swagger operation ID: `Add-Note-to-Sales-Opportunity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Sales opportunity ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5953,6 +6261,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity to Sales Opportunity
 
         Add Activity to Sales Opportunity
+
+        Swagger operation ID: `Add-Activity-to-Sales-Opportunity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Opportunity ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5989,6 +6314,23 @@ class ImpexiumClient(ConnectorClientBase):
         Update Task by Task Number
 
         Update Task by Task Number
+
+        Swagger operation ID: `Update-Task-by-Task-Number`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            task_number: A valid Task Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6032,6 +6374,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Countries`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6091,6 +6449,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get All States by Country
 
         Get All States by Country
+
+        Swagger operation ID: `Get-All-States-by-Country`.
+
+        Args:
+            country_id: Country ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6140,6 +6514,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Exhibits`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6199,6 +6589,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete a Category for an Organization
 
         Delete a Category for an Organization
+
+        Swagger operation ID: `Delete-a-Category-for-an-Organization`.
+
+        Args:
+            record_number: Record Number.
+            category_code: Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6242,6 +6648,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Customer Request
 
         Add Customer Request
+
+        Swagger operation ID: `Add-Customer-Request`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
@@ -6274,6 +6696,22 @@ class ImpexiumClient(ConnectorClientBase):
         Update Customer Request
 
         Update Customer Request
+
+        Swagger operation ID: `Update-Customer-Request`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Requests"
 
@@ -6312,6 +6750,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Categories for an Organization
 
         Add Categories for an Organization
+
+        Swagger operation ID: `Add-Categories-for-an-Organization`.
+
+        Args:
+            input: The request body.
+            record_number: Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6354,6 +6808,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-of-Customer-Relationships`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6419,6 +6889,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Open-Customer-Request`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6477,6 +6963,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization Inactive Memberships
 
         Get Organization Inactive Memberships
+
+        Swagger operation ID: `Get-Organization-Inactive-Memberships`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6523,6 +7024,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete Record From Custom Data Table
 
         Delete Record From Custom Data Table
+
+        Swagger operation ID: `Delete-Record-From-Custom-Data-Table`.
+
+        Args:
+            table_name: Custom table name.
+            id: ID of the record to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6566,6 +7083,23 @@ class ImpexiumClient(ConnectorClientBase):
         Update User Task Progress or Mark as Completed
 
         Update User Task Progress or Mark as Completed
+
+        Swagger operation ID: `Update-User-Task-Progress-or-Mark-as-Completed`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id_or_email: A valid User Id or Email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6608,6 +7142,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by First Name
 
         Find Members (Individuals) by First Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-First-Name`.
+
+        Args:
+            first_name: First Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6664,6 +7215,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by Last Name
 
         Find Members (Individuals) by Last Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-Last-Name`.
+
+        Args:
+            last_name: Last Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6719,6 +7287,23 @@ class ImpexiumClient(ConnectorClientBase):
         Create a new task or Assign Task to a User
 
         Create a new task or Assign Task to a User
+
+        Swagger operation ID: `Assign-Task-to-a-User`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id_or_email: A valid User Id or Email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6755,6 +7340,22 @@ class ImpexiumClient(ConnectorClientBase):
         Delete a Category for an Individual
 
         Delete a Category for an Individual
+
+        Swagger operation ID: `Delete-a-Category-for-an-Individual`.
+
+        Args:
+            record_number: Record Number.
+            category_code: Category Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6799,6 +7400,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Notification to Individual
 
         Add Notification to Individual
+
+        Swagger operation ID: `Add-Notification-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6835,6 +7453,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Categories for an Individual
 
         Add Categories for an Individual
+
+        Swagger operation ID: `Add-Categories-for-an-Individual`.
+
+        Args:
+            input: The request body.
+            record_number: Individual Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6874,6 +7508,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add a New Task
 
         Add a New Task
+
+        Swagger operation ID: `Add-a-New-Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/tasks"
 
@@ -6933,6 +7583,41 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-of-All-Organization-Members`.
+
+        Args:
+            page_number: Page Number.
+            zip_code: Zip Code.
+            radius: Radius in Miles.
+            state_abbreviation: State Abbreviation.
+            congressional_district: Congressional District.
+            membership_type_code: A valid code for a Membership Type.
+            membership_type_category: A valid Membership Type Category name.
+            city: City.
+            name: Name.
+            tag: Tag.
+            latitude: Latitude.
+            longitude: Longitude.
+            domain: Domain.
+            include_membership: Include Membership Data.
+            include_address: Include Address Data.
+            include_phone: Include Phone Data.
+            include_email: Include Email Data.
+            include_custom_fields: Include Custom Field Data.
+            expiring_from: Expire Date - From.
+            expiring_to: Expire Date - To.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7112,6 +7797,37 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-of-All-Individual-Members`.
+
+        Args:
+            page_number: Page Number.
+            zip_code: Zip Code.
+            radius: Radius in Miles.
+            membership_type_code: A valid code for a Membership Type.
+            membership_type_category: A valid Membership Type Category name.
+            tag: Tag.
+            include_membership: Include Membership Data.
+            include_address: Include Address Data.
+            include_phone: Include Phone Data.
+            include_email: Include Email Data.
+            include_link: Include Link Data.
+            include_custom_fields: Include Custom Field Data.
+            include_categories: Include Categories Data.
+            include_membership_renewal_url: Include Membership Renewal URLs.
+            expiring_from: Expire Date - From.
+            expiring_to: Expire Date - To.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7254,6 +7970,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get List of Active Certifications for an Organization
 
         Get List of Active Certifications for an Organization
+
+        Swagger operation ID:
+        `Get-List-of-Active-Certifications-for-an-Organization`.
+
+        Args:
+            id_or_record_number: Organization ID or Record Number.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7300,6 +8033,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get List of Active Certifications for an Individual
 
         Get List of Active Certifications for an Individual
+
+        Swagger operation ID:
+        `Get-List-of-Active-Certifications-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7345,6 +8095,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual Inactive Memberships
 
         Get Individual Inactive Memberships
+
+        Swagger operation ID: `Get-Individual-Inactive-Memberships`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7391,6 +8156,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity to Organization
 
         Add Activity to Organization
+
+        Swagger operation ID: `Add-Activity-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7429,6 +8211,25 @@ class ImpexiumClient(ConnectorClientBase):
         Register an Individual for a Free Session
 
         Register an Individual for a Free Session
+
+        Swagger operation ID: `Register-an-Individual-for-a-Free-Session`.
+
+        Args:
+            input: The request body.
+            event_code: A Valid Event Code.
+            customer_id_or_record_number: A Valid Individual ID or Record
+                Number.
+            registration_number: A Valid Registration Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7479,6 +8280,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get a List of Licenses
 
         Get a List of Licenses
+
+        Swagger operation ID: `Get-a-List-of-Licenses`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7528,6 +8345,23 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-All-Awards`.
+
+        Args:
+            page_number: Page Number.
+            year: Year.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7596,6 +8430,23 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by Name
 
         Find Members (Individuals) by Name
+
+        Swagger operation ID: `Find-Members-or-Individuals-by-Name`.
+
+        Args:
+            name: Individual Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7650,6 +8501,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get a List of All Services of an Organization
 
         Get a List of All Services of an Organization
+
+        Swagger operation ID: `Get-a-List-of-All-Services-of-an-Organization`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7691,6 +8557,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add a Service to an Organization
 
         Add a Service to an Organization
+
+        Swagger operation ID: `Add-a-Service-to-an-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7733,6 +8616,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Phone for an Individual
 
         Update Phone for an Individual
+
+        Swagger operation ID: `Update-Phone-for-an-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            id: Phone ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7780,6 +8681,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Phone for an Organization
 
         Update Phone for an Organization
+
+        Swagger operation ID: `Update-Phone-for-an-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            id: Phone ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7826,6 +8745,23 @@ class ImpexiumClient(ConnectorClientBase):
         Delete an Individual Web Link
 
         Delete an Individual Web Link
+
+        Swagger operation ID: `Delete-an-Individual-Web-Link`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: A valid Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7869,6 +8805,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Web Link for Individual
 
         Add Web Link for Individual
+
+        Swagger operation ID: `Add-Web-Link-for-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: A valid Individual Id or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7909,6 +8862,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Phone to Organization
 
         Add Phone to Organization
+
+        Swagger operation ID: `Add-Phone-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7955,6 +8925,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get Nominees by Committee
 
         Get Nominees by Committee
+
+        Swagger operation ID: `Get-Nominees-by-Committee`.
+
+        Args:
+            code: Committee Code.
+            page_number: Page Number.
+            term: Term.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8009,6 +8996,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization's Active Subscriptions
 
         Get Organization's Active Subscriptions
+
+        Swagger operation ID: `Get-Organizations-Active-Subscriptions`.
+
+        Args:
+            id: Organization ID.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8055,6 +9058,23 @@ class ImpexiumClient(ConnectorClientBase):
         Delete an Organization Web Link
 
         Delete an Organization Web Link
+
+        Swagger operation ID: `Delete-an-Organization-Web-Link`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8098,6 +9118,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Web Link for Organization
 
         Add Web Link for Organization
+
+        Swagger operation ID: `Add-Web-Link-for-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8138,6 +9175,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Email to Organization
 
         Add Email to Organization
+
+        Swagger operation ID: `Add-Email-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8176,6 +9230,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Organization's Relationships
 
         Get Organization's Relationships
+
+        Swagger operation ID: `Get-Organizations-Relationships`.
+
+        Args:
+            id: Organization ID.
+            page_number: Page Number.
+            relationship_name: Name of the Relationship.
+            includes_details: Includes Details.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8235,6 +9307,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update Address to Organization
 
         Add or Update Address to Organization
+
+        Swagger operation ID: `Add-or-Update-Address-to-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Organization ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8283,6 +9372,24 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID:
+        `Add-or-Update-a-List-of-Custom-Fields-Per-Individual`.
+
+        Args:
+            input: The request body.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8345,6 +9452,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Upcoming Events
 
         Get Upcoming Events
+
+        Swagger operation ID: `Get-Upcoming-Events`.
+
+        Args:
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8386,6 +9508,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Phone to Individual
 
         Add Phone to Individual
+
+        Swagger operation ID: `Add-Phone-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8432,6 +9571,23 @@ class ImpexiumClient(ConnectorClientBase):
         Get Committee Information for an Individual
 
         Get Committee Information for an Individual
+
+        Swagger operation ID: `Get-Committee-Information-for-an-Individual`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            include_inactive: Include Inactive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8488,6 +9644,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Get-Organization-Custom-Field-Values`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8549,6 +9721,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Get-Organization-Active-Memberships`.
+
+        Args:
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8615,6 +9803,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Events
 
         Get All Events
+
+        Swagger operation ID: `Get-All-Events`.
+
+        Args:
+            page_number: Page Number.
+            code: Code.
+            name: Name.
+            tag: Tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8676,6 +9882,22 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Get-Individual-Active-Memberships`.
+
+        Args:
+            id: Individual ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8736,6 +9958,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Event Registrations Information for an Individual
 
         Get All Event Registrations Information for an Individual
+
+        Swagger operation ID:
+        `Get-All-Event-Registrations-Information-for-an-Individual`.
+
+        Args:
+            id_or_record_number: Individual ID or Record Number.
+            page_number: Page Number.
+            event_code: Event Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8792,6 +10032,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual's Relationships
 
         Get Individual's Relationships
+
+        Swagger operation ID: `Get-Individuals-Relationships`.
+
+        Args:
+            id: Individual ID.
+            page_number: Page Number.
+            relationship_name: Name of the Relationship.
+            include_details: Include Details.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8852,6 +10110,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update an Individual Email
 
         Update an Individual Email
+
+        Swagger operation ID: `Update-an-Individual-Email`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            current_email_address: Email Address to Update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8893,6 +10169,23 @@ class ImpexiumClient(ConnectorClientBase):
         Save Relationship for Organization
 
         Save Relationship for Organization
+
+        Swagger operation ID: `Save-Relationship-for-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8929,6 +10222,24 @@ class ImpexiumClient(ConnectorClientBase):
         Add Individual
 
         Adds an Individual.
+
+        Swagger operation ID: `Add-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            create_user: Choose True if a user account should be created when
+                the individual is created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Individuals"
         query_params = []
@@ -8975,6 +10286,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Email to Individual
 
         Add Email to Individual
+
+        Swagger operation ID: `Add-Email-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID Or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9020,6 +10348,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add or Update Address to Individual
 
         Add or Update Address to Individual
+
+        Swagger operation ID: `Add-or-Update-Address-to-Individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual ID or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9067,6 +10412,25 @@ class ImpexiumClient(ConnectorClientBase):
         Find Members (Individuals) by First Name and Last Name
 
         Find Members (Individuals) by First Name and Last Name
+
+        Swagger operation ID:
+        `Find-members-or-individuals-by-first-and-last-name`.
+
+        Args:
+            first_name: First Name.
+            last_name: Last Name.
+            page_number: Page Number.
+            include_email: Include Email Data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9125,6 +10489,24 @@ class ImpexiumClient(ConnectorClientBase):
         Get Committee Members by committee ID or code
 
         Get Committee Members by Committee ID or Code
+
+        Swagger operation ID: `Get-Committee-Members-by-committee-ID-or-code`.
+
+        Args:
+            id_or_code: Committee ID or Code.
+            page_number: Page Number.
+            term: Term.
+            position_codes: Position Codes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9179,6 +10561,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Activity
 
         Add Activity.
+
+        Swagger operation ID: `Add-Activity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9215,6 +10614,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Individual by Id or Email or Record Number
 
         Find Individual by Id or Email.
+
+        Swagger operation ID: `Find-Individual-IDOrEmail`.
+
+        Args:
+            id_or_record_number_or_email: Id or Record Number or Email.
+            page_number: pageNumber.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9265,6 +10680,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Relationship to Individual
 
         Add Relationship to Individual.
+
+        Swagger operation ID: `Add-relationship-to-individual`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9301,6 +10733,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Education Credits to Individual
 
         Add a new Education Credit to an Individual.
+
+        Swagger operation ID: `Individual-Add-Education-Credit`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id_or_record_number: Individual Id or Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9341,6 +10790,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Individual
 
         Add a Note to an Individual.
+
+        Swagger operation ID: `Individual-AddNote`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Individual Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9377,6 +10843,22 @@ class ImpexiumClient(ConnectorClientBase):
         Lookup Individuals
 
         Lookup Individuals by Name
+
+        Swagger operation ID: `Individuals-LookupByName`.
+
+        Args:
+            page_number: pageNumber.
+            name: Individual Name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9426,6 +10908,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Individual to Committee
 
         Add Individual to Committee.
+
+        Swagger operation ID: `Add-To-Committee`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9469,6 +10968,25 @@ class ImpexiumClient(ConnectorClientBase):
         Update Committee Member
 
         Update Committee Member.
+
+        Swagger operation ID: `Update-Committee-Member`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            code: Committee Code.
+            member_record_number: Member Record Number.
+            current_position_code: Current Position Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9510,6 +11028,22 @@ class ImpexiumClient(ConnectorClientBase):
         Add Organization
 
         Add Organization.
+
+        Swagger operation ID: `Add-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/Organizations"
 
@@ -9548,6 +11082,23 @@ class ImpexiumClient(ConnectorClientBase):
         Update Organization
 
         Update Organization.
+
+        Swagger operation ID: `Update-Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9589,6 +11140,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Organization by Id or Record Number
 
         Get organization's profile information by ID or Record Number
+
+        Swagger operation ID: `Organization-Get-Profile`.
+
+        Args:
+            id_or_recordnumber: Organization Id or Record Number.
+            page_number: pageNumber.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9639,6 +11206,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Note to Organization
 
         Add a Note to an Organization.
+
+        Swagger operation ID: `Organization-AddNote`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9675,6 +11259,22 @@ class ImpexiumClient(ConnectorClientBase):
         Lookup Organizations
 
         Lookup Organizations by Name or Acronym
+
+        Swagger operation ID: `Organization-LookupByName`.
+
+        Args:
+            page_number: pageNumber.
+            name: Name or Acronym.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9727,6 +11327,25 @@ class ImpexiumClient(ConnectorClientBase):
         Get All Committees
 
         Get All Committees
+
+        Swagger operation ID: `Get-All-Committees`.
+
+        Args:
+            page_number: Page Number.
+            code: Committee Code.
+            name: Committee Name.
+            term: Term.
+            active_only: Active Only.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9790,6 +11409,21 @@ class ImpexiumClient(ConnectorClientBase):
         Get Positions by Committee
 
         Get Positions by Committee
+
+        Swagger operation ID: `Get-Positions-by-Committee`.
+
+        Args:
+            code: Committee Code.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9831,6 +11465,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Sub-Committees
 
         Get Sub-Committees
+
+        Swagger operation ID: `Get-Sub-Committees`.
+
+        Args:
+            code: Code.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9877,6 +11527,22 @@ class ImpexiumClient(ConnectorClientBase):
         Get Individual's Active Subscriptions
 
         Get Individual's Active Subscriptions
+
+        Swagger operation ID: `Get-Individuals-Active-Subscriptions`.
+
+        Args:
+            id: Individual.
+            page_number: Page Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9929,6 +11595,25 @@ class ImpexiumClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `List-all-Individuals`.
+
+        Args:
+            page_number: Page Number.
+            name: Individual Name.
+            include_details: Include Details.
+            old_id: Individual Old ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10006,6 +11691,22 @@ class ImpexiumClient(ConnectorClientBase):
         Find Customer by Phone Number
 
         Find Customer by Phone Number.
+
+        Swagger operation ID: `Find-Customer-Phone`.
+
+        Args:
+            page_number: pageNumber.
+            phone_number: Phone Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10057,6 +11758,22 @@ class ImpexiumClient(ConnectorClientBase):
         Mark Registrant as Attended
 
         Mark the Registrant as Attended for the specified Events.
+
+        Swagger operation ID: `Mark-Registrant-Attended`.
+
+        Args:
+            input: The request body.
+            record_number: Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10098,6 +11815,23 @@ class ImpexiumClient(ConnectorClientBase):
         Add Award Nomination
 
         Add a new Award Nomination.
+
+        Swagger operation ID: `Awards-AddAwardNomination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10135,6 +11869,24 @@ class ImpexiumClient(ConnectorClientBase):
         Update Award Nomination
 
         Update an existing Award Nomination.
+
+        Swagger operation ID: `Awards-UpdateAwardNomination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Award Id.
+            nominee_record_number: Nominee Record Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10176,6 +11928,22 @@ class ImpexiumClient(ConnectorClientBase):
         List Award Individual Recipients
 
         List all Individuals that are Award Recipients.
+
+        Swagger operation ID: `Awards-GetIndividualAwardRecipients`.
+
+        Args:
+            page_number: pageNumber.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10227,6 +11995,22 @@ class ImpexiumClient(ConnectorClientBase):
         List Award Organization Recipients
 
         List all Organizations that are Award Recipients.
+
+        Swagger operation ID: `Awards-GetOrganizationAwardRecipients`.
+
+        Args:
+            page_number: pageNumber.
+            id: Award Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

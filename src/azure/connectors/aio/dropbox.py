@@ -164,6 +164,21 @@ class DropboxClient(ConnectorClientBase):
         Get file metadata
 
         This operation gets the metadata for a file.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -208,6 +223,22 @@ class DropboxClient(ConnectorClientBase):
         Update file
 
         This operation updates a file.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -254,6 +285,21 @@ class DropboxClient(ConnectorClientBase):
         Delete file
 
         This operation deletes a file.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            id: The unique identifier of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -295,6 +341,21 @@ class DropboxClient(ConnectorClientBase):
         Get file metadata using path
 
         This operation gets the metadata of a file using the path.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            path: The unique path of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
@@ -343,6 +404,23 @@ class DropboxClient(ConnectorClientBase):
         Get file content using path
 
         This operation gets the content of a file using the path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            path: The unique path of the file.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -394,6 +472,23 @@ class DropboxClient(ConnectorClientBase):
         Get file content
 
         This operation gets the content of a file.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            id: The unique identifier of the file.
+            infer_content_type: A boolean value (true, false) to infer
+                content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -445,6 +540,23 @@ class DropboxClient(ConnectorClientBase):
         Create file
 
         This operation creates a file in a folder.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            folder_path: The path to the folder.
+            name: The name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
@@ -499,6 +611,23 @@ class DropboxClient(ConnectorClientBase):
         Copy file
 
         This operation copies a file to Dropbox.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            source: The url to source file.
+            destination: The destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/copyFile"
@@ -558,6 +687,22 @@ class DropboxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            id: The unique identifier of the folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -622,6 +767,21 @@ class DropboxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/folders"
@@ -684,6 +844,24 @@ class DropboxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            source: The path to the archive file.
+            destination: The path to extract the archive contents.
+            overwrite: Overwrites the destination files if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"

@@ -311,6 +311,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `DeviceGroups_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/deviceGroups"
@@ -382,6 +398,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device group
 
         Get details about an existing device group by ID.
+
+        Swagger operation ID: `DeviceGroups_Get`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -434,6 +466,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a device group
 
         Create or update a device group.
+
+        Swagger operation ID: `DeviceGroups_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -485,6 +535,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete device group
 
         Delete an existing device group by ID
+
+        Swagger operation ID: `DeviceGroups_Remove`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -537,6 +603,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `DeviceGroups_GetDevices`.
+
+        Args:
+            device_group_id: Unique ID of the device group.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -614,6 +697,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device cloud properties (deprecated)
 
         Get all cloud property values of a device by device ID (deprecated).
+
+        Swagger operation ID: `Devices_GetCloudProperties`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -673,6 +773,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update device cloud properties (deprecated)
 
         Update all cloud property values of a device by device ID (deprecated).
+
+        Swagger operation ID: `Devices_UpdateCloudProperties`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -734,6 +853,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Execute a device command (deprecated)
 
         Execute a command on a device (deprecated).
+
+        Swagger operation ID: `Devices_ExecuteComponentCommand`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -797,6 +937,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `DeviceRelationships_List`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -875,6 +1032,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Get details about an existing device relationship by device ID and by
         relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Get`.
+
+        Args:
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -931,6 +1105,25 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Create a new device relationship between the given device and a new
         device given a device ID and a relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            relationship_id: Unique ID of the device relationship.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -987,6 +1180,25 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Update an existing device relationship between the given device and a
         new device given a device ID and a relationship ID.
+
+        Swagger operation ID: `DeviceRelationships_Update`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1042,6 +1254,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Delete an existing device relationship by device ID and relationship
         ID.
+
+        Swagger operation ID: `DeviceRelationships_Remove`.
+
+        Args:
+            device_id: Unique ID of the device.
+            relationship_id: Unique ID of the device relationship.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1095,6 +1324,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Jobs_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/ga_2022_07_31/jobs"
         query_params = []
@@ -1164,6 +1409,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a job
 
         Get details about an existing job by ID.
+
+        Swagger operation ID: `Jobs_Get`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1214,6 +1475,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a job
 
         Create and execute a new job via its job definition.
+
+        Swagger operation ID: `Jobs_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            job_type: Type of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1270,6 +1550,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Jobs_GetDevices`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1342,6 +1639,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Stop a running job
 
         Stop execution of a job that is currently running.
+
+        Swagger operation ID: `Jobs_Stop`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1385,6 +1698,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Resume a stopped job
 
         Resume execution of an existing stopped job.
+
+        Swagger operation ID: `Jobs_Resume`.
+
+        Args:
+            job_id: Unique ID of the job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1429,6 +1758,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Resume a job on failed devices
 
         Execute a rerun of an existing job on all failed devices.
+
+        Swagger operation ID: `Jobs_Rerun`.
+
+        Args:
+            job_id: Unique ID of the job.
+            rerun_id: Unique ID of the rerun.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1484,6 +1830,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Organizations_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/organizations"
@@ -1555,6 +1917,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get an organization
 
         Get details about an existing organization by ID.
+
+        Swagger operation ID: `Organizations_Get`.
+
+        Args:
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1607,6 +1985,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create an organization
 
         Create a new organization.
+
+        Swagger operation ID: `Organizations_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1658,6 +2054,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete organization
 
         Delete an existing organization by ID
+
+        Swagger operation ID: `Organizations_Remove`.
+
+        Args:
+            organization_id: Unique ID of the organization.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1709,6 +2121,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ScheduledJobs_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/ga_2022_07_31/scheduledJobs"
@@ -1780,6 +2208,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a scheduled job
 
         Get details about an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Get`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1834,6 +2278,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create a scheduled job
 
         Create and execute a new scheduled job via its job definition.
+
+        Swagger operation ID: `ScheduledJobs_Set`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            job_type: Type of the job.
+            scheduled_job_end_type: How the scheduled job should end (not
+                applied to device template migrations).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1897,6 +2362,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update a scheduled job
 
         Update an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Update`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            scheduled_job_end_type: How the scheduled job should end (not
+                applied to device template migrations).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1953,6 +2438,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a scheduled job
 
         Delete an existing scheduled job by ID.
+
+        Swagger operation ID: `ScheduledJobs_Remove`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2005,6 +2506,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ScheduledJobs_ListJobs`.
+
+        Args:
+            scheduled_job_id: Unique ID of the scheduled job.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2081,6 +2599,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device by ID
 
         Get details about an existing device by device ID.
+
+        Swagger operation ID: `Devices_Get_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2131,6 +2665,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device command response
 
         Get the last response for a device command.
+
+        Swagger operation ID: `Devices_GetCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2192,6 +2744,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get component command response
 
         Get the last response for a device component command.
+
+        Swagger operation ID: `Devices_GetComponentCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2255,6 +2826,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get component telemetry value
 
         Get the last telemetry value from a component.
+
+        Swagger operation ID: `Devices_GetComponentTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2318,6 +2908,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module command response
 
         Get the last response for a device module command
+
+        Swagger operation ID: `Devices_GetModuleCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2382,6 +2991,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module component command response
 
         Get the last response for a module component command.
+
+        Swagger operation ID: `Devices_GetModuleComponentCommandResponse_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2448,6 +3077,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module component telemetry value
 
         Get the last telemetry value from a module component.
+
+        Swagger operation ID: `Devices_GetModuleComponentTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2512,6 +3161,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module properties
 
         Get all property values of a module.
+
+        Swagger operation ID: `Devices_GetModuleProperties_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2574,6 +3241,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get module telemetry value
 
         Get the last telemetry value from a module.
+
+        Swagger operation ID: `Devices_GetModuleTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2635,6 +3321,23 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device properties
 
         Get all property values of a device by device ID.
+
+        Swagger operation ID: `Devices_GetProperties_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2690,6 +3393,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get device telemetry value
 
         Get the last telemetry value from a device.
+
+        Swagger operation ID: `Devices_GetTelemetryValue_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            telemetry_name: Name of this device telemetry.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2750,6 +3471,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Devices_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/devices"
         query_params = []
@@ -2819,6 +3556,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a device
 
         Delete an existing device by device ID.
+
+        Swagger operation ID: `Devices_Remove_V1`.
+
+        Args:
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2868,6 +3621,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a device command
 
         Run a command on a device.
+
+        Swagger operation ID: `Devices_RunCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2930,6 +3703,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a component command
 
         Run a command on a component.
+
+        Swagger operation ID: `Devices_RunComponentCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2994,6 +3788,27 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a module command
 
         Run a command on a module.
+
+        Swagger operation ID: `Devices_RunModuleCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3059,6 +3874,28 @@ class AzureiotcentralClient(ConnectorClientBase):
         Run a module component command
 
         Run a command on a module component.
+
+        Swagger operation ID: `Devices_RunModuleComponentCommand_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            component_name: Name of the device component.
+            command_name: Name of this device command.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3122,6 +3959,24 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create or update a device
 
         Create a new device or update an existing one by device ID.
+
+        Swagger operation ID: `Devices_Set_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3173,6 +4028,26 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update module properties
 
         Update all property values of a module.
+
+        Swagger operation ID: `Devices_UpdateModuleProperties_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            module: Name of the device module.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3234,6 +4109,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update device properties
 
         Update all property values of a device by device ID.
+
+        Swagger operation ID: `Devices_UpdateProperties_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            device_id: Unique ID of the device.
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3287,6 +4181,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get a device template by ID
 
         Get details about an existing device template by ID.
+
+        Swagger operation ID: `DeviceTemplates_Get_V1`.
+
+        Args:
+            template_id: Unique ID of the template.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3337,6 +4247,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `DeviceTemplates_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/deviceTemplates"
         query_params = []
@@ -3406,6 +4332,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete a device template
 
         Delete an existing device template by ID.
+
+        Swagger operation ID: `DeviceTemplates_Remove_V1`.
+
+        Args:
+            template_id: Unique ID of the template.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3452,6 +4394,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get role
 
         Get a role by ID.
+
+        Swagger operation ID: `Roles_Get_V1`.
+
+        Args:
+            role_id: Unique ID for the role.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3502,6 +4460,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Roles_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/roles"
         query_params = []
@@ -3567,6 +4541,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Create user
 
         Create a user in the application
+
+        Swagger operation ID: `Users_Create_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            user_type: Type of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3620,6 +4613,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Get user
 
         Get a user by ID
+
+        Swagger operation ID: `Users_Get_V1`.
+
+        Args:
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3670,6 +4679,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Users_List_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v1/users"
         query_params = []
@@ -3733,6 +4758,22 @@ class AzureiotcentralClient(ConnectorClientBase):
         Delete user
 
         Delete a user
+
+        Swagger operation ID: `Users_Remove_V1`.
+
+        Args:
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3781,6 +4822,25 @@ class AzureiotcentralClient(ConnectorClientBase):
         Update user
 
         Update a user in the application via patch
+
+        Swagger operation ID: `Users_Update_V1`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            user_id: Unique ID of the user.
+            application: Unique ID of the application.
+            user_type: Type of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3833,6 +4893,21 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Applications_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/applications"
@@ -3899,6 +4974,22 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `DeviceTemplates_List`.
+
+        Args:
+            application: Unique ID of the application.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/preview/deviceTemplates"
@@ -3972,6 +5063,24 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Workflow_GetComponents`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4051,6 +5160,26 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Workflow_GetCapabilities`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            component: component.
+            module: module.
+            type_: type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4140,6 +5269,26 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Workflow_GetCapabilities_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            component: component.
+            module: module.
+            type_: type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4227,6 +5376,24 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Workflow_GetComponents_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4303,6 +5470,23 @@ class AzureiotcentralClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Workflow_GetModules_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: template.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/v1/_internal/workflow/modules"
@@ -4370,6 +5554,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCloudProperties
+
+        Swagger operation ID: `Schema_DeviceCloudProperties`.
+
+        Args:
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4423,6 +5623,24 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand
+
+        Swagger operation ID: `Schema_DeviceCommand`.
+
+        Args:
+            application: Unique ID of the application.
+            instance_of: The device template definition for the device.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4487,6 +5705,25 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceCommand_V1
+
+        Swagger operation ID: `Schema_DeviceCommand_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4554,6 +5791,23 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceProperties
+
+        Swagger operation ID: `Schema_DeviceProperties_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4613,6 +5867,25 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_DeviceTelemetry
+
+        Swagger operation ID: `Schema_DeviceTelemetry_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            template: The device template definition for the device.
+            module: module.
+            component: component.
+            capability: capability.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4679,6 +5952,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_Job
+
+        Swagger operation ID: `Schema_Job`.
+
+        Args:
+            application: Unique ID of the application.
+            job_type: job_type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4732,6 +6021,24 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_ScheduledJob
+
+        Swagger operation ID: `Schema_ScheduledJob`.
+
+        Args:
+            application: Unique ID of the application.
+            scheduled_job_end_type: scheduled_job_end_type.
+            job_type: job_type.
+            patch: patch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4794,6 +6101,23 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         Schema_User
+
+        Swagger operation ID: `Schema_User_V1`.
+
+        Args:
+            application: Unique ID of the application.
+            user_type: user_type.
+            patch: patch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4850,6 +6174,22 @@ class AzureiotcentralClient(ConnectorClientBase):
     ) -> None:
         """
         Schema_WebhookActionBody
+
+        Swagger operation ID: `Schema_WebhookActionBody`.
+
+        Args:
+            application: Unique ID of the application.
+            rule: rule.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

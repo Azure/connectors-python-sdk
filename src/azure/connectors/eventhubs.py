@@ -245,6 +245,24 @@ class EventhubsClient(ConnectorClientBase):
         Send event
 
         Send event.
+
+        Swagger operation ID: `SendEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            event_hub_name: Name of the Event Hub.
+            partition_key: Partition key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -290,6 +308,23 @@ class EventhubsClient(ConnectorClientBase):
         Send one or more events to the Event Hub partition
 
         Send one or more events to the Event Hub partition.
+
+        Swagger operation ID: `SendEvents`.
+
+        Args:
+            input: The request body.
+            event_hub_name: Name of the Event Hub.
+            partition_key: Partition key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -334,6 +369,21 @@ class EventhubsClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEventHubs`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/eventhubs"
         initial_request_url = request_url
@@ -391,6 +441,21 @@ class EventhubsClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetContentTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/contenttypes"
         initial_request_url = request_url
@@ -449,6 +514,22 @@ class EventhubsClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetConsumerGroups`.
+
+        Args:
+            event_hub_name: The Event Hub name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/consumergroups"
         query_params = []
@@ -514,6 +595,22 @@ class EventhubsClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetPartitionKeys`.
+
+        Args:
+            event_hub_name: The Event Hub name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/partitions"
         query_params = []
@@ -577,6 +674,22 @@ class EventhubsClient(ConnectorClientBase):
         Generate event schema
 
         Generate event schema V2.
+
+        Swagger operation ID: `GenerateEventSchemaV2`.
+
+        Args:
+            content_type: Content type.
+            content_schema: content schema of the event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/eventschemaV2"
         query_params = []

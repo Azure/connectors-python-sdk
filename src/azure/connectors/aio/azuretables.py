@@ -216,6 +216,24 @@ class AzuretablesClient(ConnectorClientBase):
         Insert Entity
 
         Operation to add an entity to a table.
+
+        Swagger operation ID: `CreateEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -262,6 +280,22 @@ class AzuretablesClient(ConnectorClientBase):
         Create table
 
         This operation adds a table to the storage account.
+
+        Swagger operation ID: `CreateTable_V2`.
+
+        Args:
+            input: The request body.
+            storage_account_name: Azure Storage account name or table endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -310,6 +344,26 @@ class AzuretablesClient(ConnectorClientBase):
         Delete Entity
 
         Operation to delete an entity.
+
+        Swagger operation ID: `DeleteEntity_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -366,6 +420,22 @@ class AzuretablesClient(ConnectorClientBase):
         Delete a table
 
         Delete a table.
+
+        Swagger operation ID: `DeleteTable_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -414,6 +484,28 @@ class AzuretablesClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetEntities_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            filter: OData filter query for which entities to return. Example:
+                Column eq 'Value' and Column2 ne 2. Invalid OData queries, such
+                as not wrapping string values in quotes will return 501.
+            select: OData select query for the columns to be returned. Example:
+                Column, PartitionKey.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -501,6 +593,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         This operation gets the entity in a table based on the partition and
         row key.
+
+        Swagger operation ID: `GetEntity_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            select: OData select query for the columns to be returned. Example:
+                Column, PartitionKey.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -559,6 +671,22 @@ class AzuretablesClient(ConnectorClientBase):
         Get a table
 
         This operation gets the metadata of a table.
+
+        Swagger operation ID: `GetTable_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -606,6 +734,22 @@ class AzuretablesClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTables_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or table endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -672,6 +816,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to merge data with an entity in a table, creating a new
         entity if needed.
+
+        Swagger operation ID: `InsertMergeEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -721,6 +885,26 @@ class AzuretablesClient(ConnectorClientBase):
 
         Operation to replace an entity in a table, creating a new entity if
         needed.
+
+        Swagger operation ID: `InsertReplaceEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -771,6 +955,28 @@ class AzuretablesClient(ConnectorClientBase):
         Merge Entity
 
         Operation to merge data with an entity in a table.
+
+        Swagger operation ID: `MergeEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -829,6 +1035,28 @@ class AzuretablesClient(ConnectorClientBase):
         Replace Entity
 
         Operation to replace an entity in a table.
+
+        Swagger operation ID: `ReplaceEntity_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or table endpoint.
+            table_name: Specify the table.
+            partition_key: The partition id containing this entity.
+            row_key: The row id containing this entity.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -883,6 +1111,21 @@ class AzuretablesClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetStorageAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
         initial_request_url = request_url

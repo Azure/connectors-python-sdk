@@ -11670,6 +11670,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/entry.json"
         initial_request_url = request_url
@@ -11725,6 +11742,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Entry
 
         Creates a new record in the Entry table.
+
+        Swagger operation ID: `CreateEntry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/create/entry.json"
 
@@ -11763,6 +11796,23 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry
 
         Updates an existing record in the Entry table.
+
+        Swagger operation ID: `UpdateEntry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_id: The ID of the Entry record to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -11804,6 +11854,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Delete
 
         Deletes a record from the specified table.
+
+        Swagger operation ID: `Delete`.
+
+        Args:
+            table_name: Name of the table to delete record from.
+            row_id: Row ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -11849,6 +11915,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntryCustomField`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryCustomField.json"
@@ -11907,6 +11990,24 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry Custom Field
 
         Updates an existing record in the Entry Custom Field table.
+
+        Swagger operation ID: `UpdateEntryCustomField`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_custom_field_id: The ID of the Entry Custom Field record to
+                update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -11952,6 +12053,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectTerm`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/Term.json"
         initial_request_url = request_url
@@ -12010,6 +12128,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntryAddress`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryAddress.json"
@@ -12068,6 +12203,23 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry Address
 
         Updates an existing record in the Entry Address table.
+
+        Swagger operation ID: `UpdateEntryAddress`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_address_id: The ID of the Entry Address record to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -12113,6 +12265,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntryApplication`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryApplication.json"
@@ -12170,6 +12339,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Entry Application
 
         Creates a new record in the Entry Application table.
+
+        Swagger operation ID: `CreateEntryApplication`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/create/entryapplication.json"
@@ -12210,6 +12395,24 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry Application
 
         Updates an existing record in the Entry Application table.
+
+        Swagger operation ID: `UpdateEntryApplication`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_application_id: The ID of the Entry Application record to
+                update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -12255,6 +12458,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectTermSession`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/TermSession.json"
         initial_request_url = request_url
@@ -12313,6 +12533,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntryDetail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/EntryDetail.json"
         initial_request_url = request_url
@@ -12369,6 +12606,23 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry Detail
 
         Updates an existing record in the Entry Detail table.
+
+        Swagger operation ID: `UpdateEntryDetail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_detail_id: The ID of the Entry Detail record to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -12412,6 +12666,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectEntryEnrollment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/EntryEnrollment.json"
@@ -12469,6 +12740,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Entry Enrollment
 
         Creates a new record in the Entry Enrollment table.
+
+        Swagger operation ID: `CreateEntryEnrollment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/create/entryenrollment.json"
@@ -12509,6 +12796,24 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Entry Enrollment
 
         Updates an existing record in the Entry Enrollment table.
+
+        Swagger operation ID: `UpdateEntryEnrollment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entry_enrollment_id: The ID of the Entry Enrollment record to
+                update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -12554,6 +12859,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectBooking`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/Booking.json"
         initial_request_url = request_url
@@ -12609,6 +12931,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Booking
 
         Creates a new record in the Booking table.
+
+        Swagger operation ID: `CreateBooking`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/create/booking.json"
 
@@ -12647,6 +12985,23 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Booking
 
         Updates an existing record in the Booking table.
+
+        Swagger operation ID: `UpdateBooking`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            booking_id: The ID of the Booking record to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -12690,6 +13045,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectRoomSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/RoomSpace.json"
         initial_request_url = request_url
@@ -12745,6 +13117,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Room Space
 
         Creates a new record in the Room Space table.
+
+        Swagger operation ID: `CreateRoomSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/create/roomspace.json"
 
@@ -12785,6 +13173,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectRoomLocation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomLocation.json"
@@ -12845,6 +13250,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectTransaction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/select/Transaction.json"
         initial_request_url = request_url
@@ -12900,6 +13322,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Transaction
 
         Creates a new record in the Transaction table.
+
+        Swagger operation ID: `CreateTransaction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/create/transaction.json"
 
@@ -12940,6 +13378,23 @@ class Starrezrestv1Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `SelectRoomSpaceMaintenance`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/select/RoomSpaceMaintenance.json"
@@ -12997,6 +13452,22 @@ class Starrezrestv1Client(ConnectorClientBase):
         Create Room Space Maintenance
 
         Creates a new record in the Room Space Maintenance table.
+
+        Swagger operation ID: `CreateRoomSpaceMaintenance`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/create/roomspacemaintenance.json"
@@ -13037,6 +13508,24 @@ class Starrezrestv1Client(ConnectorClientBase):
         Update Room Space Maintenance
 
         Updates an existing record in the Room Space Maintenance table.
+
+        Swagger operation ID: `UpdateRoomSpaceMaintenance`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            room_space_maintenance_id: The ID of the Room Space Maintenance
+                record to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

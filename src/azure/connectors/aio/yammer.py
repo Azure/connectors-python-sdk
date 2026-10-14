@@ -172,6 +172,21 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetNetworks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/networks.json"
         initial_request_url = request_url
@@ -232,6 +247,24 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetGroups`.
+
+        Args:
+            network_id: Network ID.
+            mine: Used for getting groups which user is part of.
+            show_all_company_group: Used for showing All Company Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/groups.json"
         query_params = []
@@ -305,6 +338,21 @@ class YammerClient(ConnectorClientBase):
         Get user details
 
         This operation returns user profile details.
+
+        Swagger operation ID: `GetUserDetailsById`.
+
+        Args:
+            user_id: Unique identifier of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -345,6 +393,21 @@ class YammerClient(ConnectorClientBase):
         Like message
 
         This operation is used to like the specified message.
+
+        Swagger operation ID: `LikeMessage`.
+
+        Args:
+            message_id: Unique id of the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/messages/liked_by/current.json"
@@ -395,6 +458,41 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllMessagesV3`.
+
+        Args:
+            network_id: Network ID.
+            older_than: Returns messages older than the message ID specified as
+                a numeric string. This is useful for paginating messages. For
+                example, if you're currently viewing 20 messages and the oldest
+                is number 2912, you could append \"?older_than=2912″ to your
+                request to get the 20 messages prior to those you're seeing.
+            newer_than: Returns messages newer than the message ID specified as
+                a numeric string. This should be used when polling for new
+                messages. If you're looking at messages, and the most recent
+                message returned is 3516, you can make a request with the
+                parameter \"?newer_than=3516″ to ensure that you do not get
+                duplicate copies of messages already on your page.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/messages.json"
         query_params = []
@@ -493,6 +591,41 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesFollowingV3`.
+
+        Args:
+            network_id: Unique identifier of the network.
+            older_than: Returns messages older than the message ID specified as
+                a numeric string. This is useful for paginating messages. For
+                example, if you're currently viewing 20 messages and the oldest
+                is number 2912, you could append \"?older_than=2912″ to your
+                request to get the 20 messages prior to those you're seeing.
+            newer_than: Returns messages newer than the message ID specified as
+                a numeric string. This should be used when polling for new
+                messages. If you're looking at messages, and the most recent
+                message returned is 3516, you can make a request with the
+                parameter \"?newer_than=3516″ to ensure that you do not get
+                duplicate copies of messages already on your page.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v3/messages/following.json"
@@ -592,6 +725,41 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesInGroupV3`.
+
+        Args:
+            group_id: Unique identifier of the group.
+            network_id: Unique identifier of the network.
+            older_than: Returns messages in threads where the thread's latest
+                message is older than the specified message ID. Any thread with
+                a most recent message ID that is newer than or equal to the
+                specified ID will not have any of its messages returned by this
+                query.
+            newer_than: Returns messages in threads where the thread's latest
+                message is newer than the specified message ID. Any thread with
+                a most recent message ID that is older than or equal to the
+                specified ID will not have any of its messages returned by this
+                query.
+            threaded: Threaded=true will only return the thread starter (first
+                message) for each thread. This parameter is intended for apps
+                which need to display message threads collapsed.
+                threaded=extended will return the thread starter messages and
+                the two most recent messages all ordered by activity, as they
+                are viewed in the default view on the Viva Engage web
+                interface.
+            limit: Return only the specified number of messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -687,6 +855,22 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesInThreadV3`.
+
+        Args:
+            thread_id: Unique identifier of the thread.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -757,6 +941,24 @@ class YammerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `PostMessageV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            network_id: Unique id of the network.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/messages.json"
         query_params = []

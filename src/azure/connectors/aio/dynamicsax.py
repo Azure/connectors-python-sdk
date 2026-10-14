@@ -220,6 +220,24 @@ class DynamicsaxClient(ConnectorClientBase):
         Execute action
 
         Execute action
+
+        Swagger operation ID: `ExecuteProcedure`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            procedure: Name of action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -274,6 +292,32 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            apply: A sequence of OData aggregation transformations.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Specific fields to retrieve from entries (default = all).
+            cross_company: Query across companies (default = no).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -382,6 +426,24 @@ class DynamicsaxClient(ConnectorClientBase):
         Create record
 
         Create a new record in an entity
+
+        Swagger operation ID: `PostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -428,6 +490,23 @@ class DynamicsaxClient(ConnectorClientBase):
         Get a record
 
         Retrieves a single record
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            id: Unique identifier of the object to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -475,6 +554,23 @@ class DynamicsaxClient(ConnectorClientBase):
         Delete record
 
         Deletes a single record in an entity
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            id: Unique identifier of the object to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -521,6 +617,25 @@ class DynamicsaxClient(ConnectorClientBase):
         Update a record
 
         Updates a single record in an entity
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            id: Unique identifier of the object to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -569,6 +684,22 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -629,6 +760,21 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDataSets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets"
         initial_request_url = request_url
@@ -687,6 +833,22 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetBusinessEventCategories`.
+
+        Args:
+            dataset: Data set.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -751,6 +913,23 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetBusinessEvents`.
+
+        Args:
+            dataset: Data set.
+            businesseventcategory: Business event category.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -818,6 +997,24 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetLegalEntities`.
+
+        Args:
+            dataset: Data set.
+            businesseventcategory: Business event category.
+            businessevent: Business event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -892,6 +1089,22 @@ class DynamicsaxClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetProcedures`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -953,6 +1166,22 @@ class DynamicsaxClient(ConnectorClientBase):
         Get actions metadata
 
         Get actions metadata.
+
+        Swagger operation ID: `GetProcedure`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            procedure: Name of action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -998,6 +1227,22 @@ class DynamicsaxClient(ConnectorClientBase):
         Get entity metadata
 
         Retrieves metadata for an entity
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            dataset: The Dynamics 365 for Fin & Ops instance.
+            table: Entity name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

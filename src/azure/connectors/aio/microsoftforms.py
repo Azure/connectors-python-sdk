@@ -163,6 +163,22 @@ class MicrosoftformsClient(ConnectorClientBase):
         Get response details
 
         This action retrieves a form response
+
+        Swagger operation ID: `GetFormResponseById`.
+
+        Args:
+            form_id: Unique identifier of the form.
+            response_id: Unique identifier of the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -210,6 +226,21 @@ class MicrosoftformsClient(ConnectorClientBase):
         Get form details
 
         This action retrieves the details of a form
+
+        Swagger operation ID: `GetFormDetailsById`.
+
+        Args:
+            form_id: Unique identifier of the form.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -261,6 +292,21 @@ class MicrosoftformsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListForms`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/formapi/api/forms"
         initial_request_url = request_url
@@ -316,6 +362,21 @@ class MicrosoftformsClient(ConnectorClientBase):
         Get questions
 
         Get questions definition in a form.
+
+        Swagger operation ID: `GetQuestions`.
+
+        Args:
+            form_id: Unique id of the form.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

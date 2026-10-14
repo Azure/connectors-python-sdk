@@ -487,6 +487,89 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find events and filter your search by location, date, availability, and
         much more.
+
+        Swagger operation ID: `EventsGet`.
+
+        Args:
+            size: The page size of the response.
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            attraction_id: The filter by attraction identifier.
+            venue_id: The filter by venue identifier.
+            postal_code: The filter by postal code or zipcode.
+            latlong: The filter for events by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                events.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            market_id: The filter by market identifier.
+            start_date_time: The filter with a start date after this date.
+            end_date_time: The filter with a start date before this date.
+            include_t_b_a: Indicates whether to include events with date to be
+                announced (TBA).
+            include_t_b_d: Indicates whether to include events with a date to
+                be defined (TBD).
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            onsale_start_date_time: The filter with onsale start date after
+                this date.
+            onsale_end_date_time: The filter with onsale end date before this
+                date.
+            city: The filter by city.
+            country_code: The filter by country code.
+            state_code: The filter by state code.
+            classification_name: The filter by classification name: name of any
+                segment, genre, sub-genre, type, sub-type.
+            classification_id: The filter by classification identifier:
+                identifier of any segment, genre, sub-genre, type, sub-type.
+            dma_id: The filter by DMA identifier.
+            local_start_date_time: The filter with event local start date time
+                within this range.
+            local_start_end_date_time: The filter for events where event local
+                start and end date overlap this range.
+            start_end_date_time: The filter for events where event start and
+                end date overlap this range.
+            public_visibility_start_date_time: The filter for events with
+                public visibility starting.
+            pre_sale_date_time: The filter for events with a presale start and
+                end that intersects with this range.
+            onsale_on_start_date: The filter with onsale start date on this
+                date.
+            onsale_on_after_start_date: The filter with onsale range within
+                this date.
+            collection_id: The filter by collection identifier.
+            segment_id: The filter by segment identifier.
+            segment_name: The filter by segment name.
+            include_family: The filter by classification that are
+                family-friendly.
+            promoter_id: The filter by promoter identifier.
+            genre_id: The filter by genre identifier.
+            sub_genre_id: The filter by sub-genre identifier.
+            type_id: The filter by type identifier.
+            sub_type_id: The filter by sub-type identifier.
+            geo_point: The filter for events by geoHash.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/events.json"
@@ -929,6 +1012,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get details for a specific event using the unique identifier for the
         event. This includes the venue and location, the attraction(s), and the
         Ticketmaster Website URL for purchasing tickets for the event
+
+        Swagger operation ID: `EventGet`.
+
+        Args:
+            id: The unique identifier for the event.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -996,6 +1098,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get images for a specific event using the unique identifier for the
         event.
+
+        Swagger operation ID: `EventImagesGet`.
+
+        Args:
+            id: The unique identifier for the event.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1080,6 +1201,48 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find attractions (artists, sports, packages, plays and so on) and
         filter your search by name, and much more.
+
+        Swagger operation ID: `AttractionsGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            classification_name: The filter for attractions by classification
+                name.
+            classification_id: The filter for attractions by classification
+                identifier.
+            include_family: The filter by classification that are
+                family-friendly.
+            segment_id: The filter for attractions by segment identifier.
+            genre_id: The filter for attractions by genre identifier.
+            sub_genre_id: The filter for attractions by sub-genre identifier.
+            type_id: The filter for attractions by type identifier.
+            sub_type_id: The filter for attractions by sub-type identifier.
+            country_code: The filter for attractions by country code.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/attractions"
@@ -1306,6 +1469,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific attraction using the unique identifier for
         the attraction.
+
+        Swagger operation ID: `AttractionGet`.
+
+        Args:
+            id: The unique identifier for the attraction.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1382,6 +1564,37 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find classifications and filter your search by name, and much more.
         Classifications help define the nature of attractions and events.
+
+        Swagger operation ID: `ClassificationsGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            country_code: The filter for classifications by country code.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/discovery/v2/classifications"
@@ -1498,6 +1711,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific segment, genre, or sub-genre using its
         unique identifier.
+
+        Swagger operation ID: `ClassificationGet`.
+
+        Args:
+            id: The unique identifier for the classification.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1564,6 +1796,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get genre details
 
         Get details for a specific genre using its unique identifier.
+
+        Swagger operation ID: `GenreGet`.
+
+        Args:
+            id: The unique identifier for the genre.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1630,6 +1881,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get segment details
 
         Get details for a specific segment using its unique identifier.
+
+        Swagger operation ID: `SegmentGet`.
+
+        Args:
+            id: The unique identifier for the segment.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1696,6 +1966,25 @@ class TicketmasterClient(ConnectorClientBase):
         Get sub-genre details
 
         Get details for a specific sub-genre using its unique identifier.
+
+        Swagger operation ID: `SubGenreGet`.
+
+        Args:
+            id: The unique identifier for the sub-genre.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1780,6 +2069,45 @@ class TicketmasterClient(ConnectorClientBase):
         Venue search
 
         Find venues and filter your search by name, and much more.
+
+        Swagger operation ID: `VenuesGet`.
+
+        Args:
+            id: The filter for entities by their identifier.
+            keyword: The keyword to search on.
+            latlong: The filter for venues by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                venues.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: The page size of the response.
+            page: The page number.
+            sort: The sorting order of the search result.
+            country_code: The filter for venues by country code.
+            state_code: The filter by state / province code.
+            geo_point: The filter for venues by geoHash.
+            preferred_country: The popularity boost by country, default is us.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/venues"
         query_params = []
@@ -1919,6 +2247,25 @@ class TicketmasterClient(ConnectorClientBase):
 
         Get details for a specific venue using the unique identifier for the
         venue.
+
+        Swagger operation ID: `VenueGet`.
+
+        Args:
+            id: The unique identifier for the venue.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2002,6 +2349,54 @@ class TicketmasterClient(ConnectorClientBase):
 
         Find search suggestions and filter your suggestions by location,
         source, etc.
+
+        Swagger operation ID: `SuggestionsGet`.
+
+        Args:
+            keyword: The keyword to search on.
+            latlong: The filter for events by latitude and longitude. This
+                filter is deprecated and may be removed in a future release,
+                please use geoPoint instead.
+            radius: The radius of the area in which we want to search for
+                events.
+            unit: The unit of the radius.
+            source: The filter for entities by their primary source name or
+                publishing source name.
+            locale: The locale in ISO code format. Multiple comma-separated
+                values can be provided.
+            include_t_b_a: Indicates whether to include events with date to be
+                announced (TBA). Defaults to no if date parameter sent, yes
+                otherwise.
+            include_t_b_d: Indicates whether to include events with a date to
+                be defined (TBD). Defaults to no if date parameter sent, yes
+                otherwise.
+            include_test: Indicates whether to include entities flagged as test
+                in the response.
+            size: Size of every entity returned in the response.
+            country_code: The filter suggestions by country code.
+            segment_id: The filter suggestions by segment identifier.
+            geo_point: The filter for events by geoHash.
+            resource: Which resources to include in the suggest response,
+                defaults to all resources.
+            preferred_country: The popularity boost by country, default is us.
+            start_end_date_time: The filter for events where event start and
+                end date overlap this range.
+            local_start_end_date_time: The filter for events where event local
+                start and end date overlap this range.
+            include_spellcheck: Indicates whether to include spell check
+                suggestions in the response.
+            domain: The filter for entities based on domains they are available
+                on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/discovery/v2/suggest"
         query_params = []

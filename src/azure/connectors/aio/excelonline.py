@@ -190,6 +190,24 @@ class ExcelonlineClient(ConnectorClientBase):
         Create table
 
         Create a new table in the Excel workbook.
+
+        Swagger operation ID: `CreateTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -242,6 +260,24 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Add a key column to an Excel table. The new column will be appended to
         the right. The new key column must be unique in the table.
+
+        Swagger operation ID: `CreateIdColumn`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id_column: Provide the key column name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -304,6 +340,32 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            filter: An ODATA filter query to restrict the entries returned.
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            select: Comma-separated list of columns to retrieve (first 500 by
+                default).
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -414,6 +476,26 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Get a row using a key column. This action will retrieve all the values
         of the specified row given a column and key column.
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -478,6 +560,25 @@ class ExcelonlineClient(ConnectorClientBase):
         Delete a row
 
         Delete a row using a key column.
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            id_column: Select a column from the drop-down.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -540,6 +641,28 @@ class ExcelonlineClient(ConnectorClientBase):
         specified cells and columns left blank will not be updated. In order to
         append (instead of overwrite) a value, use the \"Get a row\" action to
         retrieve the content first.
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            id: Enter the key value.
+            id_column: Select a column from the drop-down.
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -604,6 +727,23 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllWorksheets`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -675,6 +815,24 @@ class ExcelonlineClient(ConnectorClientBase):
         Create worksheet
 
         Create a new worksheet in the Excel workbook.
+
+        Swagger operation ID: `CreateWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -730,6 +888,23 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -803,6 +978,26 @@ class ExcelonlineClient(ConnectorClientBase):
         Add a row into a table
 
         Add a new row into the Excel table.
+
+        Swagger operation ID: `AddRowV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            date_time_format: DateTime Format.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -866,6 +1061,24 @@ class ExcelonlineClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetColumns`.
+
+        Args:
+            drive: Select a document library from the drop-down.
+            file: Select an Excel file through File Browse.
+            table: Select a table from the drop-down.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

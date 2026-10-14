@@ -196,6 +196,21 @@ class RevaiClient(ConnectorClientBase):
         Get transcription job
 
         Returns information about a transcription job.
+
+        Swagger operation ID: `TranscriptionGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -238,6 +253,21 @@ class RevaiClient(ConnectorClientBase):
         Deletes a transcription job. All data related to the job, such as input
         media and transcript, will be permanently deleted. A job can only be
         deleted once it's completed (either with success or failure).
+
+        Swagger operation ID: `TranscriptionDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -286,6 +316,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `TranscriptionsGet`.
+
+        Args:
+            limit: The limit.
+            starting_after: The starting after.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/jobs"
         query_params = []
@@ -355,6 +402,22 @@ class RevaiClient(ConnectorClientBase):
 
         Starts an asynchronous job to transcribe speech-to-text for a media
         file.
+
+        Swagger operation ID: `TranscriptionPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/jobs"
 
@@ -395,6 +458,22 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `TranscriptGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -454,6 +533,21 @@ class RevaiClient(ConnectorClientBase):
 
         Returns the caption output for a transcription job. We currently
         support the SubRip (SRT) format.
+
+        Swagger operation ID: `CaptionsGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -493,6 +587,20 @@ class RevaiClient(ConnectorClientBase):
         Get account
 
         Get the developer's account information.
+
+        Swagger operation ID: `AccountGet`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/speechtotext/v1/account"
 
@@ -534,6 +642,22 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `VocabulariesGet`.
+
+        Args:
+            limit: The limit.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/speechtotext/v1/vocabularies"
@@ -599,6 +723,22 @@ class RevaiClient(ConnectorClientBase):
         Submit custom vocabulary
 
         Submits a Custom Vocabulary for asynchronous processing.
+
+        Swagger operation ID: `VocabularyPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/speechtotext/v1/vocabularies"
@@ -638,6 +778,21 @@ class RevaiClient(ConnectorClientBase):
         Get vocabulary
 
         Retrieve a custom vocabulary processing information.
+
+        Swagger operation ID: `VocabularyGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -679,6 +834,21 @@ class RevaiClient(ConnectorClientBase):
 
         Deletes a custom vocabulary. All data related to the custom vocabulary,
         such as webhooks and metadata, will be permanently deleted.
+
+        Swagger operation ID: `VocabularyDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -727,6 +897,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractionsGet`.
+
+        Args:
+            limit: The limit.
+            starting_after: The starting after.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/topic_extraction/v1/jobs"
@@ -797,6 +984,22 @@ class RevaiClient(ConnectorClientBase):
         Submit topic extraction job
 
         Starts an asynchronous job to extract topics from a transcript.
+
+        Swagger operation ID: `ExtractionPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/topic_extraction/v1/jobs"
@@ -836,6 +1039,21 @@ class RevaiClient(ConnectorClientBase):
         Get topic extraction job
 
         Returns information about a topic extraction job.
+
+        Swagger operation ID: `ExtractionGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -877,6 +1095,21 @@ class RevaiClient(ConnectorClientBase):
 
         Deletes a topic extraction job. All data related to the job will be
         permanently deleted.
+
+        Swagger operation ID: `ExtractionDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -924,6 +1157,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractionResultGet`.
+
+        Args:
+            id: The identifier.
+            threshold: The threshold.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -992,6 +1242,22 @@ class RevaiClient(ConnectorClientBase):
 
         Gets a list of sentiment analysis jobs submitted within the last 30
         days in reverse chronological order.
+
+        Swagger operation ID: `AnalysisesGet`.
+
+        Args:
+            limit: The limit.
+            starting_after: The starting after.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/sentiment_analysis/v1/jobs"
@@ -1039,6 +1305,22 @@ class RevaiClient(ConnectorClientBase):
         Submit sentiment analysis job
 
         Starts an asynchronous job to analyze sentiments in a transcript.
+
+        Swagger operation ID: `AnalysisPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/sentiment_analysis/v1/jobs"
@@ -1078,6 +1360,21 @@ class RevaiClient(ConnectorClientBase):
         Get sentiment analysis job
 
         Returns information about a sentiment analysis job.
+
+        Swagger operation ID: `AnalysisGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1119,6 +1416,21 @@ class RevaiClient(ConnectorClientBase):
 
         Deletes a sentiment analysis job. All data related to the job will be
         permanently deleted.
+
+        Swagger operation ID: `AnalysisDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1166,6 +1478,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `AnalysisResultGet`.
+
+        Args:
+            id: The identifier.
+            filter_for: The filter for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1237,6 +1566,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `IdentificationsGet`.
+
+        Args:
+            limit: The limit.
+            starting_after: The starting after.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/languageid/v1/jobs"
         query_params = []
@@ -1306,6 +1652,22 @@ class RevaiClient(ConnectorClientBase):
 
         Starts an asynchronous job to identify the most probable language in
         the audio.
+
+        Swagger operation ID: `IdentificationPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/languageid/v1/jobs"
 
@@ -1343,6 +1705,21 @@ class RevaiClient(ConnectorClientBase):
         Get language identification job
 
         Returns information about a language identification job.
+
+        Swagger operation ID: `IdentificationGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1384,6 +1761,21 @@ class RevaiClient(ConnectorClientBase):
 
         Deletes a language identification job. All data related to the job will
         be permanently deleted.
+
+        Swagger operation ID: `IdentificationDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1427,6 +1819,21 @@ class RevaiClient(ConnectorClientBase):
         Get language identification result
 
         Returns the results for a completed language identification job.
+
+        Swagger operation ID: `IdentificationResultGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1472,6 +1879,23 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `AlignmentsGet`.
+
+        Args:
+            limit: The limit.
+            starting_after: The starting after.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/alignment/v1/jobs"
         query_params = []
@@ -1541,6 +1965,22 @@ class RevaiClient(ConnectorClientBase):
 
         Starts an asynchronous job to obtain precise word timings for an audio
         file and text transcript.
+
+        Swagger operation ID: `AlignmentPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/alignment/v1/jobs"
 
@@ -1578,6 +2018,21 @@ class RevaiClient(ConnectorClientBase):
         Get forced alignment job
 
         Returns information about a forced alignment job.
+
+        Swagger operation ID: `AlignmentGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1619,6 +2074,21 @@ class RevaiClient(ConnectorClientBase):
 
         Deletes a forced alignment job. All data related to the job will be
         permanently deleted.
+
+        Swagger operation ID: `AlignmentDelete`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1665,6 +2135,22 @@ class RevaiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `AlignmentTranscriptGet`.
+
+        Args:
+            id: The identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

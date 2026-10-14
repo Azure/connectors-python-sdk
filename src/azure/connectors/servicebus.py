@@ -397,6 +397,26 @@ class ServicebusClient(ConnectorClientBase):
         Send message
 
         This operation sends a message to a queue or topic.
+
+        Swagger operation ID: `SendMessage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entity_name: Name of the queue or topic.
+            system_properties: System properties - None or Run Details. Run
+                Details will add run metadata property details as custom
+                properties in the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -442,6 +462,25 @@ class ServicebusClient(ConnectorClientBase):
         Send one or more messages
 
         This operation sends one or more messages to a queue or topic.
+
+        Swagger operation ID: `SendMessages`.
+
+        Args:
+            input: The request body.
+            entity_name: Name of the queue or topic.
+            system_properties: System properties - None or Run Details. Run
+                Details will add run metadata property details as custom
+                properties in the message.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -490,6 +529,24 @@ class ServicebusClient(ConnectorClientBase):
         Complete the message in a queue
 
         The operation completes a message in a queue.
+
+        Swagger operation ID: `CompleteMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to complete.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -550,6 +607,24 @@ class ServicebusClient(ConnectorClientBase):
         Abandon the message in a queue
 
         The operation abandons a message in a queue.
+
+        Swagger operation ID: `AbandonMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to abandon.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -607,6 +682,24 @@ class ServicebusClient(ConnectorClientBase):
         Get deferred message from a queue
 
         The operation gets a deferred message from a queue.
+
+        Swagger operation ID: `GetDeferredMessageFromQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            sequence_number: Sequence number of message.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -669,6 +762,24 @@ class ServicebusClient(ConnectorClientBase):
         Defer the message in a queue
 
         The operation defers a message in a queue.
+
+        Swagger operation ID: `DeferMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to defer.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -727,6 +838,25 @@ class ServicebusClient(ConnectorClientBase):
         Dead-letter the message in a queue
 
         The operation moves the message to the Dead-Letter Queue.
+
+        Swagger operation ID: `DeadLetterMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to dead-letter.
+            session_id: Session id.
+            dead_letter_reason: Dead letter reason.
+            dead_letter_error_description: Dead letter error description.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -788,6 +918,23 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the message in a queue
 
         The operation renews lock on a message in a queue.
+
+        Swagger operation ID: `RenewLockOnMessageInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            lock_token: Lock token of the message to renew lock.
+            queue_type: Queue type - Main or DeadLetter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -844,6 +991,26 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMessagesFromQueueWithPeekLock`.
+
+        Args:
+            queue_name: Name of the queue.
+            max_message_count: The maximum number of messages to return in the
+                batch.
+            queue_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -924,6 +1091,22 @@ class ServicebusClient(ConnectorClientBase):
         Close a session in a queue
 
         The operation closes a session in a queue.
+
+        Swagger operation ID: `CloseSessionInQueue`.
+
+        Args:
+            queue_name: Name of a queue.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -966,6 +1149,22 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the session in a queue
 
         The operation renews a session in a queue.
+
+        Swagger operation ID: `RenewLockOnSessionInQueue`.
+
+        Args:
+            queue_name: Name of the queue.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1008,6 +1207,25 @@ class ServicebusClient(ConnectorClientBase):
         Complete the message in a topic subscription
 
         The operation completes a message in a topic subscription.
+
+        Swagger operation ID: `CompleteMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to complete.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1071,6 +1289,25 @@ class ServicebusClient(ConnectorClientBase):
         Abandon the message in a topic subscription
 
         The operation abandons a message in a topic subscription.
+
+        Swagger operation ID: `AbandonMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to abandon.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1131,6 +1368,25 @@ class ServicebusClient(ConnectorClientBase):
         Get deferred message from a topic subscription
 
         The operation gets a deferred message from a topic subscription.
+
+        Swagger operation ID: `GetDeferredMessageFromTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            sequence_number: Sequence number of message.
+            subscription_type: Queue type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1196,6 +1452,25 @@ class ServicebusClient(ConnectorClientBase):
         Defer the message in a topic subscription
 
         The operation defers a message in a topic subscription.
+
+        Swagger operation ID: `DeferMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to defer.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1257,6 +1532,26 @@ class ServicebusClient(ConnectorClientBase):
         Dead-letter the message in a topic subscription
 
         The operation moves the message to the topic Dead-Letter Queue.
+
+        Swagger operation ID: `DeadLetterMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to dead-letter.
+            session_id: Session id.
+            dead_letter_reason: Dead letter reason.
+            dead_letter_error_description: Dead letter error description.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1321,6 +1616,24 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the message in a topic subscription
 
         The operation renews lock on a message in a topic subscription.
+
+        Swagger operation ID: `RenewLockOnMessageInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            lock_token: Lock token of the message to renew lock.
+            subscription_type: Subscription type - Main or DeadLetter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1375,6 +1688,25 @@ class ServicebusClient(ConnectorClientBase):
         Create a topic subscription
 
         The operation creates a topic subscription.
+
+        Swagger operation ID: `CreateTopicSubscription`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            subscription_filter_type: Filter type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1426,6 +1758,22 @@ class ServicebusClient(ConnectorClientBase):
         Delete a topic subscription
 
         The operation deletes a topic subscription.
+
+        Swagger operation ID: `DeleteTopicSubscription`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1475,6 +1823,27 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMessagesFromTopicWithPeekLock`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            max_message_count: The maximum number of messages to return in the
+                batch.
+            subscription_type: Subscription type - Main or DeadLetter.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1558,6 +1927,23 @@ class ServicebusClient(ConnectorClientBase):
         Close a session in the topic
 
         The operation closes a session in the topic.
+
+        Swagger operation ID: `CloseSessionInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1603,6 +1989,23 @@ class ServicebusClient(ConnectorClientBase):
         Renew lock on the session in a topic subscription
 
         The operation renews a session in a topic subscription.
+
+        Swagger operation ID: `RenewLockOnSessionInTopic`.
+
+        Args:
+            topic_name: Name of the topic.
+            subscription_name: Name of the topic subscription.
+            session_id: Session id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1645,6 +2048,21 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEntities`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/entities"
         initial_request_url = request_url
@@ -1702,6 +2120,21 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSystemProperties`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/systemproperties"
         initial_request_url = request_url
@@ -1759,6 +2192,21 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetQueues`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/queues"
         initial_request_url = request_url
@@ -1817,6 +2265,21 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSessionOptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sessionoptions"
         initial_request_url = request_url
@@ -1874,6 +2337,21 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTopics`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/topics"
         initial_request_url = request_url
@@ -1933,6 +2411,22 @@ class ServicebusClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSubscriptions`.
+
+        Args:
+            topic_name: Topic name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1993,6 +2487,21 @@ class ServicebusClient(ConnectorClientBase):
         Get metadata of a filter
 
         Get metadata of a filter.
+
+        Swagger operation ID: `GetSubscriptionFilterV2`.
+
+        Args:
+            subscription_filter_type: Subscription filter type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptionfilterV2"
         query_params = []

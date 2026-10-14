@@ -1232,6 +1232,24 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Subscriptions_ListLocations`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1294,6 +1312,23 @@ class ArmClient(ConnectorClientBase):
         Read a subscription
 
         Reads the details for a particular subscription.
+
+        Swagger operation ID: `Subscriptions_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1340,6 +1375,21 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Subscriptions_List`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
@@ -1408,6 +1458,27 @@ class ArmClient(ConnectorClientBase):
         Read a template deployment
 
         Reads a template deployment within a resource group.
+
+        Swagger operation ID: `Deployments_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            wait: If the action should wait until deployment is completed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1469,6 +1540,28 @@ class ArmClient(ConnectorClientBase):
 
         Create or update a named resource group template deployment. A template
         and parameters are expected for the request to succeed.
+
+        Swagger operation ID: `Deployments_CreateOrUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the deployment.
+            wait: If the action should wait until deployment is completed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1528,6 +1621,26 @@ class ArmClient(ConnectorClientBase):
 
         Deletes a resource group template deployment. The resources will not be
         deleted; only the metadata about the template deployment.
+
+        Swagger operation ID: `Deployments_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1580,6 +1693,26 @@ class ArmClient(ConnectorClientBase):
 
         Cancel a currently running template deployment. All pending template
         operations will be suspended.
+
+        Swagger operation ID: `Deployments_Cancel`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1632,6 +1765,28 @@ class ArmClient(ConnectorClientBase):
         Validates a deployment template. This operation does not have side
         effects and can be used to test a template deployment for syntax or
         logical errors.
+
+        Swagger operation ID: `Deployments_Validate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1686,6 +1841,26 @@ class ArmClient(ConnectorClientBase):
         Export deployment template
 
         Exports a template from a past resource group deployment.
+
+        Swagger operation ID: `Deployments_ExportTemplate`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1745,6 +1920,27 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Deployments_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1833,6 +2029,27 @@ class ArmClient(ConnectorClientBase):
 
         Reads a particular resource group template deployment operation. This
         is useful for troubleshooting failed template deployments.
+
+        Swagger operation ID: `DeploymentOperations_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            operation_id: Operation Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1891,6 +2108,28 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `DeploymentOperations_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            deployment_name: The name of the resource group template
+                deployment.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1973,6 +2212,24 @@ class ArmClient(ConnectorClientBase):
         Unregisters provider from a subscription. This operation will fail if
         there are any resources from that resource provider in the
         subscription.
+
+        Swagger operation ID: `Providers_Unregister`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2023,6 +2280,24 @@ class ArmClient(ConnectorClientBase):
 
         Registers a resource provider to be used with a subscription. This will
         provision permissions for the service into your subscription.
+
+        Swagger operation ID: `Providers_Register`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2076,6 +2351,26 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Providers_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            top: Query parameters. If nothing is passed returns all values.
+            expand: The $expand query parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2156,6 +2451,25 @@ class ArmClient(ConnectorClientBase):
         Read resource provider
 
         Reads a particular resource provider within the subscription.
+
+        Swagger operation ID: `Providers_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            expand: The $expand query parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2215,6 +2529,28 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ResourceGroups_ListResources`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            filter: The filter to apply on the operation.
+            expand: The $expand query parameter.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2303,6 +2639,24 @@ class ArmClient(ConnectorClientBase):
         Read a resource group
 
         Reads a particular resource group within the subscription.
+
+        Swagger operation ID: `ResourceGroups_Get`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2353,6 +2707,27 @@ class ArmClient(ConnectorClientBase):
 
         Creates or updates a resource group. The response code can be used to
         distinguish between a create (201) or update (200).
+
+        Swagger operation ID: `ResourceGroups_CreateOrUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: The name of the resource group to be created
+                or updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2401,6 +2776,24 @@ class ArmClient(ConnectorClientBase):
         Delete a resource group
 
         Delete a particular resource group within the subscription.
+
+        Swagger operation ID: `ResourceGroups_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2449,6 +2842,26 @@ class ArmClient(ConnectorClientBase):
 
         Updates an existing resource group. If the resource does not exist,
         this request will fail.
+
+        Swagger operation ID: `ResourceGroups_Patch`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2500,6 +2913,26 @@ class ArmClient(ConnectorClientBase):
         Exports a deployment template from an existing resource group. This can
         only be successful if the underlying resources have a schema defined by
         Microsoft.
+
+        Swagger operation ID: `ResourceGroups_ExportTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2554,6 +2987,26 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ResourceGroups_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2641,6 +3094,27 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Resources_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            expand: The $expand query parameter.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2728,6 +3202,28 @@ class ArmClient(ConnectorClientBase):
         Read a resource
 
         Reads a resource object.
+
+        Swagger operation ID: `Resources_GetById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2787,6 +3283,30 @@ class ArmClient(ConnectorClientBase):
 
         Creates or updates a resource. The response code can be used to
         distinguish between a create (201) or update (200).
+
+        Swagger operation ID: `Resources_CreateOrUpdateById`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2844,6 +3364,28 @@ class ArmClient(ConnectorClientBase):
         Delete a resource
 
         Deletes a resource.
+
+        Swagger operation ID: `Resources_DeleteById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2901,6 +3443,31 @@ class ArmClient(ConnectorClientBase):
         Invoke resource operation
 
         Invokes an operation on an Azure resource.
+
+        Swagger operation ID: `Resources_Invoke`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            action_name: Name of the resource action to invoke.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2958,6 +3525,27 @@ class ArmClient(ConnectorClientBase):
         Read a resource in provider
 
         Reads a resource object.
+
+        Swagger operation ID: `Provider_Resources_GetById`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3013,6 +3601,29 @@ class ArmClient(ConnectorClientBase):
         Invoke resource operation in provider
 
         Invokes an operation on an Azure resource.
+
+        Swagger operation ID: `Provider_Resources_Invoke`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_provider_namespace: Namespace of the resource provider.
+            short_resource_id: The short Id of the resource, including the
+                resource name and resource type. For example, sites/mySite.
+            x_ms_api_version: Api Version to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3066,6 +3677,25 @@ class ArmClient(ConnectorClientBase):
         Create or update a subscription resource tag value
 
         Create or update a subscription resource tag value.
+
+        Swagger operation ID: `Tags_CreateOrUpdateValue`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            tag_value: The value of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3117,6 +3747,25 @@ class ArmClient(ConnectorClientBase):
         Delete a subscription resource tag value
 
         Delete a subscription resource tag value.
+
+        Swagger operation ID: `Tags_DeleteValue`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            tag_value: The value of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3165,6 +3814,24 @@ class ArmClient(ConnectorClientBase):
         Create or update a subscription resource tag name
 
         Create or update a subscription resource tag name.
+
+        Swagger operation ID: `Tags_CreateOrUpdate`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3213,6 +3880,24 @@ class ArmClient(ConnectorClientBase):
         Delete a subscription resource tag name
 
         Delete a subscription resource tag name.
+
+        Swagger operation ID: `Tags_Delete`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            tag_name: The name of the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3261,6 +3946,24 @@ class ArmClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Tags_List`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

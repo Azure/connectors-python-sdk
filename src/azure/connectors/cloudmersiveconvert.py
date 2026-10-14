@@ -6185,6 +6185,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Returns a blank Word DOCX Document format file. The file is blank, with
         no contents. Use additional editing commands such as Insert Paragraph
         or Insert Table or Insert Image to populate the document.
+
+        Swagger operation ID: `EditDocument_DocxCreateBlankDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/create/blank"
@@ -6225,6 +6241,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the edited Word Document in the Word Document (DOCX) format
         file with the specified pages removed
+
+        Swagger operation ID: `EditDocument_DocxDeletePages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/delete-pages"
@@ -6262,6 +6294,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Deletes an existing table row in a Word DOCX Document and returns the
         result.
+
+        Swagger operation ID: `EditDocument_DocxDeleteTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6303,6 +6351,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Deletes a range of 1 or more existing table rows in a Word DOCX
         Document and returns the result.
+
+        Swagger operation ID: `EditDocument_DocxDeleteTableRowRange`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6344,6 +6408,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the body defined in the Word Document (DOCX) format file; this
         is the main content part of a DOCX document
+
+        Swagger operation ID: `EditDocument_DocxBody`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-body"
@@ -6385,6 +6465,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Returns the comments and review annotations stored in the Word Document
         (DOCX) format file hierarchically, where reply comments are nested as
         children under top-level comments in the results returned.
+
+        Swagger operation ID: `EditDocument_DocxGetCommentsHierarchical`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6425,6 +6521,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get content of a footer from a Word DOCX document
 
         Returns the footer content from a Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetHeadersAndFooters`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6465,6 +6577,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get images from a Word DOCX document
 
         Returns the images defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetImages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-images"
@@ -6505,6 +6633,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the pages and contents of each page defined in the Word
         Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxPages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-pages"
@@ -6544,6 +6688,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get sections from a Word DOCX document
 
         Returns the sections defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetSections`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-sections"
@@ -6583,6 +6743,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get styles from a Word DOCX document
 
         Returns the styles defined in the Word Document (DOCX) format file
+
+        Swagger operation ID: `EditDocument_DocxGetStyles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-styles"
@@ -6623,6 +6799,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Gets the contents of an existing table row in a Word DOCX Document and
         returns the result.
+
+        Swagger operation ID: `EditDocument_DocxGetTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-table-row"
@@ -6663,6 +6855,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the specific table object by its 0-based index in an Office
         Word Document (DOCX)
+
+        Swagger operation ID: `EditDocument_DocxGetTableByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6703,6 +6911,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get all tables in Word DOCX document
 
         Returns all the table objects in an Office Word Document (docx)
+
+        Swagger operation ID: `EditDocument_DocxGetTables`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/get-tables"
@@ -6744,6 +6968,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Adds a new comment into a Word DOCX document attached to a paragraph
         and returns the result. Call Finish Editing on the output URL to
         complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertCommentOnParagraph`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6785,6 +7025,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertImage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/insert-image"
@@ -6827,6 +7083,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         at the beginning/end of a document, or before/after an existing object
         using its Path (location within the document). Call Finish Editing on
         the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertParagraph`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6868,6 +7140,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Adds a new table into a DOCX and returns the result. Call Finish
         Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/insert-table"
@@ -6908,6 +7196,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Adds a new table row into a DOCX Document and returns the result. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxInsertTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6949,6 +7253,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Remove all headers, or footers, or both from a Word Document (DOCX).
         Call Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxRemoveHeadersAndFooters`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6993,6 +7313,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         delete. You can call other functions such as Get-Tables, Get-Images,
         Get-Body, etc. to get the paths of the objects in the document. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxRemoveObject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/remove-object"
@@ -7032,6 +7368,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Replace string in Word DOCX document
 
         Replace all instances of a string in an Office Word Document (docx)
+
+        Swagger operation ID: `EditDocument_DocxReplace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/replace-all"
@@ -7069,6 +7421,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetFooter`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/set-footer"
@@ -7109,6 +7477,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the footer in a Word Document (DOCX) to contain a page number. Call
         Finish Editing on the output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetFooterAddPageNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7150,6 +7534,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Set the header in a Word Document (DOCX). Call Finish Editing on the
         output URL to complete the operation.
+
+        Swagger operation ID: `EditDocument_DocxSetHeader`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/docx/set-header"
@@ -7191,6 +7591,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets the contents of a table cell into a DOCX Document and returns the
         result. Call Finish Editing on the output URL to complete the
         operation.
+
+        Swagger operation ID: `EditDocument_DocxUpdateTableCell`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7234,6 +7650,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets the contents of a table row into a DOCX Document and returns the
         result. Call Finish Editing on the output URL to complete the
         operation.
+
+        Swagger operation ID: `EditDocument_DocxUpdateTableRow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7276,6 +7708,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Once done editing a document, download the result. Begin editing a
         document by calling begin-editing, then perform operations, then call
         finish-editing to get the result.
+
+        Swagger operation ID: `EditDocument_FinishEditing`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/finish-editing"
@@ -7313,6 +7761,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Edits the input PowerPoint PPTX presentation document to remove the
         specified slides
+
+        Swagger operation ID: `EditDocument_PptxDeleteSlides`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/pptx/delete-slides"
@@ -7350,6 +7814,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Replace all instances of a string in an Office PowerPoint Document
         (pptx)
+
+        Swagger operation ID: `EditDocument_PptxReplace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/pptx/replace-all"
@@ -7387,6 +7867,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Clears, sets to blank, the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet
+
+        Swagger operation ID: `EditDocument_XlsxClearCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7427,6 +7923,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Create a blank Excel XLSX spreadsheet
 
         Returns a blank Excel XLSX Spreadsheet (XLSX) format file
+
+        Swagger operation ID: `EditDocument_XlsxCreateBlankSpreadsheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/create/blank"
@@ -7467,6 +7979,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns a new Excel XLSX Spreadsheet (XLSX) format file populated with
         column and row data specified as input
+
+        Swagger operation ID: `EditDocument_XlsxCreateSpreadsheetFromData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7509,6 +8037,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Edits the input Excel XLSX spreadsheet document to remove the specified
         worksheet (tab). Use the Get Worksheets API to enumerate available
         worksheets in a spreadsheet.
+
+        Swagger operation ID: `EditDocument_XlsxDeleteWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7550,6 +8094,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the value of a specific cell based on its identifier (e.g. A1,
         B22, C33, etc.) in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetCellByIdentifier`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7591,6 +8151,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the value and definition of a specific cell in a specific row
         in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7631,6 +8207,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
         Returns the rows and cells defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetColumns`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-columns"
@@ -7670,6 +8262,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get images from a Excel XLSX spreadsheet, worksheet
 
         Returns the images defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetImages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-images"
@@ -7709,6 +8317,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get rows and cells from a Excel XLSX spreadsheet, worksheet
 
         Returns the rows and cells defined in the Excel Spreadsheet worksheet
+
+        Swagger operation ID: `EditDocument_XlsxGetRowsAndCells`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7749,6 +8373,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Get styles from a Excel XLSX spreadsheet, worksheet
 
         Returns the style defined in the Excel Spreadsheet
+
+        Swagger operation ID: `EditDocument_XlsxGetStyles`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-styles"
@@ -7789,6 +8429,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Returns the worksheets (tabs) defined in the Excel Spreadsheet (XLSX)
         format file
+
+        Swagger operation ID: `EditDocument_XlsxGetWorksheets`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/edit/xlsx/get-worksheets"
@@ -7828,6 +8484,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Insert a new worksheet into an Excel XLSX spreadsheet
 
         Inserts a new worksheet into an Excel Spreadsheet
+
+        Swagger operation ID: `EditDocument_XlsxInsertWorksheet`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7870,6 +8542,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Sets, updates the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet using its cell identifier (e.g. A1, B22, C33) in
         the worksheet
+
+        Swagger operation ID: `EditDocument_XlsxSetCellByIdentifier`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7912,6 +8600,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Sets, updates the contents of a specific cell in an Excel XLSX
         spreadsheet, worksheet
+
+        Swagger operation ID: `EditDocument_XlsxSetCellByIndex`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7952,6 +8656,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert HTML to Word DOCX Document
 
         Convert HTML to Office Word Document (DOCX) format
+
+        Swagger operation ID: `ConvertWeb_HtmlToDocx`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/html/to/docx"
 
@@ -7986,6 +8706,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert JSON to XML conversion
 
         Convert a JSON object into XML
+
+        Swagger operation ID: `ConvertData_JsonToXml`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/json/to/xml"
 
@@ -8024,6 +8760,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Apply operations to fill in an HTML template, generating a final HTML
         result
+
+        Swagger operation ID: `ConvertTemplate_ApplyHtmlTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/template/html/apply"
@@ -8064,6 +8816,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PDF of the HTML. Javascript,
         HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_HtmlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/pdf"
 
@@ -8099,6 +8867,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PNG (screenshot) of the HTML.
         Javascript, HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_HtmlToPng`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/png"
 
@@ -8136,6 +8920,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert HTML string to text (txt)
 
         Converts an HTML string input into text (txt); extracts text from HTML
+
+        Swagger operation ID: `ConvertWeb_HtmlToTxt`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/html/to/txt"
 
@@ -8174,6 +8974,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
 
         Fully renders a website and returns a PDF of the full page. Javascript,
         HTML5, CSS and other advanced features are all supported.
+
+        Swagger operation ID: `ConvertWeb_UrlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/pdf"
 
@@ -8210,6 +9026,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Fully renders a website and returns a PNG screenshot of the full page
         image. Javascript, HTML5, CSS and other advanced features are all
         supported.
+
+        Swagger operation ID: `ConvertWeb_UrlToScreenshot`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/convert/web/url/to/screenshot"
@@ -8246,6 +9078,22 @@ class CloudmersiveconvertClient(ConnectorClientBase):
         Convert website URL page to text (txt)
 
         Converts a website URL page into text (txt); extracts text from HTML
+
+        Swagger operation ID: `ConvertWeb_UrlToTxt`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/convert/web/url/to/txt"
 

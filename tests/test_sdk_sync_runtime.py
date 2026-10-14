@@ -281,6 +281,25 @@ def test_explicit_chain_rejects_per_retry_policy_without_retry() -> None:
         )
 
 
+def test_explicit_no_retry_chain_preserves_transport_timeout() -> None:
+    """Forward positive timeouts when an explicit chain omits retry policy."""
+    transport = RecordingTransport(create_response())
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        policies=[HeadersPolicy()],
+        transport=transport,
+    )
+
+    response = client.send(
+        "GET",
+        "https://example.test/items",
+        timeout=5.0,
+    )
+
+    assert response.status == 200
+    assert transport.request_options[0]["connection_timeout"] == 5.0
+
+
 def test_generated_client_uses_synchronous_context_lifecycle() -> None:
     """Close the owned transport through the generated client lifecycle."""
     transport = RecordingTransport(create_response())

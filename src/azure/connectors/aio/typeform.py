@@ -173,6 +173,26 @@ class TypeformClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListForms_V2`.
+
+        Args:
+            search: Returns items that contain the specified string.
+            page: The page of results to retrieve. Default is the first page.
+            page_size: Number of results to retrieve per page. Default is 10.
+                Maximum is 200.
+            workspace_id: Retrieve typeforms for the specified workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/forms"
         query_params = []
@@ -251,6 +271,21 @@ class TypeformClient(ConnectorClientBase):
         Get schema
 
         Get schema
+
+        Swagger operation ID: `GetSchema_V3`.
+
+        Args:
+            form_id: Form.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

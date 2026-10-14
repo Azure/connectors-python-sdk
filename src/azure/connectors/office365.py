@@ -5245,6 +5245,21 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetOutlookCategoryNames`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Categories"
         initial_request_url = request_url
@@ -5303,6 +5318,25 @@ class Office365Client(ConnectorClientBase):
         Draft an email message
 
         This operation drafts an email message.
+
+        Swagger operation ID: `DraftEmail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Message Id.
+            draft_type: Draft Type.
+            comment: Draft Comment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Draft"
         query_params = []
@@ -5359,6 +5393,23 @@ class Office365Client(ConnectorClientBase):
         Updates an email Draft message
 
         This operation updates an an email Draft message.
+
+        Swagger operation ID: `UpdateDraftEmail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Message Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Draft"
         query_params = []
@@ -5398,6 +5449,21 @@ class Office365Client(ConnectorClientBase):
         Send a Draft message
 
         This operation sends a Draft message.
+
+        Swagger operation ID: `SendDraftEmail`.
+
+        Args:
+            message_id: Message Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5434,6 +5500,22 @@ class Office365Client(ConnectorClientBase):
         Assigns an Outlook category
 
         This operation assigns an Outlook category to an email.
+
+        Swagger operation ID: `AssignCategory`.
+
+        Args:
+            message_id: Message Id.
+            category: Category.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Mail/Category"
         query_params = []
@@ -5478,6 +5560,22 @@ class Office365Client(ConnectorClientBase):
         Assign a category to multiple emails
 
         This operation assigns an Outlook category to multiple emails.
+
+        Swagger operation ID: `AssignCategoryBulk`.
+
+        Args:
+            input: The request body.
+            category_name: Category Name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5522,6 +5620,22 @@ class Office365Client(ConnectorClientBase):
         following link regarding the support of actionable messages in
         different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
+
+        Swagger operation ID: `SendMailWithOptions`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/mailwithoptions/$subscriptions"
@@ -5564,6 +5678,22 @@ class Office365Client(ConnectorClientBase):
         the recipient. Please refer to the following link regarding the support
         of actionable messages in different mail clients:
         https://docs.microsoft.com/outlook/actionable-messages/#outlook-version-requirements-for-actionable-messages.
+
+        Swagger operation ID: `SendApprovalMail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/approvalmail/$subscriptions"
@@ -5606,6 +5736,23 @@ class Office365Client(ConnectorClientBase):
 
         Updates the photo of the specified contact of the current user. The
         size of the photo must be less than 4 MB.
+
+        Swagger operation ID: `UpdateMyContactPhoto`.
+
+        Args:
+            input: The binary request body.
+            folder: Select a contacts folder.
+            id: Unique identifier of a contact to update photo.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5656,6 +5803,21 @@ class Office365Client(ConnectorClientBase):
         messages, mailFolders, events, calendar, calendars, outlook,
         inferenceClassification. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/httprequest"
 
@@ -5697,6 +5859,23 @@ class Office365Client(ConnectorClientBase):
         Email Management MCP Server (deprecated)
 
         This MCP server manages email messages from your Office 365 account
+
+        Swagger operation ID: `mcp_EmailsManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp/EmailsManagement"
         query_params = []
@@ -5743,6 +5922,23 @@ class Office365Client(ConnectorClientBase):
         Meeting Management MCP Server (deprecated)
 
         This MCP server manages events, calendars and meetings
+
+        Swagger operation ID: `mcp_MeetingManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp/MeetingManagement"
         query_params = []
@@ -5789,6 +5985,23 @@ class Office365Client(ConnectorClientBase):
         Contact Management MCP Server
 
         This MCP server manages contacts
+
+        Swagger operation ID: `mcp_ContactsManagement`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            session_id: sessionId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp/ContactsManagement"
         query_params = []
@@ -5835,6 +6048,22 @@ class Office365Client(ConnectorClientBase):
         Delete event
 
         This operation deletes an event in a calendar.
+
+        Swagger operation ID: `CalendarDeleteItem_V2`.
+
+        Args:
+            calendar: Select a calendar.
+            event: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5880,6 +6109,22 @@ class Office365Client(ConnectorClientBase):
         Get event
 
         This operation gets a specific event from a calendar using Graph API.
+
+        Swagger operation ID: `V3CalendarGetItem`.
+
+        Args:
+            table: Select a calendar.
+            id: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5933,6 +6178,28 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4CalendarGetItems`.
+
+        Args:
+            table: Select a calendar.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6021,6 +6288,21 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `CalendarGetTables_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/calendars"
@@ -6086,6 +6368,24 @@ class Office365Client(ConnectorClientBase):
         Update event
 
         This operation updates an event in a calendar using Graph API.
+
+        Swagger operation ID: `V4CalendarPatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Select a calendar.
+            id: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6133,6 +6433,23 @@ class Office365Client(ConnectorClientBase):
         Create event
 
         This operation creates a new event in a calendar.
+
+        Swagger operation ID: `V4CalendarPostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Select a calendar.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6179,6 +6496,22 @@ class Office365Client(ConnectorClientBase):
         Delete contact
 
         This operation deletes a contact from a contacts folder.
+
+        Swagger operation ID: `ContactDeleteItem_V2`.
+
+        Args:
+            folder: Select a contacts folder.
+            id: Unique identifier of contact to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6224,6 +6557,22 @@ class Office365Client(ConnectorClientBase):
         Get contact
 
         This operation gets a specific contact from a contacts folder.
+
+        Swagger operation ID: `ContactGetItem_V2`.
+
+        Args:
+            folder: Select a contacts folder.
+            id: Unique identifier of a contact to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6277,6 +6626,28 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ContactGetItems_V2`.
+
+        Args:
+            folder: Unique identifier of the contacts folder to retrieve.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6371,6 +6742,21 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ContactGetTablesV2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v2/datasets/contacts/tables"
@@ -6430,6 +6816,24 @@ class Office365Client(ConnectorClientBase):
         Update contact
 
         This operation updates a contact in a contacts folder.
+
+        Swagger operation ID: `ContactPatchItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder: Select a contacts folder.
+            id: Unique identifier of contact to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6477,6 +6881,23 @@ class Office365Client(ConnectorClientBase):
         Create contact
 
         This operation creates a new contact in a contacts folder.
+
+        Swagger operation ID: `ContactPostItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            folder: Select a contacts folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6523,6 +6944,22 @@ class Office365Client(ConnectorClientBase):
         Delete email
 
         This operation deletes an email by id.
+
+        Swagger operation ID: `DeleteEmail_V2`.
+
+        Args:
+            message_id: Id of the email to delete.
+            mailbox_address: Address of the shared mailbox to delete mail from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6570,6 +7007,22 @@ class Office365Client(ConnectorClientBase):
         Export email
 
         Export the content of the email in the EML file format.
+
+        Swagger operation ID: `ExportEmail_V2`.
+
+        Args:
+            message_id: Id of the email to export.
+            mailbox_address: Address of the shared mailbox to export from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6621,6 +7074,22 @@ class Office365Client(ConnectorClientBase):
 
         Find meeting time suggestions based on organizer, attendee
         availability, and time or location constraints
+
+        Swagger operation ID: `FindMeetingTimes_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/beta/me/findMeetingTimes"
@@ -6662,6 +7131,24 @@ class Office365Client(ConnectorClientBase):
         Flag email
 
         This operation updates an email flag.
+
+        Swagger operation ID: `Flag_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Id of the email to be flagged.
+            mailbox_address: Address of the shared mailbox to update mail.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6714,6 +7201,30 @@ class Office365Client(ConnectorClientBase):
         Forward an email
 
         Forward an email.
+
+        Swagger operation ID: `ForwardEmail_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Id of the message to forward. (You can use 'Message Id'
+                from trigger or 'Get Emails' action output).
+            mailbox_address: Address of the shared mailbox to forward mail
+                from.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6776,6 +7287,28 @@ class Office365Client(ConnectorClientBase):
         Get Attachment
 
         This operation gets an email attachment by id.
+
+        Swagger operation ID: `GetAttachment_V2`.
+
+        Args:
+            message_id: Id of the email.
+            attachment_id: Id of the attachment to download.
+            mailbox_address: Address of the shared mailbox to retrieve
+                attachment from.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6845,6 +7378,30 @@ class Office365Client(ConnectorClientBase):
         Get email
 
         This operation gets an email by id.
+
+        Swagger operation ID: `GetEmailV2`.
+
+        Args:
+            message_id: Id of the email.
+            mailbox_address: Address of the shared mailbox to retrieve mail
+                from.
+            include_attachments: If set to true, attachments content will also
+                be retrieved along with the email.
+            internet_message_id: Internet Message Id.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6932,6 +7489,45 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEmailsV3`.
+
+        Args:
+            folder_path: Mail folder to retrieve emails from (default:
+                'Inbox').
+            to: Recipient email addresses separated by semicolons (If any
+                match, the trigger will run).
+            cc: CC recipient email addresses separated by semicolons (If any
+                match, the trigger will run).
+            to_or_cc: To or CC recipient email addresses separated by
+                semicolons (If any match, the trigger will run).
+            from_: Sender email addresses separated by semicolons (If any
+                match, the trigger will run).
+            importance: Importance of the email (Any, High, Normal, Low).
+            fetch_only_with_attachment: If set to true, only emails with an
+                attachment will be retrieved. Emails without any attachments
+                will be skipped. If set to false, all emails will be retrieved.
+            subject_filter: String to look for in the subject line.
+            fetch_only_unread: Retrieve only unread emails?.
+            mailbox_address: Address of the shared mailbox to retrieve mails
+                from.
+            include_attachments: If set to true, attachments content will also
+                be retrieved along with the email.
+            search_query: Search query to filter emails. How to use '$search'
+                parameter please refer to:
+                https://docs.microsoft.com/graph/query-parameters#search-parameter.
+            top: Number of emails to retrieve (default: 10, max: 1000).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/Mail"
         query_params = []
@@ -7067,6 +7663,33 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEventsCalendarViewV3`.
+
+        Args:
+            calendar_id: Select a calendar.
+            start_date_time_utc: Start time in UTC (example:
+                '2017-01-01T08:00:00').
+            end_date_time_utc: End time in UTC (example:
+                '2017-02-01T08:00:00').
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            skip: The number of entries to skip (default = 0).
+            search: Search text for matching event body and subject.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7169,6 +7792,23 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMailTips_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/getMailTips"
@@ -7228,6 +7868,21 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetRoomLists_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/beta/me/findRoomLists"
@@ -7287,6 +7942,21 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetRooms_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/beta/me/findRooms"
@@ -7347,6 +8017,22 @@ class Office365Client(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetRoomsInRoomList_V2`.
+
+        Args:
+            room_list: Room list to find rooms in.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7410,6 +8096,24 @@ class Office365Client(ConnectorClientBase):
         Mark as read or unread
 
         This operation marks an email as read/unread.
+
+        Swagger operation ID: `MarkAsRead_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Id of the email to be marked.
+            mailbox_address: Address of the shared mailbox to update mail.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7462,6 +8166,23 @@ class Office365Client(ConnectorClientBase):
 
         This operation moves an email to the specified folder within the same
         mailbox.
+
+        Swagger operation ID: `MoveV2`.
+
+        Args:
+            message_id: Id of the email to be moved.
+            folder_path: Mail folder to move the email to.
+            mailbox_address: Address of the shared mailbox to move mail from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7516,6 +8237,24 @@ class Office365Client(ConnectorClientBase):
         Reply to email
 
         This operation replies to an email.
+
+        Swagger operation ID: `ReplyToV3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Id of the email to reply to.
+            mailbox_address: Address of the shared mailbox to reply from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7561,6 +8300,24 @@ class Office365Client(ConnectorClientBase):
         Respond to an event invite
 
         Respond to an event invite.
+
+        Swagger operation ID: `RespondToEvent_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            event_id: Id of the event to respond to.
+            response: Response for the event invite.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7601,6 +8358,22 @@ class Office365Client(ConnectorClientBase):
         Send an email
 
         This operation sends an email message.
+
+        Swagger operation ID: `SendEmailV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/Mail"
 
@@ -7633,6 +8406,22 @@ class Office365Client(ConnectorClientBase):
         Set up automatic replies
 
         Set the automatic replies setting for your mailbox.
+
+        Swagger operation ID: `SetAutomaticRepliesSetting_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/codeless/v1.0/me/mailboxSettings"
@@ -7674,6 +8463,22 @@ class Office365Client(ConnectorClientBase):
         This operation sends an email from a shared mailbox. Your account
         should have permission to access the mailbox for this operation to
         succeed.
+
+        Swagger operation ID: `SharedMailboxSendEmailV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/SharedMailbox/Mail"
 

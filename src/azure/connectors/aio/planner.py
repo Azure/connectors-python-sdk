@@ -186,6 +186,21 @@ class PlannerClient(ConnectorClientBase):
         Delete a task
 
         Deletes an existing Planner task.
+
+        Swagger operation ID: `DeleteTask`.
+
+        Args:
+            id: The unique identifier of the task to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -225,6 +240,23 @@ class PlannerClient(ConnectorClientBase):
         Remove assignees from a task
 
         Remove assignees from an existing Planner task.
+
+        Swagger operation ID: `UnassignUsers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -266,6 +298,23 @@ class PlannerClient(ConnectorClientBase):
         Add assignees to a task
 
         Add assignees to an existing Planner task.
+
+        Swagger operation ID: `AssignUsers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -309,6 +358,22 @@ class PlannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListGroupPlans`.
+
+        Args:
+            group_id: Id of the group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -367,6 +432,21 @@ class PlannerClient(ConnectorClientBase):
         Get plan details
 
         Get plan details where the task belongs to
+
+        Swagger operation ID: `GetPlanDetails`.
+
+        Args:
+            id: The unique plan id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -407,6 +487,22 @@ class PlannerClient(ConnectorClientBase):
         Create a bucket
 
         Create a bucket in Planner for the specified plan and group.
+
+        Swagger operation ID: `CreateBucket_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/v1.0/planner/buckets"
 
@@ -444,6 +540,22 @@ class PlannerClient(ConnectorClientBase):
         Create a task
 
         Create a new task in Planner.
+
+        Swagger operation ID: `CreateTask_V4`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/beta/planner/tasks"
 
@@ -481,6 +593,21 @@ class PlannerClient(ConnectorClientBase):
         Get a task
 
         Get an existing Planner task.
+
+        Swagger operation ID: `GetTask_V2`.
+
+        Args:
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -521,6 +648,21 @@ class PlannerClient(ConnectorClientBase):
         Get task details
 
         Get the task details for an existing task.
+
+        Swagger operation ID: `GetTaskDetails_V2`.
+
+        Args:
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -565,6 +707,23 @@ class PlannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListBuckets_V3`.
+
+        Args:
+            id: The unique identifier of the plan.
+            group_id: The group to retrieve the plan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -632,6 +791,21 @@ class PlannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListMyTasks_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/planner/tasks"
         initial_request_url = request_url
@@ -697,6 +871,23 @@ class PlannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTasks_V3`.
+
+        Args:
+            id: The unique identifier of the plan.
+            group_id: The group to retrieve the plan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -769,6 +960,23 @@ class PlannerClient(ConnectorClientBase):
         Update a task
 
         Update an existing Planner task.
+
+        Swagger operation ID: `UpdateTask_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -810,6 +1018,23 @@ class PlannerClient(ConnectorClientBase):
         Update task details
 
         Update the task details for an existing task.
+
+        Swagger operation ID: `UpdateTaskDetails_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: The unique identifier of the task to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -852,6 +1077,21 @@ class PlannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/memberOf"
         initial_request_url = request_url

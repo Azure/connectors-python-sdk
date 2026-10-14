@@ -206,6 +206,26 @@ class DocumentdbClient(ConnectorClientBase):
 
         Create or update document. When creating a document in DocumentDB, the
         body must include an id property.
+
+        Swagger operation ID: `CreateDocument_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -256,6 +276,26 @@ class DocumentdbClient(ConnectorClientBase):
         Create stored procedure
 
         Create stored procedure.
+
+        Swagger operation ID: `CreateStoredProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -306,6 +346,25 @@ class DocumentdbClient(ConnectorClientBase):
         Delete a document
 
         Delete a document.
+
+        Swagger operation ID: `DeleteDocument_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -355,6 +414,25 @@ class DocumentdbClient(ConnectorClientBase):
         Delete stored procedure
 
         Delete stored procedure.
+
+        Swagger operation ID: `DeleteStoredProcedure_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -410,6 +488,26 @@ class DocumentdbClient(ConnectorClientBase):
         Execute stored procedure
 
         Execute stored procedure in specified collection.
+
+        Swagger operation ID: `ExecuteStoredProcedure_V2`.
+
+        Args:
+            input: The request body.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -466,6 +564,29 @@ class DocumentdbClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDocument_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier for the document.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -552,6 +673,28 @@ class DocumentdbClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDocuments_V3`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -632,6 +775,24 @@ class DocumentdbClient(ConnectorClientBase):
         Get stored procedures
 
         Get stored procedures in the specified collection.
+
+        Swagger operation ID: `GetStoredProcedures_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -691,6 +852,37 @@ class DocumentdbClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `QueryDocuments_V5`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            container_id: The name of the container.
+            query_text: SQL query. If empty, will return all documents.
+            partition_key: Value must be provided according to its type
+                (\"string\", 42, 0.5). If empty, all partitions will be used to
+                search for documents.
+            max_item_count: An integer indicating the maximum number of items
+                to be returned per page.
+            consistency_level: Consistency level required for the feed
+                (query/read feed) operation.
+            session_token: The session token for use with session consistency.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -804,6 +996,27 @@ class DocumentdbClient(ConnectorClientBase):
         Replace a document
 
         Replace a document.
+
+        Swagger operation ID: `ReplaceDocument_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            document_id: The identifier of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -856,6 +1069,27 @@ class DocumentdbClient(ConnectorClientBase):
         Replace stored procedure
 
         Replace stored procedure.
+
+        Swagger operation ID: `ReplaceStoredProcedure_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            collection_id: The name of the collection.
+            sproc_id: The name of the stored procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -906,6 +1140,21 @@ class DocumentdbClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetCosmosDbAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/cosmosdbaccounts"
         initial_request_url = request_url
@@ -961,6 +1210,22 @@ class DocumentdbClient(ConnectorClientBase):
         Get all databases
 
         Get all databases.
+
+        Swagger operation ID: `GetDatabases_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1002,6 +1267,23 @@ class DocumentdbClient(ConnectorClientBase):
         Get all collections
 
         Get all collections.
+
+        Swagger operation ID: `GetCollections_V2`.
+
+        Args:
+            cosmos_db_account_name: The Azure Cosmos DB account name (without
+                documents.azure.com).
+            database_id: The name of the database.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

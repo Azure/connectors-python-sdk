@@ -164,6 +164,21 @@ class SlackClient(ConnectorClientBase):
         Set do not disturb
 
         Set the do not disturb status for the user.
+
+        Swagger operation ID: `SetDND`.
+
+        Args:
+            num_minutes: The number of minutes to set do not disturb.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/dnd.setSnooze"
         query_params = []
@@ -210,6 +225,22 @@ class SlackClient(ConnectorClientBase):
         Create a channel
 
         Create a channel in slack.
+
+        Swagger operation ID: `CreateChannel_V2`.
+
+        Args:
+            name: The name of the new channel.
+            is_private: Channel is private or not.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/conversations.create"
         query_params = []
@@ -260,6 +291,21 @@ class SlackClient(ConnectorClientBase):
         Join a public channel
 
         Join a public channel in slack.
+
+        Swagger operation ID: `JoinChannel_V2`.
+
+        Args:
+            channel: The name of the channel.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/conversations.join"
         query_params = []
@@ -307,6 +353,21 @@ class SlackClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListChannels_V3`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/conversations.list"
         initial_request_url = request_url
@@ -368,6 +429,22 @@ class SlackClient(ConnectorClientBase):
         Post message
 
         This operation is used to post a message to the specified channel.
+
+        Swagger operation ID: `PostMessage_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/chat.postMessage"
 

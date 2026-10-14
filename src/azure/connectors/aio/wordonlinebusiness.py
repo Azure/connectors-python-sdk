@@ -168,6 +168,28 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Reads a Microsoft Word template to then fill the template fields with
         selected dynamic values to generate a Word Document.
+
+        Swagger operation ID: `CreateFileItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            drive: Select a document library from the drop-down.
+            file: Select a Word file through File Browse.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/templates/getFile"
         query_params = []
@@ -219,6 +241,23 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Creates a Microsoft Word file with the given content in the root
         directory (use only from Copilot Studio)
+
+        Swagger operation ID: `CreateWordFileWithContent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            file_name: Name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -271,6 +310,30 @@ class WordonlinebusinessClient(ConnectorClientBase):
         Convert Word Document to PDF
 
         Gets a PDF version of the selected file
+
+        Swagger operation ID: `GetFilePDF`.
+
+        Args:
+            source: Select from the drop-down or specify one of the following:
+                - \"me\" - \"SharePoint Site URL\" - \"users/someone's UPN\" -
+                \"groups/group Id\" - \"sites/SharePoint Site URL:/teams/team
+                name:\" (colons are required).
+            drive: Select a document library from the drop-down.
+            file: Select a Word file through File Browse.
+            extract_sensitivity_label: Select if you want to extract
+                Sensitivity label ( false, true).
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/templates/convertFile"
@@ -335,6 +398,21 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetSources`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/sources"
         query_params = []
@@ -396,6 +474,21 @@ class WordonlinebusinessClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDrives`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/codeless/v1.0/drives"
         query_params = []
@@ -458,6 +551,23 @@ class WordonlinebusinessClient(ConnectorClientBase):
         Fetches the schema of the selected file
 
         Fetches the schema of the selected file.
+
+        Swagger operation ID: `GetFileSchema`.
+
+        Args:
+            source: source.
+            drive: drive.
+            file: file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/templates/schema"
         query_params = []

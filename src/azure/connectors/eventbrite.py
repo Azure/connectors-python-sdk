@@ -252,6 +252,43 @@ class EventbriteClient(ConnectorClientBase):
         Create event
 
         Create a new Eventbrite event.
+
+        Swagger operation ID: `CreateEventV2`.
+
+        Args:
+            organization_id: Select the organization.
+            event_name_html: The name of the event.
+            event_description_html: The description on the event page.
+            event_start_utc: Start time (UTC format Ex. 2020-01-12T12:00:00Z).
+            event_end_utc: End time (UTC format Ex. 2020-01-13T15:00:00Z).
+            event_start_timezone: Timezone of the event.
+            event_end_timezone: Timezone of the event.
+            event_currency: Currency for this Event's transactions.
+            event_organizer_id: The organizer of the event.
+            event_venue_id: A previously-created venue to associate with this
+                event.
+            event_category_id: The category of the event.
+            event_password: Password needed to see the event in unlisted mode.
+            event_capacity: Set specific capacity (if omitted, sums ticket
+                capacities).
+            event_shareable: If users can share the event on social media.
+            event_invite_only: Only invited users can see the event page.
+            event_online_event: Whether the event is online-only (no venue).
+            event_listed: If the event is publicly listed and searchable.
+            event_hide_start_date: Whether the start date should be hidden.
+            event_hide_end_date: Whether the end date should be hidden.
+            event_show_remaining: If the remaining number of tickets is
+                publicly visible on the event page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -403,6 +440,45 @@ class EventbriteClient(ConnectorClientBase):
         Update event
 
         Update an existing event.
+
+        Swagger operation ID: `UpdateEventV2`.
+
+        Args:
+            id: Event to update.
+            organization_id: Select the organization.
+            event_start_timezone: Timezone of the event.
+            event_end_timezone: Timezone of the event.
+            event_currency: Currency for this Event's transactions.
+            event_name_html: The name of the event.
+            event_description_html: The description on the event page.
+            event_start_utc: Start time (UTC format Ex. 2017-01-12T13:45:30Z).
+            event_end_utc: End time (UTC format Ex. 2017-01-12T16:45:30Z).
+            event_organizer_id: The organizer of the event.
+            event_venue_id: A previously-created venue to associate with this
+                event.
+            event_category_id: The category of the event.
+            event_password: Password needed to see the event in unlisted mode.
+            event_capacity: Set specific capacity (if omitted, sums ticket
+                capacities).
+            event_shareable: Set specific capacity (if omitted, sums ticket
+                capacities).
+            event_invite_only: Only invited users can see the event page.
+            event_online_event: Whether the event is online-only (no venue).
+            event_listed: If the event is publicly listed and searchable.
+            event_hide_start_date: Whether the start date should be hidden.
+            event_hide_end_date: Whether the start date should be hidden.
+            event_show_remaining: If the remaining number of tickets is
+                publicly visible on the event page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -544,6 +620,21 @@ class EventbriteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetOrganizations`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v3/users/me/organizations/"
@@ -604,6 +695,22 @@ class EventbriteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetOrganizersV2`.
+
+        Args:
+            organization_id: Select the organization.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -668,6 +775,22 @@ class EventbriteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMyVenuesV2`.
+
+        Args:
+            organization_id: Select the organization.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -728,6 +851,21 @@ class EventbriteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetCategories`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v3/categories/"
         initial_request_url = request_url
@@ -788,6 +926,24 @@ class EventbriteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetOrganizationEvents`.
+
+        Args:
+            organization_id: Select the organization.
+            order_by: Order of the returned events.
+            status: Status of the returned events.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

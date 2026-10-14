@@ -241,6 +241,22 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetScorecards`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -308,6 +324,23 @@ class PowerbiClient(ConnectorClientBase):
         Create a scorecard
 
         Creates a scorecard for Power BI goals.
+
+        Swagger operation ID: `CreateScorecard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -360,6 +393,23 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMultipleGoals`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -430,6 +480,24 @@ class PowerbiClient(ConnectorClientBase):
         Create a goal
 
         Creates a Power BI goal on the specified scorecard.
+
+        Swagger operation ID: `CreateGoal`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -481,6 +549,23 @@ class PowerbiClient(ConnectorClientBase):
         Get a goal
 
         Gets the specified Power BI goal on a scorecard.
+
+        Swagger operation ID: `GetGoal`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -534,6 +619,25 @@ class PowerbiClient(ConnectorClientBase):
         Update a goal
 
         Updates the Power BI goal's state.
+
+        Swagger operation ID: `UpdateGoal`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -583,6 +687,25 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExecuteDatasetQuery`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -653,6 +776,24 @@ class PowerbiClient(ConnectorClientBase):
         Run a json query against a dataset
 
         Use the Power BI REST API to run a query in json format.
+
+        Swagger operation ID: `ExecuteDatasetQueriesJson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -707,6 +848,25 @@ class PowerbiClient(ConnectorClientBase):
         Add rows to a dataset
 
         Use Power BI REST API to add rows to a dataset.
+
+        Swagger operation ID: `AddRows`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            tablename: The name of the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -758,6 +918,25 @@ class PowerbiClient(ConnectorClientBase):
         Add a note to a check-in
 
         Appends a new note to a check-in of a Power BI goal.
+
+        Swagger operation ID: `GoalValueCheckinNote`.
+
+        Args:
+            input: The request body.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -807,6 +986,25 @@ class PowerbiClient(ConnectorClientBase):
         Create a check-in
 
         Creates a Power BI goal check-in.
+
+        Swagger operation ID: `GoalValueCheckin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -857,6 +1055,24 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetGoalCheckins`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -930,6 +1146,26 @@ class PowerbiClient(ConnectorClientBase):
         Update a check-in
 
         Updates a Power BI goal check-in.
+
+        Swagger operation ID: `UpdateGoalCheckin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -978,6 +1214,24 @@ class PowerbiClient(ConnectorClientBase):
         Get a goal check-in
 
         Get a check-in on a Power BI goal.
+
+        Swagger operation ID: `GetGoalCheckin`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            scorecard_id: The unique identifier of the scorecard.
+            goal_id: The unique identifier of the goal.
+            goal_checkin: Example: 2021-07-21.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1030,6 +1284,22 @@ class PowerbiClient(ConnectorClientBase):
         Refresh a dataset
 
         Use Power BI REST API to refresh a powerbi dataset.
+
+        Swagger operation ID: `RefreshDataset`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1077,6 +1347,24 @@ class PowerbiClient(ConnectorClientBase):
         Export To File for Power BI Reports
 
         Use Power BI Rest API to inititate export for Power BI reports
+
+        Swagger operation ID: `InitiateExportToFileForPbiReports`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            reportid: The unique identifier of a pbi report.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1122,6 +1410,24 @@ class PowerbiClient(ConnectorClientBase):
         Export To File for Paginated Reports
 
         Use Power BI Rest API to inititate export for paginated reports
+
+        Swagger operation ID: `InitiateExportToFileForPaginatedReports`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            groupid: The unique identifier of the workspace.
+            reportid: The unique identifier of a paginated report.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1167,6 +1473,21 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/myorg/groups"
         query_params = []
@@ -1228,6 +1549,21 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAlerts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/metadata/v201606/alerts"
         query_params = []
@@ -1290,6 +1626,22 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListDatasets`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1356,6 +1708,23 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTables`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1427,6 +1796,22 @@ class PowerbiClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetReportsInGroup`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1487,6 +1872,23 @@ class PowerbiClient(ConnectorClientBase):
         GetColumns
 
         Get columns for Power BI dataset table.
+
+        Swagger operation ID: `GetColumns`.
+
+        Args:
+            groupid: The unique identifier of the workspace.
+            datasetid: The unique identifier of the dataset.
+            tablename: The name of the table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

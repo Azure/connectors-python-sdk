@@ -186,6 +186,21 @@ class ZendeskClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTables`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/tables"
         initial_request_url = request_url
@@ -249,6 +264,29 @@ class ZendeskClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetItems`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            skip: Number of entries to skip (default = 0).
+            top: Maximum number of entries to retrieve (default = 512).
+            select: Specific fields to retrieve from entries (default = all).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -346,6 +384,23 @@ class ZendeskClient(ConnectorClientBase):
         Create Item
 
         Creates a Zendesk item
+
+        Swagger operation ID: `PostItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Zendesk item type (example: 'Ticket').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -391,6 +446,22 @@ class ZendeskClient(ConnectorClientBase):
         Get item
 
         Retrieves a Zendesk item
+
+        Swagger operation ID: `GetItem`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -437,6 +508,22 @@ class ZendeskClient(ConnectorClientBase):
         Delete item
 
         Deletes a Zendesk item
+
+        Swagger operation ID: `DeleteItem`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -482,6 +569,24 @@ class ZendeskClient(ConnectorClientBase):
         Update item
 
         Updates an existing Zendesk item
+
+        Swagger operation ID: `PatchItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            table: Zendesk item type (example: 'Ticket').
+            id: Unique identifier of the item to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -537,6 +642,28 @@ class ZendeskClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `SearchArticles`.
+
+        Args:
+            query: Article to search for.
+            locale: The locale the item is displayed in.
+            brand_id: Search for articles in the specified brand.
+            category: Limit the search to this category id.
+            section: Limit the search to this section id.
+            label_names: A comma-separated list of label names.
+            multibrand: Enable search across all brands if true.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -632,6 +759,21 @@ class ZendeskClient(ConnectorClientBase):
         Get item metadata
 
         Retrieves item metadata for Zendesk object type
+
+        Swagger operation ID: `GetTable`.
+
+        Args:
+            table: Zendesk item type (example: 'Ticket').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

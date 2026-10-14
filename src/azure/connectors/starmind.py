@@ -748,6 +748,22 @@ class StarmindClient(ConnectorClientBase):
         we show from returned users by selecting concepts based on the primary
         label in the chosen language. Returned concepts are deduplicated when
         multiple concepts share the same primary label.
+
+        Swagger operation ID: `FindExperts_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/experts"
 
@@ -792,6 +808,24 @@ class StarmindClient(ConnectorClientBase):
         `items`. By default, all published questions are returned, ordered by
         their last activity (descending). A combination of filters, search
         queries and ordering criteria can be applied to the result.
+
+        Swagger operation ID: `FindQuestions_V3`.
+
+        Args:
+            query: The question search query.
+            limit: Limit the number of returned questions. Defaults to 10.
+            filter: Filter the list of questions using a predefined filter.
+            sort: Specify the criteria the result is sorted by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/questions"
         query_params = []
@@ -852,6 +886,22 @@ class StarmindClient(ConnectorClientBase):
         Get user by id
 
         Retrieves user information based on the provided user id.
+
+        Swagger operation ID: `GetUserById_V3`.
+
+        Args:
+            id: The unique global user identifier (UUID) as path parameter used
+                to reference the user across the Starmind platform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -897,6 +947,22 @@ class StarmindClient(ConnectorClientBase):
         discoverable, and allow other users to answer it. Providing the
         optional description helps experts understand the question better and
         increases the chances of getting high-quality answers.
+
+        Swagger operation ID: `PostQuestionDraft_V3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v3/questions"
 
@@ -936,6 +1002,21 @@ class StarmindClient(ConnectorClientBase):
         Publishes a question draft. Publishing the question triggers expert
         search, makes the question discoverable, and allows other users to
         answer it. Questions are always published anonymously.
+
+        Swagger operation ID: `PublishQuestionDraft_V3`.
+
+        Args:
+            question_id: The ID of the question draft to be published.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

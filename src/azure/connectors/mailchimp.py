@@ -1230,6 +1230,21 @@ class MailchimpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetCampaigns`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/campaigns"
         initial_request_url = request_url
@@ -1285,6 +1300,21 @@ class MailchimpClient(ConnectorClientBase):
         Send Campaign
 
         Send an existing campaign
+
+        Swagger operation ID: `sendcampaign`.
+
+        Args:
+            campaign_id: The unique id for the list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1321,6 +1351,24 @@ class MailchimpClient(ConnectorClientBase):
         Get all the lists
 
         Find all the lists for the current user
+
+        Swagger operation ID: `GetLists`.
+
+        Args:
+            count: The number of records to return. Default value is 10.
+                Maximum value is 1000.
+            offset: The number of records from a collection to skip. Default
+                value is 0.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
         query_params = []
@@ -1371,6 +1419,22 @@ class MailchimpClient(ConnectorClientBase):
         New List
 
         Create a new list in your MailChimp account
+
+        Swagger operation ID: `newlist`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
@@ -1411,6 +1475,26 @@ class MailchimpClient(ConnectorClientBase):
         Subscribe or unsubscribe list members
 
         Batch subscribe or unsubscribe list members.
+
+        Swagger operation ID: `AddMembers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            list_id: The unique id for the list.
+            skip_merge_validation: Allows member data to be accepted without
+                merge field values.
+            skip_duplicate_check: Ignores duplicates sent in the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1466,6 +1550,25 @@ class MailchimpClient(ConnectorClientBase):
         Show list members
 
         Show all the members of a list
+
+        Swagger operation ID: `GetListMembers`.
+
+        Args:
+            list_id: The unique id for the list.
+            count: The number of records to return. Default value is 10.
+                Maximum value is 1000.
+            offset: The number of records from a collection to skip. Default
+                value is 0.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1520,6 +1623,23 @@ class MailchimpClient(ConnectorClientBase):
         Add member to list
 
         Add or update a list member
+
+        Swagger operation ID: `addmember`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            list_id: The unique id for the list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1561,6 +1681,22 @@ class MailchimpClient(ConnectorClientBase):
 
         Create a new campaign based on a Campaign Type, Recipients list and
         Campaign Settings (subject line, title, from_name and reply_to).
+
+        Swagger operation ID: `newcampaignV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/campaigns"
 
@@ -1598,6 +1734,21 @@ class MailchimpClient(ConnectorClientBase):
         Remove Member from list
 
         Delete a member from a list.
+
+        Swagger operation ID: `removemember_v2`.
+
+        Args:
+            list_id: The unique id for the list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1640,6 +1791,23 @@ class MailchimpClient(ConnectorClientBase):
         Update member information
 
         Update information for a specific list member.
+
+        Swagger operation ID: `updatemember_v2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            list_id: The unique id for the list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

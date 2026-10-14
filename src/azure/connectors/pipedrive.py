@@ -563,6 +563,21 @@ class PipedriveClient(ConnectorClientBase):
         Get deal by id
 
         This operation retrieves all details of an existing deal, given its id.
+
+        Swagger operation ID: `GetDeal`.
+
+        Args:
+            deal_id: Deal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -605,6 +620,23 @@ class PipedriveClient(ConnectorClientBase):
 
         This operation is used to update the status associated with a deal,
         given its id.
+
+        Swagger operation ID: `UpdateDealStatus`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            deal_id: Deal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -646,6 +678,22 @@ class PipedriveClient(ConnectorClientBase):
 
         This operation is used to create a new activity for the authorized
         account.
+
+        Swagger operation ID: `AddActivity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/activities"
 
@@ -683,6 +731,21 @@ class PipedriveClient(ConnectorClientBase):
         Get stage by id
 
         This operation returns data about a specific stage.
+
+        Swagger operation ID: `GetStage`.
+
+        Args:
+            stage_id: Stage Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -723,6 +786,22 @@ class PipedriveClient(ConnectorClientBase):
         Add deal
 
         This operation creates a new deal for the authorized account.
+
+        Swagger operation ID: `AddDealV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/connector-v2/v1/deals"
 
@@ -762,6 +841,23 @@ class PipedriveClient(ConnectorClientBase):
 
         This operation is used to update the stage associated with a deal,
         given its id.
+
+        Swagger operation ID: `UpdateDealStageV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            deal_id: Deal.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -808,6 +904,21 @@ class PipedriveClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListDeals`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/deals"
         initial_request_url = request_url

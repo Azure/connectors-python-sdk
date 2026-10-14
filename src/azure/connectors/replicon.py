@@ -583,6 +583,24 @@ class RepliconClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `BulkGetProjectDetails3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -649,6 +667,23 @@ class RepliconClient(ConnectorClientBase):
         Create Project Or Apply Modifications
 
         Create Project Or Apply Modifications in Replicon
+
+        Swagger operation ID: `CreateProjectOrApplyModifications`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -697,6 +732,23 @@ class RepliconClient(ConnectorClientBase):
         Get User List
 
         Get User List Data from Replicon
+
+        Swagger operation ID: `UserListServiceGetData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -745,6 +797,23 @@ class RepliconClient(ConnectorClientBase):
         Get Descendant Task Details
 
         Get Hierarchial Task Details from Replicon
+
+        Swagger operation ID: `GetDescendantTaskDetails`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -796,6 +865,24 @@ class RepliconClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `CreateTaskHierarchyOrApplyModifications`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -864,6 +951,23 @@ class RepliconClient(ConnectorClientBase):
         Move Task
 
         Move Task to a new Parent
+
+        Swagger operation ID: `MoveTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -907,6 +1011,23 @@ class RepliconClient(ConnectorClientBase):
         Task List Service Get Data
 
         Get Task List Service Data From Replicon
+
+        Swagger operation ID: `TaskListServiceGetData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -955,6 +1076,23 @@ class RepliconClient(ConnectorClientBase):
         Get Timesheet Summary
 
         Get Timesheet Summary from Replicon
+
+        Swagger operation ID: `GetTimesheetSummary`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1006,6 +1144,24 @@ class RepliconClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `BulkGetTimeEnteredSummary`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1072,6 +1228,23 @@ class RepliconClient(ConnectorClientBase):
         Put Project Team Member Assignments
 
         Rewrite Team Member assignment of Project
+
+        Swagger operation ID: `PutProjectTeamMemberAssignments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1115,6 +1288,23 @@ class RepliconClient(ConnectorClientBase):
         Rewrite Resource Assignment of a task
 
         Update the Resource assignment to a specified task
+
+        Swagger operation ID: `PutResourceAssignments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            host_url: Replicon Host Url.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1156,6 +1346,20 @@ class RepliconClient(ConnectorClientBase):
         Get Tenant End Point Details
 
         Get End Point Details of the Tenant
+
+        Swagger operation ID: `GetMyTenantEndpointDetails`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

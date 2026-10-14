@@ -404,6 +404,21 @@ class KeyvaultClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListKeys`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/keys"
         initial_request_url = request_url
@@ -462,6 +477,22 @@ class KeyvaultClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListKeyVersions`.
+
+        Args:
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -520,6 +551,21 @@ class KeyvaultClient(ConnectorClientBase):
         Get key metadata
 
         Gets metadata of a key.
+
+        Swagger operation ID: `GetKeyMetadata`.
+
+        Args:
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -561,6 +607,22 @@ class KeyvaultClient(ConnectorClientBase):
         Get key version metadata
 
         Gets metadata of a version of a key.
+
+        Swagger operation ID: `GetKeyVersionMetadata`.
+
+        Args:
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -606,6 +668,23 @@ class KeyvaultClient(ConnectorClientBase):
         Encrypt data with key
 
         Encrypt data using the latest version of a key.
+
+        Swagger operation ID: `EncryptData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -648,6 +727,24 @@ class KeyvaultClient(ConnectorClientBase):
         Encrypt data with key version
 
         Encrypt data using a specific version of a key.
+
+        Swagger operation ID: `EncryptDataWithVersion`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -695,6 +792,23 @@ class KeyvaultClient(ConnectorClientBase):
         Decrypt data using the latest version of a key. Output of this
         operation is typically classified as secret and can be visible in the
         run history.
+
+        Swagger operation ID: `DecryptData`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -739,6 +853,24 @@ class KeyvaultClient(ConnectorClientBase):
         Decrypt data using a specific version of a key. Output of this
         operation is typically classified as secret and can be visible in the
         run history.
+
+        Swagger operation ID: `DecryptDataWithVersion`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            key_name: Name of the key.
+            key_version: Version of the key.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -785,6 +917,21 @@ class KeyvaultClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListSecrets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/secrets"
         initial_request_url = request_url
@@ -843,6 +990,22 @@ class KeyvaultClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListSecretVersions`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -901,6 +1064,21 @@ class KeyvaultClient(ConnectorClientBase):
         Get secret metadata
 
         Gets metadata of a secret.
+
+        Swagger operation ID: `GetSecretMetadata`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -942,6 +1120,22 @@ class KeyvaultClient(ConnectorClientBase):
         Get secret version metadata
 
         Gets metadata of a version of a secret.
+
+        Swagger operation ID: `GetSecretVersionMetadata`.
+
+        Args:
+            secret_name: Name of the secret.
+            secret_version: Version of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -987,6 +1181,21 @@ class KeyvaultClient(ConnectorClientBase):
 
         Gets a secret. Output of this operation is typically classified as
         secret and can be visible in the run history.
+
+        Swagger operation ID: `GetSecret`.
+
+        Args:
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1029,6 +1238,22 @@ class KeyvaultClient(ConnectorClientBase):
 
         Gets a version of a secret. Output of this operation is typically
         classified as secret and can be visible in the run history.
+
+        Swagger operation ID: `GetSecretVersion`.
+
+        Args:
+            secret_name: Name of the secret.
+            secret_version: Version of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

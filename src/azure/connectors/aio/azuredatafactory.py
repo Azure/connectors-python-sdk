@@ -183,6 +183,31 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Create a pipeline run
 
         This operation creates a new pipeline run in your factory
+
+        Swagger operation ID: `CreatePipelineRun`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_name: The name of the Data Factory pipeline.
+            reference_pipeline_run_id: The pipeline run identifier. If run ID
+                is specified the parameters of the specified run will be used
+                to create a new run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -245,6 +270,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Cancel a pipeline run
 
         This operation cancels a pipeline run by its run ID.
+
+        Swagger operation ID: `CancelPipelineRun`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_run_name: The id of the Data Factory pipeline run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -296,6 +341,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
         Get a pipeline run
 
         Get a particular pipeline run execution
+
+        Swagger operation ID: `GetPipelineRun`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            pipeline_run_name: The id of the Data Factory pipeline run.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -351,6 +416,21 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSubscriptions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/subscriptions"
         query_params = []
@@ -422,6 +502,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListResourceGroups`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            filter: The filter to apply on the operation.
+            top: Query parameters. If nothing is passed returns all values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -506,6 +606,25 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListDataFactories`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -585,6 +704,26 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListPipelines`.
+
+        Args:
+            subscription_id: The unique identifier for the Microsoft Azure
+                subscription. The subscription ID forms part of the ID for
+                every Azure resource.
+            resource_group_name: Resource group name.
+            data_factory_name: The name of the Data Factory.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

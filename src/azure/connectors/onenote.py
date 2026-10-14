@@ -554,6 +554,24 @@ class OnenoteClient(ConnectorClientBase):
         Create section in a notebook
 
         Create section in a notebook.
+
+        Swagger operation ID: `CreateSectionInNotebook`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/notebooks/Dynamic/sections"
@@ -602,6 +620,24 @@ class OnenoteClient(ConnectorClientBase):
         Create page in a section
 
         Create new page in a specified section.
+
+        Swagger operation ID: `CreatePageInSection`.
+
+        Args:
+            input: The request body.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
@@ -654,6 +690,24 @@ class OnenoteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetPagesInSection`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sections/Dynamic/pages"
         query_params = []
@@ -726,6 +780,21 @@ class OnenoteClient(ConnectorClientBase):
         Create a page in Quick Notes
 
         Create a new page in the Quick Notes section.
+
+        Swagger operation ID: `CreatePageInQuickNotes`.
+
+        Args:
+            input: The request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages"
 
@@ -765,6 +834,24 @@ class OnenoteClient(ConnectorClientBase):
         Delete a page
 
         Delete a page.
+
+        Swagger operation ID: `DeletePage`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages"
         query_params = []
@@ -817,6 +904,24 @@ class OnenoteClient(ConnectorClientBase):
         Get page content
 
         Get HTML page content.
+
+        Swagger operation ID: `GetPageContent`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
@@ -873,6 +978,25 @@ class OnenoteClient(ConnectorClientBase):
         Update page content
 
         Update HTML page content.
+
+        Swagger operation ID: `UpdatePageContent`.
+
+        Args:
+            input: The request body.
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            section_id: API URL of the section pages.
+            page_id: Unique id of the page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/pages/Dynamic/content"
         query_params = []
@@ -927,6 +1051,21 @@ class OnenoteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetNotebooks`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/notebooks"
         initial_request_url = request_url
@@ -985,6 +1124,23 @@ class OnenoteClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSectionsInNotebook`.
+
+        Args:
+            notebook_key: A key identifying the notebook. Note this is specific
+                to the API and cannot be hand-typed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/notebooks/notebookKey/sections"

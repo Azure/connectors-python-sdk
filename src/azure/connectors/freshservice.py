@@ -367,6 +367,23 @@ class FreshserviceClient(ConnectorClientBase):
         Add a note to a ticket
 
         Add a private or public note to a ticket.
+
+        Swagger operation ID: `AddNoteV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            ticket_id: The ticket id to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -407,6 +424,22 @@ class FreshserviceClient(ConnectorClientBase):
         Create a ticket
 
         Create a ticket.
+
+        Swagger operation ID: `CreateTicketV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/v2/tickets"
 
@@ -445,6 +478,23 @@ class FreshserviceClient(ConnectorClientBase):
         Update a ticket
 
         Update a ticket (only specified values will be updated).
+
+        Swagger operation ID: `UpdateTicketV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            ticket_id: The ticket id to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

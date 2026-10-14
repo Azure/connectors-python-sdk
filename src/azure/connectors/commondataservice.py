@@ -1033,6 +1033,20 @@ class CommondataserviceClient(ConnectorClientBase):
     ) -> dict[str, Any] | None:
         """
         GetDataSetsMetadata
+
+        Swagger operation ID: `GetDataSetsMetadata`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/$metadata.json/datasets"
 
@@ -1070,6 +1084,21 @@ class CommondataserviceClient(ConnectorClientBase):
         Follows nextLink to retrieve next page of data
 
         This operation gets the next page of data.
+
+        Swagger operation ID: `GetNextPage`.
+
+        Args:
+            next_link: OData nextLink.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1114,6 +1143,26 @@ class CommondataserviceClient(ConnectorClientBase):
         Associates one row to another on the provided relationship
 
         Associates one row to another on the provided relationship
+
+        Swagger operation ID: `AssociateRecordsPatchItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Select an Environment.
+            table: Name of the table.
+            id: Id of the table row.
+            relationship: Relationship on which to associate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1166,6 +1215,25 @@ class CommondataserviceClient(ConnectorClientBase):
         Creates Note (annotation) for specified table row
 
         Creates Note (annotation) for specified table row.
+
+        Swagger operation ID: `CreateAttachment_V2`.
+
+        Args:
+            input: The binary request body.
+            dataset: Select an Environment.
+            table: Table on which to create Note (annotation).
+            id: Id of the table row on which to create a Note (annotation).
+            display_name: Filename.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1226,6 +1294,24 @@ class CommondataserviceClient(ConnectorClientBase):
         Deletes specified attachment on the Note (annotation)
 
         Deletes specified attachment on the Note (annotation).
+
+        Swagger operation ID: `DeleteAttachment_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Table on which to delete Note (annotation).
+            id: Id of the table row on which to delete a Note (annotation).
+            attachment_id: Note (annotation) id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1274,6 +1360,23 @@ class CommondataserviceClient(ConnectorClientBase):
         Delete a row (legacy)
 
         This operation deletes a row from a table collection
+
+        Swagger operation ID: `DeleteItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select a table.
+            id: Identifier for the row.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1322,6 +1425,25 @@ class CommondataserviceClient(ConnectorClientBase):
         Disassociates a row from a multi-valued relationship
 
         Disassociates a row from a multi-valued relationship
+
+        Swagger operation ID: `DisassociateRecordsPostItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Name of the table.
+            id: Id of the table row.
+            relationship: Relationship on which to associate.
+            related_id: The item to disassociate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1378,6 +1500,24 @@ class CommondataserviceClient(ConnectorClientBase):
         Disassociates a row from a single-valued relationship
 
         Disassociates a row from a single-valued relationship
+
+        Swagger operation ID: `DisassociateSingleValueRecordDeleteItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Name of the table.
+            id: Id of the table row.
+            relationship: Relationship on which to associate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1432,6 +1572,24 @@ class CommondataserviceClient(ConnectorClientBase):
         Retrieves file content for specified Note (annotation)
 
         Retrieves file content for specified Note (annotation).
+
+        Swagger operation ID: `GetAttachmentContent_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Table for which to get Note (annotation) content.
+            id: Id of the table row for which to get Notes (annotations).
+            attachment_id: Note (annotation) id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1486,6 +1644,27 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetCollectionRelationships_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Name of the table.
+            id: Id of the table row.
+            collection_type: many to many or not.
+            relationship: Relationship on which to expand.
+            target: Target table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1555,6 +1734,21 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetDataSets_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/datasets"
         initial_request_url = request_url
@@ -1612,6 +1806,23 @@ class CommondataserviceClient(ConnectorClientBase):
         Get row (legacy)
 
         This operation retrieves the specified row for a table
+
+        Swagger operation ID: `GetItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select a table.
+            id: Identifier for the row.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1663,6 +1874,24 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItemAttachments_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Table for which to get Notes (annotations).
+            id: Id of the table row for which to get Notes (annotations).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1737,6 +1966,31 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetItems_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select a table.
+            apply: A sequence of OData aggregation transformations.
+            filter: An ODATA filter query to restrict the entries returned
+                (e.g. stringColumn eq 'string' OR numberColumn lt 123).
+            orderby: An ODATA orderBy query for specifying the order of
+                entries.
+            top: Total number of entries to retrieve (default = all).
+            expand: Related entries to include with requested entries (default
+                = none).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1835,6 +2089,22 @@ class CommondataserviceClient(ConnectorClientBase):
         Get table metadata - Patch
 
         Gets table metadata for patch operation
+
+        Swagger operation ID: `GetMetadataForPatchItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select a table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1882,6 +2152,22 @@ class CommondataserviceClient(ConnectorClientBase):
         Get table metadata - Post
 
         Gets table metadata for post operation
+
+        Swagger operation ID: `GetMetadataForPostItem_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select a table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1930,6 +2216,23 @@ class CommondataserviceClient(ConnectorClientBase):
         Retrieves the metadata for multi select column metadata
 
         Retrieves the metadata for multi select column metadata.
+
+        Swagger operation ID: `GetMultiSelectMetadata_V2`.
+
+        Args:
+            dataset: org name.
+            table: table name.
+            item: id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1980,6 +2283,24 @@ class CommondataserviceClient(ConnectorClientBase):
         Retrieves the metadata for choice column metadata
 
         Retrieves the metadata for choice column metadata.
+
+        Swagger operation ID: `GetOptionSetMetadata_V2`.
+
+        Args:
+            dataset: org name.
+            table: table name.
+            item: id.
+            type_: type of choice.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2029,6 +2350,22 @@ class CommondataserviceClient(ConnectorClientBase):
         Get table metadata
 
         Gets table metadata
+
+        Swagger operation ID: `GetTable_V2`.
+
+        Args:
+            dataset: Select an Environment.
+            table: Select atable.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2075,6 +2412,22 @@ class CommondataserviceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTables_V2`.
+
+        Args:
+            dataset: dataset.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2139,6 +2492,25 @@ class CommondataserviceClient(ConnectorClientBase):
         Update a row (legacy)
 
         This operation updates an existing row for a table
+
+        Swagger operation ID: `PatchItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Select an Environment.
+            table: Select a table.
+            id: Identifier for the row.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2187,6 +2559,24 @@ class CommondataserviceClient(ConnectorClientBase):
         Add a new row (legacy)
 
         This operation adds a new row of a table
+
+        Swagger operation ID: `PostItem_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            dataset: Select an Environment.
+            table: Select a table.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

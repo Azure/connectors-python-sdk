@@ -265,6 +265,21 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation returns details of a Schedule using the Schedule's
         unique ID.
+
+        Swagger operation ID: `GetSchedule`.
+
+        Args:
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -311,6 +326,25 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTimesOff`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -395,6 +429,23 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation creates a new Time Off instance and assigns it to a
         member of the team
+
+        Swagger operation ID: `CreateTimeOff`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -436,6 +487,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Time Off instance
 
         This operation returns details for a Time Off using its unique ID.
+
+        Swagger operation ID: `GetTimeOff`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_id: The unique ID of the Time Off.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -482,6 +549,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete a Time Off instance
 
         This operation deletes a Time Off using its unique ID.
+
+        Swagger operation ID: `DeleteTimeOff`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_id: The unique ID of the Time Off.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -531,6 +614,25 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListShifts`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -615,6 +717,23 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation creates a new Shift and assigns it to a member of the
         team
+
+        Swagger operation ID: `CreateShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -656,6 +775,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Shift
 
         This operation returns details for a Shift using the Shift's unique ID.
+
+        Swagger operation ID: `GetShift`.
+
+        Args:
+            team_id: Add Team ID.
+            shift_id: The unique ID of the Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -702,6 +837,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete a Shift
 
         This operation deletes a Shift using the Shift's unique ID.
+
+        Swagger operation ID: `DeleteShift`.
+
+        Args:
+            team_id: Add Team ID.
+            shift_id: The unique ID of the Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -751,6 +902,25 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListOpenShifts`.
+
+        Args:
+            team_id: Add Team ID.
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -834,6 +1004,23 @@ class ShiftsClient(ConnectorClientBase):
         Create a new Open Shift
 
         Create a new Open Shift in a Schedule.
+
+        Swagger operation ID: `CreateOpenShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -875,6 +1062,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Open Shift
 
         This operation returns details for an Open Shift.
+
+        Swagger operation ID: `GetOpenShift`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -922,6 +1125,24 @@ class ShiftsClient(ConnectorClientBase):
         Update an Open Shift
 
         Update an Open Shift in a Schedule.
+
+        Swagger operation ID: `UpdateOpenShift`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -968,6 +1189,22 @@ class ShiftsClient(ConnectorClientBase):
         Delete an Open Shift
 
         This operation deletes an Open Shift.
+
+        Swagger operation ID: `DeleteOpenShift`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_id: The unique ID of the Open Shift.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1016,6 +1253,23 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTimeOffReasons`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1096,6 +1350,23 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSchedulingGroups`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1174,6 +1445,22 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation returns details for a Scheduling Group using its unique
         ID.
+
+        Swagger operation ID: `GetSchedulingGroup`.
+
+        Args:
+            team_id: Add Team ID.
+            scheduling_group_id: The unique ID of the Scheduling Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1224,6 +1511,24 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTimeOffRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1306,6 +1611,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Time Off request
 
         This operation returns a Time Off request by ID.
+
+        Swagger operation ID: `GetTimeOffShiftRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1353,6 +1674,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve a Time Off request
 
         This operation allows managers to approve a Time Off request.
+
+        Swagger operation ID: `TimeOffRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1401,6 +1740,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline a Time Off request
 
         This operation allows managers to decline a Time Off request.
+
+        Swagger operation ID: `TimeOffRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            time_off_request_id: The unique ID of the Time Off request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1452,6 +1809,24 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListOfferShiftRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1534,6 +1909,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Offer Shift request
 
         This operation returns an Offer Shift request by ID.
+
+        Swagger operation ID: `GetOfferShiftRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1582,6 +1973,24 @@ class ShiftsClient(ConnectorClientBase):
 
         This operation allows recipients/managers to approve an Offer Shift
         request.
+
+        Swagger operation ID: `OfferShiftRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1630,6 +2039,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline an Offer Shift request
 
         This operation allows users to decline an Offer Shift request.
+
+        Swagger operation ID: `OfferShiftRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            offer_shift_request_id: The unique ID of the Offer Shift request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1681,6 +2108,24 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSwapShiftsChangeRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1763,6 +2208,22 @@ class ShiftsClient(ConnectorClientBase):
         Get a Swap Shifts request
 
         This operation returns a Swap Shifts request by ID.
+
+        Swagger operation ID: `GetSwapShiftsChangeRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1810,6 +2271,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve a Swap Shifts request
 
         This operation allows a user to approve a Swap Shifts request.
+
+        Swagger operation ID: `SwapShiftsChangeRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1858,6 +2337,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline a Swap Shifts request
 
         This operation allows users to decline a Swap Shifts request.
+
+        Swagger operation ID: `SwapShiftsChangeRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            swap_shifts_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1909,6 +2406,24 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListOpenShiftChangeRequests`.
+
+        Args:
+            team_id: Add Team ID.
+            top: Items per page (enable Pagination under .../Settings).
+            state: Request state filter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1991,6 +2506,22 @@ class ShiftsClient(ConnectorClientBase):
         Get an Open Shift request
 
         This operation returns an Open Shift change request by ID.
+
+        Swagger operation ID: `GetOpenShiftChangeRequest`.
+
+        Args:
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2038,6 +2569,24 @@ class ShiftsClient(ConnectorClientBase):
         Approve an Open Shift request
 
         This operation allows managers to approve an Open Shift request.
+
+        Swagger operation ID: `OpenShiftChangeRequestApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2086,6 +2635,24 @@ class ShiftsClient(ConnectorClientBase):
         Decline an Open Shift request
 
         This operation allows managers to decline an Open Shift request.
+
+        Swagger operation ID: `OpenShiftChangeRequestDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Add Team ID.
+            open_shift_change_request_id: The unique ID of the request.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2138,6 +2705,24 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListOpenShiftsCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getOpenShifts"
@@ -2225,6 +2810,25 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListShiftsCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            assigned_to_user_name: Assigned to user with name.
+            top: Items per page (enable Pagination under .../Settings).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getShifts"
@@ -2317,6 +2921,25 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTimesOffCrossTeam`.
+
+        Args:
+            start_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            end_time: yyyy-MM-ddTHH:mm:ss.fffZ (UTC format).
+            assigned_to_user_name: Assigned to user with name.
+            top: How many times off to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/joinedTeams/getTimesOff"
@@ -2406,6 +3029,21 @@ class ShiftsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/me/joinedTeams"
         initial_request_url = request_url

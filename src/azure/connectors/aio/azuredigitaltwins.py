@@ -190,6 +190,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `AddModels`.
+
+        Args:
+            input: The request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
@@ -253,6 +269,25 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListModels`.
+
+        Args:
+            dependencies_for: The set of the models which will have their
+                dependencies retrieved. If omitted, all models are retrieved.
+            include_model_definition: When true the model definition will be
+                returned as part of the result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/models"
         query_params = []
@@ -329,6 +364,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Deletes a model. A model can only be deleted if no other models
         reference it.
+
+        Swagger operation ID: `DeleteModel`.
+
+        Args:
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -372,6 +423,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Model By Id
 
         Retrieves model metadata and, optionally, the model definition.
+
+        Swagger operation ID: `GetModelById`.
+
+        Args:
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            include_model_definition: When true the model definition will be
+                returned as part of the result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -422,6 +491,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Model's Property
 
         Updates the metadata for a model.
+
+        Swagger operation ID: `UpdateModel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            modelid: The id of the Model. The id is unique within the service
+                and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -461,6 +548,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Twin by Id
 
         Retrieves a digital twin and its data.
+
+        Swagger operation ID: `GetTwinById`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -506,6 +609,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Deletes a digital twin. All relationships referencing the digital twin
         must already be deleted.
+
+        Swagger operation ID: `DeleteTwin`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -549,6 +668,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Add Twin
 
         Adds or replaces a digital twin.
+
+        Swagger operation ID: `AddTwin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -594,6 +731,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Twin
 
         Updates properties on a twin.
+
+        Swagger operation ID: `UpdateTwin`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -634,6 +789,23 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Component
 
         Retrieves a component from a digital twin.
+
+        Swagger operation ID: `GetComponent`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -683,6 +855,25 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Component
 
         Updates integer properties on a component of a twin.
+
+        Swagger operation ID: `UpdateComponent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -726,6 +917,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Get Relationship by Id
 
         Retrieves a relationship between two digital twins.
+
+        Swagger operation ID: `GetRelationshipById`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -774,6 +983,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Delete Relationship
 
         Deletes a relationship between two digital twins.
+
+        Swagger operation ID: `DeleteRelationship`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -821,6 +1048,26 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Add Relationship
 
         Adds a relationship between two digital twins.
+
+        Swagger operation ID: `AddRelationship`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -870,6 +1117,26 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Update Relationship
 
         Updates integer properties on a relationship between two digital twins.
+
+        Swagger operation ID: `UpdateRelationship`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            relationship_id: The id of the relationship. The id is unique
+                within the digital twin and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -915,6 +1182,23 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListIncomingRelationships`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -986,6 +1270,24 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Send Telemetry
 
         Sends telemetry on behalf of a digital twin.
+
+        Swagger operation ID: `SendTelemetry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1027,6 +1329,25 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
         Send Component Telemetry
 
         Sends telemetry on behalf of a component in a digital twin.
+
+        Swagger operation ID: `SendComponentTelemetry`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            component_path: The name of the DTDL component.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1073,6 +1394,23 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRelationships`.
+
+        Args:
+            twinid: The id of the digital twin. The id is unique within the
+                service and case sensitive.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1142,6 +1480,22 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
 
         Executes a query that allows traversing relationships and filtering by
         property values.
+
+        Swagger operation ID: `QueryTwins`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/query"
         query_params = []

@@ -171,6 +171,25 @@ class AzurequeuesClient(ConnectorClientBase):
         Delete message
 
         Delete a specific message from the queue.
+
+        Swagger operation ID: `DeleteMessage_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or queue endpoint.
+            queue_name: The queue to delete a message from.
+            message_id: The ID of the message to delete.
+            popreceipt: A valid pop receipt value returned from an earlier call
+                to the Get Messages.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -226,6 +245,26 @@ class AzurequeuesClient(ConnectorClientBase):
 
         Get a specific set of messages from the queue. The messages will be
         hidden but remain on the queue until the delete action is used.
+
+        Swagger operation ID: `GetMessages_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or queue endpoint.
+            queue_name: The queue to get Messages from.
+            numofmessages: The number of messages to grab from the queue
+                (default 1).
+            visibilitytimeout: The time in seconds that messages will be
+                invisible to other consumers (default 30).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -287,6 +326,22 @@ class AzurequeuesClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListQueues_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or queue endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -351,6 +406,23 @@ class AzurequeuesClient(ConnectorClientBase):
         Put a message on a queue
 
         Adds a message to the given queue.
+
+        Swagger operation ID: `PutMessage_V2`.
+
+        Args:
+            input: The request body.
+            storage_account_name: Azure Storage account name or queue endpoint.
+            queue_name: The queue to put a message to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -392,6 +464,22 @@ class AzurequeuesClient(ConnectorClientBase):
         Create a new queue
 
         Adds a queue to your account.
+
+        Swagger operation ID: `PutQueue_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or queue endpoint.
+            queue_name: The name of the queue to create.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -445,6 +533,21 @@ class AzurequeuesClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetStorageAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/GetStorageAccounts"
         initial_request_url = request_url

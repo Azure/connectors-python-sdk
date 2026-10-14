@@ -1479,6 +1479,44 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListCards`.
+
+        Args:
+            board_id: The unique id of the board.
+            actions: The list the actions to return. Specify 'all' or a comma
+                separated list of valid values.
+            attachments: A boolean value (true, false) determining whether or
+                not to show attachments.
+            attachment_fields: List the attachment fields to return. Specify
+                'all' or a comma separated list of valid values.
+            stickers: A boolean value (true, false) determining whether or not
+                to show stickers.
+            members: A boolean value (true, false) determining whether or not
+                to show members.
+            memeber_fields: List the member fields to return. Specify 'all' or
+                a comma separated list of valid values.
+            check_item_states: A boolean value (true, false) determining
+                whether or not to return the card states.
+            checklists: Specify the checklists to return.
+            limit: The max number of results to return, between 1 and 1000.
+            since: Fetch all cards after this date.
+            before: Fetch all cards before this date.
+            filter: An option on how to filter the response. The allowed values
+                are 'all', 'closed', 'none', 'open' or 'visible'.
+            fields: List the card fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1608,6 +1646,22 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListCardsSimple`.
+
+        Args:
+            board_id: Board Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1690,6 +1744,70 @@ class TrelloClient(ConnectorClientBase):
         Get a card by id
 
         Get a specific card by its unique id.
+
+        Swagger operation ID: `GetCard`.
+
+        Args:
+            card_id: The id of the card to fetch.
+            board_id: The id of the board to fetch cards in.
+            actions: List the actions to return. Specify 'all' or a comma
+                separated list of valid values.
+            actions_entities: A boolean value (true, false) determining whether
+                or not to return action entities.
+            actions_display: A boolean value (true, false) determining whether
+                or not to return action displays.
+            actions_limit: Max number of actions to return.
+            action_fields: List of action fields to return for each action.
+                Specify 'all' or a comma separated list of valid values.
+            action_member_creator_fields: List of action member creator fields
+                to return. Specify 'all' or a comma separated list of valid
+                values.
+            attachments: A boolean value (true, false) determining whether or
+                not to return attachments.
+            attachment_fields: List of attachment fields to return for each
+                attachment. Specify 'all' or a comma separated list of valid
+                values.
+            members: A boolean value (true, false) determining whether or not
+                to return members.
+            member_fields: List of member fields to return for each member.
+                Specify 'all' or a comma separated list of valid values.
+            members_voted: A boolean value (true, false) determining whether or
+                not to return voted members.
+            member_voted_fields: List of voted member fields to return for each
+                voted member. Specify 'all' or a comma separated list of valid
+                values.
+            check_item_states: A boolean value (true, false) determining
+                whether or not to return card states.
+            check_item_state_fields: List of state fields to return for each of
+                the card item state. Specify 'all' or a comma separated list of
+                valid values.
+            checklists: Specify the checklists to return for each card.
+            checklist_fields: List of checklist fields to return for each
+                checklist. Specify 'all' or a comma separated list of valid
+                values.
+            board: A boolean value (true, false) determining whether or not to
+                return the board which the card belongs to.
+            board_fields: List the board fields to return. Specify 'all' or a
+                comma separated list of valid values.
+            list: A boolean value (true, false) determining whether or not to
+                return the list which the card belongs to.
+            list_fields: List the list fields to return. Specify 'all' or a
+                comma separated list of valid values.
+            stickers: A boolean value (true, false) determining whether or not
+                to return the stickers.
+            sticker_fields: List the sticker fields to return for each sticker.
+                Specify 'all' or a comma separated list of valid values.
+            fields: List the card fields to return.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1853,6 +1971,22 @@ class TrelloClient(ConnectorClientBase):
         Delete a card
 
         Delete an existing card from the account.
+
+        Swagger operation ID: `DeleteCard`.
+
+        Args:
+            card_id: The id of the card to delete.
+            board_id: The id of the board to fetch cards from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1917,6 +2051,41 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListBoards`.
+
+        Args:
+            filter: List filters to apply to board results. Specify 'all' or a
+                comma separated list of valid values.
+            fields: List the board fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            actions: List the action fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            actions_entities: A boolean value (true, false) determining whether
+                or not to return action entities.
+            actions_limit: The max number of actions to return.
+            actions_format: Specify the format of the actions to return. The
+                valid options are 'count', 'list', 'minimal'.
+            actions_since: Return actions after the specified date.
+            action_fields: List the fields of the action to return. Specify
+                'all' or a comma separated list of valid values.
+            memberships: Specify membership information to return.
+            organization: A boolean value (true, false) determining whether or
+                not to return organization information.
+            organization_fields: List the organization fields to return.
+                Specify 'all' or a comma separated list of valid values.
+            lists: Specify whether to return lists which belong to the board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/member/me/boards"
         query_params = []
@@ -2038,6 +2207,21 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListBoardsSimple`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/simple/member/me/boards"
         initial_request_url = request_url
@@ -2130,6 +2314,93 @@ class TrelloClient(ConnectorClientBase):
         Get a board by Id
 
         Get a specific board by its unique identifier.
+
+        Swagger operation ID: `GetBoard`.
+
+        Args:
+            board_id: The unique Id of the board to get.
+            actions: List the actions to return. Specify 'all' or a comma
+                separated list of valid values.
+            action_entities: A boolean value (true, false) determining whether
+                or not to return action entities.
+            actions_display: A boolean value (true, false) determining whether
+                or not to return actions display.
+            actions_format: Specify the format of the actions to return. Valid
+                options are 'count', 'list', 'minimal'.
+            actions_since: Only return the actions after this date.
+            actions_limit: Max number of actions to return.
+            action_fields: List the fields to return with each field. Specify
+                'all' or a comma separated list of valid values.
+            action_member: A boolean value (true, false) determining whether or
+                not to return action members.
+            action_member_fields: List the member fields to return with each
+                action member. Specify 'all' or a comma separated list of valid
+                values.
+            action_member_creator: A boolean value (true, false) determining
+                whether or not to return action member creator.
+            action_member_creator_fields: List the action member creator fields
+                to return. Specify 'all' or a comma separated list of valid
+                values.
+            cards: Specify the cards to return. Valid options are 'all',
+                'closed', 'none', 'open', or 'visible'.
+            card_fields: List the fields to return for each card. Specify 'all'
+                or a comma separated list of valid values.
+            card_attachments: A boolean value (true, false) determining whether
+                or not to return attachments on cards.
+            card_attachment_fields: List the attachment fields to return for
+                each attachment. Specify 'all' or a comma separated list of
+                valid values.
+            card_checklists: Specify the checklists to return for each card.
+            card_stickers: A boolean value (true, false) determining whether or
+                not to return card stickers.
+            board_stars: Specify the board stars to return.
+            labels: Specify the labels to return.
+            label_fields: List the label fields to return for each label.
+                Specify 'all' or a comma separated list of valid values.
+            labels_limit: Max number of labels to return.
+            lists: Specify the lists to return.
+            list_fields: List the list fields to return for each list. Specify
+                'all' or a comma separated list of valid values.
+            memberships: List the memberships to return. Specify 'all' or a
+                comma separated list of valid values.
+            memberships_member: A boolean value (true, false) determining
+                whether or not to return membership members.
+            memberships_member_fields: List the member fields to return for
+                each membership member. Specify 'all' or a comma separated list
+                of valid values.
+            members: List the members to return. Specify 'all' or a comma
+                separated list of valid values.
+            member_fields: List the member fields to return for each member.
+                Specify 'all' or a comma separated list of valid values.
+            members_invited: Specify the invited members to return.
+            members_invited_fields: List the fields to return for each. Specify
+                'all' or a comma separated list of valid values.
+            checklists: Specify the checklists to return.
+            checklist_fields: List the checklist fields to return for each
+                checklist. Specify 'all' or a comma separated list of valid
+                values.
+            organization: A boolean value (true, false) determining whether or
+                not to return the organization information.
+            organization_fields: List the organization fields to return for
+                each organization. Specify 'all' or a comma separated list of
+                valid values.
+            organization_memberships: List the organization memberships to
+                return. Specify 'all' or a comma separated list of valid
+                values.
+            my_perfs: A boolean value (true, false) determining whether or not
+                to return my perfs.
+            fields: List the fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2359,6 +2630,23 @@ class TrelloClient(ConnectorClientBase):
         Update a board
 
         Update an existing board.
+
+        Swagger operation ID: `UpdateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The unique identifier of the board to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2406,6 +2694,29 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListLists`.
+
+        Args:
+            board_id: The unique id of the board to fetch lists.
+            cards: Specify the cards to return.
+            card_fields: List the card fields to return from. Specify 'all' or
+                a comma separated list of valid values.
+            filter: Specify the filter property for lists. Valid options are
+                'all, 'closed', 'none', or 'open'.
+            fields: List the fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2490,6 +2801,22 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListListsSimple`.
+
+        Args:
+            board_id: Unique Id of the board to fetch lists.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2555,6 +2882,31 @@ class TrelloClient(ConnectorClientBase):
 
         Get an existing list and the cards in the list by the unique identifier
         of the list.
+
+        Swagger operation ID: `GetList`.
+
+        Args:
+            list_id: The unique Id of the list to fetch.
+            board_id: The unique Id of the board to fetch the lists from.
+            cards: Specify the cards to return.
+            card_fields: List the card fields to return for each card. Specify
+                'all' or a comma separated list of valid values.
+            board: A boolean value (true, false) determining whether or not to
+                return board information.
+            board_fields: List the board fields to return. Specify 'all' or a
+                comma separated list of valid values.
+            fields: List the list fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2633,6 +2985,29 @@ class TrelloClient(ConnectorClientBase):
         Update a list
 
         Update an existing list.
+
+        Swagger operation ID: `UpdateList`.
+
+        Args:
+            list_id: The unique id of the list to update.
+            board_id: The unique id of the board the list is on.
+            name: The new list name.
+            closed: A string (true, false) determining whether or not to close
+                the list.
+            id_board: The unique id of the board to move the list to.
+            pos: The list position (top, bottom, or number).
+            subscribed: A boolean value (true, false) determining whether or
+                not to subscribe to the list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2705,6 +3080,22 @@ class TrelloClient(ConnectorClientBase):
         Get your User Profile info
 
         Get information about your User Profile
+
+        Swagger operation ID: `GetUserProfile`.
+
+        Args:
+            fields: List the fields to return. Specify 'all' or a comma
+                separated list of valid values.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/members/me"
         query_params = []
@@ -2752,6 +3143,21 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/members/me/organizations"
@@ -2812,6 +3218,22 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTeamMembers`.
+
+        Args:
+            team_id: The unique Id of the team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2873,6 +3295,22 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListBoardMembers`.
+
+        Args:
+            board_id: The unique Id of the board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2934,6 +3372,22 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListBoardLabels`.
+
+        Args:
+            board_id: The unique Id of the board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2996,6 +3450,21 @@ class TrelloClient(ConnectorClientBase):
         Get the team for a board
 
         Get the team details for a specific board.
+
+        Swagger operation ID: `GetTeamForBoard`.
+
+        Args:
+            board_id: The unique Id of the board to fetch team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3040,6 +3509,23 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListCardMembers`.
+
+        Args:
+            card_id: The unique id of the card.
+            board_id: The unique id of the board to look for cards on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3109,6 +3595,23 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListCardComments`.
+
+        Args:
+            card_id: The unique id of the card.
+            board_id: The unique id of the board to look for comments on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3176,6 +3679,24 @@ class TrelloClient(ConnectorClientBase):
         Add a comment to a card
 
         Add a comment to a specific card.
+
+        Swagger operation ID: `AddCommentToCard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            card_id: The unique id of the card.
+            board_id: The unique id of the board to add a comment to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3228,6 +3749,24 @@ class TrelloClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `AddMemberToCard`.
+
+        Args:
+            card_id: The unique identifier of the card to add a member to.
+            board_id: The unique id of the board the card is on.
+            member_id: The member id or username to add to the card.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3297,6 +3836,22 @@ class TrelloClient(ConnectorClientBase):
         Create a board
 
         Create a new board with the specified fields.
+
+        Swagger operation ID: `CreateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/boards"
 
@@ -3334,6 +3889,22 @@ class TrelloClient(ConnectorClientBase):
         Create a list
 
         Create a new list.
+
+        Swagger operation ID: `CreateList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
@@ -3371,6 +3942,21 @@ class TrelloClient(ConnectorClientBase):
         Close a board
 
         Set a specific board to closed.
+
+        Swagger operation ID: `CloseBoard`.
+
+        Args:
+            board_id: The unique id of the board to close.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3412,6 +3998,23 @@ class TrelloClient(ConnectorClientBase):
         Create a card
 
         Creates a new card with the parameters provided.
+
+        Swagger operation ID: `CreateCard_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The id of the board to create the card in.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/cards"
         query_params = []
@@ -3458,6 +4061,24 @@ class TrelloClient(ConnectorClientBase):
         Update a card
 
         Update an existing card with new parameters.
+
+        Swagger operation ID: `UpdateCard_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            card_id: The id of the card to update.
+            board_id: The id of the board to fetch cards from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

@@ -276,6 +276,24 @@ class ZohosignClient(ConnectorClientBase):
         Invoke API
 
         Invoke API
+
+        Swagger operation ID: `InvokeAPI`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            url: Provide url path.
+            method: Select API Method to be used.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/{quote(str(url), safe='')}"
@@ -322,6 +340,21 @@ class ZohosignClient(ConnectorClientBase):
         Download Completion Certificate
 
         Downloads the completion certificate of a specific envelope
+
+        Swagger operation ID: `download-completion-certificate`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -361,6 +394,21 @@ class ZohosignClient(ConnectorClientBase):
         Download Document
 
         Downloads a specific envelope
+
+        Swagger operation ID: `download-document`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -399,6 +447,22 @@ class ZohosignClient(ConnectorClientBase):
         Download File
 
         Downloads a specific document or file
+
+        Swagger operation ID: `download-file`.
+
+        Args:
+            request_id: Request ID.
+            document_id: Document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -440,6 +504,21 @@ class ZohosignClient(ConnectorClientBase):
         Get data of completed request
 
         Shows the details of a signed envelope
+
+        Swagger operation ID: `get-form-data`.
+
+        Args:
+            request_id: Request id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -480,6 +559,21 @@ class ZohosignClient(ConnectorClientBase):
         Recall a particular document
 
         Recall a particular document
+
+        Swagger operation ID: `recall-document`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -515,6 +609,21 @@ class ZohosignClient(ConnectorClientBase):
         Reminder for recipients
 
         Send a reminder to recipients of a particular document.
+
+        Swagger operation ID: `remind-document-recipients`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -550,6 +659,21 @@ class ZohosignClient(ConnectorClientBase):
         Delete Document
 
         Delete a particular document
+
+        Swagger operation ID: `delete-document`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -585,6 +709,21 @@ class ZohosignClient(ConnectorClientBase):
         Get a document
 
         Shows the details of a specific envelope
+
+        Swagger operation ID: `get-document`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -626,6 +765,23 @@ class ZohosignClient(ConnectorClientBase):
         Update the properties of a created request
 
         Update the properties of a created request
+
+        Swagger operation ID: `UpdateDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -666,6 +822,21 @@ class ZohosignClient(ConnectorClientBase):
         SendSignRequest
 
         Send the uploaded document out for signature
+
+        Swagger operation ID: `SendSignRequest`.
+
+        Args:
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -706,6 +877,21 @@ class ZohosignClient(ConnectorClientBase):
         Get particular template details
 
         Shows the details of a specific document template
+
+        Swagger operation ID: `get-template-details`.
+
+        Args:
+            template_id: List of Templates.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -743,6 +929,21 @@ class ZohosignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTemplates`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/templates"
         initial_request_url = request_url

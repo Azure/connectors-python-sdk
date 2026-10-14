@@ -700,6 +700,22 @@ class AzureadClient(ConnectorClientBase):
         Create Office 365 group
 
         Create an Office 365 group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateOffice365Group`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups/office365"
 
@@ -737,6 +753,22 @@ class AzureadClient(ConnectorClientBase):
         Create security group
 
         Create a security group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateSecurityGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/groups/securityGroup"
@@ -776,6 +808,22 @@ class AzureadClient(ConnectorClientBase):
         Get group
 
         Get details for a group.
+
+        Swagger operation ID: `GetGroup`.
+
+        Args:
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -816,6 +864,22 @@ class AzureadClient(ConnectorClientBase):
         Get user
 
         Get details for a user.
+
+        Swagger operation ID: `GetUser`.
+
+        Args:
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -857,6 +921,24 @@ class AzureadClient(ConnectorClientBase):
         Update user
 
         Update the info for a user.
+
+        Swagger operation ID: `UpdateUser`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -892,6 +974,22 @@ class AzureadClient(ConnectorClientBase):
         Refresh tokens
 
         Invalidate all refresh tokens for a user
+
+        Swagger operation ID: `RefreshTokens`.
+
+        Args:
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -927,6 +1025,22 @@ class AzureadClient(ConnectorClientBase):
         Create user
 
         Create a new user in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateUser`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/users"
 
@@ -971,6 +1085,25 @@ class AzureadClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetGroupMembers`.
+
+        Args:
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            top: Limit on the number of results to return (from 1 to 999,
+                default is 100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1044,6 +1177,22 @@ class AzureadClient(ConnectorClientBase):
         Remove Member From Group
 
         Remove Member From Group
+
+        Swagger operation ID: `RemoveMemberFromGroup`.
+
+        Args:
+            group_id: The Id of the group.
+            member_id: The Id of the member.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1088,6 +1237,24 @@ class AzureadClient(ConnectorClientBase):
         Add user to group
 
         Add a user to a group in this Microsoft Entra ID tenant.
+
+        Swagger operation ID: `AddUserToGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a group (Ex.
+                '40639f36-46a6-73a6-91e2-9584b7913429').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1124,6 +1291,24 @@ class AzureadClient(ConnectorClientBase):
         Assign manager
 
         Assign a manager for a user.
+
+        Swagger operation ID: `AssignManager`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1159,6 +1344,22 @@ class AzureadClient(ConnectorClientBase):
         Create group
 
         Create a group in your Microsoft Entra ID tenant.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
 
@@ -1201,6 +1402,25 @@ class AzureadClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `CheckMemberGroupsV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1263,6 +1483,25 @@ class AzureadClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMemberGroupsV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Unique identifier of a user (Ex. 'user@tennant.onmicrosoft.com'
+                or '5f6ce5c7-b521-4842-9bbe-3f6d5aa5e35b').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

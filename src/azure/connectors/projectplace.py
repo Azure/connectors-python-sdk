@@ -335,6 +335,23 @@ class ProjectplaceClient(ConnectorClientBase):
         Create Card
 
         Creates a new card with the parameters provided
+
+        Swagger operation ID: `create_card`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The id of the Board where the card should be created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -379,6 +396,23 @@ class ProjectplaceClient(ConnectorClientBase):
         Move card to another column
 
         Move a card on the selected board
+
+        Swagger operation ID: `move_card`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            board_id: The id of the Board where the card should be created.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -424,6 +458,21 @@ class ProjectplaceClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `list_boards`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

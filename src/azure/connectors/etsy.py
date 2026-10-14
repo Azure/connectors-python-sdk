@@ -2931,6 +2931,20 @@ class EtsyClient(ConnectorClientBase):
         Ping
 
         Check to confirm connectivity to the Etsy API with an application.
+
+        Swagger operation ID: `Ping`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/openapi-ping"
 
@@ -2972,6 +2986,28 @@ class EtsyClient(ConnectorClientBase):
         Get a shop payment account ledger's entries
 
         Retrieve the entries of a shop's payment account ledger.
+
+        Swagger operation ID: `PaymentLedgerEntries`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            min_created: The earliest unix timestamp for when a record was
+                created.
+            max_created: The latest unix timestamp for when a record was
+                created.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3037,6 +3073,22 @@ class EtsyClient(ConnectorClientBase):
         Get a payment from a payment account ledger entry ID
 
         Get a Payment from a Payment Account Ledger Entry ID, if applicable.
+
+        Swagger operation ID: `PaymentGetEntryID`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            ledger_entry_ids: Array of integers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3090,6 +3142,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a payment from a specific receipt, identified by receipt ID,
         from a specific shop, identified by shop ID.
+
+        Swagger operation ID: `PaymentGetReceipt`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3136,6 +3205,22 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of payments from a shop identified by shop ID. You can
         also filter results using a list of payment IDs.
+
+        Swagger operation ID: `PaymentsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            payment_ids: A comma-separated array of Payment IDs numbers.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3184,6 +3269,23 @@ class EtsyClient(ConnectorClientBase):
         Get a receipt
 
         Retrieves a receipt, identified by a receipt ID, from an Etsy shop.
+
+        Swagger operation ID: `ReceiptGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3236,6 +3338,36 @@ class EtsyClient(ConnectorClientBase):
 
         Requests the shop receipts from a specific shop, unfiltered or filtered
         by receipt ID range or offset, date, paid, and/or shipped purchases.
+
+        Swagger operation ID: `ReceiptsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            min_created: The earliest unix timestamp for when a record was
+                created.
+            max_created: The latest unix timestamp for when a record was
+                created.
+            min_last_modified: The earliest unix timestamp for when a record
+                last changed.
+            max_last_modified: The latest unix timestamp for when a record last
+                changed.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            was_paid: When true, the seller received payment for the product(s)
+                in this receipt.
+            was_shipped: When true, the seller shipped the product(s) in this
+                receipt.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3326,6 +3458,24 @@ class EtsyClient(ConnectorClientBase):
         the buyer User. When send BCC is true, Etsy sends shipping
         notifications to the seller as well. When tracking code and carrier
         name aren't sent, the receipt is marked as shipped only.
+
+        Swagger operation ID: `ReceiptCreateShipment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The receipt to submit tracking for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3373,6 +3523,26 @@ class EtsyClient(ConnectorClientBase):
         Retrieve a listing's transactions
 
         Retrieves the list of transactions associated with a listing.
+
+        Swagger operation ID: `TransactionsListing`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3431,6 +3601,23 @@ class EtsyClient(ConnectorClientBase):
         Get a receipt's transaction
 
         Retrieves the list of transactions associated with a specific receipt.
+
+        Swagger operation ID: `TransactionReceipt`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            receipt_id: The numeric ID for the receipt associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3476,6 +3663,22 @@ class EtsyClient(ConnectorClientBase):
         Get a transaction
 
         Retrieves a transaction by transaction ID.
+
+        Swagger operation ID: `TransactionGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            transaction_id: The unique numeric ID for a transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3521,6 +3724,24 @@ class EtsyClient(ConnectorClientBase):
         Get a shop's transaction
 
         Retrieves the list of transactions associated with a shop.
+
+        Swagger operation ID: `TransactionGetShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3576,6 +3797,24 @@ class EtsyClient(ConnectorClientBase):
         Get reviews
 
         Retrieves the reviews from a shop given its ID.
+
+        Swagger operation ID: `ReviewsGet`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3630,6 +3869,22 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of available shipping carriers and the mail classes
         associated with them for a given country.
+
+        Swagger operation ID: `ShippingCarriers`.
+
+        Args:
+            origin_country_iso: The ISO code of the country from which the
+                listing ships.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/shipping-carriers"
         query_params = []
@@ -3675,6 +3930,21 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of shipping profiles available in the specific Etsy
         shop identified by its shop ID.
+
+        Swagger operation ID: `ShippingProfiles`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3719,6 +3989,23 @@ class EtsyClient(ConnectorClientBase):
         region when creating a shipping profile, but not both. Only one is
         required. You must pass either a shipping carrier ID and mail class, or
         both min and max delivery days.
+
+        Swagger operation ID: `ShippingCreateProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3760,6 +4047,23 @@ class EtsyClient(ConnectorClientBase):
         Get a shipping profile
 
         Retrieves a shipping profile referenced by shipping profile ID.
+
+        Swagger operation ID: `ShippingGetProfile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3799,6 +4103,23 @@ class EtsyClient(ConnectorClientBase):
         Delete a shipping profile
 
         Deletes a shipping profile by given ID.
+
+        Swagger operation ID: `ShippingDeleteProfile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3847,6 +4168,25 @@ class EtsyClient(ConnectorClientBase):
         Update a shipping profile
 
         Changes the settings in a shipping profile.
+
+        Swagger operation ID: `ShippingUpdateProfile`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3894,6 +4234,26 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of shipping destination objects associated with a
         shipping profile.
+
+        Swagger operation ID: `ShippingGetDestinations`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3962,6 +4322,25 @@ class EtsyClient(ConnectorClientBase):
         default destination is everywhere. You must also either assign both a
         shipping carrier ID and mail class or both min delivery days and max
         delivery days.
+
+        Swagger operation ID: `ShippingCreateDestination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4013,6 +4392,26 @@ class EtsyClient(ConnectorClientBase):
         cannot delete the final shipping destination for any shipping profile.
         To delete the final shipping destination from a shipping profile, you
         must delete the entire shipping profile.
+
+        Swagger operation ID: `ShippingDeleteProfileDestination`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            shipping_profile_destination_id: The numeric ID of the shipping
+                profile destination in the shipping profile associated with the
+                listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4060,6 +4459,27 @@ class EtsyClient(ConnectorClientBase):
 
         Updates an existing shipping destination, which can set or reassign the
         shipping cost, carrier, and class for a destination.
+
+        Swagger operation ID: `ShippingUpdateProfileDestination`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            shipping_profile_destination_id: The numeric ID of the shipping
+                profile destinationassociated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4107,6 +4527,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the list of shipping profile upgrades assigned to a specific
         shipping profile.
+
+        Swagger operation ID: `ShippingGetProfileUpgrades`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4154,6 +4591,25 @@ class EtsyClient(ConnectorClientBase):
 
         Creates a new shipping profile upgrade, which can establish a price for
         a shipping option, such as an alternate carrier or faster delivery.
+
+        Swagger operation ID: `ShippingCreateUpgrade`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4201,6 +4657,24 @@ class EtsyClient(ConnectorClientBase):
 
         Deletes a shipping profile upgrade and removes the upgrade option from
         every listing that uses the associated shipping profile.
+
+        Swagger operation ID: `ShippingDeleteProfileUpgrade`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile.
+            upgrade_id: The numeric ID that is associated with a shipping
+                upgrade.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4248,6 +4722,27 @@ class EtsyClient(ConnectorClientBase):
 
         Updates a shipping profile upgrade and updates any listings that use
         the shipping profile.
+
+        Swagger operation ID: `ShippingUpdateProfileUpgrade`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shipping_profile_id: The numeric ID of the shipping profile
+                associated with the listing.
+            upgrade_id: The numeric ID that is associated with a shipping
+                upgrade.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4295,6 +4790,23 @@ class EtsyClient(ConnectorClientBase):
 
         Update a shop. Assumes that all string parameters are provided in the
         shop's primary language.
+
+        Swagger operation ID: `ShopUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4335,6 +4847,21 @@ class EtsyClient(ConnectorClientBase):
         Get shop by owner ID
 
         Retrieves the shop identified by the shop owner's user ID.
+
+        Swagger operation ID: `ShopGetByOwnerID`.
+
+        Args:
+            user_id: The numeric user ID of the user who owns this shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4377,6 +4904,24 @@ class EtsyClient(ConnectorClientBase):
         Search shops
 
         Returns a list of shops with the matching name.
+
+        Swagger operation ID: `ShopSearch`.
+
+        Args:
+            shop_name: The shop's name string.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/shops"
         query_params = []
@@ -4432,6 +4977,21 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the list of shop sections in a specific shop identified by
         shop ID.
+
+        Swagger operation ID: `ShopGetSections`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4473,6 +5033,23 @@ class EtsyClient(ConnectorClientBase):
         Create a shop section
 
         Creates a new section in a specific shop.
+
+        Swagger operation ID: `ShopCreateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4513,6 +5090,21 @@ class EtsyClient(ConnectorClientBase):
         Get user
 
         Returns user profile for the user identified by a user ID.
+
+        Swagger operation ID: `UserGet`.
+
+        Args:
+            user_id: The unique positive non-zero numeric ID for an user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4554,6 +5146,23 @@ class EtsyClient(ConnectorClientBase):
         Get shop section
 
         Retrieves a shop section, referenced by section ID and shop ID.
+
+        Swagger operation ID: `ShopGetSection`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shop_section_id: The numeric ID of a section in a specific Etsy
+                shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4598,6 +5207,21 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the user's address. Development for this endpoint is in
         progress. It will only return a 501 response.
+
+        Swagger operation ID: `UserGetAddress`.
+
+        Args:
+            user_address_id: The numeric ID of the user's address.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4639,6 +5263,23 @@ class EtsyClient(ConnectorClientBase):
         Get user addresses
 
         Retrieve a list of user addresses.
+
+        Swagger operation ID: `UserGetAddresses`.
+
+        Args:
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user/addresses"
         query_params = []
@@ -4688,6 +5329,20 @@ class EtsyClient(ConnectorClientBase):
         Get seller taxonomy nodes
 
         Retrieves the full hierarchy tree of seller taxonomy nodes.
+
+        Swagger operation ID: `ListingGetTaxonomyNodes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/seller-taxonomy/nodes"
 
@@ -4726,6 +5381,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of product properties, with applicable scales and
         values, supported for a specific seller taxonomy ID.
+
+        Swagger operation ID: `ListingGetPropertiesByTaxonomy`.
+
+        Args:
+            taxonomy_id: The unique numeric ID of an Etsy taxonomy node, which
+                is a metadata category for listings organized into the seller
+                taxonomy hierarchy tree.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4775,6 +5447,28 @@ class EtsyClient(ConnectorClientBase):
 
         Returns listings that belong to a Shop. Listings can be filtered using
         the state parameter.
+
+        Swagger operation ID: `ListingGetShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            state: An enumerated string from any of: active or inactive.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            sort_on: The value to sort a search result of listings on.
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4844,6 +5538,23 @@ class EtsyClient(ConnectorClientBase):
         Create a draft listing
 
         Creates a physical draft listing product in a shop on the Etsy channel.
+
+        Swagger operation ID: `ListingCreate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4885,6 +5596,24 @@ class EtsyClient(ConnectorClientBase):
         Get a listing
 
         Retrieves a listing record by listing ID.
+
+        Swagger operation ID: `ListingGet`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            includes: An enumerated string that attaches a valid association.
+                Acceptable inputs are 'shop', 'images' and 'user'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4931,6 +5660,22 @@ class EtsyClient(ConnectorClientBase):
         the state is one of the following: SOLD_OUT, DRAFT, EXPIRED, INACTIVE,
         ACTIVE and is_available or ACTIVE and has seller flags: SUPRESSED
         (frozen), VACATION, CUSTOM_SHOPS (pattern), SELL_ON_FACEBOOK
+
+        Swagger operation ID: `ListingDelete`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4978,6 +5723,38 @@ class EtsyClient(ConnectorClientBase):
 
         A list of all active listings on Etsy paginated by their creation date.
         Without sort order listings will be returned newest-first by default.
+
+        Swagger operation ID: `ListingGetActive`.
+
+        Args:
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            keywords: Search term or phrase that must appear in all results.
+            sort_on: The value to sort a search result of listings on. NOTE:
+                sort on only works when combined with one of the search options
+                (keywords, region, etc.).
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by. NOTE: sort_order only works when combined with one
+                of the search options (keywords, region, etc.).
+            min_price: The minimum price of listings to be returned by a search
+                result.
+            max_price: The maximum price of listings to be returned by a search
+                result.
+            taxonomy_id: The numeric taxonomy ID of the listing. The seller
+                manages listing taxonomy IDs for their shop.
+            shop_location: Filters by shop location. If location cannot be
+                parsed, Etsy responds with an error.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listings/active"
         query_params = []
@@ -5067,6 +5844,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a list of all active listings on Etsy in a specific shop,
         paginated by listing creation date.
+
+        Swagger operation ID: `ListingGetActiveByShop`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            keywords: Search term or phrase that must appear in all results.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5127,6 +5923,23 @@ class EtsyClient(ConnectorClientBase):
 
         Allows to query multiple listing IDs at once. Limit 100 IDs maximum per
         query.
+
+        Swagger operation ID: `ListingGetByID`.
+
+        Args:
+            listing_ids: The array of numeric IDs for the listings in a
+                specific Etsy shop.
+            includes: An enumerated string that attaches a valid association.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/listings/batch"
         query_params = []
@@ -5178,6 +5991,24 @@ class EtsyClient(ConnectorClientBase):
         Get featured listings by shop
 
         Retrieves listings associated to a shop that are featured.
+
+        Swagger operation ID: `ListingGetFeatured`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5233,6 +6064,24 @@ class EtsyClient(ConnectorClientBase):
         Delete a listing property
 
         Deletes a property from a listing.
+
+        Swagger operation ID: `ListingDeleteProperty`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5282,6 +6131,26 @@ class EtsyClient(ConnectorClientBase):
         a listing. Each offering requires both a value and a value ID that are
         valid for a scale ID assigned to the listing or that you assign to the
         listing with this request.
+
+        Swagger operation ID: `ListingUpdateProperty`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5329,6 +6198,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a listing's property. Development for this endpoint is in
         progress. It will only return a 501 response.
+
+        Swagger operation ID: `ListingGetProperty`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            property_id: The unique ID of an Etsy listing property.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5373,6 +6259,23 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's properties
 
         Returns a list of a listing's properties.
+
+        Swagger operation ID: `ListingGetProperties`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5420,6 +6323,25 @@ class EtsyClient(ConnectorClientBase):
 
         Updates a listing, identified by a listing ID, for a specific shop
         identified by a shop ID.
+
+        Swagger operation ID: `ListingUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5466,6 +6388,27 @@ class EtsyClient(ConnectorClientBase):
         Get listings by shop receipt
 
         Gets all listings associated with a receipt.
+
+        Swagger operation ID: `ListingGetByReceipt`.
+
+        Args:
+            shop_id: The numeric ID for the receipt associated to this
+                transaction.
+            receipt_id: The unique positive non-zero numeric ID for an Etsy
+                Shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5528,6 +6471,29 @@ class EtsyClient(ConnectorClientBase):
         Get listings by shop section ID
 
         Retrieves all the listings from the section of a specific shop.
+
+        Swagger operation ID: `ListingGetBySectionID`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            shop_section_ids: A array of numeric IDs for all sections in a
+                specific Etsy shop.
+            limit: The maximum number of results to return.
+            offset: The number of records to skip before selecting the first
+                result.
+            sort_on: The value to sort a search result of listings on.
+            sort_order: The ascending(up) or descending(down) order to sort
+                listings by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5598,6 +6564,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves a single file associated with the given digital listing.
         Requesting a file from a physical listing returns an empty result.
+
+        Swagger operation ID: `ListingGetFile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_file_id: The unique numeric ID of a file associated with a
+                digital listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5648,6 +6633,25 @@ class EtsyClient(ConnectorClientBase):
         converts into a physical listing. The response to a delete request
         returns a list of the remaining file records associated with the given
         listing.
+
+        Swagger operation ID: `ListingDeleteFile`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_file_id: The unique numeric ID of a file associated with a
+                digital listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5693,6 +6697,24 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves all the files associated with the given digital listing.
         Requesting files from a physical listing returns an empty result.
+
+        Swagger operation ID: `ListingGetFiles`.
+
+        Args:
+            shop_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_id: The unique positive non-zero numeric ID for an Etsy
+                Shop.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5744,6 +6766,25 @@ class EtsyClient(ConnectorClientBase):
         upload. Associating an existing file to a physical listing converts the
         physical listing into a digital listing, which removes all shipping
         costs and any product and inventory variations.
+
+        Swagger operation ID: `ListingUpload`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5791,6 +6832,25 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves the references and metadata for a listing image with a
         specific image ID.
+
+        Swagger operation ID: `ListingGetImage`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_image_id: The numeric ID of the primary listing image for
+                this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5840,6 +6900,25 @@ class EtsyClient(ConnectorClientBase):
         Deletes a listing image. A copy of the file remains on our servers, and
         so a deleted image may be re-associated with the listing without
         re-uploading the original image.
+
+        Swagger operation ID: `ListingDeleteImage`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            listing_image_id: The numeric ID of the primary listing image for
+                this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5885,6 +6964,23 @@ class EtsyClient(ConnectorClientBase):
 
         Retrieves all listing image resources for a listing with a specific
         listing ID.
+
+        Swagger operation ID: `ListingGetImages`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5937,6 +7033,25 @@ class EtsyClient(ConnectorClientBase):
         parameter. When a request contains both image and listing image ID
         parameter values, the endpoint uploads the image in the image parameter
         only.
+
+        Swagger operation ID: `ListingUploadImage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5985,6 +7100,23 @@ class EtsyClient(ConnectorClientBase):
         using the Etsy.com inventory tools have no inventory records. This
         endpoint returns SKU data if you are the owner of the inventory records
         being fetched.
+
+        Swagger operation ID: `ListingGetInventory`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            includes: An enumerated string that attaches an valid association.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6038,6 +7170,24 @@ class EtsyClient(ConnectorClientBase):
         and/or price are incompatible with values in on property fields. When
         setting a price, assign a float equal to amount divided by divisor as
         specified in the money resource.
+
+        Swagger operation ID: `ListingUpdateInventory`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6080,6 +7230,26 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's offering
 
         Get an offering for a listing.
+
+        Swagger operation ID: `ListingGetOffering`.
+
+        Args:
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            product_id: The numeric ID for the product associated to this
+                transaction.
+            product_offering_id: The numeric ID for the product offering
+                associated to this transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6126,6 +7296,23 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's product
 
         Retrieve a listing product by ID.
+
+        Swagger operation ID: `ListingGetProduct`.
+
+        Args:
+            listing_id: The listing to return a listing product for.
+            product_id: The numeric ID for a specific product purchased from a
+                listing.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6172,6 +7359,25 @@ class EtsyClient(ConnectorClientBase):
         Get a listing's translation
 
         Returns the translation for a listing in the given language.
+
+        Swagger operation ID: `ListingGetTranslation`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6220,6 +7426,27 @@ class EtsyClient(ConnectorClientBase):
         Create a listing translation
 
         Creates a listing translation by listing ID and language.
+
+        Swagger operation ID: `ListingCreateTranslation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6268,6 +7495,27 @@ class EtsyClient(ConnectorClientBase):
         Update a listing translation
 
         Updates a listing translation by listing ID and language.
+
+        Swagger operation ID: `ListingUpdateTranslation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            language: The IETF language tag for the language of this
+                translation. Ex: de, en, es, fr, it, ja, nl, pl, pt, ru.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6314,6 +7562,23 @@ class EtsyClient(ConnectorClientBase):
         Get listing's variation images
 
         Gets all variation images on a listing.
+
+        Swagger operation ID: `ListingGetVariation`.
+
+        Args:
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6360,6 +7625,25 @@ class EtsyClient(ConnectorClientBase):
         Update a listing's variation images
 
         Creates variation images on a listing.
+
+        Swagger operation ID: `ListingUpdateVariation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            shop_id: The unique positive non-zero numeric ID for an Etsy Shop.
+            listing_id: The numeric ID for the listing associated to this
+                transaction.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

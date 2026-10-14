@@ -206,6 +206,22 @@ class WebexClient(ConnectorClientBase):
         Add Member to Space
 
         Add a member to an existing space
+
+        Swagger operation ID: `CreateSpaceMember`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/memberships"
 
@@ -250,6 +266,28 @@ class WebexClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessages`.
+
+        Args:
+            room_id: List messages in a space for a given space ID.
+            mentioned_people: List messages where the caller is mentioned by
+                specifying \"me\" or the caller personId.
+            before_message: List messages sent before a message, by ID.
+            before: List messages sent before a date and time, in ISO8601
+                format.
+            max: Limit the maximum number of messages in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/messages"
         query_params = []
@@ -332,6 +370,22 @@ class WebexClient(ConnectorClientBase):
         Send a Message
 
         Send a message to webex
+
+        Swagger operation ID: `SendMessage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/messages"
 
@@ -369,6 +423,21 @@ class WebexClient(ConnectorClientBase):
         Get Message Details
 
         Shows details for a message, by message ID.
+
+        Swagger operation ID: `GetMessageDetails`.
+
+        Args:
+            message_id: The message ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -413,6 +482,24 @@ class WebexClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetPeople`.
+
+        Args:
+            id: List people by ID. Accepts up to 85 person IDs separated by
+                commas.
+            email: List people with this email address.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/people"
         query_params = []
@@ -480,6 +567,20 @@ class WebexClient(ConnectorClientBase):
         Get My Own Details
 
         Lookup your own details
+
+        Swagger operation ID: `GetMyOwnDetails`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/people/me"
 
@@ -522,6 +623,26 @@ class WebexClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetSpaces`.
+
+        Args:
+            max: Maximum number of spaces to return.
+            type_: (group) only include group spaces, (direct) only include 1
+                to 1 spaces, returns all if not specified.
+            sort_by: (id) the space id, (lastactivity) the last activity
+                timestamp, (created) space creation date.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/rooms"
         query_params = []
@@ -595,6 +716,22 @@ class WebexClient(ConnectorClientBase):
         Create Space
 
         Create space or team space
+
+        Swagger operation ID: `CreateSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/rooms"
 
@@ -632,6 +769,21 @@ class WebexClient(ConnectorClientBase):
         Get Space Details
 
         Return details of a given space
+
+        Swagger operation ID: `GetSpaceDetail`.
+
+        Args:
+            room_id: Select a space.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -672,6 +824,22 @@ class WebexClient(ConnectorClientBase):
         Add Member to Team
 
         Add a member to a team
+
+        Swagger operation ID: `CreateTeamMember`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/team/memberships"
 

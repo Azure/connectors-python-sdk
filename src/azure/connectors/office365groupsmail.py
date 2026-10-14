@@ -772,6 +772,22 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListConversations`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -837,6 +853,23 @@ class Office365groupsmailClient(ConnectorClientBase):
         Create a new conversation in a group
 
         Create a new conversation in this group.
+
+        Swagger operation ID: `CreateConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -878,6 +911,22 @@ class Office365groupsmailClient(ConnectorClientBase):
         Get a group conversation
 
         Retrieves the properties of a particular conversation.
+
+        Swagger operation ID: `GetGroupConversation`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            conversation_id: Enter the conversation ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -926,6 +975,23 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListConversationThreads`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            conversation_id: Enter the conversation ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -997,6 +1063,24 @@ class Office365groupsmailClient(ConnectorClientBase):
         Create a conversation thread
 
         Create a new thread in the specified conversation.
+
+        Swagger operation ID: `CreateConversationThread`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            conversation_id: Enter the conversation ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1045,6 +1129,22 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListGroupThreads`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1110,6 +1210,23 @@ class Office365groupsmailClient(ConnectorClientBase):
         Start a new group conversation by creating a thread
 
         Start a new group conversation by first creating a thread.
+
+        Swagger operation ID: `CreateGroupThread`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1151,6 +1268,22 @@ class Office365groupsmailClient(ConnectorClientBase):
         Get a conversation thread
 
         Get a specific thread that belongs to a group.
+
+        Swagger operation ID: `GetConversationThread`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1196,6 +1329,22 @@ class Office365groupsmailClient(ConnectorClientBase):
         Delete a conversation thread
 
         Deletes the specified conversation thread.
+
+        Swagger operation ID: `DeleteConversationThread`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1242,6 +1391,23 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListThreadPosts`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1313,6 +1479,23 @@ class Office365groupsmailClient(ConnectorClientBase):
         Get a thread post
 
         Retrieves a post in a specified thread.
+
+        Swagger operation ID: `GetThreadPost`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            post_id: Enter the post ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1368,6 +1551,24 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAttachments`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            post_id: Enter the post ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1441,6 +1642,24 @@ class Office365groupsmailClient(ConnectorClientBase):
         Reply to a conversation thread
 
         Reply to a thread in a group conversation and add a new post to it.
+
+        Swagger operation ID: `ReplyToAThread`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1485,6 +1704,25 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Reply to a post and add a new post to the specified thread in a group
         conversation.
+
+        Swagger operation ID: `ReplyPost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            thread_id: Enter the conversation thread ID.
+            post_id: Enter the post ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1528,6 +1766,21 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Construct a Microsoft Graph REST API request to invoke. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
@@ -1572,6 +1825,27 @@ class Office365groupsmailClient(ConnectorClientBase):
         Forward a post
 
         Forward a post to a recipient.
+
+        Swagger operation ID: `ForwardPost_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_mail: Pick a group from the drop down or enter the group mail
+                address.
+            conversation_id: Enter the conversation ID.
+            thread_id: Enter the conversation thread ID.
+            post_id: Enter the post ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1618,6 +1892,21 @@ class Office365groupsmailClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

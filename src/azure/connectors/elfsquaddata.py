@@ -266,6 +266,29 @@ class ElfsquaddataClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `get_entities`.
+
+        Args:
+            entity_name: Entity name.
+            top: Top.
+            skip: Skip.
+            orderby: Order by.
+            filter: Filter items.
+            select: Select properties.
+            expand: Expand.
+            count: Count.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -369,6 +392,23 @@ class ElfsquaddataClient(ConnectorClientBase):
         Create entity
 
         Create entity
+
+        Swagger operation ID: `post_entity_by_id`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entity_name: Entity name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -410,6 +450,22 @@ class ElfsquaddataClient(ConnectorClientBase):
         Get entity by id
 
         Get entity by id
+
+        Swagger operation ID: `get_entity_by_id`.
+
+        Args:
+            entity_name: Entity name.
+            id: Identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -453,6 +509,22 @@ class ElfsquaddataClient(ConnectorClientBase):
         Delete entity
 
         Delete entity
+
+        Swagger operation ID: `delete_entity_by_id`.
+
+        Args:
+            entity_name: Entity name.
+            id: Identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -495,6 +567,24 @@ class ElfsquaddataClient(ConnectorClientBase):
         Update entity
 
         Update entity
+
+        Swagger operation ID: `put_entity_by_id`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            entity_name: Entity name.
+            id: Identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -533,6 +623,23 @@ class ElfsquaddataClient(ConnectorClientBase):
         Invoke function
 
         Invoke function
+
+        Swagger operation ID: `invoke_function`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            function_path: Function path.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -570,6 +677,20 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get triggers
+
+        Swagger operation ID: `get_triggers`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/data/1/$triggers"
 
@@ -599,6 +720,20 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get schemas
+
+        Swagger operation ID: `get_schemas`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/data/1"
 
@@ -629,6 +764,21 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get schema
+
+        Swagger operation ID: `get_schema`.
+
+        Args:
+            entity_name: entity_name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -661,6 +811,20 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get function
+
+        Swagger operation ID: `get_functions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/data/1/$functions"
 
@@ -691,6 +855,21 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get function definition
+
+        Swagger operation ID: `get_function_definition`.
+
+        Args:
+            function_path: function_path.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -724,6 +903,21 @@ class ElfsquaddataClient(ConnectorClientBase):
     ) -> None:
         """
         Get trigger schema
+
+        Swagger operation ID: `get_trigger_schema`.
+
+        Args:
+            trigger_name: trigger_name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

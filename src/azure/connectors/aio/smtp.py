@@ -109,6 +109,22 @@ class SmtpClient(ConnectorClientBase):
         Send Email
 
         This operation sends an email to one or more recipients.
+
+        Swagger operation ID: `SendEmailV3`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/SendEmailV3"
 

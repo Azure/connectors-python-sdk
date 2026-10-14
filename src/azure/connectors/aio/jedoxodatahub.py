@@ -245,6 +245,30 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Databases`.
+
+        Args:
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Databases"
         query_params = []
@@ -318,6 +342,21 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get database by id
 
         Get the database with the given ID.
+
+        Swagger operation ID: `DatabaseById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -366,6 +405,31 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Cubes`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -445,6 +509,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get the cube with the given ID in the given database. To prevent issues
         with the URL encodings, Attribute cubes will be renamed, e.g. \\#_Years
         to ATT_Years.
+
+        Swagger operation ID: `CubeById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            cube_id: Numeric ID of the cube.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -499,6 +579,46 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `CubeCells`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            cube_id: Numeric ID of the cube.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+                > Currently the /Cells functions only support basic operations.
+                Complex formulas might return an invalid result. For complex
+                filtering, please use Views.
+            baseonly: If set to true, the result will only contain base
+                elements. If set to false, it will also contain consolidated
+                elements.
+            userules: If set to true, rules will be applied to the resulting
+                cells.
+            zerosupression: If set to true, numeric cells with a value of 0 and
+                empty string cells will be removed from the result.
+            disablepaging: If set to true, the service will return the entire
+                result instead of a single page. With this option set to true,
+                the response might take multiple minutes depending on the
+                cube's size.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -603,6 +723,31 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Dimensions`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -680,6 +825,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get dimension by ID
 
         Get the dimension with the given ID in the given database.
+
+        Swagger operation ID: `DimensionById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -728,6 +889,32 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Elements`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -808,6 +995,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get element by ID
 
         Returns the element with the given ID in the given dimension.
+
+        Swagger operation ID: `ElementById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            dimension_id: Numeric ID of the dimension.
+            element_id: Numeric ID of the element.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -856,6 +1060,31 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Views`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -933,6 +1162,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get stored view by ID
 
         Get the view with the given ID in the given database.
+
+        Swagger operation ID: `ViewById`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            view_id: UUID of the view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -987,6 +1232,45 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ViewCells`.
+
+        Args:
+            database_id: Numeric ID of the database.
+            view_id: UUID of the view.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+                > Currently the /Cells functions only support basic operations.
+                Complex formulas might return an invalid result.
+            baseonly: If set to true, the result will only contain base
+                elements. If set to false, it will also contain consolidated
+                elements.
+            userules: If set to true, rules will be applied to the resulting
+                cells.
+            zerosupression: If set to true, numeric cells with a value of 0 and
+                empty string cells will be removed from the result.
+            disablepaging: If set to true, the service will return the entire
+                result instead of a single page. With this option set to true,
+                the response might take multiple minutes depending on the
+                view's size.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1090,6 +1374,30 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `IntegratorProjectGroups`.
+
+        Args:
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/Integrator"
         query_params = []
@@ -1163,6 +1471,21 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get Integrator project group by identifier
 
         Get the project group with the given ID.
+
+        Swagger operation ID: `IntegratorProjectsById`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1209,6 +1532,31 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `IntegratorProjects`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1286,6 +1634,22 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get Integrator project by name
 
         Get the integrator project with the given name.
+
+        Swagger operation ID: `IntegratorProjectsByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1334,6 +1698,32 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Extracts`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1414,6 +1804,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get extract by Name
 
         Get the extract with the given name in the given integrator project.
+
+        Swagger operation ID: `ExtractByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            extract_name: The name of the extract.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1465,6 +1872,33 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractRows`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            extract_name: The name of the extract.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1551,6 +1985,32 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Jobs`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1631,6 +2091,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get job by name
 
         Get the jobs with the given name in the given integrator project.
+
+        Swagger operation ID: `JobByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1676,6 +2153,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the job with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunJob`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1723,6 +2217,27 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the job with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunJobWithVariables`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            job_name: The name of the job.
+            variables: Variable names and values separated by an equal sign. If
+                a variable is omitted, the default value will be used. Multiple
+                variables must be separated by commas. Example:
+                Variables='SourceDB=Demo,TargetDB=Biker'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1775,6 +2290,32 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Loads`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1855,6 +2396,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get load by name
 
         Get the transform with the given name in the given integrator project.
+
+        Swagger operation ID: `LoadByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1900,6 +2458,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the load with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunLoad`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1947,6 +2522,27 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Run the load with the given name in the given integrator project. The
         execution will be added to the queue.
+
+        Swagger operation ID: `RunLoadWithVariables`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            load_name: The name of the load.
+            variables: Variable names and values separated by an equal sign. If
+                a variable is omitted, the default value will be used. Multiple
+                variables must be separated by commas. Example:
+                Variables='SourceDB=Demo,TargetDB=Biker'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1999,6 +2595,32 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `Transforms`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2079,6 +2701,23 @@ class JedoxodatahubClient(ConnectorClientBase):
         Get transform by name
 
         Get the transform with the given name in the given integrator project.
+
+        Swagger operation ID: `TransformByName`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            transform_name: The name of the transform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2130,6 +2769,33 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `TransformRows`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the Integrator project.
+            transform_name: The name of the transform.
+            top: Limits the number of items returned by the given number. The
+                service returns the number of available items up to but not
+                greater than the specified value n.
+            skip: Excludes the first n items of the queried collection from the
+                result. The service returns items starting at position n+1.
+            filter: The $filter system query option restricts the set of items
+                returned. For a list of available operations and functions see
+                the [OData
+                Documentation](http://docs.oasis-open.org/odata/odata/v4.0/errata03/os/complete/part1-protocol/odata-v4.0-errata03-os-part1-protocol-complete.html#_Ref356810738).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2211,6 +2877,22 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of cube
         cells.
+
+        Swagger operation ID: `GetCubeCellResultSchema`.
+
+        Args:
+            database_id: The identifier of the Olap database.
+            cube_id: The identifier of the Olap cube.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2261,6 +2943,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of extract
         rows.
+
+        Swagger operation ID: `GetExtractRowsResultSchema`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the project.
+            extract_name: The name of the extract.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2312,6 +3011,23 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of transform
         rows.
+
+        Swagger operation ID: `GetTransformRowsResultSchema`.
+
+        Args:
+            group_identifier: The identifier of the Integrator project group.
+            project_name: The name of the project.
+            transform_name: The name of the transform.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2362,6 +3078,22 @@ class JedoxodatahubClient(ConnectorClientBase):
 
         Service request for getting the schema used for the result of view
         cells.
+
+        Swagger operation ID: `GetViewCellResultSchema`.
+
+        Args:
+            database_id: The identifier of the Olap database.
+            view_id: The identifier of the stored view.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

@@ -169,6 +169,23 @@ class FtpClient(ConnectorClientBase):
         server right after it was created, connector may return HTTP 404 error
         by it's design. Please use a delay for 1 minute before deleting or
         renaming newly created file.
+
+        Swagger operation ID: `CreateFile`.
+
+        Args:
+            input: The binary request body.
+            folder_path: Select a folder.
+            name: Name of the file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/datasets/default/files"
         query_params = []
@@ -221,6 +238,21 @@ class FtpClient(ConnectorClientBase):
         Get file metadata
 
         This operation gets the metadata for a file.
+
+        Swagger operation ID: `GetFileMetadata`.
+
+        Args:
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -268,6 +300,22 @@ class FtpClient(ConnectorClientBase):
         server right after it was updated, connector may return HTTP 404 error
         by it's design. Please use a delay for 1 minute before deleting or
         renaming recently updated file.
+
+        Swagger operation ID: `UpdateFile`.
+
+        Args:
+            input: The binary request body.
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -314,6 +362,21 @@ class FtpClient(ConnectorClientBase):
         Delete file
 
         This operation deletes a file.
+
+        Swagger operation ID: `DeleteFile`.
+
+        Args:
+            id: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -360,6 +423,23 @@ class FtpClient(ConnectorClientBase):
         deleted/renamed on server right after it was copied, connector may
         return HTTP 404 error by it's design. Please use a delay for 1 minute
         before deleting or renaming newly created file.
+
+        Swagger operation ID: `CopyFile`.
+
+        Args:
+            source: Url to source file.
+            destination: Destination file path, including target filename.
+            overwrite: Overwrites the destination file if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/copyFile"
@@ -416,6 +496,21 @@ class FtpClient(ConnectorClientBase):
         Get file metadata using path
 
         This operation gets the metadata of a file using the file path.
+
+        Swagger operation ID: `GetFileMetadataByPath`.
+
+        Args:
+            path: Select a file.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/GetFileByPath"
@@ -464,6 +559,22 @@ class FtpClient(ConnectorClientBase):
         Get file content using path
 
         This operation gets the content of a file using the file path.
+
+        Swagger operation ID: `GetFileContentByPath`.
+
+        Args:
+            path: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -515,6 +626,22 @@ class FtpClient(ConnectorClientBase):
         Get file content
 
         This operation gets the content of a file.
+
+        Swagger operation ID: `GetFileContent`.
+
+        Args:
+            id: Select a file.
+            infer_content_type: Infer content-type based on extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -567,6 +694,22 @@ class FtpClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListFolder`.
+
+        Args:
+            id: Select a folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -631,6 +774,21 @@ class FtpClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRootFolder`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/folders"
@@ -694,6 +852,25 @@ class FtpClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractFolderV2`.
+
+        Args:
+            source: Path to the archive file.
+            destination: Path to the destination folder.
+            overwrite: Overwrites the destination files if set to 'true'.
+            create_folders: Extracts folders from archive if set to 'true'.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/datasets/default/extractFolderV2"

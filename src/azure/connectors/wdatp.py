@@ -1337,6 +1337,22 @@ class WdatpClient(ConnectorClientBase):
         and will be retired on February 1, 2027. Migrate to the Microsoft Graph
         Security API. For migration guidance, see:
         https://learn.microsoft.com/en-us/graph/api/resources/security-api-overview?view=graph-rest-1.0#powerplatformflow-migrationpowerapps-power-automate-logic-apps
+
+        Swagger operation ID: `AdvancedHunting`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/advancedqueries/run"
 
@@ -1374,6 +1390,22 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Create alert
 
         Create Alert based on specific Event
+
+        Swagger operation ID: `CreateAlertByReference`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/alerts/createAlertByReference"
@@ -1422,6 +1454,29 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAlerts`.
+
+        Args:
+            expand: Expands related entities inline.
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/alerts"
         query_params = []
@@ -1521,6 +1576,21 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Get single alert
 
         Retrieve from Windows Defender ATP a specific alert
+
+        Swagger operation ID: `GetSingleAlert`.
+
+        Args:
+            alert_id: The identifier of the alert to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1562,6 +1632,23 @@ class WdatpClient(ConnectorClientBase):
         Alerts - Update alert
 
         Update a Windows Defender ATP alert
+
+        Swagger operation ID: `PatchAlert`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            alert_id: The identifier of the alert to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1603,6 +1690,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Initiate investigation on a machine (to be deprecated)
 
         Initiate investigation on a machine
+
+        Swagger operation ID: `InitiateInvestigation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to investigate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1647,6 +1751,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Start automated investigation on a machine
 
         Start automated investigation on a machine
+
+        Swagger operation ID: `StartInvestigation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to investigate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1690,6 +1811,22 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get single machine action
 
         Retrieve from Windows Defender ATP a specific machine action
+
+        Swagger operation ID: `GetSingleMachineAction`.
+
+        Args:
+            machine_action_id: The identifier of the machine action to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1731,6 +1868,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Cancel a single machine action
 
         Cancel a specific machine action
+
+        Swagger operation ID: `CancelSingleMachineAction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_action_id: The identifier of the machine action to cancel.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1775,6 +1929,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get live response command result download URI
 
         Get result download URI for a completed live response command
+
+        Swagger operation ID: `GetLiveResponseDownloadLink`.
+
+        Args:
+            machine_action_id: The identifier of the machine action.
+            command_index: The index of the live response command to get the
+                results download URI for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1828,6 +1999,28 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMachineActions`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/machineactions"
         query_params = []
@@ -1924,6 +2117,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics for the given file to a
         given file by identifier Sha1, or Sha256
+
+        Swagger operation ID: `GetFileStats`.
+
+        Args:
+            file_id: The file identifier - Sha1, or Sha256.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1974,6 +2184,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics related to a given domain
         name
+
+        Swagger operation ID: `GetDomainStats`.
+
+        Args:
+            domain_name: The domain name.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2024,6 +2251,23 @@ class WdatpClient(ConnectorClientBase):
 
         Retrieve from Windows Defender ATP statistics related to a given ip
         address - given in ipv4 or ipv6 format.
+
+        Swagger operation ID: `GetIpStats`.
+
+        Args:
+            ip_address: The ip address.
+            look_back_hours: The look back period in hours to look by, the
+                default is 24 hours.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2072,6 +2316,21 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get single investigation
 
         Retrieve from Microsoft Defender ATP a specific investigation
+
+        Swagger operation ID: `GetSingleInvestigation`.
+
+        Args:
+            investigation_id: The identifier of the investigation to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2120,6 +2379,28 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetInvestigations`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/investigations"
         query_params = []
@@ -2215,6 +2496,24 @@ class WdatpClient(ConnectorClientBase):
         Actions - Collect investigation package
 
         Collect investigation package from a machine
+
+        Swagger operation ID: `CollectInvestigationPackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to collect the investigation
+                from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2258,6 +2557,21 @@ class WdatpClient(ConnectorClientBase):
         Actions - Get investigation package download URI
 
         Get a URI that allows downloading of an investigation package
+
+        Swagger operation ID: `GetInvestigationPackageUri`.
+
+        Args:
+            machine_action_id: The ID of the investigation package collection.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2302,6 +2616,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Isolate machine
 
         Isolate a machine from network
+
+        Swagger operation ID: `IsolateMachine`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to isolate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2343,6 +2674,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Unisolate machine
 
         Unisolate a machine from network
+
+        Swagger operation ID: `UnisolateMachine`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to unisolate.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2385,6 +2733,23 @@ class WdatpClient(ConnectorClientBase):
 
         Restrict execution of all applications on the machine except a
         predefined set
+
+        Swagger operation ID: `RestrictAppExecution`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to restrict.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2429,6 +2794,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Remove app execution restriction
 
         Enable execution of any application on the machine
+
+        Swagger operation ID: `UnrestrictAppExecution`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to unrestrict.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2473,6 +2855,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Run antivirus scan
 
         Initiate Windows Defender Antivirus scan on a machine
+
+        Swagger operation ID: `RunAntivirusScan`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to scan.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2514,6 +2913,23 @@ class WdatpClient(ConnectorClientBase):
         Actions - Run live response
 
         Run live response api commands for a single machine
+
+        Swagger operation ID: `RunLiveResponse`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to run live response session on.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2562,6 +2978,28 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetRemediationActivities`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/remediationtasks"
         query_params = []
@@ -2656,6 +3094,22 @@ class WdatpClient(ConnectorClientBase):
         RemediationActivities - Get single remediation activity (Preview)
 
         Retrieve from Windows Defender ATP a specific remediation activity
+
+        Swagger operation ID: `GetSingleRemediationActivity`.
+
+        Args:
+            remediation_id: The identifier of the remediation activity to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2700,6 +3154,23 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetRemediationActivityMachineList`.
+
+        Args:
+            remediation_id: The identifier of the remediation activity to
+                retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2775,6 +3246,28 @@ class WdatpClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMachines`.
+
+        Args:
+            filter: Filters the results, using OData syntax.
+            select: Selects which properties to include in the response,
+                defaults to all.
+            orderby: Sorts the results.
+            top: Returns only the first n results.
+            skip: Skips the first n results.
+            count: Includes a count of the matching results in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/api/machines"
         query_params = []
@@ -2869,6 +3362,21 @@ class WdatpClient(ConnectorClientBase):
         Machines - Get single machine
 
         Retrieve from Windows Defender ATP a specific machine
+
+        Swagger operation ID: `GetSingleMachine`.
+
+        Args:
+            machine_id: The identifier of the machine to retrieve.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2910,6 +3418,24 @@ class WdatpClient(ConnectorClientBase):
         Machines - Tag machine
 
         Add or remove a tag to/from a machine
+
+        Swagger operation ID: `MachineTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            machine_id: The ID of the machine to which the tag should be added
+                or removed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2950,6 +3476,22 @@ class WdatpClient(ConnectorClientBase):
         Advanced Hunting Schema
 
         Gets the schema for a Windows Defender ATP custom query
+
+        Swagger operation ID: `AdvancedHuntingSchema`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/api/advancedqueries/schema"

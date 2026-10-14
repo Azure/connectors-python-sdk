@@ -278,6 +278,22 @@ class MondayClient(ConnectorClientBase):
         Create an item
 
         Creates an item in the selected monday.com board and group.
+
+        Swagger operation ID: `CreateItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -318,6 +334,22 @@ class MondayClient(ConnectorClientBase):
         Duplicate a board
 
         Duplicates a board in monday.com.
+
+        Swagger operation ID: `DuplicateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -358,6 +390,22 @@ class MondayClient(ConnectorClientBase):
         Create a board
 
         Creates a board in monday.com.
+
+        Swagger operation ID: `CreateBoard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -398,6 +446,22 @@ class MondayClient(ConnectorClientBase):
         Create a column
 
         Creates a column in monday.com for the specified board.
+
+        Swagger operation ID: `CreateColumn`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -438,6 +502,22 @@ class MondayClient(ConnectorClientBase):
         Create a group
 
         Creates a group in monday.com for the specified board.
+
+        Swagger operation ID: `CreateGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -479,6 +559,22 @@ class MondayClient(ConnectorClientBase):
 
         Updates a single item's column. If the value is blank, the column value
         will be cleared.
+
+        Swagger operation ID: `UpdateItemColumn`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -520,6 +616,22 @@ class MondayClient(ConnectorClientBase):
 
         Updates multiple item columns. Leave the column value blank to keep the
         current value.
+
+        Swagger operation ID: `UpdateMultipleItemColumns`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -560,6 +672,22 @@ class MondayClient(ConnectorClientBase):
         Move an item to a group
 
         Moves an item to another group on the same board.
+
+        Swagger operation ID: `MoveItemToGroup`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -601,6 +729,22 @@ class MondayClient(ConnectorClientBase):
 
         Creates a notification in monday.com for a user for either a specific
         board or item.
+
+        Swagger operation ID: `CreateNotification`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -641,6 +785,22 @@ class MondayClient(ConnectorClientBase):
         Create a subitem
 
         Creates a subitem in monday.com for the selected board and parent item.
+
+        Swagger operation ID: `CreateSubitem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -683,6 +843,25 @@ class MondayClient(ConnectorClientBase):
         Get subitems
 
         Gets subitems in monday.com for a specific item in a board.
+
+        Swagger operation ID: `GetSubitems`.
+
+        Args:
+            workspace_id: Select a workspace from the drop-down or specify a
+                workspace ID.
+            board_id: Select the item's board from the drop-down or specify a
+                board ID.
+            item_id: Specify an item ID to retrieve the subitems for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getSubitems"
         query_params = []
@@ -735,6 +914,22 @@ class MondayClient(ConnectorClientBase):
         Create an update
 
         Creates an update in monday.com for a specific item.
+
+        Swagger operation ID: `CreateUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -777,6 +972,25 @@ class MondayClient(ConnectorClientBase):
         Get an item by ID
 
         Gets a monday.com item using the specified item ID and board.
+
+        Swagger operation ID: `GetItemById`.
+
+        Args:
+            item_id: Specify an item ID to retrieve.
+            workspace_id: Select the item's workspace from the drop-down or
+                specify a workspace ID.
+            board_id: Select the item's board from the drop-down or specify a
+                board ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getItemById"
         query_params = []
@@ -830,6 +1044,22 @@ class MondayClient(ConnectorClientBase):
 
         Creates a monday.com workspace with a user-specified name and
         description.
+
+        Swagger operation ID: `CreateWorkspace_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -887,6 +1117,40 @@ class MondayClient(ConnectorClientBase):
         by column values using the filters found under advanced options. More
         info on filtering can be found here:
         https://plugingenie.com/docs/filtering-items.
+
+        Swagger operation ID: `GetItems_V2`.
+
+        Args:
+            workspace_id: Select a workspace from the drop-down or specify a
+                workspace ID.
+            board_id: Select a board from the drop-down or specify a board ID.
+            group_id: Select a group from the drop-down or specify a group ID.
+            filter1_column: Select a column from the drop-down or specify a
+                column ID.
+            filter1_operator: Select an operator from the drop-down.
+            filter1_value: Specify a value (if applicable).
+            filter2_column: Select a column from the drop-down or specify a
+                column ID.
+            filter2_operator: Select an operator from the drop-down.
+            filter2_value: Specify a value (if applicable).
+            filter3_column: Select a column from the drop-down or specify a
+                column ID.
+            filter3_operator: Select an operator from the drop-down.
+            filter3_value: Specify a value (if applicable).
+            filter4_column: Select a column from the drop-down or specify a
+                column ID.
+            filter4_operator: Select an operator from the drop-down.
+            filter4_value: Specify a value (if applicable).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getItemsV2"
         query_params = []
@@ -998,6 +1262,20 @@ class MondayClient(ConnectorClientBase):
         Get tags
 
         This operation gets monday.com tags.
+
+        Swagger operation ID: `GetTags_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getTagsV2"
 
@@ -1035,6 +1313,20 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the name, email, and ID of users in your monday.com
         account.
+
+        Swagger operation ID: `GetUsers_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getUsersV2"
 
@@ -1071,6 +1363,20 @@ class MondayClient(ConnectorClientBase):
         Get workspaces
 
         This operation gets the workspaces from monday.com.
+
+        Swagger operation ID: `GetWorkspaces_V2`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getWorkspacesV2"
 
@@ -1111,6 +1417,22 @@ class MondayClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetBoards`.
+
+        Args:
+            workspace_id: Specify the ID of the monday.com workspace.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/getData/getBoards"
         query_params = []
@@ -1178,6 +1500,22 @@ class MondayClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetGroupsForGetItems`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getGroupsForGetItems"
@@ -1245,6 +1583,22 @@ class MondayClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetColumnsForItemFiltering`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1315,6 +1669,23 @@ class MondayClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetColumnFilterOperator`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            column_id: Specify the ID of a monday.com column.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getData/getColumnFilterOperator"
@@ -1384,6 +1755,21 @@ class MondayClient(ConnectorClientBase):
         Get column names for a board ID
 
         This operation gets the column names for a board ID.
+
+        Swagger operation ID: `GetColumnNamesSchema`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getColumnNames"
@@ -1432,6 +1818,22 @@ class MondayClient(ConnectorClientBase):
         Gets single column schema for a board ID
 
         This operation gets the single column schema for a board ID.
+
+        Swagger operation ID: `GetSingleColumnSchema`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            column_id: Specify the ID of a monday.com column.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSingleColumnSchema"
@@ -1485,6 +1887,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1533,6 +1950,21 @@ class MondayClient(ConnectorClientBase):
         Get column names for a board ID for a webhook
 
         This operation gets the schema for the GetItems action.
+
+        Swagger operation ID: `GetSchemaForGetItemsAction`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1582,6 +2014,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForUpdateWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1630,6 +2077,21 @@ class MondayClient(ConnectorClientBase):
         Get subitem column names
 
         Gets subitem column names in monday.com given a board ID.
+
+        Swagger operation ID: `GetSubitemColumnNames`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSubitemColumnNames"
@@ -1676,6 +2138,21 @@ class MondayClient(ConnectorClientBase):
         Get subitem column names
 
         Gets subitem schema in monday.com given a board ID.
+
+        Swagger operation ID: `GetSubitemSchema`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/getSchema/getSubitemSchema"
@@ -1723,6 +2200,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook when
         the item's name changes.
+
+        Swagger operation ID: `GetColumnNamesSchemaForItemNameChangeWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1772,6 +2264,22 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook when
         the subitem's name changes.
+
+        Swagger operation ID:
+        `GetColumnNamesSchemaForSubitemNameChangeWebhook`.
+
+        Args:
+            parent_board_id: Specify the ID of the monday.com parent board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1820,6 +2328,21 @@ class MondayClient(ConnectorClientBase):
 
         This operation gets the column names for a board ID for a webhook
         (includes itemId).
+
+        Swagger operation ID: `GetColumnNamesSchemaForColumnChangesWebhook`.
+
+        Args:
+            board_id: Specify the ID of a monday.com board.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

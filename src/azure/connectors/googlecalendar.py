@@ -406,6 +406,23 @@ class GooglecalendarClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListCalendars`.
+
+        Args:
+            min_access_role: The minimum access role users must have to view
+                calendars.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/me/calendarList"
         query_params = []
@@ -476,6 +493,28 @@ class GooglecalendarClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListEvents`.
+
+        Args:
+            calendar_id: Unique ID of the calendar to fetch events from.
+            time_min: Time format: yyyy-MM-ddTHH:mm:ss.fffZ
+                (2016-07-20T08:00:00.000Z).
+            time_max: Time format: yyyy-MM-ddTHH:mm:ss.fffZ
+                (2016-07-20T09:00:59.000Z).
+            q: Text search terms to find events that match these terms in any
+                fields.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -553,6 +592,23 @@ class GooglecalendarClient(ConnectorClientBase):
         Create an event
 
         This operation is used to create an event on a specific calendar.
+
+        Swagger operation ID: `CreateEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            calendar_id: Unique ID of the calendar to fetch events from.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -595,6 +651,22 @@ class GooglecalendarClient(ConnectorClientBase):
 
         This operation is used to get the details of a specific event from a
         calendar.
+
+        Swagger operation ID: `GetEvent`.
+
+        Args:
+            calendar_id: Unique ID of the calendar to fetch events from.
+            event_id: Unique ID of the event to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -639,6 +711,22 @@ class GooglecalendarClient(ConnectorClientBase):
         Delete an event
 
         This operation is used to delete an event from a calendar.
+
+        Swagger operation ID: `DeleteEvent`.
+
+        Args:
+            calendar_id: Unique ID of the calendar to fetch events from.
+            event_id: Unique ID of the event to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -687,6 +775,24 @@ class GooglecalendarClient(ConnectorClientBase):
         Update an event
 
         This operation is used to update an existing event on a calendar.
+
+        Swagger operation ID: `UpdateEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            calendar_id: Unique ID of the calendar to fetch events from.
+            event_id: Unique ID of the event to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -733,6 +839,21 @@ class GooglecalendarClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListWritableCalendars`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/me/calendarList/1"
         query_params = []

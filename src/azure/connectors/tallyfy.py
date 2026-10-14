@@ -1955,6 +1955,29 @@ class TallyfyClient(ConnectorClientBase):
         Get a member's tasks
 
         Get all tasks that belong to a specific member
+
+        Swagger operation ID: `Get_User_Tasks`.
+
+        Args:
+            org: Organization Id.
+            user_id: Member Id.
+            q: Search Tasks by their Process name.
+            status: You can search all Tasks by status.
+            sort: Add minus sign (-) before sort value if you want to sort
+                records in descending order. Ex: sort=-improvements.
+            tag: Search Tasks by Tag name.
+            page: Which results page to retrieve. Default is 1.
+            per_page: How many Tasks per page. Default is 10.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2033,6 +2056,23 @@ class TallyfyClient(ConnectorClientBase):
         Invite a new member to your organization
 
         Invite a new member to your organization
+
+        Swagger operation ID: `Invite_User_To_Organization`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2074,6 +2114,23 @@ class TallyfyClient(ConnectorClientBase):
         Launch a Process
 
         Launch a process using a blueprint
+
+        Swagger operation ID: `Create_Run`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2115,6 +2172,23 @@ class TallyfyClient(ConnectorClientBase):
         Complete One Off Task
 
         Complete one off task
+
+        Swagger operation ID: `Completed_One_Off_Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2156,6 +2230,22 @@ class TallyfyClient(ConnectorClientBase):
         Reopen One Off Task
 
         Reopen one off task
+
+        Swagger operation ID: `Reopen_One_Off_Task`.
+
+        Args:
+            org: Organization Id.
+            task: Task Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2204,6 +2294,24 @@ class TallyfyClient(ConnectorClientBase):
         Complete process task
 
         Complete process task
+
+        Swagger operation ID: `Completed_Process_Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            run: Run Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2250,6 +2358,23 @@ class TallyfyClient(ConnectorClientBase):
         Reopen process Task
 
         Reopen process task
+
+        Swagger operation ID: `Reopen_Process_Task`.
+
+        Args:
+            org: Organization Id.
+            run: Run Id.
+            task: Task Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2297,6 +2422,24 @@ class TallyfyClient(ConnectorClientBase):
         Add comment, report issue, resolve issue on a task
 
         task deadline, in date-time format
+
+        Swagger operation ID: `Comment_Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            task: Task Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2342,6 +2485,23 @@ class TallyfyClient(ConnectorClientBase):
         Create a task
 
         Create Task
+
+        Swagger operation ID: `Create_Task`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2388,6 +2548,24 @@ class TallyfyClient(ConnectorClientBase):
         Edit task deadline
 
         Edit deadline of a task
+
+        Swagger operation ID: `Edit_Task_Deadline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            task: Task id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2436,6 +2614,23 @@ class TallyfyClient(ConnectorClientBase):
         Remove guest assigned
 
         Remove guest of a task
+
+        Swagger operation ID: `Remove_Guest`.
+
+        Args:
+            org: Organization Id.
+            task: Task id.
+            guest: Guest email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2485,6 +2680,23 @@ class TallyfyClient(ConnectorClientBase):
         Remove assignee
 
         Remove assignee of a task
+
+        Swagger operation ID: `Remove_Assignee`.
+
+        Args:
+            org: Organization Id.
+            task: Task id.
+            member: Member id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2535,6 +2747,25 @@ class TallyfyClient(ConnectorClientBase):
         Edit step type
 
         Edit step type
+
+        Swagger operation ID: `Edit_Step_Type`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            org: Organization Id.
+            blueprint: Blueprint id.
+            step: Step id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2582,6 +2813,20 @@ class TallyfyClient(ConnectorClientBase):
         Get user's organizations
 
         Get user's organizations
+
+        Swagger operation ID: `Get_User_Organizations`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/me/organizations"
 
@@ -2622,6 +2867,22 @@ class TallyfyClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Get_Organization_Users`.
+
+        Args:
+            org: Organization Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

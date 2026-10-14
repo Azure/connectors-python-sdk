@@ -206,6 +206,26 @@ class RssClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListFeedItems`.
+
+        Args:
+            feed_url: The RSS feed URL (Example:
+                http://rss.cnn.com/rss/cnn_topstories.rss).
+            since: The date since when RSS feed should be retrieved (Example:
+                2018-12-29 10:24:05Z).
+            since_property: Chosen property will be used for trigger state.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/ListFeedItems"
         query_params = []

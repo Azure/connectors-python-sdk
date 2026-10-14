@@ -412,6 +412,21 @@ class WordpressClient(ConnectorClientBase):
         Get site statistics
 
         Get statistics for a specified site
+
+        Swagger operation ID: `SiteStats`.
+
+        Args:
+            site_id: The site's id or domain.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -457,6 +472,22 @@ class WordpressClient(ConnectorClientBase):
         Get post
 
         Get post
+
+        Swagger operation ID: `GetPost`.
+
+        Args:
+            site_id: The site's id or domain.
+            post_id: The post Id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -501,6 +532,23 @@ class WordpressClient(ConnectorClientBase):
         Create post
 
         Create post
+
+        Swagger operation ID: `CreatePost`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            site_id: The site's id or domain.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -543,6 +591,21 @@ class WordpressClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListSites`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/me/sites"
         query_params = []

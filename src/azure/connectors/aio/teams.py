@@ -502,6 +502,23 @@ class TeamsClient(ConnectorClientBase):
 
         Create a meeting with a link at the bottom of the invite to join the
         meeting online on Microsoft Teams.
+
+        Swagger operation ID: `CreateTeamsMeeting`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            calendarid: Select a value.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -544,6 +561,21 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/me/joinedTeams"
         initial_request_url = request_url
@@ -602,6 +634,21 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllAssociatedTeams`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/me/teamwork/associatedTeams"
@@ -664,6 +711,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetChannelsForGroup`.
+
+        Args:
+            group_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -736,6 +803,23 @@ class TeamsClient(ConnectorClientBase):
         Create a channel
 
         Create a new channel within a specified team
+
+        Swagger operation ID: `CreateChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -777,6 +861,22 @@ class TeamsClient(ConnectorClientBase):
         Get details for a specific channel in a team
 
         Get the channel details
+
+        Swagger operation ID: `GetChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -826,6 +926,24 @@ class TeamsClient(ConnectorClientBase):
         properties you provide are changed; omitted properties are left
         unchanged. For shared channels, the team ID must refer to the host
         team, which is the team that owns the shared channel.
+
+        Swagger operation ID: `UpdateChannelProperties`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -870,6 +988,24 @@ class TeamsClient(ConnectorClientBase):
         send new messages or react to existing messages in the channel, edit
         the channel settings, or make other changes to the channel. Archiving
         is an asynchronous operation.
+
+        Swagger operation ID: `ArchiveChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -921,6 +1057,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllChannelsForTeam`.
+
+        Args:
+            group_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -996,6 +1152,23 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetChats`.
+
+        Args:
+            chat_type: Filter by type.
+            topic: Filter by whether or not the topic name is defined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1065,6 +1238,24 @@ class TeamsClient(ConnectorClientBase):
 
         Posts a notification to a user's activity feed linking to a chat or
         team.
+
+        Swagger operation ID: `PostFeedNotification`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            notification_type: Choose notification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1107,6 +1298,22 @@ class TeamsClient(ConnectorClientBase):
 
         Creates a token that can be inserted into a message or adaptive card
         sent as a user in a channel to @mention a team tag.
+
+        Swagger operation ID: `AtMentionTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1157,6 +1364,23 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesFromChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1228,6 +1452,24 @@ class TeamsClient(ConnectorClientBase):
         Get message details
 
         Gets the details of a message in a chat or a channel.
+
+        Swagger operation ID: `GetMessageDetails`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            message_id: Message ID.
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1281,6 +1523,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRepliesToMessage`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            message_id: Message ID.
+            top: The number of latest replies to return. The default value is
+                20. The supported value is between 1 and 50.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1359,6 +1621,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListMembers`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            thread_type: Choose message type.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1431,6 +1713,22 @@ class TeamsClient(ConnectorClientBase):
         Send a set of options to a Microsoft Teams user, that they must respond
         to before the flow will continue. This action will pause the flow until
         the user response to the options
+
+        Swagger operation ID: `SubscribeUserMessageWithOptions`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1471,6 +1769,21 @@ class TeamsClient(ConnectorClientBase):
         Get a team
 
         Gets the details for a team in Microsoft Teams.
+
+        Swagger operation ID: `GetTeam`.
+
+        Args:
+            team_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1512,6 +1825,21 @@ class TeamsClient(ConnectorClientBase):
 
         Creates a token that can be inserted into a message or adaptive card to
         @mention a user.
+
+        Swagger operation ID: `AtMentionUser`.
+
+        Args:
+            user_id: Specify a user principal or user ID to @mention.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1552,6 +1880,22 @@ class TeamsClient(ConnectorClientBase):
         Create a chat
 
         Creates a one on one or group chat
+
+        Swagger operation ID: `CreateChat`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/chats"
 
@@ -1595,6 +1939,28 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessagesFromChat`.
+
+        Args:
+            chat_id: The chat's unique identifier.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            orderby: An OData orderBy query option for specifying the order of
+                entries (e.g., displayName asc).
+            top: An OData top query option for specifying the maximum number of
+                entries returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1678,6 +2044,22 @@ class TeamsClient(ConnectorClientBase):
 
         Sends a message to the signed-in user's own Notes chat in Microsoft
         Teams.
+
+        Swagger operation ID: `PostMessageToSelf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/chats/48:notes/messages"
@@ -1717,6 +2099,22 @@ class TeamsClient(ConnectorClientBase):
         Create a team
 
         Creates a new team in Microsoft Teams
+
+        Swagger operation ID: `CreateATeam`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/beta/teams"
 
@@ -1759,6 +2157,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListTeamMembers`.
+
+        Args:
+            team_id: Select team.
+            filter: An OData filter query to restrict the entries returned
+                (e.g. membershipType eq 'standard').
+            top: An OData top query option for specifying the maximum number of
+                entries returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1831,6 +2249,23 @@ class TeamsClient(ConnectorClientBase):
         Add a member to a team
 
         Adds a member to a team in Microsoft Teams
+
+        Swagger operation ID: `AddMemberToTeam`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            team_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1867,6 +2302,24 @@ class TeamsClient(ConnectorClientBase):
         Remove a member from a team
 
         Removes a member from a team in Microsoft Teams
+
+        Swagger operation ID: `RemoveMemberFromTeam`.
+
+        Args:
+            team_id: Select team.
+            membership_id: The membership ID of the member to remove from the
+                team. Use the 'List team members' action to look up the
+                membership ID for a user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1912,6 +2365,24 @@ class TeamsClient(ConnectorClientBase):
 
         Adds a member to a channel in Microsoft Teams. The channel must be a
         private or shared channel.
+
+        Swagger operation ID: `AddMemberToChannel`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            channel_id: Channel ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1955,6 +2426,26 @@ class TeamsClient(ConnectorClientBase):
 
         Removes a direct member from a channel in Microsoft Teams. The channel
         must be a private or shared channel.
+
+        Swagger operation ID: `RemoveMemberFromChannel`.
+
+        Args:
+            group_id: Select team.
+            channel_id: Channel ID.
+            membership_id: The membership ID of the direct member to remove
+                from the channel. Use the 'List chat or channel members' action
+                with thread type 'Channel' to look up the membership ID for a
+                user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2001,6 +2492,24 @@ class TeamsClient(ConnectorClientBase):
         Post message in a chat or channel
 
         Posts a message to a chat or a channel
+
+        Swagger operation ID: `PostMessageToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2050,6 +2559,24 @@ class TeamsClient(ConnectorClientBase):
         Reply with a message in a channel
 
         Replies with a message to a channel's message
+
+        Swagger operation ID: `ReplyWithMessageToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2099,6 +2626,24 @@ class TeamsClient(ConnectorClientBase):
         Post card in a chat or channel
 
         Posts a card to a chat or a channel
+
+        Swagger operation ID: `PostCardToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2149,6 +2694,24 @@ class TeamsClient(ConnectorClientBase):
 
         Posts an adaptive card to a chat or a channel and waits for a response
         from any user. This will pause the flow until any user responds.
+
+        Swagger operation ID: `PostCardAndWaitForResponse`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2199,6 +2762,24 @@ class TeamsClient(ConnectorClientBase):
         Reply with an adaptive card in a channel
 
         Replies with an adaptive card to a channel's message
+
+        Swagger operation ID: `ReplyWithCardToConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2248,6 +2829,24 @@ class TeamsClient(ConnectorClientBase):
         Update an adaptive card in a chat or channel
 
         Updates an existing adaptive card
+
+        Swagger operation ID: `UpdateCardInConversation`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            poster: Select an option.
+            location: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2299,6 +2898,21 @@ class TeamsClient(ConnectorClientBase):
         /teams, /me, /users 2nd segment: channels, chats, installedApps,
         messages, pinnedMessages, onlineMeetings. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api
+
+        Swagger operation ID: `HttpRequest`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/httprequest"
 
@@ -2340,6 +2954,23 @@ class TeamsClient(ConnectorClientBase):
         Add a user to a chat
 
         Adds a user to a chat in Microsoft Teams.
+
+        Swagger operation ID: `AddMemberToChat`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            chat_id: The chat's unique identifier.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2377,6 +3008,24 @@ class TeamsClient(ConnectorClientBase):
 
         Removes a member from a chat in Microsoft Teams. Only group chats
         support member removal.
+
+        Swagger operation ID: `RemoveMemberFromChat`.
+
+        Args:
+            chat_id: The chat's unique identifier.
+            membership_id: The membership ID of the member to remove from the
+                chat. Use the 'List chat or channel members' action with thread
+                type 'Group chat' to look up the membership ID for a user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2421,6 +3070,23 @@ class TeamsClient(ConnectorClientBase):
 
         Retrieves the properties and relationships of an online meeting. You
         can look up a meeting by meeting ID, join web URL, or join meeting ID.
+
+        Swagger operation ID: `GetOnlineMeeting`.
+
+        Args:
+            lookup_type: Select how to identify the meeting.
+            lookup_value: The value corresponding to the selected lookup type
+                (meeting ID, join web URL, or join meeting ID).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1.0/me/onlineMeetings/lookup"
@@ -2474,6 +3140,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListMeetingTranscripts`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2537,6 +3219,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting transcript
 
         Gets a specific transcript for an online meeting
+
+        Swagger operation ID: `GetMeetingTranscript`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2583,6 +3281,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting transcript content
 
         Gets the content of a meeting transcript
+
+        Swagger operation ID: `GetMeetingTranscriptContent`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2632,6 +3346,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListMeetingRecordings`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2695,6 +3425,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting recording
 
         Gets a specific recording for an online meeting
+
+        Swagger operation ID: `GetMeetingRecording`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2741,6 +3487,22 @@ class TeamsClient(ConnectorClientBase):
         Get meeting recording content
 
         Gets the content stream of a meeting recording
+
+        Swagger operation ID: `GetMeetingRecordingContent`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2786,6 +3548,21 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSections`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/beta/me/teamwork/sections"
@@ -2845,6 +3622,24 @@ class TeamsClient(ConnectorClientBase):
         Create a section
 
         Creates a new teamwork section for the current user
+
+        Swagger operation ID: `CreateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -2891,6 +3686,21 @@ class TeamsClient(ConnectorClientBase):
         Get a section
 
         Gets a specific teamwork section by ID
+
+        Swagger operation ID: `GetSection`.
+
+        Args:
+            section_id: The section ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2934,6 +3744,25 @@ class TeamsClient(ConnectorClientBase):
         Update a section
 
         Updates a teamwork section for the current user
+
+        Swagger operation ID: `UpdateSection`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -2983,6 +3812,23 @@ class TeamsClient(ConnectorClientBase):
         Delete a section
 
         Deletes a teamwork section for the current user
+
+        Swagger operation ID: `DeleteSection`.
+
+        Args:
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -3032,6 +3878,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListSectionItems`.
+
+        Args:
+            section_id: The section ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3100,6 +3962,25 @@ class TeamsClient(ConnectorClientBase):
         Adds an item (chat, channel, meeting, or community) currently in a
         system-defined section to a user-defined teamwork section. Use Move
         Section Item to relocate items already in another user-defined section.
+
+        Swagger operation ID: `AddSectionItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -3157,6 +4038,25 @@ class TeamsClient(ConnectorClientBase):
         Removes an item from a user-defined teamwork section. The underlying
         chat, channel, meeting, or community is not deleted; the item returns
         to its default system-defined section.
+
+        Swagger operation ID: `RemoveSectionItem`.
+
+        Args:
+            section_id: The section ID.
+            section_item_id: The section item ID (the conversation ID of the
+                underlying chat, channel, meeting, or community).
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -3215,6 +4115,27 @@ class TeamsClient(ConnectorClientBase):
         another user-defined section. Each item can belong to only one section
         at a time. This action removes the item from its current section and
         adds it to the target section.
+
+        Swagger operation ID: `MoveSectionItem`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            section_id: The section ID.
+            section_item_id: The section item ID (the conversation ID of the
+                underlying chat, channel, meeting, or community).
+            etag: The entity tag for the conditional request.
+            match_condition: The Azure Core match condition.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         headers = self._prepare_match_headers(
             headers,
@@ -3272,6 +4193,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTags`.
+
+        Args:
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3331,6 +4268,23 @@ class TeamsClient(ConnectorClientBase):
         Create a tag for a team
 
         Creates a tag in a team
+
+        Swagger operation ID: `CreateTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3372,6 +4326,22 @@ class TeamsClient(ConnectorClientBase):
         Get a team tag
 
         Gets a specific tag by ID from a team
+
+        Swagger operation ID: `GetTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3418,6 +4388,24 @@ class TeamsClient(ConnectorClientBase):
         Update a team tag
 
         Updates the display name of a tag in a team
+
+        Swagger operation ID: `UpdateTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3463,6 +4451,22 @@ class TeamsClient(ConnectorClientBase):
         Delete a team tag
 
         Deletes a tag from a team
+
+        Swagger operation ID: `DeleteTag`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3507,6 +4511,24 @@ class TeamsClient(ConnectorClientBase):
         Add a member to a team tag
 
         Adds a user to a team tag
+
+        Swagger operation ID: `AddMemberToTag`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3556,6 +4578,23 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTagMembers`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3621,6 +4660,23 @@ class TeamsClient(ConnectorClientBase):
         Delete a member from a team tag
 
         Deletes a member from a team tag
+
+        Swagger operation ID: `DeleteTagMember`.
+
+        Args:
+            group_id: Select team.
+            tag_id: Select tag.
+            tag_member_id: ID of the member to remove from the tag.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3668,6 +4724,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListCallRecordings`.
+
+        Args:
+            call_id: The call ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3727,6 +4799,22 @@ class TeamsClient(ConnectorClientBase):
         Get call recording
 
         Gets a specific recording for an ad-hoc call
+
+        Swagger operation ID: `GetCallRecording`.
+
+        Args:
+            call_id: The call ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3773,6 +4861,22 @@ class TeamsClient(ConnectorClientBase):
         Get call recording content
 
         Gets the content of a call recording
+
+        Swagger operation ID: `GetCallRecordingContent`.
+
+        Args:
+            call_id: The call ID.
+            recording_id: The recording ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3819,6 +4923,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListCallTranscripts`.
+
+        Args:
+            call_id: The call ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3878,6 +4998,22 @@ class TeamsClient(ConnectorClientBase):
         Get call transcript
 
         Gets a specific transcript for an ad-hoc call
+
+        Swagger operation ID: `GetCallTranscript`.
+
+        Args:
+            call_id: The call ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3924,6 +5060,22 @@ class TeamsClient(ConnectorClientBase):
         Get call transcript content
 
         Gets the content of a call transcript
+
+        Swagger operation ID: `GetCallTranscriptContent`.
+
+        Args:
+            call_id: The call ID.
+            transcript_id: The transcript ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3977,6 +5129,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllAdhocCallRecordings`.
+
+        Args:
+            start_date_time: The start date and time to filter recordings.
+            end_date_time: The end date and time to filter recordings.
+            top: The number of recordings to return.
+            skiptoken: The skip token for pagination.
+            deltatoken: The delta token for tracking changes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4070,6 +5242,26 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAllAdhocCallTranscripts`.
+
+        Args:
+            start_date_time: The start date and time to filter transcripts.
+            end_date_time: The end date and time to filter transcripts.
+            top: The number of transcripts to return.
+            skiptoken: The skip token for pagination.
+            deltatoken: The delta token for tracking changes.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4160,6 +5352,22 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListAiInsights`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4225,6 +5433,22 @@ class TeamsClient(ConnectorClientBase):
 
         Gets a specific AI-generated insight for an online meeting. Requires
         Microsoft 365 Copilot license.
+
+        Swagger operation ID: `GetAiInsight`.
+
+        Args:
+            meeting_id: The online meeting ID.
+            ai_insight_id: The AI insight ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4276,6 +5500,23 @@ class TeamsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMessageLocations`.
+
+        Args:
+            message_type: Message Type.
+            poster: Select an option.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4338,6 +5579,21 @@ class TeamsClient(ConnectorClientBase):
         Get message details response schema
 
         Get the schema information for get message details response
+
+        Swagger operation ID: `GetMessageDetailsInputSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4381,6 +5637,21 @@ class TeamsClient(ConnectorClientBase):
         Get message details input metadata
 
         Get the schema information for message inputs
+
+        Swagger operation ID: `GetMessageDetailsResponseSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4424,6 +5695,21 @@ class TeamsClient(ConnectorClientBase):
         List members input schema
 
         Get the schema information for list members input based on thread type
+
+        Swagger operation ID: `ListMembersInputSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4468,6 +5754,22 @@ class TeamsClient(ConnectorClientBase):
         Get feed notification input metadata
 
         Get the schema information for feed notification
+
+        Swagger operation ID: `GetFeedNotificationInputSchema`.
+
+        Args:
+            poster: Select an option.
+            notification_type: Choose notification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4515,6 +5817,23 @@ class TeamsClient(ConnectorClientBase):
         Get unified action input metadata
 
         Get the schema information for unified actions
+
+        Swagger operation ID: `GetUnifiedActionSchema`.
+
+        Args:
+            action_type: Unified Action.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4563,6 +5882,21 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the message with options subscription
         inputs
+
+        Swagger operation ID: `GetMessageWithOptionsSubscriptionInputMetadata`.
+
+        Args:
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4610,6 +5944,22 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the message with options subscription
         outputs
+
+        Swagger operation ID:
+        `GetMessageWithOptionsSubscriptionOutputMetadata`.
+
+        Args:
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4656,6 +6006,21 @@ class TeamsClient(ConnectorClientBase):
         Input schema for webhook trigger
 
         Gets the input schema for webhook trigger
+
+        Swagger operation ID: `GetWebhookTriggerRequestSchema`.
+
+        Args:
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4701,6 +6066,22 @@ class TeamsClient(ConnectorClientBase):
         Response schema for webhook trigger
 
         Gets the response schema for webhook trigger
+
+        Swagger operation ID: `GetWebhookTriggerResponseSchema`.
+
+        Args:
+            trigger_type: Trigger type.
+            thread_type: Choose message type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4749,6 +6130,23 @@ class TeamsClient(ConnectorClientBase):
         Get response schema
 
         Get the schema information for unified action responses
+
+        Swagger operation ID: `GetPostToConversationResponseSchema`.
+
+        Args:
+            action_type: Unified Action.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4800,6 +6198,24 @@ class TeamsClient(ConnectorClientBase):
 
         Get the schema information for the flow continuation subscription
         outputs
+
+        Swagger operation ID:
+        `GetFlowContinuationSubscriptionWithPosterOutputMetadata`.
+
+        Args:
+            input: The request body.
+            poster: Select an option.
+            recipient_type: Type of the recipient of the action.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4849,6 +6265,21 @@ class TeamsClient(ConnectorClientBase):
 
         Returns the input schema for a subscription trigger based on the
         selected scope type.
+
+        Swagger operation ID: `GetSubscriptionScopeSchema`.
+
+        Args:
+            scope_type: The selected scope type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

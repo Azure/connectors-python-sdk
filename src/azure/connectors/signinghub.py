@@ -5952,6 +5952,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete the attachment
         of a document.
+
+        Swagger operation ID: `V4_Attachment_DeleteAttachment`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            attachment_id: ID of the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6004,6 +6022,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the
         attachment of a document.
+
+        Swagger operation ID: `V4_Attachment_DownloadAttachment`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            attachment_id: ID of the attachment.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6055,6 +6091,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Attachment_GetAttachments`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment is added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6121,6 +6175,25 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to upload a attachment
         in a document.
+
+        Swagger operation ID: `V4_Attachment_UploadAttachment`.
+
+        Args:
+            input: The binary request body.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to which the attachment needs to be
+                add.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6184,6 +6257,24 @@ class SigninghubClient(ConnectorClientBase):
         will be assigned. If either width or height (or both) is provided, the
         system will compare these provided values with each other. The larger
         value between width and height will be assigned to both dimensions.
+
+        Swagger operation ID: `V4_Checkbox_AddCheckBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6240,6 +6331,24 @@ class SigninghubClient(ConnectorClientBase):
         be used when a template was applied or the document was created using
         the GUI interface. It's width and height cannot be updated. They will
         remain the same as when they were added.
+
+        Swagger operation ID: `V4_Checkbox_UpdateCheckBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6298,6 +6407,25 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Contacts_Get`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort the result by possible values are mentioned above.
+            asc: Order the result set by ascending or descending.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6375,6 +6503,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete a document in
         a package.
+
+        Swagger operation ID: `V4_Documents_DeleteDocument`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: ID of the document to be deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6424,6 +6569,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the document
         bytes. The package ID and document ID is provided in the resource URL.
+
+        Swagger operation ID: `V4_Documents_DownloadDocumentBytes`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6470,6 +6632,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get certify signature
         settings of a document in a package.
+
+        Swagger operation ID: `V4_Documents_GetCertifyPolicy`.
+
+        Args:
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6517,6 +6696,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get the document
         details. The document ID is provided in the URL as \"{document_id}\".
+
+        Swagger operation ID: `V4_Documents_GetDocumentDetails`.
+
+        Args:
+            package_id: The Package ID of the package to which the document is
+                added.
+            document_id: The document ID for which the document details are
+                requested.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6565,6 +6762,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to rename a document in
         a package.
+
+        Swagger operation ID: `V4_Documents_RenameDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document to on which the action is to be
+                performed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6612,6 +6829,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update certify
         signature settings for a document in a package.
+
+        Swagger operation ID: `V4_Documents_UpdateCertifyPolicy`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID of the package to which the document is
+                added.
+            document_id: The ID of the document on which the action is to be
+                performed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6663,6 +6900,23 @@ class SigninghubClient(ConnectorClientBase):
         resource URL to identify the library document to be copied. Note a
         package must already exist before you can add a document using this
         call.
+
+        Swagger operation ID: `V4_Documents_UploadFromLibrary`.
+
+        Args:
+            package_id: The Package ID of the package to which the document is
+                being added.
+            document_id: The library document ID that need to add/updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6719,6 +6973,23 @@ class SigninghubClient(ConnectorClientBase):
         converted to PDF format upon upload.Click here for the full list. Note
         PDF documents are not altered upon upload to the system. Note a package
         must already exist before you can add a document using this call.
+
+        Swagger operation ID: `V4_Documents_UploadStream`.
+
+        Args:
+            input: The binary request body.
+            package_id: Package ID of the package to which the document is
+                being added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6770,6 +7041,25 @@ class SigninghubClient(ConnectorClientBase):
         to access document package outside the scope of this duration if the
         access security is enabled. Document owner can also configure
         authentication based security of the package for a recipient.
+
+        Swagger operation ID:
+        `V4_EnterpriseDocuments_GetEnterpriseWorkflowAccess`.
+
+        Args:
+            package_id: The package ID for which workflow access security and
+                authentication is to be updated.
+            order: Order of the recipient in the workflow for which the access
+                security and authentication is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6822,6 +7112,27 @@ class SigninghubClient(ConnectorClientBase):
         authentications and access duration for the recipients. This API can
         also be used by the enterprise administrator or the enterprise user if
         the \"scope\" variable was used in the authentication request
+
+        Swagger operation ID:
+        `V4_EnterpriseDocuments_UpdateEnterpriseWorkflowAccess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow access security and
+                authentication is to be updated.
+            order: Order of the recipient in the workflow for which the access
+                security and authentication is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6879,6 +7190,24 @@ class SigninghubClient(ConnectorClientBase):
         they are numbered \"1\", \"2\", and \"3\" respectfully.This API call
         allows you to assign a user by their workflow order number, to an input
         field on the document.
+
+        Swagger operation ID: `V4_Fields_AutoAssignField`.
+
+        Args:
+            input: The request body.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which workflow user needs to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -6954,6 +7283,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Fields_AutoPlace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to which the document is added.
+            document_id: The ID of the document for which the fields are
+                requested.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7021,6 +7370,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete a field of
         document in a package.
+
+        Swagger operation ID: `V4_Fields_DeleteDocumentField`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7072,6 +7439,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to fill one or more form
         fields in a document by a specified user in the order.
+
+        Swagger operation ID: `V4_Fields_FillFormFields`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7120,6 +7505,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get document fields
         i.e., initials, in-persons, signature fields or form fields.
+
+        Swagger operation ID: `V4_Fields_GetAllDocumentFields`.
+
+        Args:
+            package_id: The ID of the package to which the document is added.
+            document_id: The ID of the document for which the fields are
+                requested.
+            page_no: Page no of the document for which the fields are
+                requested. If page number is not provided fields of whole
+                document are returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7168,6 +7573,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to move the document
         package to a shared space or user's custom folder.
+
+        Swagger operation ID: `V4_Folder_MovePackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package id that need to move to folder.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7219,6 +7641,24 @@ class SigninghubClient(ConnectorClientBase):
         Workflow](#operation/Workflow_WorkflowAddUser) for more information.
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
+
+        Swagger operation ID: `V4_Initials_AddInitial`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7268,6 +7708,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to fill an initials
         field in a document by a specified user in the order.
+
+        Swagger operation ID: `V4_Initials_Fill`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7322,6 +7780,24 @@ class SigninghubClient(ConnectorClientBase):
         Document Fields](#operation/Documents_GetDocumentFields).The latter can
         be used when a template was applied or the document was created using
         the GUI interface.
+
+        Swagger operation ID: `V4_Initials_UpdateInitial`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7388,6 +7864,24 @@ class SigninghubClient(ConnectorClientBase):
         recipient would be in the same location.This type of signature is not
         intended for use whereby a document is shared with recipients over
         email link in the normal loose integration method.
+
+        Swagger operation ID: `V4_InPerson_AddInPerson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7444,6 +7938,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields).The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_InPerson_UpdateInPerson`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7496,6 +8008,22 @@ class SigninghubClient(ConnectorClientBase):
         exist before you can upload or add documents to SigningHub.. Even a
         single document is a part of a package: a package containing one
         document. Note: A package can be renamed if required once created.
+
+        Swagger operation ID: `V4_Package_AddPackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v4/packages"
 
@@ -7535,6 +8063,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to approve a document by
         a specified user in the order.
+
+        Swagger operation ID: `V4_Package_Approve`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be approved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7577,6 +8122,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to decline a document by
         a specified user in the order.
+
+        Swagger operation ID: `V4_Package_Decline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be declined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7622,6 +8184,22 @@ class SigninghubClient(ConnectorClientBase):
         automatically declined as result of delete operation. If the document
         status is SHARED, then the document is automatically recalled and
         workflow is stopped before the document is deleted.
+
+        Swagger operation ID: `V4_Package_DeletePackage`.
+
+        Args:
+            package_id_bulk_action: Package ID of the package which contains
+                the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7672,6 +8250,24 @@ class SigninghubClient(ConnectorClientBase):
         document, the download is the binary zip file of all documents. The
         x-password and x-otp headers are optional. They are required if the
         document owner set them during the workflow creation phase.
+
+        Swagger operation ID: `V4_Package_DownloadPackageBytes`.
+
+        Args:
+            package_id_bulk_action: The package ID to be downloaded.
+            document_ids: The Document IDs parameter is optional. If
+                x-combine-files is set to true, the documents will be merged
+                based on the mentioned documents of the package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7749,6 +8345,21 @@ class SigninghubClient(ConnectorClientBase):
         SigningHub App, this method is invoked by the application to ensure the
         workflow continues to process and the next signatory is notified, and
         the document status is available via the configured call-back URL.
+
+        Swagger operation ID: `V4_Package_Finish`.
+
+        Args:
+            package_id: The ID of the package to be finished.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7791,6 +8402,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to gatekeeper approve a
         document by a specified user in the order.
+
+        Swagger operation ID: `V4_Package_GatekeeperApprove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be approved.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7837,6 +8465,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to gatekeeper decline a
         document by a specified user in the order.
+
+        Swagger operation ID: `V4_Package_GatekeeperDecline`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The ID of the package to be declined.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -7907,6 +8552,47 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Package_GetAllPackages`.
+
+        Args:
+            document_status: Filter by document status possible values are ALL,
+                DRAFT, PENDING, SIGNED, DECLINED, INPROGRESS, EDITED, REVIEWED,
+                COMPLETED, EXPIRING_IN_SEVEN_DAYS.
+            page_no: Page number, according the division of records per page.
+            record_per_page: Number of records that are needed to be fetched in
+                one request.
+            package_name: Package Name.
+            package_id: Package Id.
+            recipient_from: From.
+            recipient_to: To.
+            document_id: Document Id.
+            expiry: Expiry (Days).
+            modified_from: From Modified Date.
+            modified_to: To Modified Date.
+            size_from: From Size (KB).
+            size_to: To Size (KB).
+            certified_documents: Only certified signed documents.
+            form_fields: Only documents that have form fields.
+            attachments: Only documents that have attachments.
+            document_type: Document Type like XML, PDF, DOCX etc.
+            sort_by: Sort the resultant records as per your choice.
+            asc: Sorted the resultant records by ascending or descending order.
+            document_statuses: Document Type.
+            owned_by: Owned By filter possible values are ME_OTHERS, ME,
+                OTHERS.
+            smart_form: Smart form name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8081,6 +8767,21 @@ class SigninghubClient(ConnectorClientBase):
         package. This API can also be used by the business application to
         perform action on behalf of the enterprise user via \"Scope
         Authentication\".
+
+        Swagger operation ID: `V4_Package_GetPackageDetails`.
+
+        Args:
+            package_id: Package ID of the document package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8123,6 +8824,23 @@ class SigninghubClient(ConnectorClientBase):
 
         This service API is used to rename a document package. The document
         package is identified by its unique identifier in the URL of the call.
+
+        Swagger operation ID: `V4_Package_RenamePackage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id_bulk_action: Package ID to change the name of.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8170,6 +8888,22 @@ class SigninghubClient(ConnectorClientBase):
         [SigningHub
         Roles](http://manuals.ascertia.com/SigningHubv7/default.aspx#pageid=1056)
         for a description of all available workflow recipient roles.
+
+        Swagger operation ID: `V4_Package_Submit`.
+
+        Args:
+            package_id: The SigningHub package ID that contains the document to
+                be submitted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8213,6 +8947,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to add a QR Code to a
         document in a package.
+
+        Swagger operation ID: `V4_QR_AddQRCode`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8262,6 +9014,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update a QR Code of a
         document in a package.
+
+        Swagger operation ID: `V4_QR_UpdateQRCode`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8323,6 +9093,24 @@ class SigninghubClient(ConnectorClientBase):
         will be assigned. If either width or height (or both) is provided, the
         system will compare these provided values with each other. The larger
         value between width and height will be assigned to both dimensions.
+
+        Swagger operation ID: `V4_Radio_AddRadioBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8379,6 +9167,24 @@ class SigninghubClient(ConnectorClientBase):
         when a template was applied or the document was created using the GUI
         interface. It's width and height cannot be updated. They will remain
         the same as when they were added.
+
+        Swagger operation ID: `V4_Radio_UpdateRadioBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8435,6 +9241,27 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Settings_GetTemplates`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort by column. Possible Values are CREATED_ON and NAME.
+                Default is sort by CREATED_ON.
+            asc: The resulting list order. Default resulting list will be
+                descending.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8522,6 +9349,25 @@ class SigninghubClient(ConnectorClientBase):
         information.Note if you have a document with a template applied, or
         have applied one using the APIs, then the workflow will already contain
         users.
+
+        Swagger operation ID: `V4_Signature_AddSignature`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow details need to be
+                updated.
+            document_id: The document ID where the field is to be added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8578,6 +9424,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields).The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_Signature_UpdateSignature`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8661,6 +9525,24 @@ class SigninghubClient(ConnectorClientBase):
         applications must retrieve the OTP from the use and submit it when
         making the API call. This is done using the \"x-otp\" header in the
         request.
+
+        Swagger operation ID: `V4_Signing_BulkSignDocuments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id_bulk_action: Bulk action to be performed. Possible
+                values are: SIGN | SHARE.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8719,6 +9601,24 @@ class SigninghubClient(ConnectorClientBase):
         signing process to complete the signing process on failed documents,
         the ACTION property will be REINITIATE_SIGNING_PROCESS, and the STATUS
         property will be PENDING.
+
+        Swagger operation ID: `V4_Signing_BulkSignStatus`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            bulk_action: Bulk action to be performed. Possible values are: SIGN
+                | SHARE.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8793,6 +9693,25 @@ class SigninghubClient(ConnectorClientBase):
         business applications must retrieve the OTP from the use and submit it
         when making the API call. This is done using the \"x-otp\" header in
         the request.
+
+        Swagger operation ID: `V4_Signing_SignDocument`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The identifier of the package that contains the
+                document for signature.
+            document_id: Identifier of the document to be signed.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8849,6 +9768,26 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Template_GetEnterpriseTemplates`.
+
+        Args:
+            record_per_page: Total number of records to be retrieved in a page.
+            page_no: Page number to be retrieved.
+            sort_by: Sort the result by possible values are mentioned above.
+            asc: Order the result set by ascending or descending.
+            id: Search by template ids.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -8951,6 +9890,24 @@ class SigninghubClient(ConnectorClientBase):
         to Workflow](#operation/Workflow_WorkflowAddUser) for more information.
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
+
+        Swagger operation ID: `V4_TextBox_AddTextBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9006,6 +9963,24 @@ class SigninghubClient(ConnectorClientBase):
         Fields](#operation/Documents_GetDocumentFields). The latter can be used
         when a template was applied or the document was created using the GUI
         interface.
+
+        Swagger operation ID: `V4_TextBox_UpdateTextBox`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: Package ID to which the document is added.
+            document_id: The document ID for which the action is to be taken.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9070,6 +10045,27 @@ class SigninghubClient(ConnectorClientBase):
         applying such a template, these form fields will be created on the
         target document even if these form fields were already present in the
         document.
+
+        Swagger operation ID: `V4_Workflow_ApplyTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The Package ID of the package to which the template
+                needs to be applied.
+            document_id: The document ID on which the template needs to be
+                applied. If the value is set to 0, if template is to be applied
+                on all the documents in the package.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9116,6 +10112,21 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to download the workflow
         process evidence report of a document.
+
+        Swagger operation ID: `V4_WorkflowEvidenceReport_DownloadBytes`.
+
+        Args:
+            package_id: The ID of the document.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9157,6 +10168,21 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to get workflow details
         for the package.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowDetail`.
+
+        Args:
+            package_id: The ID of the package to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9202,6 +10228,24 @@ class SigninghubClient(ConnectorClientBase):
         of actions performed on a document. The package ID is provided in the
         resource URL. The search field (x-search-text header) is intended for
         email, document name, action, infokey, and infovalue.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowHistory`.
+
+        Args:
+            package_id: The ID of the document for which the log is required.
+            page_no: Page number to be retrieved.
+            records_per_page: Total number of records to be retrieved in a
+                page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9254,6 +10298,24 @@ class SigninghubClient(ConnectorClientBase):
         the workflow. The ID of the workflow document is provided in the
         resource URL, and the workflow recipient is identified by the order at
         which it is added to the workflow.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowReminder`.
+
+        Args:
+            package_id: The package ID for which workflow reminders to be
+                updated.
+            order: The order of the user for which the workflow reminders to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9303,6 +10365,22 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Workflow_GetWorkflowUsers`.
+
+        Args:
+            package_id: The ID of the package to be downloaded.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9368,6 +10446,22 @@ class SigninghubClient(ConnectorClientBase):
         Bearer token should belong to document owner or enterprise admin can
         use scope variable to get the access token on behalf of document owner
         to perform this action.
+
+        Swagger operation ID: `V4_Workflow_MarkWorkflowCompleted`.
+
+        Args:
+            package_id: The package ID from which the recipient is to be
+                deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9411,6 +10505,26 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get document
         permissions for a recipient. Recipient is identified by the order in
         the workflow. The ID of the package is provided in the resource URL.
+
+        Swagger operation ID: `V4_WorkflowPermission_GetWorkflowPermissions`.
+
+        Args:
+            package_id: The document ID for which workflow user needs to be
+                updated.
+            order: The order of the user in workflow for which the permissions
+                are requested. By providing the value 0 in order, service would
+                return the permissions of most recently added collaborator in
+                the workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9464,6 +10578,27 @@ class SigninghubClient(ConnectorClientBase):
         within the workflow. The ID of the document package is provided in the
         resource URL, and the workflow user is identified by the order at which
         it is added to the workflow.
+
+        Swagger operation ID:
+        `V4_WorkflowPermission_UpdateWorkflowPermissions`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow permissions to be
+                updated.
+            order: The order of the recipient for which the workflow
+                permissions to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9511,6 +10646,21 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to stop a workflow in
         progress. The document ID is provided in the resource URL. After recall
         the document status automatically changes to \"DRAFT\".
+
+        Swagger operation ID: `V4_Workflow_RecallWorkflow`.
+
+        Args:
+            package_id: The ID of the package to be recalled.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9561,6 +10711,22 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Workflow_StartWorkflow`.
+
+        Args:
+            package_id: The document package to be shared.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9624,6 +10790,24 @@ class SigninghubClient(ConnectorClientBase):
         to a document, but business applications wants to override the certify
         permission or post processing details. The package ID is provided in
         the resource URL.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow details need to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9666,6 +10850,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to add placeholder to a
         workflow a document in a package.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflowPostProcess`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the document package for which the post
+                processing is being updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9718,6 +10920,26 @@ class SigninghubClient(ConnectorClientBase):
         settings within the workflow. The ID of the workflow document is
         provided in the resource URL, and the workflow recipient is identified
         by the order at which it is added to the workflow.
+
+        Swagger operation ID: `V4_Workflow_UpdateWorkflowReminder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow reminders to be
+                updated.
+            order: The order of the user for which the workflow reminders to be
+                updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9774,6 +10996,23 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddGroup`.
+
+        Args:
+            input: The request body.
+            package_id: ID of the package for which the group is to be added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9845,6 +11084,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddPlaceholder`.
+
+        Args:
+            input: The request body.
+            package_id: ID of the package for which the placeholder is to be
+                added.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9938,6 +11195,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `V4_Workflow_WorkflowAddUser`.
+
+        Args:
+            input: The request body.
+            package_id: SigningHub package ID, which the recipients are to be
+                added to.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -9998,6 +11273,24 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to delete workflow
         recipient.
+
+        Swagger operation ID: `V4_Workflow_WorkflowDeleteUser`.
+
+        Args:
+            package_id: The package ID from which the recipient is to be
+                deleted.
+            order: Order of the recipient in the workflow which is to be
+                deleted.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10054,6 +11347,25 @@ class SigninghubClient(ConnectorClientBase):
         place holder is identified by the order at which it is added to the
         workflow. While XML type document preparation, only supported role
         types are \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\"
+
+        Swagger operation ID: `V4_Workflow_WorkflowUpdatePlaceholder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the package for which the placeholder is to be
+                added.
+            order: Order of the recipient in the workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10109,6 +11421,25 @@ class SigninghubClient(ConnectorClientBase):
         identified by the order at which it is added to the workflow. Note,
         while XML type document preparation, only supports role types
         \"SIGNER\", \"REVIEWER\" and \"CARBON_COPY\".
+
+        Swagger operation ID: `V4_Workflow_WorkflowUserUpdate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: The package ID for which workflow user needs to be
+                updated.
+            order: The order of the user in workflow.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10157,6 +11488,25 @@ class SigninghubClient(ConnectorClientBase):
 
         Business applications can use this service API to update order of the
         recipient in the workflow.
+
+        Swagger operation ID: `V4_Workflow_WorkflowUserUpdateOrder`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            package_id: ID of the package to which the recipients are to be
+                added.
+            order: Existing order of the recipient which is to be updated.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10205,6 +11555,21 @@ class SigninghubClient(ConnectorClientBase):
         The availability of deleting shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
         enable the 'Manage Shared Space' option in Roles>Document Settings.
+
+        Swagger operation ID: `V4_WorkSpace_DeleteSharedSpace`.
+
+        Args:
+            id: Id of shared space that you want to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10250,6 +11615,21 @@ class SigninghubClient(ConnectorClientBase):
         Business applications can use this service API to get a specific shared
         space. This API returns information about shared space, its owner and
         collaborator.
+
+        Swagger operation ID: `V4_WorkSpace_GetSharedSpace`.
+
+        Args:
+            id: Id of shared space that you want to get.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -10294,6 +11674,23 @@ class SigninghubClient(ConnectorClientBase):
         The availability of updating shared spaces is subject to the assigned
         enterprise user role. To allow this provision Enterprise Admin will
         enable the 'Manage Shared Space' option in Roles>Document Settings.
+
+        Swagger operation ID: `V4_WorkSpace_UpdateSharedSpace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            id: Id of shared space that you want to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

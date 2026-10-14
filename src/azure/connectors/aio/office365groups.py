@@ -178,6 +178,24 @@ class Office365groupsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListGroupMembers`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            top: Number of group members to retrieve (from 1 to 999, default is
+                100).
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -251,6 +269,22 @@ class Office365groupsClient(ConnectorClientBase):
         Add member to group
 
         This operation is used to add a member to an O365 group, using a UPN.
+
+        Swagger operation ID: `AddMemberToGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            user_upn: The user principal name (UPN) of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -300,6 +334,30 @@ class Office365groupsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListGroups`.
+
+        Args:
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            filter: Enter an OData style filter expression to limit which rows
+                are listed.
+            top: Sets the page size of results.
+            skiptoken: Token that references the next page of results and is
+                returned in the @odata.nextLink property in the response.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1.0/groups"
         query_params = []
@@ -391,6 +449,24 @@ class Office365groupsClient(ConnectorClientBase):
         Update a group event
 
         This operation is used to update a new event in a group calendar.
+
+        Swagger operation ID: `UpdateCalendarEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            event: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -437,6 +513,22 @@ class Office365groupsClient(ConnectorClientBase):
 
         This operation is used to remove a member from an O365 group, using a
         UPN.
+
+        Swagger operation ID: `RemoveMemberFromGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            user_upn: The user principal name (UPN) of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -489,6 +581,21 @@ class Office365groupsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListDeletedGroups`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -553,6 +660,21 @@ class Office365groupsClient(ConnectorClientBase):
         Restore a deleted group
 
         Restore a recently deleted group
+
+        Swagger operation ID: `RestoreDeletedGroup`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -594,6 +716,21 @@ class Office365groupsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListDeletedGroupsByOwner`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -659,6 +796,22 @@ class Office365groupsClient(ConnectorClientBase):
         Delete event
 
         This operation deletes an event in a calendar.
+
+        Swagger operation ID: `CalendarDeleteItem_V2`.
+
+        Args:
+            group_id: Pick a group from the drop down or enter group id.
+            event: Select an event.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -702,6 +855,23 @@ class Office365groupsClient(ConnectorClientBase):
         Create a group event
 
         This operation is used to create a new event in a group calendar.
+
+        Swagger operation ID: `CreateCalendarEventV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            group_id: Pick a group from the drop down or enter group id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -744,6 +914,21 @@ class Office365groupsClient(ConnectorClientBase):
         Construct a Microsoft Graph REST API request to invoke. There is one
         segment that is supported: /groups. Learn more:
         https://docs.microsoft.com/en-us/graph/use-the-api.
+
+        Swagger operation ID: `HttpRequestV2`.
+
+        Args:
+            input: The binary request body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/httprequest"
 
@@ -788,6 +973,25 @@ class Office365groupsClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListOwnedGroups_V3`.
+
+        Args:
+            extract_sensitivity_label: A boolean whether to extract sensitivity
+                label Id for associated artefact.
+            fetch_sensitivity_label_metadata: A boolean whether to fetch
+                sensitivity label Metadata for associated LabelId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

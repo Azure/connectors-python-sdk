@@ -118,6 +118,20 @@ class OrderfulClient(ConnectorClientBase):
 
         Fetches a list of transactions as specified by the filter/sort
         parameters supplied.
+
+        Swagger operation ID: `ListTransactions`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
@@ -150,6 +164,22 @@ class OrderfulClient(ConnectorClientBase):
         Create Transaction
 
         Create Transaction.
+
+        Swagger operation ID: `CreateTransaction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/transactions"
 
@@ -182,6 +212,21 @@ class OrderfulClient(ConnectorClientBase):
         Get Transaction by ID
 
         Get transaction by ID.
+
+        Swagger operation ID: `GetTransactionById`.
+
+        Args:
+            transaction_id: The transaction Id used to retrieve transaction..
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

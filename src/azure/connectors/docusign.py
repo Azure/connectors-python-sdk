@@ -2208,6 +2208,23 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetDocgenFormFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2273,6 +2290,24 @@ class DocusignClient(ConnectorClientBase):
         Update document generation form fields from envelope
 
         Update document generation form fields from envelope
+
+        Swagger operation ID: `UpdateDocgenFormFields`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_guid: Document GUID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2322,6 +2357,22 @@ class DocusignClient(ConnectorClientBase):
 
         Get document generation form fields from template (bulk send templates
         only)
+
+        Swagger operation ID: `GetDocGenTemplateTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2367,6 +2418,23 @@ class DocusignClient(ConnectorClientBase):
         Void the envelope
 
         Void the envelope.
+
+        Swagger operation ID: `VoidEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            voided_reason: Voided reason.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2420,6 +2488,21 @@ class DocusignClient(ConnectorClientBase):
         This action resends a Docusign envelope or sends a reminder to
         recipients who need to sign a Docusign agreement based on a provided
         EnvelopeId.
+
+        Swagger operation ID: `ResendEnvelope`.
+
+        Args:
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2469,6 +2552,28 @@ class DocusignClient(ConnectorClientBase):
         Add reminders for an envelope
 
         Add reminders for an envelope
+
+        Swagger operation ID: `AddReminders`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            reminder_enabled: When set to false the reminders are disabled.
+                Default is false.
+            reminder_delay: Add number of days after which recipient receives
+                reminder email.
+            reminder_frequency: Add number of days between reminder emails.
+            expire_after: Add number of days before expiry.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2538,6 +2643,24 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEnvelopeDocumentTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2605,6 +2728,24 @@ class DocusignClient(ConnectorClientBase):
         Update envelope prefill tabs
 
         Update values for a list of prefill tabs
+
+        Swagger operation ID: `UpdateEnvelopePrefillTabs`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2651,6 +2792,24 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetTemplateDocumentTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2720,6 +2879,24 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEnvelopeDocumentFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter a document ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2789,6 +2966,27 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using composite templates
 
         Create envelope using composite templates
+
+        Swagger operation ID: `CompositeTemplates`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            email_subject: Subject of the email.
+            status: Envelope status.
+            email_body: Body of the email.
+            merge_roles_on_draft: Merge roles and delete empty recipients.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2871,6 +3069,39 @@ class DocusignClient(ConnectorClientBase):
         title, description, Envelope ID, document names, sender names, envelope
         status, status date, date sent, and a URL of the envelope which can be
         used as a link to view the envelope in Docusign.
+
+        Swagger operation ID: `SearchListEnvelopes`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            recipient_name: This action lists envelopes based on recipient
+                name.
+            recipient_email_id: Filters envelopes by recipient email.
+            envelope_title: Filters envelopes by envelope subject.
+            custom_field_name: This action lists envelopes based on a name of
+                its custom fields.
+            custom_field_value: Filters by custom field value.
+            search_text: Enter one keyword to find matches in envelope
+                subjects, recipients, and custom fields.
+            envelope_status: This action lists envelopes based on status of the
+                envelope.
+            folder_ids: Filters envelopes by the selected folder.
+            order_by: Sorts envelopes in the selected order.
+            top: Specify the number of envelopes to return (default is 10;
+                maximum is 1,000).
+            skip: Specify the number of envelopes to skip from the start.
+            from_date: Enter start date-time in UTC format: 2017-05-02T01:44z.
+            to_date: Enter end date-time in UTC format: 2017-05-02T01:44z.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2984,6 +3215,23 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using template
 
         Create a new envelope using a specified template.
+
+        Swagger operation ID: `CreateEnvelopeFromTemplateNoRecipients`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            status: Envelope status.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3044,6 +3292,27 @@ class DocusignClient(ConnectorClientBase):
 
         Create a new envelope using a specified template and specify
         recipients.
+
+        Swagger operation ID: `SendEnvelope`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            status: Envelope status.
+            template_id: Enter or select a template ID.
+            email_subject: Email subject.
+            email_body: Email body.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3109,6 +3378,26 @@ class DocusignClient(ConnectorClientBase):
         Create envelope using template with recipients and tabs
 
         Create envelope using template with recipients and tabs
+
+        Swagger operation ID: `SendEnvelopeWithRecipientFields`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            merge_roles_on_draft: Merge roles and delete empty recipients.
+            email_subject: Email subject.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3170,6 +3459,22 @@ class DocusignClient(ConnectorClientBase):
         Send envelope
 
         Send an existing envelope.
+
+        Swagger operation ID: `SendDraftEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3215,6 +3520,23 @@ class DocusignClient(ConnectorClientBase):
         Get envelope custom field info
 
         Get envelope custom field info.
+
+        Swagger operation ID: `GetEnvelopeCustomField`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            field_name: Custom Field Name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3271,6 +3593,26 @@ class DocusignClient(ConnectorClientBase):
         Update envelope custom field
 
         Update value for the specified envelope custom field
+
+        Swagger operation ID: `UpdateEnvelopeCustomField`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            field_id: Custom Field ID.
+            field_type: Custom Field Type.
+            name: Custom Field Name.
+            value: Custom Field Value.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3338,6 +3680,26 @@ class DocusignClient(ConnectorClientBase):
         Generate Embedded Sender URL
 
         Generate Embedded Sender URL
+
+        Swagger operation ID: `GenerateEmbeddedSenderURL`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            open_in: Open in.
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3395,6 +3757,22 @@ class DocusignClient(ConnectorClientBase):
         List recipients from an envelope
 
         List recipients from an envelope
+
+        Swagger operation ID: `GetRecipientStatus`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3442,6 +3820,24 @@ class DocusignClient(ConnectorClientBase):
         Remove recipient from an envelope
 
         Remove recipient from an envelope
+
+        Swagger operation ID: `RemoveRecipientFromEnvelope`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            folder_id: Folder ID.
+            remove_recipient_from_envelope_recipient_id: Recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3505,6 +3901,26 @@ class DocusignClient(ConnectorClientBase):
         Get recipient info from envelope
 
         Get recipient info from envelope
+
+        Swagger operation ID: `GetRecipientFields`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_email: Recipient email.
+            area_code: Area code of the recipient.
+            phone_number: Phone number of the recipient.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3573,6 +3989,22 @@ class DocusignClient(ConnectorClientBase):
         Get audit event list
 
         Get audit event list
+
+        Swagger operation ID: `GetAuditEvents`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3622,6 +4054,27 @@ class DocusignClient(ConnectorClientBase):
         Add verification type to a recipient
 
         Add verification type to a recipient.
+
+        Swagger operation ID: `AddVerificationToRecipient`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            recipient_type: Enter or select a recipient type.
+            verification_type: Verification type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3698,6 +4151,41 @@ class DocusignClient(ConnectorClientBase):
         Update recipient on an envelope
 
         Update recipient on an envelope
+
+        Swagger operation ID: `UpdateEnvelopeRecipient`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            recipient_type: Recipient type.
+            signature_type: DocuSign standards-based-signature (SBS) types.
+            client_user_id: Client user ID for embedded signer.
+            embedded_recipient_start_u_r_l: A sender-provided URL string for
+                redirecting an embedded recipient.
+            routing_order: The signing order of the recipient.
+            email_notification_language: Language for the email notification.
+            email_notification_subject: Subject of the email notification.
+            email_notification_body: Body of the email notification.
+            note: Custom note for the recipient.
+            role_name: Role name associated with the recipient.
+            country_code: For SMS notifications, the country code, without
+                leading + sign.
+            phone_number: Signer email or SMS phone required. Exclude country
+                code for phone number.
+            signing_group_id: Signing Group.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3818,6 +4306,26 @@ class DocusignClient(ConnectorClientBase):
         Apply a template to documents
 
         Apply a template to documents
+
+        Swagger operation ID: `ApplyTemplatesToDocuments`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            template_id: Enter or select a template ID.
+            preserve_template_recipient: False.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3871,6 +4379,24 @@ class DocusignClient(ConnectorClientBase):
         Create bulk send list
 
         Create bulk send list
+
+        Swagger operation ID: `CreateBulkSendList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            name: Bulk send list name.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3920,6 +4446,24 @@ class DocusignClient(ConnectorClientBase):
         Bulk send envelope using template
 
         Bulk send envelope using template
+
+        Swagger operation ID: `BulkSend`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            bulk_send_list_id: Bulk send list GUID.
+            envelope_or_template_id: Enter the template ID, or choose a
+                template from the dropdown.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -3973,6 +4517,21 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetLoginAccounts`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/oauth/userinfo"
         initial_request_url = request_url
@@ -4031,6 +4590,22 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEnvelopeTemplates`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4091,6 +4666,24 @@ class DocusignClient(ConnectorClientBase):
         Add documents to an envelope
 
         Add documents to an envelope.
+
+        Swagger operation ID: `AddDocumentsToEnvelope`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4139,6 +4732,23 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTemplateDocuments`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            template_id: Enter or select a template ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4205,6 +4815,23 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListEnvelopeDocuments`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4269,6 +4896,23 @@ class DocusignClient(ConnectorClientBase):
         Get document info from envelope
 
         Get document info from envelope
+
+        Swagger operation ID: `GetEnvelopeDocumentInfo`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_name: File name with extension.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4323,6 +4967,24 @@ class DocusignClient(ConnectorClientBase):
         Get info for recipient tab
 
         Returns the value of the tab for the given recipient
+
+        Swagger operation ID: `GetTabInfo`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            tab_label: Tab label.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4383,6 +5045,27 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `AddRecipientTabs`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            tab_type: Tab type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4457,6 +5140,24 @@ class DocusignClient(ConnectorClientBase):
         Update recipient tab values on an envelope
 
         Update recipient tab values on an envelope
+
+        Swagger operation ID: `UpdateRecipientTabsValues`.
+
+        Args:
+            input: The request body.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4503,6 +5204,24 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetEnvelopeRecipientTabs`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_id: Enter a recipient ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4570,6 +5289,26 @@ class DocusignClient(ConnectorClientBase):
         Start Docusign workflow
 
         Start Docusign workflow
+
+        Swagger operation ID: `TriggerMaestroFlow`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            workflow_id: Enter the workflow ID or select the workflow name from
+                the dropdown.
+            instance_name: Name of the workflow instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4622,6 +5361,22 @@ class DocusignClient(ConnectorClientBase):
         execution)
 
         Identifier for the currently deployed build.
+
+        Swagger operation ID: `BuildNumber`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/build_number"
 
@@ -4676,6 +5431,43 @@ class DocusignClient(ConnectorClientBase):
         Add recipient to an envelope
 
         Add recipient to an envelope.
+
+        Swagger operation ID: `AddRecipientToEnvelopeV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            recipient_type: Enter or select a recipient type.
+            client_user_id: Client user ID for embedded signer.
+            recipient_id: Enter a recipient ID.
+            embedded_recipient_start_u_r_l: A sender-provided URL string for
+                redirecting an embedded recipient.
+            routing_order: The signing order of the recipient.
+            email_notification_language: Language for the email notification.
+            email_notification_subject: Subject of the email notification.
+            email_notification_body: Body of the email notification.
+            note: Custom note for the recipient.
+            role_name: Role name associated with the recipient.
+            country_code: For SMS notifications, the country code, without
+                leading + sign.
+            phone_number: Signer email or SMS phone required. Exclude country
+                code for phone number.
+            signing_group_id: Signing Group.
+            signature_type: DocuSign standards-based-signature (SBS) types.
+            workflow_id: IDV workflows with pen signature types must be
+                selected here.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4800,6 +5592,24 @@ class DocusignClient(ConnectorClientBase):
         Create envelope
 
         Create a new blank envelope.
+
+        Swagger operation ID: `CreateBlankEnvelopeV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            email_subject: Subject of the email.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4855,6 +5665,27 @@ class DocusignClient(ConnectorClientBase):
         Generate Embedded Signing URL
 
         Generate Embedded Signing URL
+
+        Swagger operation ID: `GenerateEmbeddedSigningURLV2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            is_in_person_signer: Yes/No.
+            authentication_method: Authentication Method.
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4918,6 +5749,25 @@ class DocusignClient(ConnectorClientBase):
         Get documents from an envelope
 
         Get documents from an envelope
+
+        Swagger operation ID: `GetDocumentsV2`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            envelope_id: Enter an envelope ID.
+            document_id: Enter \"string(document ID)\" to get a single
+                document, or select a format.
+            language: Select language.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -4974,6 +5824,21 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetOrganizations`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/Management/v2/organizations"
@@ -5035,6 +5900,21 @@ class DocusignClient(ConnectorClientBase):
         Get account custom fields
 
         Get the custom fields for a specified account.
+
+        Swagger operation ID: `GetAccountCustomFields`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5075,6 +5955,22 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetFolderList`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5137,6 +6033,23 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetFolderEnvelopeList`.
+
+        Args:
+            account_id: Enter or select an account ID.
+            folder_id: Folder id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5200,6 +6113,21 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `StaticResponseForRecipientTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/recipient_types"
         initial_request_url = request_url
@@ -5257,6 +6185,21 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `StaticResponseForSignatureTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/signature_types"
         initial_request_url = request_url
@@ -5315,6 +6258,22 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetSigningGroups`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5375,6 +6334,21 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `StaticResponseForTabTypes`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/tab_types"
         initial_request_url = request_url
@@ -5433,6 +6407,22 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetMaestroWorkflowDefinitions`.
+
+        Args:
+            account_id: accountId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5494,6 +6484,22 @@ class DocusignClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAllWorkflowIDs`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5555,6 +6561,22 @@ class DocusignClient(ConnectorClientBase):
         Get Maestro Workflow Definition
 
         Get Maestro Workflow Definition
+
+        Swagger operation ID: `GetMaestroWorkflowDefinition`.
+
+        Args:
+            account_id: accountId.
+            workflow_id: workflowId.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5599,6 +6621,22 @@ class DocusignClient(ConnectorClientBase):
         Get the signers of a template in dynamic schema format
 
         Get the signers of a template in dynamic schema format.
+
+        Swagger operation ID: `GetDynamicSigners`.
+
+        Args:
+            account_id: Account to get the signers for.
+            template_id: Template to get the signers for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5645,6 +6683,22 @@ class DocusignClient(ConnectorClientBase):
         Get the signers of a template in dynamic schema format
 
         Get the signers of a template in dynamic schema format.
+
+        Swagger operation ID: `GetDynamicRecipients`.
+
+        Args:
+            account_id: Account to get the signers for.
+            template_id: Template to get the signers for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5690,6 +6744,22 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForRecipientTypeSchema
 
         Get schema for a specific recipient type.
+
+        Swagger operation ID: `StaticResponseForRecipientTypeSchema`.
+
+        Args:
+            recipient_type: recipient type.
+            signature_type: signature type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/recipienttype_schema"
         query_params = []
@@ -5739,6 +6809,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForVerificationTypeSchema
 
         Get schema for a verification type.
+
+        Swagger operation ID: `StaticResponseForVerificationTypeSchema`.
+
+        Args:
+            verification_type: Verification Type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/verificationtype_schema"
         query_params = []
@@ -5783,6 +6868,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForEmbeddedSenderSchema
 
         Get schema for return URL.
+
+        Swagger operation ID: `StaticResponseForEmbeddedSenderSchema`.
+
+        Args:
+            return_url: Return URL.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/embeddedSender_schema"
         query_params = []
@@ -5828,6 +6928,22 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForEmbeddedSigningSchema
 
         Get schema for return URL.
+
+        Swagger operation ID: `StaticResponseForEmbeddedSigningSchemaV2`.
+
+        Args:
+            return_url: Return URL.
+            is_in_person_signer: Is this an in-person signer?
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/embeddedSigning_schema_v2"
@@ -5877,6 +6993,20 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForBuildNumberSchema
 
         Get schema for a build number.
+
+        Swagger operation ID: `StaticResponseForBuildNumberSchema`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/build_number_schema"
 
@@ -5914,6 +7044,21 @@ class DocusignClient(ConnectorClientBase):
         Get custom fields from an account
 
         Get custom fields from an account
+
+        Swagger operation ID: `GetCustomFields`.
+
+        Args:
+            account_id: Account id.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5949,6 +7094,21 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForAnchorTabSchema
 
         Get schema for a specific anchor tab.
+
+        Swagger operation ID: `StaticResponseForAnchorTabSchema`.
+
+        Args:
+            tab_type: tab type.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/anchortab_schema"
         query_params = []
@@ -5992,6 +7152,20 @@ class DocusignClient(ConnectorClientBase):
         StaticResponseForCompositeTemplates
 
         Get schema for a composite templates.
+
+        Swagger operation ID: `StaticResponseForCompositeTemplates`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/composite_templates_schema"

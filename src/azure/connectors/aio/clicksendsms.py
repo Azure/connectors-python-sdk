@@ -157,6 +157,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send SMS
 
         Each 160 characters = 1 SMS. Can send up to 1,224 standard characters.
+
+        Swagger operation ID: `sms_send`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/sms/send"
 
@@ -194,6 +210,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Create New Contact List
 
         Create New Contact List
+
+        Swagger operation ID: `create_list`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
 
@@ -232,6 +264,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Get Contact Lists
 
         Get all contact lists unless specified in the advance options
+
+        Swagger operation ID: `get_contact_lists`.
+
+        Args:
+            page: Page number.
+            limit: Number of records per page.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/lists"
         query_params = []
@@ -283,6 +331,22 @@ class ClicksendsmsClient(ConnectorClientBase):
 
         Each 300 characters = 1 voice message. Can send up to 1,200 standard
         characters
+
+        Swagger operation ID: `send_voice`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/voice/send"
 
@@ -320,6 +384,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Delete List
 
         Delete a specific contact list
+
+        Swagger operation ID: `delete_list`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -364,6 +444,24 @@ class ClicksendsmsClient(ConnectorClientBase):
         Create New Contact
 
         Create New Contact
+
+        Swagger operation ID: `create_list_contact`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -404,6 +502,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Get Contacts in a List
 
         Get all Contacts in a List
+
+        Swagger operation ID: `view_list_contacts`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -445,6 +559,23 @@ class ClicksendsmsClient(ConnectorClientBase):
         Delete a Contact
 
         Delete a Contact
+
+        Swagger operation ID: `delete_list_contact`.
+
+        Args:
+            list_id: You may use the Search Contact List action OR Get Contact
+                List action to get the List ID.
+            contact_id: Contact ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -491,6 +622,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send MMS
 
         Send MMS
+
+        Swagger operation ID: `send_mms`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mms/send"
 
@@ -528,6 +675,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Fax
 
         Send Fax
+
+        Swagger operation ID: `send_fax`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/fax/send"
 
@@ -566,6 +729,23 @@ class ClicksendsmsClient(ConnectorClientBase):
         Convert Media File Format
 
         Convert Media File Format
+
+        Swagger operation ID: `upload_media`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            convert: Select action the file is needed for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/uploads"
         query_params = []
@@ -610,6 +790,21 @@ class ClicksendsmsClient(ConnectorClientBase):
         Search Contact Lists
 
         Get list of searched contact list
+
+        Swagger operation ID: `search_contact_list`.
+
+        Args:
+            q: Search for.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/search/contacts-lists"
         query_params = []
@@ -654,6 +849,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Letter
 
         Send Letter
+
+        Swagger operation ID: `send_letter`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/post/letters/send"
 
@@ -691,6 +902,22 @@ class ClicksendsmsClient(ConnectorClientBase):
         Send Postcard
 
         Send one or more postcards
+
+        Swagger operation ID: `send_postcard`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/post/postcards/send"
 

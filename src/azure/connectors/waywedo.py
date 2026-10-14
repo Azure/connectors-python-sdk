@@ -665,6 +665,22 @@ class WaywedoClient(ConnectorClientBase):
         Add a comment to a checklist instance step
 
         Adds a new comment to an Activated Checklist Instance step.
+
+        Swagger operation ID: `Comment_Add`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/ChecklistInstanceComments"
@@ -704,6 +720,22 @@ class WaywedoClient(ConnectorClientBase):
         Create Checklist Instance
 
         Creates a new activated checklist instance.
+
+        Swagger operation ID: `ChecklistInstances_Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/ChecklistInstances"
 
@@ -741,6 +773,21 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Instance
 
         Retrieve a specific checklist instance by ID
+
+        Swagger operation ID: `ChecklistInstances_Get`.
+
+        Args:
+            instance_id: The ID of the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -784,6 +831,22 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ChecklistInstances_Activity`.
+
+        Args:
+            instance_id: Select the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -849,6 +912,23 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Find_Steps`.
+
+        Args:
+            instance_id: Select the checklist instance.
+            query: Search for a step title.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -916,6 +996,22 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Step
 
         Retrieve a specific checklist step by ID
+
+        Swagger operation ID: `ChecklistSteps_Get`.
+
+        Args:
+            instance_id: The ID of the checklist instance.
+            step_id: The ID of the checklist step.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -962,6 +1058,24 @@ class WaywedoClient(ConnectorClientBase):
         Complete a Checklist Step
 
         Mark a specific step in a checklist instance as complete.
+
+        Swagger operation ID: `ChecklistSteps_Complete`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            instance_id: Select the checklist instance.
+            step_id: Select the checklist step.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1007,6 +1121,22 @@ class WaywedoClient(ConnectorClientBase):
         Add Collaborators to a Checklist Instance
 
         Adds one or more collaborators to a checklist instance.
+
+        Swagger operation ID: `Collaborators_Add`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Collaborators"
 
@@ -1047,6 +1177,22 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Find_Checklist`.
+
+        Args:
+            query: The title of the checklist.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Procedures"
         query_params = []
@@ -1111,6 +1257,21 @@ class WaywedoClient(ConnectorClientBase):
         Get A Checklist Or Procedure
 
         Retrieve a specific checklist or procedure by ID
+
+        Swagger operation ID: `Procedures_Get`.
+
+        Args:
+            procedure_id: The ID of the checklist or procedure.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1155,6 +1316,23 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Find_Checklist_Instances`.
+
+        Args:
+            procedure_id: Select a checklist.
+            query: The title of the checklist instance.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1227,6 +1405,22 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `Find_User`.
+
+        Args:
+            query: The name or email address of the user.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Users"
         query_params = []
@@ -1290,6 +1484,22 @@ class WaywedoClient(ConnectorClientBase):
         Add a New User
 
         Creates and invites a new user.
+
+        Swagger operation ID: `Users_Post`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/Users"
 
@@ -1332,6 +1542,24 @@ class WaywedoClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `GetAll_ChecklistInstances`.
+
+        Args:
+            limit: Maximum number of results to fetch.
+            offset: The number of records skipped.
+            status: The status of instances returned.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/ChecklistInstances"
         query_params = []

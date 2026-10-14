@@ -5188,6 +5188,22 @@ class PdfcoClient(ConnectorClientBase):
         Convert HTML code snippet into full featured PDF. Please see api
         documentation at https://developer.pdf.co/api/pdf-to-html/index.html
         for comprehensive guidelines.
+
+        Swagger operation ID: `HtmlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/convert/from/html"
@@ -5229,6 +5245,22 @@ class PdfcoClient(ConnectorClientBase):
         Create PDF from URL. Please see api documentation at
         https://developer.pdf.co/api/pdf-from-url/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `UrlToPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/url"
 
@@ -5269,6 +5301,22 @@ class PdfcoClient(ConnectorClientBase):
         new pdf from templates. Please see api documentation at
         https://developer.pdf.co/api/pdf-add/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `PdfFiller`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/add"
 
@@ -5308,6 +5356,22 @@ class PdfcoClient(ConnectorClientBase):
         Merge PDF from two or more PDF files into a new one. Please see api
         documentation at https://developer.pdf.co/api/pdf-merge/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `MergePdfSimplified`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge"
 
@@ -5349,6 +5413,22 @@ class PdfcoClient(ConnectorClientBase):
         xlsx, rtf, txt, png, jpg. Please see api documentation at
         https://developer.pdf.co/api/pdf-merge/index.html#post-tag-pdf-merge2
         for comprehensive guidelines.
+
+        Swagger operation ID: `MergePdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/merge2"
 
@@ -5389,6 +5469,22 @@ class PdfcoClient(ConnectorClientBase):
         numbers and page ranges. Please see api documentation at
         https://developer.pdf.co/api/pdf-split/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `SplitPdf`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/split"
 
@@ -5429,6 +5525,22 @@ class PdfcoClient(ConnectorClientBase):
         expressions) or barcode. Please see api documentation at
         https://developer.pdf.co/api/pdf-split/index.html#post-tag-pdf-split2
         for comprehensive guidelines.
+
+        Swagger operation ID: `SplitPdf2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/split2"
 
@@ -5469,6 +5581,22 @@ class PdfcoClient(ConnectorClientBase):
         Please see api documentation at
         https://developer.pdf.co/api/pdf-find/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `PDFSearchText`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/find"
 
@@ -5511,6 +5639,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/document-parser/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `DocumentParser`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/documentparser"
 
@@ -5551,6 +5695,22 @@ class PdfcoClient(ConnectorClientBase):
         API. Please see api documentation at
         https://developer.pdf.co/api/background-job-check/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `JobCheck`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/job/check"
 
@@ -5592,6 +5752,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/barcode-generator/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `BarcodeGenerator`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/barcode/generate"
 
@@ -5633,6 +5809,22 @@ class PdfcoClient(ConnectorClientBase):
         other barcodes. Please see api documentation at
         https://developer.pdf.co/api/barcode-reader/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `BarcodeReader`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/barcode/read/from/url"
@@ -5675,6 +5867,22 @@ class PdfcoClient(ConnectorClientBase):
         security permissions. Please see api documentation at
         https://developer.pdf.co/api/pdf-info-reader/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFInfoReader`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/info"
 
@@ -5715,6 +5923,22 @@ class PdfcoClient(ConnectorClientBase):
         api documentation at
         https://developer.pdf.co/api/pdf-forms-info-reader/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFFormsInfoReader`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/info/fields"
 
@@ -5756,6 +5980,22 @@ class PdfcoClient(ConnectorClientBase):
         about columns detected in these tables. Please see api documentation at
         https://developer.pdf.co/api/pdf-find/index.html#post-tag-pdf-find-table
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFFindTable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/find/table"
 
@@ -5796,6 +6036,22 @@ class PdfcoClient(ConnectorClientBase):
         new text. Please see api documentation at
         https://developer.pdf.co/api/pdf-search-and-replace-text/index.html#post-tag-pdf-edit-replace-text
         for comprehensive guidelines.
+
+        Swagger operation ID: `SearchAndReplace`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/edit/replace-text"
@@ -5838,6 +6094,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/pdf-search-and-replace-text/index.html#post-tag-pdf-edit-replace-text-with-image
         for comprehensive guidelines.
+
+        Swagger operation ID: `SearchAndReplaceWithImage`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -5881,6 +6153,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/pdf-search-and-delete-text/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `SearchAndDeleteText`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/delete-text"
 
@@ -5921,6 +6209,22 @@ class PdfcoClient(ConnectorClientBase):
         see api documentation at
         https://developer.pdf.co/api/pdf-make-text-searchable-or-unsearchable/index.html#post-tag-pdf-makesearchable
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFSearchable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/makesearchable"
 
@@ -5961,6 +6265,22 @@ class PdfcoClient(ConnectorClientBase):
         then scanned your PDF. Please see api documentation at
         https://developer.pdf.co/api/pdf-make-text-searchable-or-unsearchable/index.html#post-tag-pdf-makeunsearchable
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFUnSearchable`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/makeunsearchable"
 
@@ -6001,6 +6321,22 @@ class PdfcoClient(ConnectorClientBase):
         columns, rows, and tables. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-csv/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `PDFToCSV`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/csv"
 
@@ -6041,6 +6377,22 @@ class PdfcoClient(ConnectorClientBase):
         fonts, images, vectors, and formatting preserved. Please see api
         documentation at https://developer.pdf.co/api/pdf-to-json/index.html
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToJSON`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/json2"
 
@@ -6082,6 +6434,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/pdf-to-json/index.html#post-tag-pdf-convert-to-json-meta
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToJSONMeta`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/convert/to/json-meta"
@@ -6124,6 +6492,22 @@ class PdfcoClient(ConnectorClientBase):
         see api documentation at
         https://developer.pdf.co/api/pdf-to-text/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `PDFToText`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/text"
 
@@ -6164,6 +6548,22 @@ class PdfcoClient(ConnectorClientBase):
         Please see api documentation at
         https://developer.pdf.co/api/pdf-to-text/index.html#post-tag-pdf-convert-to-text-simple
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToTextSimple`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/convert/to/text-simple"
@@ -6206,6 +6606,22 @@ class PdfcoClient(ConnectorClientBase):
         preserved. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-excel/index.html#post-tag-pdf-convert-to-xls
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToXLS`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xls"
 
@@ -6246,6 +6662,22 @@ class PdfcoClient(ConnectorClientBase):
         preserved. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-excel/index.html#post-tag-pdf-convert-to-xlsx
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToXLSX`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xlsx"
 
@@ -6286,6 +6718,22 @@ class PdfcoClient(ConnectorClientBase):
         images, objects positions. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-xml/index.html for comprehensive
         guidelines.
+
+        Swagger operation ID: `PDFToXML`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/xml"
 
@@ -6326,6 +6774,22 @@ class PdfcoClient(ConnectorClientBase):
         thumbnail generation and previews. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-image/index.html#post-tag-pdf-convert-to-jpg
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToJPG`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/jpg"
 
@@ -6366,6 +6830,22 @@ class PdfcoClient(ConnectorClientBase):
         thumbnail generation and previews. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-image/index.html#post-tag-pdf-convert-to-png
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToPNG`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/png"
 
@@ -6406,6 +6886,22 @@ class PdfcoClient(ConnectorClientBase):
         thumbnail generation and previews. Please see api documentation at
         https://developer.pdf.co/api/pdf-to-image/index.html#post-tag-pdf-convert-to-webp
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToWEBP`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/webp"
 
@@ -6447,6 +6943,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/pdf-to-image/index.html#post-tag-pdf-convert-to-tiff
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFToTIFF`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/to/tiff"
 
@@ -6487,6 +6999,22 @@ class PdfcoClient(ConnectorClientBase):
         see api documentation at
         https://developer.pdf.co/api/pdf-from-document/index.html#post-tag-pdf-convert-from-csv
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFFromCSV`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/csv"
 
@@ -6527,6 +7055,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/pdf-from-document/index.html#post-tag-pdf-convert-from-doc
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFFromDoc`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/convert/from/doc"
 
@@ -6567,6 +7111,22 @@ class PdfcoClient(ConnectorClientBase):
         api documentation at
         https://developer.pdf.co/api/pdf-from-image/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFFromImages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/convert/from/image"
@@ -6610,6 +7170,22 @@ class PdfcoClient(ConnectorClientBase):
         Please see api documentation at
         https://developer.pdf.co/api/pdf-from-email/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFFromEmail`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/convert/from/email"
@@ -6652,6 +7228,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/password-and-security/index.html#post-tag-pdf-security-add
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFAddSecurity`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/add"
 
@@ -6692,6 +7284,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/password-and-security/index.html#post-tag-pdf-security-remove
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFSecurityRemove`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/security/remove"
 
@@ -6731,6 +7339,22 @@ class PdfcoClient(ConnectorClientBase):
         Create PDF from XLS, XLSX spreadsheet. Please see api documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-pdf
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFFromXLSXLSX`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/pdf"
 
@@ -6771,6 +7395,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-csv
         for comprehensive guidelines.
+
+        Swagger operation ID: `XLStoCSV`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/csv"
 
@@ -6810,6 +7450,22 @@ class PdfcoClient(ConnectorClientBase):
         Convert XLS/XLSX into JSON file. Please see api documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-json
         for comprehensive guidelines.
+
+        Swagger operation ID: `XLStoJSON`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/json"
 
@@ -6849,6 +7505,22 @@ class PdfcoClient(ConnectorClientBase):
         Convert XLS/XLSX into HTML file. Please see api documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-html
         for comprehensive guidelines.
+
+        Swagger operation ID: `XLStoHTML`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/html"
 
@@ -6888,6 +7560,22 @@ class PdfcoClient(ConnectorClientBase):
         Convert XLS/XLSX or CSV into Text file. Please see api documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-txt
         for comprehensive guidelines.
+
+        Swagger operation ID: `XLStoTXT`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/txt"
 
@@ -6927,6 +7615,22 @@ class PdfcoClient(ConnectorClientBase):
         Convert XLS/XLSX or CSV into XML file. Please see api documentation at
         https://developer.pdf.co/api/convert-excel/index.html#post-tag-xls-convert-to-xml
         for comprehensive guidelines.
+
+        Swagger operation ID: `XLStoXML`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/xls/convert/to/xml"
 
@@ -6966,6 +7670,22 @@ class PdfcoClient(ConnectorClientBase):
         Rotate PDF Pages. Please see api documentation at
         https://developer.pdf.co/api/pdf-rotate-pages/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFRotatePages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate"
 
@@ -7006,6 +7726,22 @@ class PdfcoClient(ConnectorClientBase):
         based on text analysis. Please see api documentation at
         https://developer.pdf.co/api/pdf-rotate-pages/index.html#post-tag-pdf-edit-rotate-auto
         for comprehensive guidelines.
+
+        Swagger operation ID: `PDFAutoRotatePages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/edit/rotate/auto"
 
@@ -7045,6 +7781,22 @@ class PdfcoClient(ConnectorClientBase):
         Delete pages in PDF. Please see api documentation at
         https://developer.pdf.co/api/pdf-delete-pages/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFDeletePages`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/edit/delete-pages"
@@ -7086,6 +7838,22 @@ class PdfcoClient(ConnectorClientBase):
         Optimize PDF document to reduce its size. Please see api documentation
         at https://developer.pdf.co/api/pdf-optimize/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFCompress`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/optimize"
 
@@ -7128,6 +7896,22 @@ class PdfcoClient(ConnectorClientBase):
         api documentation at
         https://developer.pdf.co/api/document-classifier/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFClassifier`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/pdf/classifier"
 
@@ -7167,6 +7951,22 @@ class PdfcoClient(ConnectorClientBase):
         Send Email with Attachments. Please see api documentation at
         https://developer.pdf.co/api/email-send-and-decode/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `EmailSend`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/email/send"
 
@@ -7207,6 +8007,22 @@ class PdfcoClient(ConnectorClientBase):
         Please see api documentation at
         https://developer.pdf.co/api/email-send-and-decode/index.html#post-tag-email-decode
         for comprehensive guidelines.
+
+        Swagger operation ID: `EmailDecode`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v1/email/decode"
 
@@ -7247,6 +8063,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/email-send-and-decode/index.html#post-tag-email-extract-attachments
         for comprehensive guidelines.
+
+        Swagger operation ID: `EmailAttachmentExtraction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/email/extract-attachments"
@@ -7289,6 +8121,22 @@ class PdfcoClient(ConnectorClientBase):
         documentation at
         https://developer.pdf.co/api/extract-attachments/index.html for
         comprehensive guidelines.
+
+        Swagger operation ID: `PDFAttachmentExtraction`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}/v1/pdf/attachments/extract"

@@ -260,6 +260,21 @@ class GoogletasksClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTaskLists`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/@me/lists"
         initial_request_url = request_url
@@ -315,6 +330,22 @@ class GoogletasksClient(ConnectorClientBase):
         Create a task list
 
         Creates a new task list.
+
+        Swagger operation ID: `CreateTaskList`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/users/@me/lists"
 
@@ -355,6 +386,22 @@ class GoogletasksClient(ConnectorClientBase):
 
         Returns an Azure Core pager that follows the connector continuation
         URL.
+
+        Swagger operation ID: `ListTasks`.
+
+        Args:
+            task_list_id: The id of the task list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -414,6 +461,23 @@ class GoogletasksClient(ConnectorClientBase):
         Create a task in a task list
 
         Create a task in a specific task list.
+
+        Swagger operation ID: `CreateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            task_list_id: The id of the task list.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -455,6 +519,22 @@ class GoogletasksClient(ConnectorClientBase):
         Get a task from a task list
 
         Get specific task from the specified task list.
+
+        Swagger operation ID: `ListTask`.
+
+        Args:
+            task_list_id: The id of the task list.
+            task_id: The id of the task.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"

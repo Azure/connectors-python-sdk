@@ -230,6 +230,24 @@ class GithubClient(ConnectorClientBase):
         Create an issue
 
         This operation is used to create a new issue for a specific repository.
+
+        Swagger operation ID: `CreateIssue`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -288,6 +306,34 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetIssues`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            milestone: Filter by milestone.
+            state: Filter by state.
+            assignee: Filter by assignee.
+            creator: Filter by creator.
+            mentioned: Filter by mentions.
+            labels: Filter by label names.
+            sort: Field to sort results by.
+            direction: Direction of sort.
+            since: Filter by issues after given date.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -409,6 +455,22 @@ class GithubClient(ConnectorClientBase):
 
         Gets your public key, which you need to encrypt secrets. You need to
         encrypt a secret before you can create or update secrets.
+
+        Swagger operation ID: `GetRepositoryPublicKey`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -458,6 +520,25 @@ class GithubClient(ConnectorClientBase):
 
         Creates or updates a repository secret with an encrypted value. Encrypt
         your secret using LibSodium.
+
+        Swagger operation ID: `CreateUpdateRepositorySecret`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -502,6 +583,24 @@ class GithubClient(ConnectorClientBase):
         Creates a new repository using a repository template. The authenticated
         user must own or be a member of an organization that owns the
         repository.
+
+        Swagger operation ID: `CreateRepositoryUsingTemplate`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            template_owner: Name of the template repository owner.
+            template_repository: Name of the template repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -545,6 +644,21 @@ class GithubClient(ConnectorClientBase):
         Get a repository by Id
 
         Gets a repository by Id.
+
+        Swagger operation ID: `GetRepositoryById`.
+
+        Args:
+            repository_id: Unique Identifier of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -589,6 +703,24 @@ class GithubClient(ConnectorClientBase):
         Creates a reference for your repository. You are unable to create new
         references for empty repositories, even if the commit SHA-1 hash used
         exists. Empty repositories are repositories without branches.
+
+        Swagger operation ID: `CreateReference`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -638,6 +770,24 @@ class GithubClient(ConnectorClientBase):
         parameter must be formatted as `heads/<branch name>` for branches and
         `tags/<tag name>` for tags. If the `reference` doesn't match an
         existing ref, a `404` is returned.
+
+        Swagger operation ID: `GetReference`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            reference: The ref in the URL must be formatted as heads/<branch
+                name> for branches and tags/<tag name> for tags.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -686,6 +836,25 @@ class GithubClient(ConnectorClientBase):
         Merge a pull request
 
         This operation is used to merge a pull request for the repository.
+
+        Swagger operation ID: `MergePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -733,6 +902,23 @@ class GithubClient(ConnectorClientBase):
         Get a pull request
 
         This operation is used to get a pull request for the repository.
+
+        Swagger operation ID: `GetPullRequest`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -784,6 +970,25 @@ class GithubClient(ConnectorClientBase):
         access to the head or the source branch. For organization-owned
         repositories, you must be a member of the organization that owns the
         repository to open or update a pull request.
+
+        Swagger operation ID: `UpdatePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -834,6 +1039,24 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetPullRequestFiles`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -901,6 +1124,25 @@ class GithubClient(ConnectorClientBase):
 
         Requests reviews for a pull request from a given set of users and/or
         teams.
+
+        Swagger operation ID: `RequestReviewersPullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -945,6 +1187,25 @@ class GithubClient(ConnectorClientBase):
 
         Remove requested reviewers from a pull request from a given set of
         users and/or teams.
+
+        Swagger operation ID: `RemoveReviewersPullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            pull_number: Pull Number.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -994,6 +1255,24 @@ class GithubClient(ConnectorClientBase):
         access to the head or the source branch. For organization-owned
         repositories, you must be a member of the organization that owns the
         repository to create a pull request.
+
+        Swagger operation ID: `CreatePullRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1048,6 +1327,30 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetPullRequests`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            state: Filter by state.
+            head: Filter by head user or organization.
+            base: Filter by base branch name.
+            sort: What to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1153,6 +1456,24 @@ class GithubClient(ConnectorClientBase):
         GitHub to trigger a GitHub Actions workflow or GitHub App webhook. You
         must configure your GitHub Actions workflow or GitHub App to run when
         the `repository_dispatch` event occurs.
+
+        Swagger operation ID: `CreateRepositoryDispatchEvent`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1198,6 +1519,24 @@ class GithubClient(ConnectorClientBase):
         `repositoryName`, use the format `<USERNAME>:branch`. The response is
         equivalent to running the `git log base..head` command; however,
         commits are returned in chronological order.
+
+        Swagger operation ID: `CompareRepositoryCommits`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            base: base parameter.
+            head: head parameter.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1250,6 +1589,23 @@ class GithubClient(ConnectorClientBase):
         You must authenticate using an access token with the `admin:org` scope
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
+
+        Swagger operation ID: `AddSelectedRepoToOrgSecret`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_id: Unique Identifier of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1299,6 +1655,23 @@ class GithubClient(ConnectorClientBase):
         You must authenticate using an access token with the `admin:org` scope
         to use this endpoint. GitHub Apps must have the `secrets` organization
         permission to use this endpoint.
+
+        Swagger operation ID: `RemoveSelectedRepoFromOrgSecret`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_id: Unique Identifier of the repository.
+            secret_name: Name of the secret.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1345,6 +1718,23 @@ class GithubClient(ConnectorClientBase):
         Deletes a GitHub Webhook
 
         Deletes a GitHub Webhook
+
+        Swagger operation ID: `DeleteWebhookTrigger`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            webhook_id: ID of the GitHub Webhook.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1389,6 +1779,23 @@ class GithubClient(ConnectorClientBase):
         Get a particular issue of a repository
 
         Get a particular issue of a repository.
+
+        Swagger operation ID: `GetIssueNum`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1436,6 +1843,25 @@ class GithubClient(ConnectorClientBase):
         Update an Issue
 
         Update an existing issue given the issue number.
+
+        Swagger operation ID: `UpdateIssueNum`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1483,6 +1909,25 @@ class GithubClient(ConnectorClientBase):
         Update a milestone
 
         Update an existing milestone.
+
+        Swagger operation ID: `UpdateMilestone`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            milestone_number: Milestone number for a given milestone.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1526,6 +1971,20 @@ class GithubClient(ConnectorClientBase):
         Get the authenticated user
 
         Get the authenticated user.
+
+        Swagger operation ID: `GetUser`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user"
 
@@ -1563,6 +2022,22 @@ class GithubClient(ConnectorClientBase):
         Search Github using Query
 
         Search Github using Query
+
+        Swagger operation ID: `SearchGithubWithQuery`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/graphql"
 
@@ -1601,6 +2076,25 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAssignees`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1681,6 +2175,25 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListCollaborators`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1757,6 +2270,23 @@ class GithubClient(ConnectorClientBase):
         Check if a user is a repository collaborator
 
         Check if a user is a repository collaborator.
+
+        Swagger operation ID: `checkCollaborator`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            user_name: The handle for the GitHub user account.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1810,6 +2340,28 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetMilestones`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            state: State of the milestone.
+            sort: What to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1905,6 +2457,25 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetLabels`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1986,6 +2557,26 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetIssueLabels`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            repository_name: Name of the repository.
+            issue_number: Issue Number for a given issue.
+            per_page: Number of results per page.
+            page: Page number to display.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2070,6 +2661,27 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetRepos`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2164,6 +2776,27 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetOrgRepos`.
+
+        Args:
+            repository_owner: Name of the repository owner.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2262,6 +2895,31 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetUserRepos`.
+
+        Args:
+            visibility: Limit results to repositories of the specified
+                visibility(public/private/all).
+            affiliation: Limit results based on affiliation.
+            since: Limit results to repositories updated after a given time.
+            before: Limit results to repositories updated before a given time.
+            type_: Limit results to repositories of the specified type.
+            sort: The property to sort the results by.
+            direction: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/user/repos"
         query_params = []
@@ -2372,6 +3030,26 @@ class GithubClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `SearchIssues`.
+
+        Args:
+            q: Search keywords and qualifiers.
+            sort: The property to sort the results by.
+            order: Direction of sort.
+            per_page: Number of results per page.
+            page: Page number to fetch.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/search/issues"
         query_params = []
@@ -2454,6 +3132,22 @@ class GithubClient(ConnectorClientBase):
         Github MCP Server
 
         Github MCP Server
+
+        Swagger operation ID: `InvokeMCPServer`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/mcp"
 

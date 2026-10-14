@@ -187,6 +187,26 @@ class AzureblobClient(ConnectorClientBase):
         action. If source and destination are present in same storage account,
         please use relative path. Otherwise, maximum size of a source for copy
         blob operation is 50 MB.
+
+        Swagger operation ID: `CopyFile_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            source: Specify the url to source blob.
+            destination: Specify the destination blob path, including the
+                target blob name.
+            overwrite: Should the destination blob be overwritten
+                (true/false)?.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -250,6 +270,24 @@ class AzureblobClient(ConnectorClientBase):
         Create block blob
 
         This operation uploads a block blob to Azure Blob Storage.
+
+        Swagger operation ID: `CreateBlockBlob_V2`.
+
+        Args:
+            input: The binary request body.
+            storage_account_name: The storage account name.
+            folder_path: Specify folder path to upload.
+            name: Specify name of the blob to create.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -306,6 +344,24 @@ class AzureblobClient(ConnectorClientBase):
         Create blob
 
         This operation uploads a blob to Azure Blob Storage.
+
+        Swagger operation ID: `CreateFile_V2`.
+
+        Args:
+            input: The binary request body.
+            dataset: Azure Storage account name or blob endpoint.
+            folder_path: Specify folder path to upload.
+            name: Specify name of the blob to create.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -366,6 +422,24 @@ class AzureblobClient(ConnectorClientBase):
         Create SAS URI by path
 
         This operation creates a SAS link for a blob using the path.
+
+        Swagger operation ID: `CreateShareLinkByPath_V2`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -417,6 +491,22 @@ class AzureblobClient(ConnectorClientBase):
         Delete blob
 
         This operation deletes a blob.
+
+        Swagger operation ID: `DeleteFile_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob to delete.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -465,6 +555,26 @@ class AzureblobClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ExtractFolder_V3`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            source: Specify the path to the archive blob.
+            destination: Specify the path in Azure Blob Storage to extract the
+                archive contents.
+            overwrite: Should destination blob be overwritten (true/false)?.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -547,6 +657,23 @@ class AzureblobClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetAccessPolicies_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -619,6 +746,26 @@ class AzureblobClient(ConnectorClientBase):
         Get blob content
 
         This operation retrieves blob contents using id.
+
+        Swagger operation ID: `GetFileContent_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob.
+            infer_content_type: Infer content-type based on extension.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -683,6 +830,26 @@ class AzureblobClient(ConnectorClientBase):
         Get blob content using path
 
         This operation retrieves blob contents using path.
+
+        Swagger operation ID: `GetFileContentByPath_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            path: Specify unique path to the blob.
+            infer_content_type: Infer content-type based on extension.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            bytes: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -749,6 +916,25 @@ class AzureblobClient(ConnectorClientBase):
         Get Blob Metadata
 
         This operation retrieves blob metadata using blob id.
+
+        Swagger operation ID: `GetFileMetadata_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -809,6 +995,25 @@ class AzureblobClient(ConnectorClientBase):
         Get Blob Metadata using path
 
         This operation retrieves blob metadata using path.
+
+        Swagger operation ID: `GetFileMetadataByPath_V2`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            path: Specify unique path to the blob.
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -877,6 +1082,27 @@ class AzureblobClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListFolder_V4`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the folder.
+            use_flat_listing: Whether or not to list blobs in flat listing\".
+            extract_sensitivity_label: Specify whether to extract MIP labels.
+            purview_account_name: Default collection will be queried unless
+                specified.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -966,6 +1192,22 @@ class AzureblobClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `ListRootFolder_V4`.
+
+        Args:
+            dataset: Azure Storage account name or blob endpoint.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1040,6 +1282,23 @@ class AzureblobClient(ConnectorClientBase):
 
         This operation sets a tier for a block blob on a standard storage
         account using the path.
+
+        Swagger operation ID: `SetBlobTierByPath_V2`.
+
+        Args:
+            storage_account_name: Azure Storage account name or blob endpoint.
+            path: The unique path of the blob.
+            new_tier: The new tier for the blob.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1091,6 +1350,23 @@ class AzureblobClient(ConnectorClientBase):
         Update blob
 
         This operation updates a blob in Azure Blob Storage.
+
+        Swagger operation ID: `UpdateFile_V2`.
+
+        Args:
+            input: The binary request body.
+            dataset: Azure Storage account name or blob endpoint.
+            id: Specify the blob to update.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1140,6 +1416,21 @@ class AzureblobClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetDataSets`.
+
+        Args:
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/codeless/GetDataSets"
         initial_request_url = request_url

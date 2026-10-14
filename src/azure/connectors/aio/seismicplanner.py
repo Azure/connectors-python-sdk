@@ -233,6 +233,27 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetComments`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            creator_ids: List of user IDs to query by creator.
+            cursor: Cursor used for pagination.
+            limit: Number to limit records.
+            sort: Sort by query.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -344,6 +365,24 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Create a comment on a given project, task, or request. Requires node
         (project, task, or request) ID.
+
+        Swagger operation ID: `CreateComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            node_id: Node ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -393,6 +432,23 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Get a single comment. Requires node (project, task, or request) and
         comment ID.
+
+        Swagger operation ID: `GetComment`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -443,6 +499,23 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Delete a comment. Requires node (project, task, or request) and comment
         ID.
+
+        Swagger operation ID: `DeleteComment`.
+
+        Args:
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -492,6 +565,25 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Update an existing comment. Requires node (project, task, or request)
         and comment ID.
+
+        Swagger operation ID: `UpdateComment`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            node_id: Node ID.
+            comment_id: Comment ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -557,6 +649,38 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetProjects`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: Filter from a planned end date.
+            planned_end_date_to: Filter to a planned end date.
+            planned_start_date_from: Filter from a planned start date.
+            planned_start_date_to: Filter to a planned start date.
+            ids: List of project IDs to query by.
+            title: Project title to query by.
+            manager_ids: List of user IDs to query by manager.
+            creator_ids: List of user IDs to query by creator.
+            associated_node_ids: List of association IDs to query by.
+            cursor: Cursor used for pagination.
+            limit: Number to limit records returned.
+            sort: Sort query.
+            custom_properties: List of custom properties to query by.
+            follower_ids: List of user IDs to query by follower.
+            include_associations: Indicator to allow for inclusion of
+                association data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -756,6 +880,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete projects
 
         Delete one or more projects.
+
+        Swagger operation ID: `DeleteProjects`.
+
+        Args:
+            space_id: Space ID.
+            ids: List of project IDs.
+            delete_tasks: Also delete associated tasks.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -823,6 +964,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Create project
 
         Create a project.
+
+        Swagger operation ID: `CreateProject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -866,6 +1024,25 @@ class SeismicplannerClient(ConnectorClientBase):
         Get project
 
         Get a single project by ID. Return tasks if desired.
+
+        Swagger operation ID: `GetProject`.
+
+        Args:
+            space_id: Space ID.
+            project_id: Project ID.
+            associated_nodes_depth: Number to indicate depth of associated node
+                data returned.
+            include_works: Indicator to include associated tasks data.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -926,6 +1103,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete project
 
         Delete a project.
+
+        Swagger operation ID: `DeleteProject`.
+
+        Args:
+            space_id: Space ID.
+            project_id: Project ID.
+            delete_tasks: Also delete associated tasks.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -984,6 +1178,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update a project
 
         Update and return a project.
+
+        Swagger operation ID: `UpdateProject`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            project_id: Project ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1059,6 +1271,51 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetRequests`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: filter by request due date (inclusive).
+            planned_end_date_to: filter by request due date (exclusive).
+            planned_start_date_from: filter by request start date (inclusive).
+            planned_start_date_to: filter by request start date (exclusive).
+            created_at_from: filter by request created date (inclusive).
+            created_at_to: filter by request created date (exclusive).
+            updated_at_from: filter by request updated date (inclusive).
+            updated_at_to: filter by request updated date (exclusive).
+            ids: A list of request IDs.
+            title: Keyword values to search for on request titles.
+            assignee_ids: A list of assignees' user IDs to filter by.
+            priorities: A list of priority values, Available values : critical,
+                high, medium, low.
+            keywords: Keyword values to search.
+            assigner_ids: A list of assigner' user Ids to filter by.
+            creator_ids: A list of creators' user IDs to filter by.
+            step_ids: A list of step IDs to filter by.
+            status_schema_id: Status schema ID to filter by.
+            cursor: A token used to guide the next page window.
+            limit: Number of items to return per page, default: 50.
+            sort: Sort by requests.
+            project_id: The project ID a request is associated to.
+            has_project: Filter by if requests are associated with a project.
+            custom_properties: Filter by custom properties.
+            follower_ids: A list of followers' user id.
+            associated_node_ids: A list of Associated node IDs to filter by.
+            content_refs: List of content reference objects.
+            include_request_form_custom_properties: whether to include request
+                form custom properties, default false.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1357,6 +1614,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete requests
 
         Bulk delete requests.
+
+        Swagger operation ID: `DeleteRequests`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1401,6 +1675,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Create request
 
         Create a request.
+
+        Swagger operation ID: `CreateRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1442,6 +1733,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get request
 
         Get a single request.
+
+        Swagger operation ID: `GetRequest`.
+
+        Args:
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1488,6 +1795,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete request
 
         Delete a request.
+
+        Swagger operation ID: `DeleteRequest`.
+
+        Args:
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            None: The operation completes without a response body.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1533,6 +1856,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update request
 
         Update a request.
+
+        Swagger operation ID: `UpdateRequest`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            request_id: Request ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1589,6 +1930,28 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetStatusSchemas`.
+
+        Args:
+            space_id: Space ID.
+            is_default: Get default status schema.
+            type_: Query by node type.
+            ids: List of status schemas IDs.
+            creator_ids: List of user IDs to query by creator.
+            cursor: Cursor used for pagination.
+            limit: Number to limit returned records.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1704,6 +2067,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get a single status schema by ID. These schemas hold the data for set
         statuses for specific work. Example: `(Not started, In progress,
         Complete)`
+
+        Swagger operation ID: `GetStatusSchema`.
+
+        Args:
+            space_id: Space ID.
+            status_schema_id: Status schema ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -1781,6 +2160,52 @@ class SeismicplannerClient(ConnectorClientBase):
 
         Returns an Azure Core async pager that follows the connector
         continuation URL.
+
+        Swagger operation ID: `GetTasks`.
+
+        Args:
+            space_id: Space ID.
+            planned_end_date_from: Filter by task due date (inclusive).
+            planned_end_date_to: Filter by task due date (exclusive).
+            planned_start_date_from: Filter by task start date (inclusive).
+            planned_start_date_to: Filter by task start date (exclusive).
+            created_at_from: Filter by task created date (inclusive).
+            created_at_to: Filter by task created date (exclusive).
+            updated_at_from: Filter by task updated date (inclusive).
+            updated_at_to: Filter by task updated date (exclusive).
+            ids: Filter by a list of task IDs.
+            title: Filter by task title.
+            description: Filter by task description.
+            assignee_ids: List of user IDs to filter by assignee.
+            priorities: Filter by list of priorities.
+            keywords: Filter by keywords.
+            assigner_ids: List of user IDs to filter by user that assigned the
+                task.
+            step_ids: Filter by status value IDs.
+            status_schema_id: Filter by status schema IDs.
+            cursor: Cursor used for pagination.
+            limit: Number to limit returned records.
+            sort: Sort by query.
+            recursive: Include subtasks within the returned list.
+            project_id: Filter by project ID.
+            has_project: Filter by tasks that are associated with a project.
+            custom_properties: Filter by custom property values.
+            follower_ids: List of user IDs to filter by followers.
+            associated_node_ids: List of association IDs to filter by.
+            creator_ids: List of user IDs to filter by creator.
+            include_associations: Include association data in the response.
+            parent_id: List of task IDs to filter by.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
+                results.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2079,6 +2504,23 @@ class SeismicplannerClient(ConnectorClientBase):
         Create task
 
         Create a task.
+
+        Swagger operation ID: `CreateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2120,6 +2562,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Get task
 
         Get a single task by ID.
+
+        Swagger operation ID: `GetTask`.
+
+        Args:
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2166,6 +2624,22 @@ class SeismicplannerClient(ConnectorClientBase):
         Delete task
 
         Delete a task.
+
+        Swagger operation ID: `DeleteTask`.
+
+        Args:
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
@@ -2216,6 +2690,24 @@ class SeismicplannerClient(ConnectorClientBase):
         Update task
 
         Update an existing task.
+
+        Swagger operation ID: `UpdateTask`.
+
+        Args:
+            input: The request body. Mapping keys use serialized Swagger wire
+                names.
+            space_id: Space ID.
+            task_id: Task ID.
+            timeout: The request timeout in seconds.
+            headers: Additional HTTP request headers.
+            client_request_id: A caller-provided request identifier.
+            response_hook: A callback invoked with the connector response.
+
+        Returns:
+            dict[str, Any] | None: The connector operation result.
+
+        Raises:
+            ConnectorException: If the connector request fails.
         """
         request_url = (
             f"{self._connection_runtime_url}"
