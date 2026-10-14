@@ -1215,7 +1215,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1323,7 +1325,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1430,7 +1434,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1614,7 +1620,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_extract_folder(
+    async def extract_folder(
         self,
         source: str,
         destination: str,
@@ -1624,15 +1630,12 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Extract archive to folder
 
         This operation extracts an archive file into a folder (example: .zip).
         Maximum archive size is 50 MB and 100 files inside.
-
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
 
         Swagger operation ID: `ExtractFolderV2`.
 
@@ -1646,8 +1649,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1671,45 +1673,27 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = None
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def list_folder(
         self,
@@ -1762,7 +1746,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,

@@ -49,7 +49,7 @@ async def _invoke_operation(client: BoxClient, operation: str):
         return await resolve_generated_result(client.list_root_folder())
     if operation == "extract_folder":
         return await resolve_generated_result(
-            client.list_extract_folder(
+            client.extract_folder(
                 source="/Documents/archive.zip",
                 destination="/Documents/extracted",
             )

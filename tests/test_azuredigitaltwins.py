@@ -35,7 +35,7 @@ from tests.generated_connector_test_utils import resolve_generated_result
 
 WRITE_OPERATIONS = [
     (
-        "list_add_models",
+        "add_models",
         [{"@id": "dtmi:example:Room;1"}],
         {},
         "POST",

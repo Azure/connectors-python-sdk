@@ -229,6 +229,38 @@ class TestGetItems:
             assert mock_send.await_args_list[1].args[1] == next_link
 
     @pytest.mark.asyncio
+    async def test_get_items_rebases_caller_continuation_to_runtime_origin(
+        self,
+        mock_credential,
+    ):
+        """Test caller continuation URLs cannot redirect authenticated requests."""
+        client = _make_client(mock_credential)
+        continuation_token = "https://attacker.invalid/capture?secret=opaque"
+        mock_response = MockResponse(
+            status=200,
+            text='{"value": [{"sequence": 2}]}',
+        )
+
+        with patch.object(
+            client._http_client, "send", new_callable=AsyncMock
+        ) as mock_send:
+            mock_send.return_value = mock_response
+
+            page_iterator = client.list_items(
+                dataset="default",
+                table="accounts",
+            ).by_page(continuation_token=continuation_token)
+            page = await anext(page_iterator)
+            result = [item async for item in page]
+
+            assert result == [{"sequence": 2}]
+            mock_send.assert_awaited_once()
+            assert mock_send.await_args.args[1] == (
+                "https://example.azure.com/connections/test"
+                "/capture?secret=opaque"
+            )
+
+    @pytest.mark.asyncio
     async def test_get_items_resolves_query_only_next_link_against_current_url(
         self,
         mock_credential,

@@ -49,9 +49,9 @@ async def _invoke_operation(client: GoogledriveClient, operation: str):
         return await resolve_generated_result(client.list_folder(id="folder123"))
     if operation == "list_root_folder":
         return await resolve_generated_result(client.list_root_folder())
-    if operation == "list_extract_folder":
+    if operation == "extract_folder":
         return await resolve_generated_result(
-            client.list_extract_folder(
+            client.extract_folder(
                 source="/Documents/archive.zip",
                 destination="/Documents/extracted",
             )
@@ -234,7 +234,7 @@ class TestGoogledriveClientErrorHandling:
             "copy_file",
             "list_folder",
             "list_root_folder",
-            "list_extract_folder",
+            "extract_folder",
         ],
     )
     async def test_error_response_raises_exception_for_all_operations(

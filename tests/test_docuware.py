@@ -2,6 +2,8 @@
 
 """Unit tests for DocuwareClient."""
 
+from collections.abc import Mapping
+from typing import Any, get_args, get_origin, get_type_hints
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -186,6 +188,21 @@ class TestGetFileCabinetsAsync:
 
 class TestSearchForDocumentsInFileCabinetAsync:
     """Tests for search_for_documents_in_file_cabinet_async (POST with body)."""
+
+    def test_input_annotation_accepts_model_or_mapping(self):
+        """Test dynamic search criteria support typed models and wire mappings."""
+        input_annotation = get_type_hints(
+            DocuwareClient.search_for_documents_in_file_cabinet
+        )["input"]
+        annotation_members = get_args(input_annotation)
+
+        assert SearchForDocumentsInFileCabinetInput in annotation_members
+        mapping_annotation = next(
+            member
+            for member in annotation_members
+            if get_origin(member) is Mapping
+        )
+        assert get_args(mapping_annotation) == (str, Any)
 
     @pytest.mark.asyncio
     async def test_success_forwards_request_body(self, mock_credential):

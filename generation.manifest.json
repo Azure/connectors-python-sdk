@@ -3,10 +3,10 @@
   "generator": {
     "repository": "https://msazure.visualstudio.com/One/_git/AzureUX-BPM",
     "tool": "CodefulSdkGenerator (LogicAppsCompiler)",
-    "revision": "d180efdf721b96b6b96dae3a7a070d1461686faf",
-    "compilerSha256": "139242f499c966c6021dde863bcefaad9d04a6e576d4cdf6f4ff37ed5a465e4f"
+    "revision": "dfbac0cf23422c8a339aa3c384e3a05f48c5ca48",
+    "compilerSha256": "791fe6766a522a8dfa7a19eaa054e3171071e255591bfb9a0f4f8c7d13f495b6"
   },
-  "command": "python scripts/regenerate_connectors.py <LogicAppsCompiler> --generator-revision=d180efdf721b96b6b96dae3a7a070d1461686faf --captured-at-utc=2026-10-12T20:13:21Z",
+  "command": "python scripts/regenerate_connectors.py <LogicAppsCompiler> --generator-revision=dfbac0cf23422c8a339aa3c384e3a05f48c5ca48 --captured-at-utc=2026-10-12T20:13:21Z",
   "swaggerSource": {
     "kind": "live-arm-metadata",
     "location": "westus",
@@ -41,8 +41,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/arm.py",
       "swaggerSnapshot": "swagger-cache/arm.swagger.json",
       "swaggerSha256": "5974fb8aaee9a2d46d64171889a52c0cf5345aff190a52cd045b2fc5e1d79a7f",
-      "outputSha256": "d1688cd0d0f3872d8dc8cc2315469c629891ffe9c76be6c063efa96a768ccae8",
-      "asyncOutputSha256": "61134cbdf141c565f8e0edf78429a087a1dd0a7d3cdc556a2565a68f43d5c6cb"
+      "outputSha256": "66b51da4ade67d81e144e29042ac1c2b6b164a4fcb8b1c8d15cd317c18cfb6ae",
+      "asyncOutputSha256": "8255cc9c669bd110442f759217a1c419dc3327e8dccc90b940dd4b618bf8f008"
     },
     {
       "apiName": "azuread",
@@ -50,8 +50,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azuread.py",
       "swaggerSnapshot": "swagger-cache/azuread.swagger.json",
       "swaggerSha256": "480ecb572277f001bbf6b893fb2a8c70b5bafc158c46c0b96ced93ddf9b7437d",
-      "outputSha256": "aaff6bbbd6d64913b33fe6450f68a2fe7c3d38eca7656bda6a18a0abaf9db6ec",
-      "asyncOutputSha256": "21e6a10f5fe2c5c91f154a58f3a6550f51fee6d78bfc44745d24e8df98099942"
+      "outputSha256": "e286a3a11709381fae0e0647744aa5dc1d7cfc8344355766b6e792d487a3bd72",
+      "asyncOutputSha256": "abba52f9f44ca6c4e21ebd64a2e7c924e37b17e02ace63395c3d11ba697749be"
     },
     {
       "apiName": "azureautomation",
@@ -59,8 +59,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azureautomation.py",
       "swaggerSnapshot": "swagger-cache/azureautomation.swagger.json",
       "swaggerSha256": "34aa31d4424e439bf26d4a0c2adc9627ee3fe6e19b41de2fbf85400f12450710",
-      "outputSha256": "a890810aef9f4e667ae245285c65254a6f9a63dcb4b4c991481c8deb93206f12",
-      "asyncOutputSha256": "6757dde2e45d7963c2343b66ef20a3c3179645eed75ccac24a57ca9cdddaedc5"
+      "outputSha256": "b45b16c36ae6f215569b0f7d627aed5b8f1514870264501ce94f55d68d25bcbf",
+      "asyncOutputSha256": "4599a1db5bd38a0d5d48f2a435189b05a4f7b17266633703f882fc9efa73b10e"
     },
     {
       "apiName": "azureblob",
@@ -68,8 +68,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azureblob.py",
       "swaggerSnapshot": "swagger-cache/azureblob.swagger.json",
       "swaggerSha256": "2913f54ac344c619768967e0a126bd5aba4e92917e9531d081daeae1b9b76f7c",
-      "outputSha256": "b3a9d53265d852224cd97237b1e60fe9fba79c15bc344923523fcdbb94b2266a",
-      "asyncOutputSha256": "7e6fcc66e6b5ffca828beb99513275ba90e12e873c96b2c21609ac49b7abb781"
+      "outputSha256": "47821e78e8c030c3d222bcaa753a8995cf82bbaed421b52ae9fa532eb9058eb1",
+      "asyncOutputSha256": "efdbc683789a55ce84934fbf71605b8eb335ecb07ccd5c7817ad2a17f9a1a771"
     },
     {
       "apiName": "azuredatafactory",
@@ -77,8 +77,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azuredatafactory.py",
       "swaggerSnapshot": "swagger-cache/azuredatafactory.swagger.json",
       "swaggerSha256": "9e9004143907dedb8e01453a129987c7aec959221206c16086c8d1586c8b0333",
-      "outputSha256": "1f5de61d2cc6f9a21bef9a994302767b9c1198e1b5fede89f5b7dca62a73b37b",
-      "asyncOutputSha256": "123a01668a59feabc271341178aa16169f212bd23a538142ffd3f26f9f76571f"
+      "outputSha256": "4a6541c4cb3b67e2caf0c44cd6f907100efaa7cfe05a73c22cecc8ee3d6c161e",
+      "asyncOutputSha256": "bfddb79f2b88fa0909988792811237d802af96c6ae3c8154a4d0b3029f5a4246"
     },
     {
       "apiName": "azuredigitaltwins",
@@ -86,8 +86,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azuredigitaltwins.py",
       "swaggerSnapshot": "swagger-cache/azuredigitaltwins.swagger.json",
       "swaggerSha256": "d5d8b5fa735c04209f985697fa761a24e23d81eb23fb82236700a56e6d81a8ac",
-      "outputSha256": "f603a5e4aa3f52676f5e73e90488d7fc81048ed6b88672406667655add9eeeac",
-      "asyncOutputSha256": "e2b4c67e8e1194a610dfe5d0125d07e68512e30beca520a6ba1fddc83587b297"
+      "outputSha256": "963200ae9d41f8cd12843d7778ae694258b3ad9487e0194600b00bc429a568d0",
+      "asyncOutputSha256": "1bbd106506d4e179c41ed8ec231fa1d2d9061c86f4085936ec912e12759e8bbe"
     },
     {
       "apiName": "azureeventgrid",
@@ -95,8 +95,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azureeventgrid.py",
       "swaggerSnapshot": "swagger-cache/azureeventgrid.swagger.json",
       "swaggerSha256": "7c66da60e8a32a159118d1117682e54571423b327ebd86ea4716d93438897d32",
-      "outputSha256": "12d13b59a89060eddd5c894d9fd0a7f66b5cd960f2111d7bf7d6d0fc9ec4e261",
-      "asyncOutputSha256": "d63ca77b83bc14317fd59369149790757369113808d336aa0139d26f4b4d076a"
+      "outputSha256": "9ce7541bc379c415177160160dafc134189444daad9ca397e79551e183d37b5b",
+      "asyncOutputSha256": "d9b900ac489cafc84e5dab891c36d3121916e7d1701c858a90a595ab09480b28"
     },
     {
       "apiName": "azureiotcentral",
@@ -104,8 +104,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azureiotcentral.py",
       "swaggerSnapshot": "swagger-cache/azureiotcentral.swagger.json",
       "swaggerSha256": "19613b639f5451e81d7f6be142426e3f74a6749e006f75a48e87b52a013f5751",
-      "outputSha256": "41a4e4cbc2457114373b6fc6d3040ba1f5ae5ad60f585a6ca28c86ff1187eded",
-      "asyncOutputSha256": "7ceb0b000926d2bfc5638b36b4f834c84bc7a5eae0d44903a85622a4b5807aa9"
+      "outputSha256": "a0dc6420832f447cbbd72a79b7c153558504dc0278385a739eca1f50d687fbfb",
+      "asyncOutputSha256": "e18e77cf94b826978e836fc2c58ff817b22fc5fd41197cd2f8493ea58d016f27"
     },
     {
       "apiName": "azuremonitorlogs",
@@ -113,8 +113,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azuremonitorlogs.py",
       "swaggerSnapshot": "swagger-cache/azuremonitorlogs.swagger.json",
       "swaggerSha256": "d6910d0894785e464d92a3cef07bebb473d6e175797bfd43e3600338d4b9c3cd",
-      "outputSha256": "b05b250fac3966427119d804c476e4b5fb1605c361155e76b0284eb1bdcedac6",
-      "asyncOutputSha256": "f167553f5e115447567f6702077782e27593b92055093b82988e0f8dc8d777a7"
+      "outputSha256": "e49f833ad48f864b904cefeaee49e0b5ae51895bfa3294a18381e4b3d839b069",
+      "asyncOutputSha256": "85666b7f3c2f30c263e5a943331ce8e9010d276f76691bd51634e5d393bbab14"
     },
     {
       "apiName": "azurequeues",
@@ -122,8 +122,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azurequeues.py",
       "swaggerSnapshot": "swagger-cache/azurequeues.swagger.json",
       "swaggerSha256": "c6a434430eb9e7fa1885564da814266c2b2b35d55814f7d9aca4c99d2bf7b5c5",
-      "outputSha256": "92f97411fcdb10f4940ebf4f496df39a09e85e50f17ccb324e1315d8c21f5ca9",
-      "asyncOutputSha256": "a6c8c32502b2dfa292c75a9032dc4d6b95abb683286aa4e19ce3f52f9be1da84"
+      "outputSha256": "747219942ec794f639a7cdc86c97a9917799cd719bcdf475634857e9ff9d515a",
+      "asyncOutputSha256": "6d48e065f4d86d3d16d6d0260d66c102dd930bfb092e9841624b66aec6b0b08f"
     },
     {
       "apiName": "azuretables",
@@ -131,8 +131,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azuretables.py",
       "swaggerSnapshot": "swagger-cache/azuretables.swagger.json",
       "swaggerSha256": "613366b55d82952ef98098af1b967847a5bb1d73c642bc713960c6898a46e167",
-      "outputSha256": "95625cba72aca7b36340bc7cd35aaa5e408a76820d6d0df8ceb1a110f98c38df",
-      "asyncOutputSha256": "c79899c0bfc8a3851c48fabf1b1048405ba9389346c051e2db1ef260ec10cbc0"
+      "outputSha256": "4335a0f10386abb6aca0f3813e9d9252663c324ea076b385dbcf01a6f2495090",
+      "asyncOutputSha256": "b34867bc0892ea44e8bcbc26778546ad52a5092db9b86e21ca258c7e59b0ea5c"
     },
     {
       "apiName": "azurevm",
@@ -140,8 +140,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/azurevm.py",
       "swaggerSnapshot": "swagger-cache/azurevm.swagger.json",
       "swaggerSha256": "d5fe4e4f971fe26a0aa54dcb50b828eb61ba8582c01324eddd8b3065ad32dad8",
-      "outputSha256": "b565b35b78d614a1d5bbc3ca95894faa62d0fa9ffe75838f8b7917b4623cd84b",
-      "asyncOutputSha256": "63c39299c0bb2374f95c77e56f9673c9c4e7c0852cb550bdcd991f25a71b424d"
+      "outputSha256": "2bb4f9ce6ab28d3f3abed7547518962a6e899b358f442cdcead180660eb8f966",
+      "asyncOutputSha256": "b560a180e63a519d677b8d22779dd5c6fdbf3b1858a3a4d00f7d0986194b9307"
     },
     {
       "apiName": "box",
@@ -149,8 +149,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/box.py",
       "swaggerSnapshot": "swagger-cache/box.swagger.json",
       "swaggerSha256": "fe54c9b5095095f2aa30b78847b006330f3a3f2d3e2c7410527e18d7d1e1e408",
-      "outputSha256": "34844ff0a59efeadc98002aef5c16db10290b060f55189bb454baaee8bfe2936",
-      "asyncOutputSha256": "d5302c6d9ee63faca14b38de9443e83a429c02a25acd0412021cbff78a7f79a0"
+      "outputSha256": "42fac262604c53fad7c641280f12733eb977bcec9edfaf8b85ea0558fe82436b",
+      "asyncOutputSha256": "0ab5409685a33a4875059a065e4091994f345ede7730f2e2aa9eec0d8d0d875a"
     },
     {
       "apiName": "campfire",
@@ -158,8 +158,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/campfire.py",
       "swaggerSnapshot": "swagger-cache/campfire.swagger.json",
       "swaggerSha256": "c86087b24f20b9f7a792c695ea265bd0f1ba84233057fc9ebebd474b443a8b7d",
-      "outputSha256": "5fd2e39326958d6c77088660e3c306de73321a40b05090b630b508babb503667",
-      "asyncOutputSha256": "eaf32fa1322709930208fa6e18e5607db0e7fb1aeffd613a9d4501037f96c321"
+      "outputSha256": "c5c48924750d06d752f797a2ab92ae9aaa5d5482ca7520ad0906585c01c4e2e0",
+      "asyncOutputSha256": "87291608a52743daa1df8a4cad489ec42b1d76ea3c7cda24b311cfa9f2ee81c9"
     },
     {
       "apiName": "clicksendsms",
@@ -194,8 +194,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/commondataservice.py",
       "swaggerSnapshot": "swagger-cache/commondataservice.swagger.json",
       "swaggerSha256": "8c07cdc661241079cbd8f801bb28444f7f5907b68518c161be98bc6aa6c3e24c",
-      "outputSha256": "390c18ee50068f1017232fca50da987611ea2fd29bdce6baaf21bfa6583967eb",
-      "asyncOutputSha256": "3c86ae82406149d160e11c6db3ee6793fa05ee7fc87b135bea44fcbfdee20bef"
+      "outputSha256": "43e66c15655ec1d21a2fc0a4d5306bc32ebaf5bca9a3091c22876c9e8a39d495",
+      "asyncOutputSha256": "14488f7ef8618d904a80f2dd05b8446c1ed8052f0cace2aeb30780f61140eae2"
     },
     {
       "apiName": "documentdb",
@@ -203,8 +203,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/documentdb.py",
       "swaggerSnapshot": "swagger-cache/documentdb.swagger.json",
       "swaggerSha256": "065e7fdf4058c42a9d395da1de82f4d8f53cb81395dc2482a38733ebeea55969",
-      "outputSha256": "d8f477b1ac3aa7c625f9e518211d917cb7619f67f0c0468522b0da2af617aac6",
-      "asyncOutputSha256": "7b5970f93ee22e6d216295167deea22e60b59cc2ec33731c94cb534c506ffa4c"
+      "outputSha256": "e923296d594b86b214afd953a781b0c55af5bc15e6c69a766616e2eb0c0630a5",
+      "asyncOutputSha256": "96e2cd8c0e1470941499e34581ea0e7fa54b49ddc579dd9a41cd6956dfb76a9b"
     },
     {
       "apiName": "docusign",
@@ -212,8 +212,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/docusign.py",
       "swaggerSnapshot": "swagger-cache/docusign.swagger.json",
       "swaggerSha256": "4a8742b7bf35b705558a5ddb7607219e7ac46fd6582a1f2fe964ec72c1d435dd",
-      "outputSha256": "39cfec51021617a0b00f6562ec42a30731ac202033d4c0d0fe941f08e807ed0a",
-      "asyncOutputSha256": "795e5a206fa564d6b60e9d1eea8ebc22ef7bd002c433697a26062371df2a7a5b"
+      "outputSha256": "351316f42a0b5f60d5a24a5f918954e67e05fc9e9092a7e646147e2d85e78e98",
+      "asyncOutputSha256": "eae88785bf591264317ec46322ff28a3fb2e1edae4ea03543058638e8bd95e88"
     },
     {
       "apiName": "docuware",
@@ -221,8 +221,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/docuware.py",
       "swaggerSnapshot": "swagger-cache/docuware.swagger.json",
       "swaggerSha256": "7ebc04b5a47c35f5da9a2afddb9de3bb022e169744f5362f92449939f07df143",
-      "outputSha256": "e761833a46fad039060b0c60c76a6a8a33ae791bb33bfade8228adfbe843af60",
-      "asyncOutputSha256": "5fa17e242cc778952c3198fefd5ad23477fbfd48d6a315c6e3d03e40ceeb807b"
+      "outputSha256": "9c6d1747e3dcf61931f5c08c29748ecb9db1d6c51b51441b67ad8e1d36021713",
+      "asyncOutputSha256": "5330cdbb874872cf13d228f8ba099144ea70fefcfbd5a24b768f0920022d44c5"
     },
     {
       "apiName": "dropbox",
@@ -230,8 +230,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/dropbox.py",
       "swaggerSnapshot": "swagger-cache/dropbox.swagger.json",
       "swaggerSha256": "d096ccafa3e65ca96c504d4a8335760f0fc8c38b9a446f9e6d6db13b83809df1",
-      "outputSha256": "065862b5d602b5e9fd477d41c9cc82fc3e6d4287caa11d9322e90cfae91c0b9d",
-      "asyncOutputSha256": "4644b40e33ac3470e3acf27e54daf946cc5f1a327bf5f1c52858a9b6c31c8f84"
+      "outputSha256": "c004474aedf13f045bacf672c0a47e4dc76668b0673c0e6776b19ea792f12e9f",
+      "asyncOutputSha256": "6736beaea9dc26abfc29d8d2015dabc5cf52f345135c7b5a7ee70ace5c04d595"
     },
     {
       "apiName": "dynamicsax",
@@ -239,8 +239,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/dynamicsax.py",
       "swaggerSnapshot": "swagger-cache/dynamicsax.swagger.json",
       "swaggerSha256": "7ad46b64824a9857eef0cd657182f571258f4e2e3127c5b5ed0f0313e80c6e55",
-      "outputSha256": "8c432eaf1c6719b5de9145bcb8894aaca73f0715e244b446fc1496367b4042d5",
-      "asyncOutputSha256": "35e21833ca74802695186189d2818841e9ed2f9583a534d42b6b47cce38a4112"
+      "outputSha256": "6ae278922cfb1f4eeb0dc09e2a2fc8fb6deb79c7861bb40aa5ea648d410cb6e6",
+      "asyncOutputSha256": "c890f033bbc18f64b35db831ff7c7c6459b9d94c5937d4c6339a760477112251"
     },
     {
       "apiName": "elfsquaddata",
@@ -248,8 +248,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/elfsquaddata.py",
       "swaggerSnapshot": "swagger-cache/elfsquaddata.swagger.json",
       "swaggerSha256": "37bd441cdd9688a86afaefae7ea2671b42c6719b0d0774bc790c7bde7a684b82",
-      "outputSha256": "37adc403e0f34c681c753cc3db2b1c0cd10ca23ad892f94561634f32c093a368",
-      "asyncOutputSha256": "fd5815af797b8cfd231be40f40d31e56b875e100d581b784c902661243058635"
+      "outputSha256": "1476da5aecc97126324d992f86d7d537185036ad067eea710189715a0fe073aa",
+      "asyncOutputSha256": "1b55302b8d9252bf849ba2876b396410020ac0bf7f87565fc3f9f960240d5f4d"
     },
     {
       "apiName": "etsy",
@@ -266,8 +266,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/eventbrite.py",
       "swaggerSnapshot": "swagger-cache/eventbrite.swagger.json",
       "swaggerSha256": "6f2b23b6c2db52ecc1cb09a5cfc52bcf00dd070c24bdbf1b025627e34397f475",
-      "outputSha256": "b55b3f65b057d047d679b7b283356c78a2a08ffce774c335c3a8138b3b3268f9",
-      "asyncOutputSha256": "356e177618ca359153105a8b4affb35a14532e1b5d8ce5b95da5b4eac4aaa383"
+      "outputSha256": "4e262902d59d377970e75850ef23b2a8a1d0d167f8c34f6997db7eda1bb059eb",
+      "asyncOutputSha256": "99853c5546ff1366a71bea7d32a845a618c22680053aa3650fd75626fda19617"
     },
     {
       "apiName": "eventhubs",
@@ -275,8 +275,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/eventhubs.py",
       "swaggerSnapshot": "swagger-cache/eventhubs.swagger.json",
       "swaggerSha256": "427949755cf4f8421886ce5165b3780d3a7bd167f3ac4e44c8f519dfe636a9ed",
-      "outputSha256": "fccb8df06cefcad1367ce96e53feea81806bbd372a1077fba32a43df541bd9f7",
-      "asyncOutputSha256": "1cb49f43f047e2c871d4897388b7e17bae266299ab89ba1c6380600dd6dbb207"
+      "outputSha256": "8b2e2b464f5f6351f8b85f8c3839d17d01f7f5298aa6cb198f3d4f9b76a8749b",
+      "asyncOutputSha256": "18d03d7fd996e5dbb51745ce554545261bb392ea436dfc4751c787118c60a342"
     },
     {
       "apiName": "excelonline",
@@ -284,8 +284,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/excelonline.py",
       "swaggerSnapshot": "swagger-cache/excelonline.swagger.json",
       "swaggerSha256": "55b95c5aa93a92f02f3258e0daecbb158cb3dbc27abc67aecbf20375c07f6489",
-      "outputSha256": "f3ee0ebecc2a2cce872a024d462f4c1a5124bcbd55e1d36f48812de0de841dc3",
-      "asyncOutputSha256": "7e9bad68d8493af0819ec88a9b349cf731352036820535ad93014e85394de44f"
+      "outputSha256": "d33be125f73af9e77bf12d1d87348827c79fe47276b3500267274aba342f14af",
+      "asyncOutputSha256": "65baef856b2dfbaa26c7f30ca90a0db191dde413edc7b96a0fb9a9439da00121"
     },
     {
       "apiName": "excelonlinebusiness",
@@ -293,8 +293,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/excelonlinebusiness.py",
       "swaggerSnapshot": "swagger-cache/excelonlinebusiness.swagger.json",
       "swaggerSha256": "a42249a6891e01690904d16e5da956c70c742c7c9587de0738456540bda87538",
-      "outputSha256": "93773164544456cfb99ae5922b257338547a16d91e5cd2c143d21eaeddce0151",
-      "asyncOutputSha256": "b0f3b11f2a996ccb4e818ca0392bc68753444deb39def37eabdda4749ed16a9f"
+      "outputSha256": "bf19fa725d8ed2aaeddec547017971c2dd075e8b636e3318826046c684289f7e",
+      "asyncOutputSha256": "9cddba46e813dd3e4770431de7fc7d237d39ded7074aa10964bda433d33ac56e"
     },
     {
       "apiName": "formstackforms",
@@ -320,8 +320,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/ftp.py",
       "swaggerSnapshot": "swagger-cache/ftp.swagger.json",
       "swaggerSha256": "ae060ad49d55f2e651e8f04a3e5ab33454f6546a67af7cc67e724cecba63eaec",
-      "outputSha256": "2611ff1310e288a4d9a5847ffd68ecfc57d958a834cdd2dd96dee8c777f026d9",
-      "asyncOutputSha256": "86d90b4c64b07848cfe011fa824a539a7ac1d2657989706af1a6e47c05868008"
+      "outputSha256": "3f2f0d7e3eeb59f901035bd5dda4a966bd3d1c623126153f92b0eb247a1ddf14",
+      "asyncOutputSha256": "da9479e85aa50b053a4ef79ed71e7e134ec9309a225876ce64257640f2e5ac98"
     },
     {
       "apiName": "github",
@@ -329,8 +329,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/github.py",
       "swaggerSnapshot": "swagger-cache/github.swagger.json",
       "swaggerSha256": "ab508ed2ea1f9c4cf3216d440e2d50cf86b3cc0f5312fa39ee036185d493c73e",
-      "outputSha256": "e7203b07acd7b89e5996f40a19f8c09f8ac5577b8a87ce5c51fcd6e46c703f36",
-      "asyncOutputSha256": "add0dce884557377d619d2dcd13e5a84d2c2f9363322f903ac5b458509880934"
+      "outputSha256": "67e524191eb5dc62b6cc52106c1eabf4a991847e1ea3314e3f5c87b5c6ac7fca",
+      "asyncOutputSha256": "e39f8765f9b95fb238b09c1df8e566b7483decbb8b2807e0bc7f379ca93cbc47"
     },
     {
       "apiName": "googlecalendar",
@@ -338,8 +338,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/googlecalendar.py",
       "swaggerSnapshot": "swagger-cache/googlecalendar.swagger.json",
       "swaggerSha256": "dd09f24015298cc95328572c4bfdb47c3be3ee1c56a7bd48cd2c0751b2d35e2c",
-      "outputSha256": "231f681795f40390b79aa427fb2a319e1572e3b3eba33977506616e4a9d8c5e2",
-      "asyncOutputSha256": "7c0946cdc37d442921be52b0b08333ec8deb49e52e4eafe89cb09f26028738d2"
+      "outputSha256": "e3d1cc00898976cdbefc38b6354957f8b1fc08c1c41bf9243172bdb0994aa336",
+      "asyncOutputSha256": "e99eef4f33c1280f70b1fdca3fb9fa2810b1b29902bc4a2d1ce7531b1c4ebc95"
     },
     {
       "apiName": "googledrive",
@@ -347,8 +347,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/googledrive.py",
       "swaggerSnapshot": "swagger-cache/googledrive.swagger.json",
       "swaggerSha256": "c77bf8e2a2b80669f82d97d0341ba332392b964afc962f07e78728a4421ad338",
-      "outputSha256": "daea8b52f35dbd5e2de7cd728762b6a7b15797c72da02f76ec928a638c5a10be",
-      "asyncOutputSha256": "cb4ecb2ebbcb63855b21f04408671b45b1a1c4f9d399b16a956868c6acac1f62"
+      "outputSha256": "9321ca4dc8fa4a3e2075bcbe479d961dee8ff50a572bb9374eeb67af86f96534",
+      "asyncOutputSha256": "e07845cbacae644702df2aa8ad42d4f845c8e7947206aebac10813d5f60bb7fa"
     },
     {
       "apiName": "googletasks",
@@ -356,8 +356,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/googletasks.py",
       "swaggerSnapshot": "swagger-cache/googletasks.swagger.json",
       "swaggerSha256": "0c7f04201868f4f31b01a72191cf9c28617bf09cb07265ef1bab75723c20efb6",
-      "outputSha256": "67fd7d53532c4396bffa734d926d1c198c1a2dcd370a47855a0cd5267bf0f264",
-      "asyncOutputSha256": "7811bc6f7fdb55998b5f31f55ef4c2e64274a0d5772cf57d150901f4d40e33f3"
+      "outputSha256": "52ed53d6151a3a74c19222f7d4371f2fcd41c1442eb239b16ef85b8e74db0ec7",
+      "asyncOutputSha256": "77a8d8832ee2b69cb07ca4e368520ea44eec7b6d9425f012cb7e745040c9fbc9"
     },
     {
       "apiName": "impexium",
@@ -365,8 +365,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/impexium.py",
       "swaggerSnapshot": "swagger-cache/impexium.swagger.json",
       "swaggerSha256": "cabec9c237eebcae532854cdb32766e502be672e6c404e86860bdbeaefaf6c7b",
-      "outputSha256": "2c0d46e5d5655f668dfef1798fc90083b21dba94a50216182f4bcf64cfe47531",
-      "asyncOutputSha256": "2c9044c739b5f55f608a6eb5da938b6376d30f0963ab92707236f7c6e1395f33"
+      "outputSha256": "0005ddf491058f6c347aa5ce683e20c835dc9a7d4ada8e49ad4ed968379e12db",
+      "asyncOutputSha256": "2af3327b85770e402f51b1c0d55cd4240baade4bb61a581a00a7894d23cf8ad8"
     },
     {
       "apiName": "infusionsoft",
@@ -374,8 +374,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/infusionsoft.py",
       "swaggerSnapshot": "swagger-cache/infusionsoft.swagger.json",
       "swaggerSha256": "dbbb0d24f6d67dc9ae36c12ab2ee38d1b7daea90bef97af5b04677e8381b0482",
-      "outputSha256": "7224914529a20cee240d3a891ca20077d3575d6d4d03cfe4a8d685fd52bc9635",
-      "asyncOutputSha256": "9cc41f1adbe0bbc0d43ce143556dd4ccfc3e6acea3fd4e515905e3392a20670d"
+      "outputSha256": "c49227bc1d347f7cc15e12a2eb42124030f9dce2b9ea6326faffffffc6316bdf",
+      "asyncOutputSha256": "63ab6f5789c99631f22fd42a26d4fe4421468b94eaf947d27bf32da0ba1648fa"
     },
     {
       "apiName": "insightly",
@@ -383,8 +383,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/insightly.py",
       "swaggerSnapshot": "swagger-cache/insightly.swagger.json",
       "swaggerSha256": "f5ead046092417e8c47bada3c0f12cc07b7b2efe62d3a7d025d0205c7b9c7924",
-      "outputSha256": "2ee0880f1ac4bb4ae338e8a82467716892b90155c4a9367ae99234ddafba492f",
-      "asyncOutputSha256": "07df1eaf2b3e018ac2c9464cbc93b687420919a616c0def5c7eab5b135fa7bc4"
+      "outputSha256": "c61f88b8fa98962569ea121630a17e90628504bb9b90298940c0dc9da8e610c1",
+      "asyncOutputSha256": "ff3cde656b80d9cc6eafc97d65990f9cfca9b03416a1ce17c3c63b0615d79273"
     },
     {
       "apiName": "jedoxodatahub",
@@ -392,8 +392,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/jedoxodatahub.py",
       "swaggerSnapshot": "swagger-cache/jedoxodatahub.swagger.json",
       "swaggerSha256": "c733673ea33c7babcae0570e83eeabbe3682ae71932fcfb8bee281b9954a2199",
-      "outputSha256": "a6d87fd62a96c3d7f89b32266a4b3cda0f7cbf51f1e814a6f8dc2b0c2a3a86a1",
-      "asyncOutputSha256": "3e939f03ede3863d7905d3fb888d810889fa9872c3a7ec81e55bd038fa80e601"
+      "outputSha256": "fd2010a52bc69052c68450b8b0344a0d2824abab8a1ea1a25ed00ffccb8feceb",
+      "asyncOutputSha256": "3e6f2653eb48250321b96f6018a2d03685a428645cf7811bba9c1c47b61ca73d"
     },
     {
       "apiName": "jira",
@@ -401,8 +401,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/jira.py",
       "swaggerSnapshot": "swagger-cache/jira.swagger.json",
       "swaggerSha256": "09c9e3b933be233c381c3c0f35a9ecdb493583bb655163e0d786c31be7754a5d",
-      "outputSha256": "0f823c1c42b4d0a8d0c987cc8f2263dc2a23b49c70e378e69824eaf6a3a8b845",
-      "asyncOutputSha256": "e7b3bcc690d1afbd34afc841e8a37ecb6bc0d0fa577b27c9860d78593a73360b"
+      "outputSha256": "4157e8c2bcb0fe24a9ad95d0b4a9c95569b5b43db0540bd478098b03255f3bfd",
+      "asyncOutputSha256": "d5b5335819fce7173b62519e96b9522cfb26671d17d746300d5e6f64d5cd6ade"
     },
     {
       "apiName": "keyvault",
@@ -410,8 +410,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/keyvault.py",
       "swaggerSnapshot": "swagger-cache/keyvault.swagger.json",
       "swaggerSha256": "9e7662b7fecc4f526392bc16abd0815b002ebf5bf823546ce3d126c4ce594123",
-      "outputSha256": "fae78c5692ed41b141bd4f1de6831fb6853c8fda101a4aee532ad496b24150ca",
-      "asyncOutputSha256": "5bf176442b3e7880ab58be554e1f61ec6ee644857813376731d8162cb7b967dc"
+      "outputSha256": "e0a723162b9cc7bbfa7029272aa3b67ccb77786de9fd8437aa34ece6119fdd71",
+      "asyncOutputSha256": "aa7302bf60bf049faf845dc1fe7468816890a6e3d3303f6c8c27ebff34bba939"
     },
     {
       "apiName": "kusto",
@@ -428,8 +428,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/mailchimp.py",
       "swaggerSnapshot": "swagger-cache/mailchimp.swagger.json",
       "swaggerSha256": "2cf5f68881a233e7f1c9850bc4d3649231bad35ac2d883b02b94c24962308fa6",
-      "outputSha256": "f6e5ba5bdb1d55e6ab308fc45e4fc720f2a4da2d45026fbdd5946f8ea1ca2793",
-      "asyncOutputSha256": "34759b9043e451b6c92ff6f0e1b99031e665b703cd024562f223499104f17302"
+      "outputSha256": "07e356bb8c10305bf4d7b9faf0491924c7ffc777bb3f76d2f79a4ef62b4cd3d1",
+      "asyncOutputSha256": "c2036a5aedca4e50fc0dcd36ab713eca71f272ab7936f7471899ce058d9d7b77"
     },
     {
       "apiName": "meetingroommap",
@@ -437,8 +437,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/meetingroommap.py",
       "swaggerSnapshot": "swagger-cache/meetingroommap.swagger.json",
       "swaggerSha256": "d78285d9fa59597e5e8f2ff0ef55db439c1e85ed565f2257231ea215a9246465",
-      "outputSha256": "f4b8e3de644059c53e26d3bca6e1b4f178e5cdc6881b61e2543957fff2edf65f",
-      "asyncOutputSha256": "05f1686138d691d2f9232f1ca38e6336fe782e043481e9dae5778fd9833e0de1"
+      "outputSha256": "e4bd25b92ba2e4f954c7472a42d6f61c271d6ebeebed13955e0f0b95b1288f80",
+      "asyncOutputSha256": "36595181fb90477eb21c22c2fc6c6c907e631d07c0b2fe583838501baaeb3d05"
     },
     {
       "apiName": "microsoftbookings",
@@ -446,8 +446,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/microsoftbookings.py",
       "swaggerSnapshot": "swagger-cache/microsoftbookings.swagger.json",
       "swaggerSha256": "f5a9d2d540ba646436feb4e3f521eb4d6d84511d92612f8290e95625e2be5321",
-      "outputSha256": "faa846470b2c1e909d5752c85d106c24cbef6426de83ebd938721664aae73c05",
-      "asyncOutputSha256": "ddc45d4419ffc7a8cb3e51ce3d374d7641c57bdea31a0d1ba2fbe1eb98d7203e"
+      "outputSha256": "aadaec54a84cf5a1c809bbfb98a72a56aba9f0825499ab11b30ee34576e02287",
+      "asyncOutputSha256": "202c52916dba15f5d5ed28371f9012c675dab58f68e8c3c27ea65544ccf497f4"
     },
     {
       "apiName": "microsoftforms",
@@ -455,8 +455,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/microsoftforms.py",
       "swaggerSnapshot": "swagger-cache/microsoftforms.swagger.json",
       "swaggerSha256": "41fe0302637470344eebd0ebc2837253a6501cdf708a5297d7002408f5f2d19d",
-      "outputSha256": "680bb25db81c4c4f0c95466468d36b01162d86c7535233bbb5fd28eac85c5e0c",
-      "asyncOutputSha256": "acb73dfe7a3dd28cc38595cb347454032c5f267188141bbae0c81dc22c326e50"
+      "outputSha256": "d7de0f19e9545d799b0841543b29de9d21ef3989679638bbdd367d970e08e625",
+      "asyncOutputSha256": "6793ca06a7a8b856032cc93be91053a10d6119767202fcfff390307f4baab9d1"
     },
     {
       "apiName": "monday",
@@ -464,8 +464,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/monday.py",
       "swaggerSnapshot": "swagger-cache/monday.swagger.json",
       "swaggerSha256": "c3510aa18fd7e2ce8349c28ab83e10598ffa2f25ff0dbaa6b9ccd4d2fe1e0797",
-      "outputSha256": "3e8f5b9bac30783ea414b4d1fe46baf4363c477e47e09a1e00a8a0674ea9ab35",
-      "asyncOutputSha256": "8472234b10784c3ca45d6c60c4f449698064112ba5997bc0040837637f717d6f"
+      "outputSha256": "da78c036e5f7e67df467c8717e647b33a68118489f09bb2bd778d6b676029ee8",
+      "asyncOutputSha256": "3845c22cd5e7f8b3c01b119997357b3cba6e31838ec74605dedf0f9e122d8bff"
     },
     {
       "apiName": "mq",
@@ -473,8 +473,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/mq.py",
       "swaggerSnapshot": "swagger-cache/mq.swagger.json",
       "swaggerSha256": "ffd294fd756815f011740d654360b95e5acdbbe9ee0de2d05b64c0edd158de18",
-      "outputSha256": "fccb4710703a3f00368ae97aafd0a746a33f56d2a4dcff2f3e5c598b461077af",
-      "asyncOutputSha256": "0ed83922d83427aad29f04edbfd9859bba4f696a0e03b4b5fa74243434774a31"
+      "outputSha256": "4c0a99050e40b0e3e901f6889efe3384078a4baa53ef01cf994b846135943654",
+      "asyncOutputSha256": "e6a1bea1cbe70658b1d348f367b94a970c7d2f568efe83a3fc03ec4bdffadd29"
     },
     {
       "apiName": "msgraphgroupsanduser",
@@ -482,8 +482,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/msgraphgroupsanduser.py",
       "swaggerSnapshot": "swagger-cache/msgraphgroupsanduser.swagger.json",
       "swaggerSha256": "cf7a73b0df7b3e26ab4c2c19a595f4c7eb3d3c935f47675735b074b00ea0af7b",
-      "outputSha256": "e9123e786606e3f63c45f1ae6d4eb1848ca64b529c493d853d39bede0a1ff4ca",
-      "asyncOutputSha256": "4feea8cd5f553520a21edea54f29659b01a529081a013f4c3e183dc5ea8af99a"
+      "outputSha256": "36c469c36b2e484dcfe8a3bdff172e5c0db5a590504cafab42504fcfd3612304",
+      "asyncOutputSha256": "54f95402a50f4f40b13d84f10bd59c79a4377a777f88da82ef5937cf47fc2460"
     },
     {
       "apiName": "office365",
@@ -491,8 +491,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/office365.py",
       "swaggerSnapshot": "swagger-cache/office365.swagger.json",
       "swaggerSha256": "b58a10baa9a5ca6914bd7dff75d050cba3949c1186ef962abc2365fabdc96f05",
-      "outputSha256": "596ea007fd4313a3753dc3abc0affead129f786c81ec8ec5d3a07e08f17e6d52",
-      "asyncOutputSha256": "f660a12d0fe814fd4b1a699af202227e5b449b0d93d5a9ff95ee6abbed944e15"
+      "outputSha256": "9180d31adecfd9aef83ed332cd857a552b6055ffadf9f745b8327f9618da6bea",
+      "asyncOutputSha256": "37cf75f09e328612caafffdd4aa35aa9d651df9af784c8b8cee3d3acc5470ff6"
     },
     {
       "apiName": "office365groups",
@@ -500,8 +500,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/office365groups.py",
       "swaggerSnapshot": "swagger-cache/office365groups.swagger.json",
       "swaggerSha256": "3f553ce2c316f1af178cb04beacac6e621ffbb7103e3db92f56dbf8792292ccf",
-      "outputSha256": "367253ee5e04d3c61180ec883068026611d228806f8866eddd137481a3ccef89",
-      "asyncOutputSha256": "b84dec064b1b6fa38639c57c9374a4e2df2a692fa1be624a34273059369d36d3"
+      "outputSha256": "0e34b10d758d6f641b18fa3ba12153a378c902299530ec7dfdd4cfbeb85871e4",
+      "asyncOutputSha256": "b7ffc301b2d11ad98f7dfe8d959571f04584ccf05a579ab98b8e147b080c8b8d"
     },
     {
       "apiName": "office365groupsmail",
@@ -509,8 +509,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/office365groupsmail.py",
       "swaggerSnapshot": "swagger-cache/office365groupsmail.swagger.json",
       "swaggerSha256": "37779afe93884a17244309536fe011b5482db7404f7e0f262961b8dc6b3f4760",
-      "outputSha256": "fcca6b2c4d8bfd3ef0c0e5b4f5b1d94ce6b1f43386232b2b0131abc0f657356b",
-      "asyncOutputSha256": "d0e649e7511c50d799698e1fab467db4d34b74814adfa093f1103fa7091b1222"
+      "outputSha256": "1e84e65ba5536863bd313999219db036867ed0b52c5847abae27d8a7da4b6a9e",
+      "asyncOutputSha256": "29d161f766edf19a290f676332ce6c65dfeda9bbca38c681d7169867924684f1"
     },
     {
       "apiName": "office365users",
@@ -518,8 +518,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/office365users.py",
       "swaggerSnapshot": "swagger-cache/office365users.swagger.json",
       "swaggerSha256": "642b5779ef601327d0345f631c9a1182b27914815a854f536b84ee99f476e137",
-      "outputSha256": "426cd8d83525f1099381b239d65dfbab1a57fe18229b7820f61bbac144e86f52",
-      "asyncOutputSha256": "ef5a5d91885a3a63c5245e0ab44259f7888e4d192c1103ec4b968b7ba2bfe2ce"
+      "outputSha256": "08b764ecd23d52c269cd77fecd4ea226513452ad8b66e4ab16900d9f5a7eab6c",
+      "asyncOutputSha256": "ecc5408472a64e6f0284232b093a3498c31ef425710df8e7f568cf0b5831fbd7"
     },
     {
       "apiName": "onedrive",
@@ -527,8 +527,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/onedrive.py",
       "swaggerSnapshot": "swagger-cache/onedrive.swagger.json",
       "swaggerSha256": "c79f8ac32d5e272d7024ddb2962bd997c5d45acc28a93747a3b36e7ef606bb6e",
-      "outputSha256": "553c3bc0fea07ac941ac0854fb3b6b65edd2b24fa9d2886918ced87a56f2e563",
-      "asyncOutputSha256": "70bfa228a9dd6fc424c70922b644d31e39e87d564237ecfca6208c6f0e8749fb"
+      "outputSha256": "20142ccf05781ca885b49ea752da54ae7ea2caebfaa35f3e8163d3b562a0b891",
+      "asyncOutputSha256": "94e66489dcd1a2cc651d3c70901d4779ea3d5d42871523c2018b9985a35b76a1"
     },
     {
       "apiName": "onedriveforbusiness",
@@ -536,8 +536,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/onedriveforbusiness.py",
       "swaggerSnapshot": "swagger-cache/onedriveforbusiness.swagger.json",
       "swaggerSha256": "bb09c0baccb5c324d74f9cdefa979336f849fbe903204135095bbc3e04d1c568",
-      "outputSha256": "53b1529f8dbc00cfddf3662070a6e30a0419a0a8458703eb5fa803a01043d4a4",
-      "asyncOutputSha256": "bd7fc14c994f7ec16f1491a76bee6ee2a6f4f0cfc555dec075771acfd302c9be"
+      "outputSha256": "de837f2b4b0d5f8b9811a221e9bddb69818885d8e169a4a9da2cd2a79dad543b",
+      "asyncOutputSha256": "724b0e72152e3a5ff6ce1cc2c743999a26b1ad5791094ff110b5d6daa6e59ad9"
     },
     {
       "apiName": "onenote",
@@ -545,8 +545,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/onenote.py",
       "swaggerSnapshot": "swagger-cache/onenote.swagger.json",
       "swaggerSha256": "f770e29ca5f26e51d7cc0e3ddbf54f56702ae2dfebd80dda40050b19c0414229",
-      "outputSha256": "e0ca27409017fc743f66485bd04ca8a2b78814b2be0a547b65a78fa0aa70ce98",
-      "asyncOutputSha256": "43c2db546fe5b29a54b73084f77a757a030ebb4bdbda0a4e6eec1c6df01cbc1e"
+      "outputSha256": "7e2399ed8c98c50f58dd4315002fb69de9b0c91821f1abf3b8791a8425270362",
+      "asyncOutputSha256": "44bd6d3d52b0bb94f206d100b44d8742967698154050ea811933908c2170bc49"
     },
     {
       "apiName": "orderful",
@@ -563,8 +563,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/outlook.py",
       "swaggerSnapshot": "swagger-cache/outlook.swagger.json",
       "swaggerSha256": "b83f03d06d6a13848a4d2d0419c6cfd6986578c167bad54d03637664083bb240",
-      "outputSha256": "055222a4e529d81486171562da0c6bbc00af76dc29122d3a1fff877dcd5eb007",
-      "asyncOutputSha256": "cddca9af3534a0b7f7c0a89f5aa2c11d6cca32be4adeb9753387aedbd57d2797"
+      "outputSha256": "9d70faa33875b56253fa139065674863e9d2c10499f6562c1ebf6d019790b079",
+      "asyncOutputSha256": "d9d21a94a301356713567852c69162873e1de117a945e1dc81c1c7290a1f59e0"
     },
     {
       "apiName": "pdfco",
@@ -581,8 +581,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/pipedrive.py",
       "swaggerSnapshot": "swagger-cache/pipedrive.swagger.json",
       "swaggerSha256": "0ad01a515fe55402fd96669a2b37c420dbad740db51520e52d7b1e187e174770",
-      "outputSha256": "9fbbe2e771a619ea9768f715d82f5c3f3bb4d92dc2d96043b3e01fecf18766a7",
-      "asyncOutputSha256": "d4f9806590166564675d03f9229a78d56e0aac5538a8ee7efb0e497a79fa3289"
+      "outputSha256": "c65f4c5d31bba2aed7ba5faec905e02303c844b4b8489a110a99e0f13bb9e638",
+      "asyncOutputSha256": "267db6ba3c414806d0f1d002e1cfd09ad2e2cf8079c732bdc697c94acced32ee"
     },
     {
       "apiName": "planner",
@@ -590,8 +590,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/planner.py",
       "swaggerSnapshot": "swagger-cache/planner.swagger.json",
       "swaggerSha256": "4f3f2f751541664f9ff701b2e08d64f2be39f221546e11936ef222a96394b021",
-      "outputSha256": "cb89060b82a25f3b2d2e32ec3dc757315758c75119856d978b1165b5118f72d1",
-      "asyncOutputSha256": "163b43b98467ab261e13fdaeab9ccf05a569dacc421de6c3f743114cfe3b5186"
+      "outputSha256": "e101efabd93284d5fb1290f6922c87fa3ada5751cea4430d2975bf58d6c4e020",
+      "asyncOutputSha256": "7a1fbccc6e90d86b2194643b53d0fa20cb2d0ff4ef51aa216f592f6de7f5b314"
     },
     {
       "apiName": "plivo",
@@ -599,8 +599,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/plivo.py",
       "swaggerSnapshot": "swagger-cache/plivo.swagger.json",
       "swaggerSha256": "85071ba3c076fc92eef5af2272cb2a775b9fe1b04242fdc86a7cf1429d78790a",
-      "outputSha256": "76581148eed9fcd18940d02586b71280bfe85856dd8395c9255d863eb82c8836",
-      "asyncOutputSha256": "e8c7b692b3ff3226d614c85ffdd32e69618f0bcd8baef3f5cd1d39c8a469609b"
+      "outputSha256": "06262380cdf761e72ae34f9a6116ef93b5aacad4c38277554dd681508976b48b",
+      "asyncOutputSha256": "473f5bc099084ae8a6a5c058703c873fda418acf322e5e38c8ce9f189c5da724"
     },
     {
       "apiName": "plumsail",
@@ -617,8 +617,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/powerbi.py",
       "swaggerSnapshot": "swagger-cache/powerbi.swagger.json",
       "swaggerSha256": "27efea205500f3a160a3c0ade08b31522cd6bb5b7601221c118c930f82efa24b",
-      "outputSha256": "9588f9dfd2d67e1ca3680df11152a12b877e6034fcec273e6219c3f760764995",
-      "asyncOutputSha256": "3a0347dd672508157d133f5e2a6883cdc7f64adc0609b740a7f0668117efc355"
+      "outputSha256": "51a039ae1d5630d92bb9122e1b1b4e8fb623eafa40ca70c12932f8b5026785df",
+      "asyncOutputSha256": "9ba00e365124976a69b440abf722cfc2f0ed85157161f3d8ef53389a0282500f"
     },
     {
       "apiName": "projectplace",
@@ -626,8 +626,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/projectplace.py",
       "swaggerSnapshot": "swagger-cache/projectplace.swagger.json",
       "swaggerSha256": "2dadbee3dfee2d60eeac8df831bd8a7b51cbbcded8480cbb7a14180fe7e50c11",
-      "outputSha256": "a8100cae58623d4ae26aacb53c0d99ba29c773414a0eb3f5e52759206f6eb33c",
-      "asyncOutputSha256": "5b508af1510fccd9326b98f0fd82bf1a6558c6607e454f01708cf9b153bee072"
+      "outputSha256": "e034e4d4c10eb7335ac69cb6af14cc22c7f0dee8cdc19a849a349e7944cd6915",
+      "asyncOutputSha256": "dd1a1e045bfec67a36b5a2edc889fbf5300937df2e53fafc81b910984c3a8b16"
     },
     {
       "apiName": "replicon",
@@ -635,8 +635,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/replicon.py",
       "swaggerSnapshot": "swagger-cache/replicon.swagger.json",
       "swaggerSha256": "8af777a66023a7ffd02c8e1ce5261119a529da8dc4fab07eebbe0c2454264b2c",
-      "outputSha256": "44eebd0dc13e435b87d06f6b2fecbdd90ef7fce19d442caac5f0d6d6f48caf2a",
-      "asyncOutputSha256": "bbcc2a6e8003015c3df076dd568236ce5aeb5096d87d2ae6f4febcda81cc1c73"
+      "outputSha256": "cdc868f19afb2c99b891cd6d8ddeaa01d284513abb4656ed98344e970daa7c71",
+      "asyncOutputSha256": "ac6bbd0b17342a7021ca99ecf9b27eb71621af36ecb942e1f93f30dd31701e9c"
     },
     {
       "apiName": "revai",
@@ -644,8 +644,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/revai.py",
       "swaggerSnapshot": "swagger-cache/revai.swagger.json",
       "swaggerSha256": "0b0aa956275624c23f31a2c3c3315f49fb26d8559e80e6ec536f6364c04e1037",
-      "outputSha256": "40158c0ec94c68a67c21ec7e99f1c26f127f4318f6d533c2e31c64f0497942fe",
-      "asyncOutputSha256": "b7bde0a3efee7a7348ac1dd39b357d0d12a22e3caeaa48f21f8d17156dcc40c6"
+      "outputSha256": "f46a61e5d03a7f0a0fb1b896c7243f80c6135b2d507046fef20cd490528fd865",
+      "asyncOutputSha256": "c67aa82ee23c4707b43f03f257dd2a00484dea3b76149d002ba3e38724d9ea51"
     },
     {
       "apiName": "rss",
@@ -653,8 +653,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/rss.py",
       "swaggerSnapshot": "swagger-cache/rss.swagger.json",
       "swaggerSha256": "e8470f461e7b966cc86b51733674510b7cc3a4f719611e1a337f8fad7fcf96d2",
-      "outputSha256": "89e26496a932be08935157259880c1c46a781d6958e1663149ee759edfb6f684",
-      "asyncOutputSha256": "8efd74e009874c7d928f2a919f2dadf39b52eaf8e488eab9232280e0cb69133d"
+      "outputSha256": "a5f716b37b5df3de950b722348bdb9f978ef27748a2fef5c4bc3565e9ba1a6eb",
+      "asyncOutputSha256": "9f2a58e473fe539e5dbf9f38edad89cca79f3d7f1857ef3f67b00efbb50f5e19"
     },
     {
       "apiName": "salesforce",
@@ -662,8 +662,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/salesforce.py",
       "swaggerSnapshot": "swagger-cache/salesforce.swagger.json",
       "swaggerSha256": "57ad15ab50d2d1796a1520b9a03d85dbabbf52b5ac722b05e390f1787926051f",
-      "outputSha256": "63a4b72ba8253fe9572cb9420c59768e01e16f2bbf2b0dd5a9b2007079759944",
-      "asyncOutputSha256": "154c07c12ecf66981f689cfdd7199547441c02dee2f29179cae565895444db30"
+      "outputSha256": "35552bd4a421cadb068010f473429391e4e645905523aaabeac53bb30e9d164d",
+      "asyncOutputSha256": "1c32d5f65e1b8f0e9b07ede2afba11dfc09560daa3501813d7922bea76fddd6f"
     },
     {
       "apiName": "seismicplanner",
@@ -671,8 +671,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/seismicplanner.py",
       "swaggerSnapshot": "swagger-cache/seismicplanner.swagger.json",
       "swaggerSha256": "adb321a0255847eab5f08294342cc59e9a12124b02b3676e5c43176fab460670",
-      "outputSha256": "2ea315483db5fcafa9423223c8f18a458e27ac6c987c8d12fad5211fa00755ff",
-      "asyncOutputSha256": "a72b8c8c383bdf7d6c62360d789a6cf19e482905d539fc2217d3c4b546c417fa"
+      "outputSha256": "60e6af2210c1fd9f93677a42e4198f9fc8bfaca15ca72ae06118ac10a7fc830f",
+      "asyncOutputSha256": "11f9cd8c4e073437260276f15152bbb7ee10f0688680fcba1973f8d387c96070"
     },
     {
       "apiName": "sendgrid",
@@ -680,8 +680,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/sendgrid.py",
       "swaggerSnapshot": "swagger-cache/sendgrid.swagger.json",
       "swaggerSha256": "a5d7caddb68834238831a5a808180c5f84c0c7075130fc09a0a2a998a0dc7fd6",
-      "outputSha256": "1eaf852ae1f4fccb689c1fc8c5660ed2e5a6bea4d202d800adf88ae895d1d434",
-      "asyncOutputSha256": "63ac87f56df43f08476b555ed45d8da0a194a5add05118f01294ff22ee42826c"
+      "outputSha256": "297a586bbb1f53541f82cb36c2b635f4f41103f9758f05c41445fd76fffbcf77",
+      "asyncOutputSha256": "6ee42dd7435106e723e1cc10c29b6eb03589afb24f56b8178bad898710100b29"
     },
     {
       "apiName": "servicebus",
@@ -689,8 +689,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/servicebus.py",
       "swaggerSnapshot": "swagger-cache/servicebus.swagger.json",
       "swaggerSha256": "b772b0ee3a4cbaee6e5f35c5690397ca0676855555051164ac3bdfd809ccd44b",
-      "outputSha256": "3a35d34e6db7bbf69377324ffedb797aee29e959b85210fb0af4e747a53cf122",
-      "asyncOutputSha256": "526ac98f1b1e9ae9491ee3a69cee20edab4a39c4cf3e9d249d5e54e5d7f719fc"
+      "outputSha256": "83f361b262f2f508908514f754c7a21d30d52e9c3ad6c62f06ae750f947d1eaf",
+      "asyncOutputSha256": "5986ef4127064516855ae2d6742abbe65f042d6b408ab4a9d3649501a0004a37"
     },
     {
       "apiName": "sharepointonline",
@@ -698,8 +698,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/sharepointonline.py",
       "swaggerSnapshot": "swagger-cache/sharepointonline.swagger.json",
       "swaggerSha256": "ecc0784ebe0ff3a418073094c66b3ec52154b5809b7234e1e9336c917ce48fbf",
-      "outputSha256": "2f9903c1afede7217da7f9c093069c883de1eb1be0291567a190d80e7d01bbcc",
-      "asyncOutputSha256": "a5cb8f9a5d9afcefd1e3630b1a17e086394868eb1a04d264d326a9642f206a58"
+      "outputSha256": "faa156806a0c220143e584f0b304e36c2b2629dea9f2a4e324c6f9d660980315",
+      "asyncOutputSha256": "404c67ed78ed0e1382d2f59459ea1fc0ce4a2df482f68d733a5d75f505aec600"
     },
     {
       "apiName": "shifts",
@@ -707,8 +707,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/shifts.py",
       "swaggerSnapshot": "swagger-cache/shifts.swagger.json",
       "swaggerSha256": "db4ed2f1af41c20cf583de3ebf7351ffa12baae52abb565906c7e46ef7eb86b9",
-      "outputSha256": "42e17d2c92fcb2ac55b88b55fc967f2f01eaf7bdfdf9b2344f3e3bc349a3d478",
-      "asyncOutputSha256": "511b91484b8f9292d779e0c16744c377b5ffbc5ad260fdde04a2244e561edafe"
+      "outputSha256": "56bfa71f5220306f55160766ddebc2a93144033fb5f543ca3a1ca2723d90e84f",
+      "asyncOutputSha256": "ea27bc81f0728be341deb3e442b04a5c7c7d72fdbd9b4f4b1958fde65584ab79"
     },
     {
       "apiName": "signinghub",
@@ -716,8 +716,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/signinghub.py",
       "swaggerSnapshot": "swagger-cache/signinghub.swagger.json",
       "swaggerSha256": "209a58f4fa78b19845cd3d7b6f4e01d94f73ace0a9832c73f804449f68263404",
-      "outputSha256": "b80adf7877ab3cc20a42d39444d659bae8fbf6c002f80d032dd8158d1b3947ec",
-      "asyncOutputSha256": "c1da814d806723afaa558a5f5d010eb355342b770b6ec2fb7634deb8572b6df5"
+      "outputSha256": "1f1abe3b20b49f7ccf6fe9c74f44716a3f6726117c35c266c1f1e9a7197f5f5e",
+      "asyncOutputSha256": "ddfbfdf5df3afd425efa497d2a567e6cfe9989e5bdd7b1566892c294ffb87fb5"
     },
     {
       "apiName": "slack",
@@ -725,8 +725,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/slack.py",
       "swaggerSnapshot": "swagger-cache/slack.swagger.json",
       "swaggerSha256": "9628ffa4396b91d06a3ef246926c86beea3513602b8b8f5a1d6f22c38386c336",
-      "outputSha256": "a786d358ae0b4b172c51e5fc9720117c406fe025031e0a39281cd3f31b558ab9",
-      "asyncOutputSha256": "0e5480b555686f9d7a8dee485053043e38955cfcb21e5880e61846e557ad5494"
+      "outputSha256": "a7d27f3907556535acf07474f261d5e697e2a06b94f21e65c816733d228be1ce",
+      "asyncOutputSha256": "e749f63496ea60c5dad405046df3a522c8029a942f41f0f197afec207850ec8e"
     },
     {
       "apiName": "smtp",
@@ -743,8 +743,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/sql.py",
       "swaggerSnapshot": "swagger-cache/sql.swagger.json",
       "swaggerSha256": "ce1b8d471f2a8ca04e7919434266694173a456b0af27710de3694cbf84f01972",
-      "outputSha256": "ad40b16fa29c0fb16f184b91dd4f54da9b8ac4a6796d9b0b3be45442b05307c6",
-      "asyncOutputSha256": "134eb1ce8731dfc318210a25bf0e37e0a6fa1c2239f9a816cb409115349a72c4"
+      "outputSha256": "fc74df941ac410dfd0bf162e619bf4cf7023fb5a92361087e6eea163aea9e861",
+      "asyncOutputSha256": "65698c03401c8a06c28082e24e8ceccae75d2213ab8d594e8f4ab6535bb76317"
     },
     {
       "apiName": "starmind",
@@ -761,8 +761,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/starrezrestv1.py",
       "swaggerSnapshot": "swagger-cache/starrezrestv1.swagger.json",
       "swaggerSha256": "ec00ac764f396b41b9725414ad10f2b358ee583bbea760ae99a91799d48d0e73",
-      "outputSha256": "8a3d0dec4d4f64e512d8601d8df2afd1f37a63c4717220ffaa7dd58f66f75a5c",
-      "asyncOutputSha256": "c4e155042aafdf41a7a89b8b3679b1e8d8e0a1e8377cf59087de7653c0c5c05d"
+      "outputSha256": "cc666348dfbf9ab38aeeb35eba88087c69cbe3cedad5008cb4be47e47c4f6fef",
+      "asyncOutputSha256": "e88da1f4b7df34e09639f6b2c78d7d3ac73cf04403c6f7fe8bda5a2797078fdb"
     },
     {
       "apiName": "tallyfy",
@@ -770,8 +770,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/tallyfy.py",
       "swaggerSnapshot": "swagger-cache/tallyfy.swagger.json",
       "swaggerSha256": "fc196fdc54606cac820bcf67025b6505b9f6e4c5c74fad4d7da44533e5aad464",
-      "outputSha256": "57ad8e8a95e495ef9d74011d3ebb4b20a41557f5433bad53a85111c48a6de01d",
-      "asyncOutputSha256": "32869ad224a8c8dde1fa82d032bd9389b01d420eb3aca782b2bec223c4c0980c"
+      "outputSha256": "941edfb08071afdb49820c37d07fc4138eda326c084aba5fc2008bed63152b15",
+      "asyncOutputSha256": "8ddc3bbdbfab8377599c7c8e6547adfc058eed1452e84cfdbb4f4250b4963e86"
     },
     {
       "apiName": "teams",
@@ -779,8 +779,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/teams.py",
       "swaggerSnapshot": "swagger-cache/teams.swagger.json",
       "swaggerSha256": "0116fc974e54ff4c9a69ef386b9f990f1d51d226f1666bbd705f53e720b955e8",
-      "outputSha256": "77bcdac9439f17eeb066ad86fbf67a317240f26106b612f218d3aa5c94beb321",
-      "asyncOutputSha256": "8916df29e586244227a3623157f2319b7bae9cea70f69e49d77f8c2a586254f4"
+      "outputSha256": "873b937150bd988d23110ac6baecaf4136c30c26b9e1e1ee5a858cddb242994f",
+      "asyncOutputSha256": "7aa05db343690935e5a4dd6863cf29910ce2ce2eaf7dd924e3b222b161a7a67c"
     },
     {
       "apiName": "textrequest",
@@ -788,8 +788,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/textrequest.py",
       "swaggerSnapshot": "swagger-cache/textrequest.swagger.json",
       "swaggerSha256": "ae8e02fd550831232602aed510c23be86b8287c394d9b4ffdfc3f8657b9d7adb",
-      "outputSha256": "c3683ac69cd1045a1ff9490af341c31ec1678cdd9e49e90758ebece79fd3a2ca",
-      "asyncOutputSha256": "f5540cb0b59617fbf08fdc742fb5f70bcf17579adfc37e4e9bcd78c480d122dc"
+      "outputSha256": "8406a0314e7e78e9937607eb456aa3554059da97114cde3e3a4e448bc7bb2740",
+      "asyncOutputSha256": "1e10a6c92aa29255773a8ce0b99b5ffa88c9404c3ed8cc4333e9c1d86d59292b"
     },
     {
       "apiName": "ticketmaster",
@@ -806,8 +806,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/todo.py",
       "swaggerSnapshot": "swagger-cache/todo.swagger.json",
       "swaggerSha256": "d500a1028c6e81a051a849c6a6382082363f5bcc0c74d1c132d825210670ca6a",
-      "outputSha256": "1195d270693c633ab56ec9cd1a08752f7e7e211fea7d51dca5b45d7ccc37f199",
-      "asyncOutputSha256": "206f3bdafd5de79552bc5b7790ca3db10c5687835fe1dae622c852c4d4364ac7"
+      "outputSha256": "677b04e2aa7b359142fa0c5802b8bd9bae391f3c9a960daa1cb1363fbfbde7a8",
+      "asyncOutputSha256": "06f0e57b20410f017c5156585ffb289fb29247069fe55e79daea861279e48adb"
     },
     {
       "apiName": "trello",
@@ -815,8 +815,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/trello.py",
       "swaggerSnapshot": "swagger-cache/trello.swagger.json",
       "swaggerSha256": "d916351d7242576f38bfa018f922ed49cd58e08e7e63bee4801d9e9dd5a8b97f",
-      "outputSha256": "24c213df1525352e5b6c9b9afeeccb81e747fb7941e5efd4759b725fc196d250",
-      "asyncOutputSha256": "409acdb2515f9735dc8d04bc688bde21621d08f65f4cd9f8fb3839e031e17d75"
+      "outputSha256": "3f8e2ffc3a8592876ff8f86ee5a5c2721cf2094259f1133dee327e82b9a400a9",
+      "asyncOutputSha256": "d2160cbb25b0aed6537b7199ad5ae56c3afc314757e6528bda99808d5b3c26a7"
     },
     {
       "apiName": "twitter",
@@ -824,8 +824,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/twitter.py",
       "swaggerSnapshot": "swagger-cache/twitter.swagger.json",
       "swaggerSha256": "e617b4c93b41a36d2a645edd420063a56b17302a5c25c6d9f7725cb10c218abd",
-      "outputSha256": "834c21985ee416233bccd8be96a3b99b7abefd8f3cdeee7dbbef389f5f10c0d0",
-      "asyncOutputSha256": "aa248c6daacf65460524f365ea65554eae09309db04ee264b1bfc7d47f8d063f"
+      "outputSha256": "0faf381020877127072c8291c9842df3b4607ee2926bca4a403ad43798d0b1cc",
+      "asyncOutputSha256": "75399433596f76575ecfc88387d07e3b34d941348b4dcff9b60b67602999d0c3"
     },
     {
       "apiName": "typeform",
@@ -833,8 +833,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/typeform.py",
       "swaggerSnapshot": "swagger-cache/typeform.swagger.json",
       "swaggerSha256": "9c6a2b915765e47cbe1416322f810908e82ef991cf124f9ec89569d149fa9625",
-      "outputSha256": "b92dde963b5b9ddceaab9ce12f1b2ebc9f9378e5f74d4e782f1b49b592338356",
-      "asyncOutputSha256": "b209f9327302bf1302028d3726b49cde0f588ecf2dcf787624febe30810fd545"
+      "outputSha256": "3b03d32f5f6cddfeb1f22f803831be599127945b14fa2a0bd2de0176cb41ddb9",
+      "asyncOutputSha256": "21e790b19867b9af21c9cad70c57e48743915f5b8a82ce8ccb97de11224664f7"
     },
     {
       "apiName": "universalprint",
@@ -842,8 +842,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/universalprint.py",
       "swaggerSnapshot": "swagger-cache/universalprint.swagger.json",
       "swaggerSha256": "46eb75534617fffca747ab0a1a6ea03844d5e2f810f4488fcabac962ff9f3b13",
-      "outputSha256": "8879993c28f90895aabe33129e7773a8b425b7d2d0c0250531fdb21cb9b0dc34",
-      "asyncOutputSha256": "cea4c83ab24bb6d45a004e248a60b679a391ec965b924f7015f8cceb528631d4"
+      "outputSha256": "e415497049e34de6fd02519081217e442e0a5730b2d9f41c2e3739f077ca1225",
+      "asyncOutputSha256": "4d50c1e91d3fbff6e48817e62a1e95301c77aed393f470d7d2f5de782b52e48e"
     },
     {
       "apiName": "waywedo",
@@ -851,8 +851,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/waywedo.py",
       "swaggerSnapshot": "swagger-cache/waywedo.swagger.json",
       "swaggerSha256": "7f5fc1e2e00c11874a8c9bf6b2301ebfe325de3f70e4b786f316d11f3555d21a",
-      "outputSha256": "6f3100ed9b95762d454fa78c32736337057df75d185d16078b7395be37a866fa",
-      "asyncOutputSha256": "d1217324a6ac2910e84e906ab31e29389c1ffad794248bf4d4917351302c6969"
+      "outputSha256": "1dca598b85bb81d8123987e56152b34218d9131d0a823053371e7215ce32e849",
+      "asyncOutputSha256": "e92411ed1e2feeef81f57feebfcc07a1ca5f246c466d453cd7d9dbd67e67909c"
     },
     {
       "apiName": "wdatp",
@@ -860,8 +860,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/wdatp.py",
       "swaggerSnapshot": "swagger-cache/wdatp.swagger.json",
       "swaggerSha256": "a0aa86e34831de1f7206b3d26ac89b7fa446b9f64b7555555ba5c96d70b8fa16",
-      "outputSha256": "af6341ac867e9e1be16b7ad092348b00472537927a6a4476470f515f1246d6ff",
-      "asyncOutputSha256": "c290533a66a58b941a0998bf74043eba4226d6dbf121650f8672686da6e4f68a"
+      "outputSha256": "9c26e254b9700afd434f10a85a74f1d42baaabd339b45304f090b6ebaebc4325",
+      "asyncOutputSha256": "c7e689ce2ad4846a4e62cd3f10fcd7ee20e1818b69b5cd02e6fba9352f753a0a"
     },
     {
       "apiName": "webex",
@@ -869,8 +869,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/webex.py",
       "swaggerSnapshot": "swagger-cache/webex.swagger.json",
       "swaggerSha256": "171e92c116967fbfef49546c895cc4f1de3304102c7d45b6ed2ba371e9ad07dc",
-      "outputSha256": "a4f94b7ac6522ad8ea377c2be7c0e79c6b5ff963121baed68ff3256a2f7c4bbf",
-      "asyncOutputSha256": "20341c764cba5e9ff2141fbce4067985a50b2688d0d93da89119115269ae9e2a"
+      "outputSha256": "9ae62391bfee1ceac189702a58a951bdc55b85c7aa18915c6fd17300843c8077",
+      "asyncOutputSha256": "2b76266665909a3db0c464f82316af3b6a9040df0aed2f543d0a226afdc98924"
     },
     {
       "apiName": "wordonlinebusiness",
@@ -878,8 +878,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/wordonlinebusiness.py",
       "swaggerSnapshot": "swagger-cache/wordonlinebusiness.swagger.json",
       "swaggerSha256": "e7d1b48fc4ac9758220441a2ca0c3c77bc490f35a406df947c69b3cfb1d70358",
-      "outputSha256": "850866ae18faba8993ddeb706cee3f136c1414dab89c90078c693f0761069c04",
-      "asyncOutputSha256": "2c70ecb88bc222b008197a83e959bd715f5a248f42432d14b38def9b2ee580ee"
+      "outputSha256": "4688cefbd7609a064d7c7e26216be4bf918e856f11b15c3fa2799f44b49b1a64",
+      "asyncOutputSha256": "cd5defd3ddfdd59bd5c3b859d85925daa684c1f14edb6cb67bbc16feaa04f9fd"
     },
     {
       "apiName": "wordpress",
@@ -887,8 +887,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/wordpress.py",
       "swaggerSnapshot": "swagger-cache/wordpress.swagger.json",
       "swaggerSha256": "a9386247d5261e0746aa5d8ee445d014ec0151f26594837d95b7c3d9dd68cb06",
-      "outputSha256": "b97a5e848bb43bb15f87f5823bad290a65d52f65a57478220cf9ac630de4c5e9",
-      "asyncOutputSha256": "8f490cf0dc0e9c10420e0b39e2513f8fcb4049c86db8c7b8f3680adcfd8950c4"
+      "outputSha256": "dd4becc72766c0350056bf573bb6b4ae8a31c838b76419e732334acef2111dd0",
+      "asyncOutputSha256": "b43e838d98d571590219d6301d48424e623158e1778340c47b4375cc688d6a76"
     },
     {
       "apiName": "yammer",
@@ -896,8 +896,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/yammer.py",
       "swaggerSnapshot": "swagger-cache/yammer.swagger.json",
       "swaggerSha256": "010c481c1a53c2dbda78c376fc5aa20deaafb6bce7d4dfaf72cc25b0d6bc92d1",
-      "outputSha256": "fae8381e372de04b583eddb3cabe8d5314ae1128e54d06ae326a12b7d56b16d1",
-      "asyncOutputSha256": "02cbf97d9829d7fe01fc110c4965c02ede1feef6000ff549d561de15cd7e6257"
+      "outputSha256": "5fb8b40aac9e5f56b571f8e1f410b314fc7d22934271cc80f9064e7d2ce45556",
+      "asyncOutputSha256": "240e75c4628e8bfba2a099b8f0df33afadd5c8e8bb6e135ddbfde68455dcd9f1"
     },
     {
       "apiName": "zendesk",
@@ -905,8 +905,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/zendesk.py",
       "swaggerSnapshot": "swagger-cache/zendesk.swagger.json",
       "swaggerSha256": "f568516a726b1eb89d50c38c34582f20fd3bb315d29f5f139eb563ddf84b1f8a",
-      "outputSha256": "3289387ee2c7f14efa0610fbf8ae6365d9e9a0d3cd6c8580f227acf2f0710584",
-      "asyncOutputSha256": "c8ae5739ac03da363a58329dfc9c4c0e60cec22676b880cacace6a53c9eabd76"
+      "outputSha256": "e15f8e47c2820ae13b06fec4695a660675d5bde577e5ba220f9616b84d0d7b75",
+      "asyncOutputSha256": "979a56e5432c4a2d56e5781f41842ae349aa74003688dc8686e669e3a2ed1301"
     },
     {
       "apiName": "zeptomail",
@@ -923,8 +923,8 @@
       "asyncOutputFile": "src/azure/connectors/aio/zohosign.py",
       "swaggerSnapshot": "swagger-cache/zohosign.swagger.json",
       "swaggerSha256": "ce62c4d774b291d1ccbf5a1f258613e938f894400c77cec02eefca0bbd9c8239",
-      "outputSha256": "3e516b2f493d8551f3cf7e36ca4d6d966eb455446510d6c1398d8340a5e9c1b1",
-      "asyncOutputSha256": "5a76a81a7ca6ef39a1840aac01ea5b7ac926319b1a88c5042d6706165bf874bc"
+      "outputSha256": "34cf4f209ae9946c4dcf8196742235a1b7354cb4baabf7f996195612f5f526b2",
+      "asyncOutputSha256": "bed7e6c46c998a9610234e4f076fd8d8186e14d2fc2eab711793b44fd1a7b044"
     }
   ]
 }

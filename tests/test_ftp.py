@@ -50,7 +50,7 @@ async def _invoke_operation(client: FtpClient, operation: str):
         return await resolve_generated_result(client.list_root_folder())
     if operation == "extract_folder":
         return await resolve_generated_result(
-            client.list_extract_folder(
+            client.extract_folder(
                 source="/inbound/archive.zip",
                 destination="/expanded",
                 overwrite=True,
@@ -252,7 +252,7 @@ class TestFtpClientMethods:
             return_value=mock_response,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_extract_folder(
+                client.extract_folder(
                     source="/inbound/archive.zip",
                     destination="/expanded",
                     overwrite=True,

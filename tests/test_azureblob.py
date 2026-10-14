@@ -425,7 +425,7 @@ class TestExtractFolder:
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_extract_folder(
+                client.extract_folder(
                     dataset="mycontainer",
                     source="/archive.zip",
                     destination="/extracted"
@@ -455,7 +455,7 @@ class TestExtractFolder:
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(
-                client.list_extract_folder(
+                client.extract_folder(
                     dataset="mycontainer",
                     source="/archive.zip",
                     destination="/extracted",
@@ -484,7 +484,7 @@ class TestExtractFolder:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_extract_folder(
+                    client.extract_folder(
                         dataset="mycontainer",
                         source="/archive.zip",
                         destination="/extracted"

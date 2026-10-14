@@ -409,7 +409,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1380,7 +1382,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1460,7 +1464,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1828,7 +1834,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1908,7 +1916,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -2746,7 +2756,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -2882,7 +2894,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -2960,7 +2974,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "POST", request_url, body=body,
@@ -3034,7 +3050,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -3108,7 +3126,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -3188,7 +3208,9 @@ class Office365Client(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,

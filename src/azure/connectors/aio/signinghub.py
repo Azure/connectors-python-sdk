@@ -804,7 +804,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1133,7 +1135,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -1920,7 +1924,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_fields_auto_place(
+    async def fields_auto_place(
         self,
         input: AutoPlaceFieldRequest | Mapping[str, Any],
         package_id: int,
@@ -1930,7 +1934,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         AutoPlace Fields
 
@@ -1960,9 +1964,6 @@ class SigninghubClient(ConnectorClientBase):
         Note if you have a document with a template applied, or have applied
         one using the APIs, then the workflow will already contain users.
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
-
         Swagger operation ID: `V4_Fields_AutoPlace`.
 
         Args:
@@ -1977,8 +1978,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1993,45 +1993,27 @@ class SigninghubClient(ConnectorClientBase):
             f"/fields"
             f"/autoplace"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def fields_delete_document_field(
         self,
@@ -3396,7 +3378,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -3969,7 +3953,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -4511,7 +4497,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -5071,7 +5059,9 @@ class SigninghubClient(ConnectorClientBase):
         async def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = await self.http_client.send(
                 "GET", request_url, body=body,
@@ -5370,7 +5360,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_workflow_start_workflow(
+    async def workflow_start_workflow(
         self,
         package_id: int,
         *,
@@ -5378,7 +5368,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Share Document Package
 
@@ -5387,9 +5377,6 @@ class SigninghubClient(ConnectorClientBase):
         already have been prepared by applying a template and optionally
         updating the users and actions defined in template. The package ID to
         be shared is provided in the resource URL.
-
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
 
         Swagger operation ID: `V4_Workflow_StartWorkflow`.
 
@@ -5401,8 +5388,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5411,45 +5397,27 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow"
         )
-        initial_request_url = request_url
-        request_body = None
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def workflow_update_workflow(
         self,
@@ -5651,7 +5619,7 @@ class SigninghubClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_workflow_workflow_add_group(
+    async def workflow_workflow_add_group(
         self,
         input: WorkflowWorkflowAddGroupInput,
         package_id: int,
@@ -5660,7 +5628,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add Groups to Workflow
 
@@ -5673,9 +5641,6 @@ class SigninghubClient(ConnectorClientBase):
         preparation, only supported role types are \"SIGNER\", \"REVIEWER\" and
         \"CARBON_COPY\"
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
-
         Swagger operation ID: `V4_Workflow_WorkflowAddGroup`.
 
         Args:
@@ -5687,8 +5652,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5697,47 +5661,29 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/groups"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
+        return json.loads(response.text)
 
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
-
-    def list_workflow_workflow_add_placeholder(
+    async def workflow_workflow_add_placeholder(
         self,
         input: WorkflowWorkflowAddPlaceholderInput,
         package_id: int,
@@ -5746,7 +5692,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add Placeholder to Workflow
 
@@ -5761,9 +5707,6 @@ class SigninghubClient(ConnectorClientBase):
         document preparation, only supported role types are \"SIGNER\",
         \"REVIEWER\" and \"CARBON_COPY\"
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
-
         Swagger operation ID: `V4_Workflow_WorkflowAddPlaceholder`.
 
         Args:
@@ -5776,8 +5719,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5790,47 +5732,29 @@ class SigninghubClient(ConnectorClientBase):
             f"/workflow"
             f"/placeholder"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
+        return json.loads(response.text)
 
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
-
-    def list_workflow_workflow_add_user(
+    async def workflow_workflow_add_user(
         self,
         input: WorkflowWorkflowAddUserInput,
         package_id: int,
@@ -5839,7 +5763,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add Users to Workflow
 
@@ -5872,9 +5796,6 @@ class SigninghubClient(ConnectorClientBase):
         preparation, only supported role types are \"SIGNER\", \"REVIEWER\" and
         \"CARBON_COPY\"
 
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
-
         Swagger operation ID: `V4_Workflow_WorkflowAddUser`.
 
         Args:
@@ -5887,8 +5808,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5897,45 +5817,27 @@ class SigninghubClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v4/packages/{quote(str(package_id), safe='')}/workflow/users"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def workflow_workflow_delete_user(
         self,

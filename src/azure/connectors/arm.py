@@ -776,7 +776,12 @@ class ProviderResourceType:
         metadata={"wire_name": "resourceType"},
     )
     """The resource type."""
-    locations: Optional[List[ObjectWithoutType]] = dataclass_field(default=None, kw_only=True)
+    locations: Optional[
+        List[ObjectWithoutType | Mapping[str, Any]]
+    ] = dataclass_field(
+        default=None,
+        kw_only=True,
+    )
     """
     The collection of locations where this resource type can be created in.
     """
@@ -1265,7 +1270,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1402,7 +1409,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1972,7 +1981,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -2156,7 +2167,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -2396,7 +2409,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -2585,7 +2600,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -3034,7 +3051,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -3145,7 +3164,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -3979,7 +4000,9 @@ class ArmClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,

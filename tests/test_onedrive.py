@@ -1012,7 +1012,7 @@ class TestExtractFolder:
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(
-                client.list_extract_folder(
+                client.extract_folder(
                     source="/Documents/archive.zip",
                     destination="/Documents/extracted"
                 )

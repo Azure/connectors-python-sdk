@@ -81,9 +81,9 @@ async def _invoke_operation(client: TrelloClient, operation: str):
             card_id="card",
             board_id="board",
         )
-    if operation == "list_add_member_to_card":
+    if operation == "add_member_to_card":
         return await resolve_generated_result(
-            client.list_add_member_to_card(
+            client.add_member_to_card(
                 card_id="card",
                 board_id="board",
                 member_id="member",
@@ -132,7 +132,7 @@ ALL_OPERATIONS = [
     "list_card_members",
     "list_card_comments",
     "add_comment_to_card",
-    "list_add_member_to_card",
+    "add_member_to_card",
     "create_board",
     "create_list",
     "close_board",

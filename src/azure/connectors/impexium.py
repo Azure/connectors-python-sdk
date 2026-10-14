@@ -5009,7 +5009,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -5135,7 +5137,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -5243,7 +5247,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -5339,7 +5345,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_add_exam_scores(
+    def add_exam_scores(
         self,
         input: AddExamScoresInput,
         exam_code: str,
@@ -5348,14 +5354,11 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add Exam Scores
 
         Add Exam Scores
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `Add-Exam-Scores`.
 
@@ -5368,8 +5371,7 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5378,45 +5380,27 @@ class ImpexiumClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/api/v1/Exams/{quote(str(exam_code), safe='')}/Scores"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def find_members_by_name(
         self,
@@ -5567,7 +5551,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_add_or_update_a_list_of_custom_fields_per_organization(
+    def add_or_update_a_list_of_custom_fields_per_organization(
         self,
         input: AddOrUpdateAListOfCustomFieldsPerOrganizationInput,
         id_or_record_number: str,
@@ -5576,14 +5560,11 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add or Update a List of Custom Fields Per Organization
 
         Add or Update a List of Custom Fields Per Organization
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID:
         `Add-or-Update-a-List-of-Custom-Fields-Per-Organization`.
@@ -5597,8 +5578,7 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5611,45 +5591,27 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(id_or_record_number), safe='')}"
             f"/CustomFieldsList"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def add_nominee(
         self,
@@ -5747,7 +5709,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -5903,7 +5867,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6075,7 +6041,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6160,7 +6128,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6401,7 +6371,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6541,7 +6513,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6839,7 +6813,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -6916,7 +6892,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -7732,7 +7710,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -7922,7 +7902,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -8381,7 +8363,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -9355,7 +9339,7 @@ class ImpexiumClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_add_or_update_a_list_of_custom_fields_per_individual(
+    def add_or_update_a_list_of_custom_fields_per_individual(
         self,
         input: AddOrUpdateAListOfCustomFieldsPerIndividualInput,
         id_or_record_number: str,
@@ -9364,14 +9348,11 @@ class ImpexiumClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Add or Update a List of Custom Fields Per Individual
 
         Add or Update a List of Custom Fields Per Individual
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID:
         `Add-or-Update-a-List-of-Custom-Fields-Per-Individual`.
@@ -9385,8 +9366,7 @@ class ImpexiumClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -9399,45 +9379,27 @@ class ImpexiumClient(ConnectorClientBase):
             f"/{quote(str(id_or_record_number), safe='')}"
             f"/CustomFieldsList"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def get_upcoming_events(
         self,
@@ -9671,7 +9633,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -9753,7 +9717,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -9909,7 +9875,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -11643,7 +11611,9 @@ class ImpexiumClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,

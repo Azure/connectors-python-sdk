@@ -16,6 +16,7 @@ decisions so future changes preserve the public contract.
 | Errors | Derive connector service errors from Azure Core `HttpResponseError`. | Follow |
 | Request options | Expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` on both modes. | Follow |
 | Long-running operations | Return `LROPoller`/`AsyncLROPoller` for retained operations with an HTTP 202 `Location` contract. | Follow |
+| API versions | Use each generated operation's managed-connector Swagger version; do not expose a client-level `api_version` override. | Intentional deviation |
 | Return values | Return connector payloads directly rather than Azure Core `Response[T]` wrappers. | Intentional deviation |
 
 ## Namespace shape
@@ -39,6 +40,11 @@ enums, and `TRIGGER_OPERATIONS` have shared identity across the paired modules.
 Location-backed operations use the same `begin_*` name in both modes. Azure
 status-document protocols, poller continuation tokens, and cancellation are
 not part of the current contract.
+
+Managed connectors can route operations to different service API versions
+within one client. Generated operations therefore retain their Swagger-declared
+internal version defaults instead of accepting one constructor-level
+`api_version` that could override unrelated routes.
 
 ## Compatibility policy
 

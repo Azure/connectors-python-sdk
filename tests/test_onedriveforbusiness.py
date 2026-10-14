@@ -80,7 +80,7 @@ METHOD_ARGUMENTS: list[tuple[str, dict]] = [
         {"path": "/Documents/file.txt", "type_": "view"},
     ),
     (
-        "list_extract_folder",
+        "extract_folder",
         {"source": "/Documents/archive.zip", "destination": "/Documents/extracted"},
     ),
     ("list_folder", {"id": "folder123"}),

@@ -38,7 +38,7 @@ SUCCESS_CONTRACTS = {
         "/dashboards/1/contacts/value/conversations/archive",
         False,
     ),
-    "list_bulk_update_contacts": ("POST", "/dashboards/1/contacts", True),
+    "bulk_update_contacts": ("POST", "/dashboards/1/contacts", True),
     "cancel_payment": (
         "POST",
         "/dashboards/1/payments/1/cancel",
@@ -249,7 +249,7 @@ class TestTextrequestClientOperations:
                 text=(
                     '[{"ok": true}]'
                     if operation in {
-                        "list_bulk_update_contacts",
+                        "bulk_update_contacts",
                         "list_custom_fields",
                     }
                     else '{"items": [{"ok": true}]}'
@@ -271,7 +271,7 @@ class TestTextrequestClientOperations:
         expected_result = (
             [{"ok": True}]
             if operation in {
-                "list_bulk_update_contacts",
+                "bulk_update_contacts",
                 "list_custom_fields",
             } | PAGED_OPERATIONS
             else {"ok": True}
@@ -637,7 +637,7 @@ class TestTextrequestClientErrorHandling:
             "delete_contact",
             "create_contact",
             "list_contacts",
-            "list_bulk_update_contacts",
+            "bulk_update_contacts",
             "get_group_by_id",
             "delete_group",
             "update_group",

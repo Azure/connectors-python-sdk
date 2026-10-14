@@ -23,9 +23,10 @@ contract.
   pageable methods construct and return their pager without being awaited.
 - Paired clients have the same class name, unsuffixed operation names,
   parameters, request controls, and non-paging return payload types.
-- Root collection operations return `ItemPaged`; aio collection operations
-  return `AsyncItemPaged`. This includes bounded collections without a
-  continuation-link contract.
+- Root read-collection operations return `ItemPaged`; aio read-collection
+  operations return `AsyncItemPaged`. This includes bounded read collections
+  without a continuation-link contract. Arrays returned by mutations and other
+  actions remain eager operation payloads.
 - Dataclasses, type aliases, enums, and `TRIGGER_OPERATIONS` are declared only
   in root and imported by aio, preserving object identity.
 - Swagger-required dataclass properties are required constructor arguments;
@@ -44,8 +45,9 @@ contract.
 
 Paging must preserve validation, connector error behavior, empty pages,
 continuation links, request controls, and response hooks on every request.
-Continuation links from a different origin are rebased onto the connection
-runtime origin before the next request.
+Service links and caller-provided continuation tokens pass through the same URL
+resolver. Links from a different origin are rebased onto the connection runtime
+origin before the next request.
 
 The shipped catalog contains exactly 44 paired LRO methods: 5 in Kusto and 39
 in Plumsail. Internal Kusto retrieval helpers and superseded Plumsail revisions

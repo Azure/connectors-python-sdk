@@ -1456,7 +1456,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1564,7 +1566,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1671,7 +1675,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,
@@ -1855,7 +1861,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_extract_folder(
+    def extract_folder(
         self,
         source: str,
         destination: str,
@@ -1865,15 +1871,12 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Extract archive to folder
 
         This operation extracts an archive file into a folder (example: .zip).
         Maximum archive size is 50 MB and 100 files inside.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `ExtractFolderV2`.
 
@@ -1887,8 +1890,7 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1912,45 +1914,27 @@ class OnedriveforbusinessClient(ConnectorClientBase):
             query_params.append(f"overwrite={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = None
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=None,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else []
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page:
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def list_folder(
         self,
@@ -2003,7 +1987,9 @@ class OnedriveforbusinessClient(ConnectorClientBase):
         def get_next(
             continuation_token: Optional[str],
         ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = continuation_token or initial_request_url
+            request_url = initial_request_url
+            if continuation_token is not None:
+                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
             body = request_body if continuation_token is None else None
             response = self.http_client.send(
                 "GET", request_url, body=body,

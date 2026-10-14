@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Breaking Changes
 
 - **Swagger-required model fields are now required constructor arguments** — generated dataclasses no longer default required properties to `None`.
-- **All collection operations now return Azure Core pagers** — bounded collection responses without continuation metadata now use `ItemPaged` or `AsyncItemPaged` consistently with pageable operations.
+- **Read collection operations now return Azure Core pagers** — bounded read collections without continuation metadata use `ItemPaged` or `AsyncItemPaged`; mutation and action arrays remain eager operation payloads.
 - **Client timeout configuration now uses `timeout`** — generated sync and aio
   client constructors use the same keyword as per-operation request controls.
 - **Location-backed operations now return pollers** — 44 Kusto and Plumsail operations move from immediate operation names to `begin_*`. Call `poller.result()` for root clients or await `poller.result()` for aio clients while the connector client remains open.
@@ -58,7 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded collection envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`.
+- **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
+- **Caller continuation isolation**: Caller-provided `by_page()` continuation URLs now pass through the same origin normalization as service-provided next links, preventing authenticated requests from being sent to an arbitrary host.
 - **Idempotent deletes** — generated `DELETE` operations now succeed when the resource is already absent and the service returns HTTP 404.
 - **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
 - **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.

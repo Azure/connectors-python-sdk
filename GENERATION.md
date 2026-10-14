@@ -143,10 +143,11 @@ Run it a second time and require a clean diff to prove reproducibility.
 
 ### Pageable Results
 
-Collection operations return Azure Core pagers, including bounded collections
-without continuation metadata. Iteration follows continuation links when the
-contract provides them and yields items directly; an empty response yields no
-items. Do not await pager construction:
+Read-collection operations return Azure Core pagers, including bounded read
+collections without continuation metadata. Arrays returned by mutations and
+other actions remain eager payloads. Pager iteration follows continuation links
+when the contract provides them and yields items directly; an empty response
+yields no items. Do not await pager construction:
 
 ```python
 for item in sync_client.list_items(...):
@@ -631,7 +632,9 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Operation methods corrected Swagger spelling or split acronym letters | Fixed in generator | `docusign`, `github`, `googletasks`, `pdfco`, `salesforce`, `signinghub`, `slack`, `wordonlinebusiness`, `zohosign` | Fixed | Python applies deterministic acronym-aware snake_case and connector-scoped corrections for known malformed operation IDs. |
 | Colliding wire names dropped after Python normalization | Fixed in generator | `teams`, `shifts`, `todo` | Fixed | Distinct generated fields preserve both `id` and `@odata.id`; serializer tests set both values together. |
 | String-encoded integer enum tokens emitted as string literals | Fixed in generator | `etsy` | Fixed | Python now normalizes quoted enum tokens to the declared integer schema type. All Phase 6 and 7 clients were regenerated; only `etsy` changed. |
-| Pageable item properties and bounded collection envelopes misclassified | Fixed in generator | `insightly`, `jira`, `documentdb`, `sql`, and other collection connectors | Fixed | Explicit pageable operations infer omitted item names and use recognized continuation fields present in the response schema. Bounded envelopes select conventional primary arrays over auxiliary array metadata and emit `list_*` pagers. |
+| Pageable item properties and bounded collection envelopes misclassified | Fixed in generator | `azuredigitaltwins`, `insightly`, `jira`, `documentdb`, `sql`, and other collection connectors | Fixed | Explicit pageable operations infer omitted item names and use recognized continuation fields present in the response schema. Bounded read envelopes select conventional primary arrays over auxiliary array metadata and emit `list_*` pagers, while mutation/action arrays remain eager. |
+| Caller continuation URLs bypassed pagination origin normalization | Fixed in generator | All pageable connectors | Fixed | `by_page(continuation_token=...)` now routes caller tokens through the same URL resolver as service-provided next links before transport receives the request. |
+| Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 
 **Adding a new defect:**

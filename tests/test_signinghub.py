@@ -466,7 +466,7 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "document_id": "doc-1",
     },
-    "list_fields_auto_place": {
+    "fields_auto_place": {
         "input": {},
         "package_id": "package-1",
         "document_id": "doc-1",
@@ -604,7 +604,7 @@ OPERATION_ARGS = {
         "order": "1",
     },
     "workflow_recall_workflow": {"package_id": "package-1"},
-    "list_workflow_start_workflow": {"package_id": "package-1"},
+    "workflow_start_workflow": {"package_id": "package-1"},
     "workflow_update_workflow": {"input": {}, "package_id": "package-1"},
     "workflow_update_workflow_post_process": {"input": {}, "package_id": "package-1"},
     "workflow_update_workflow_reminder": {
@@ -612,12 +612,12 @@ OPERATION_ARGS = {
         "package_id": "package-1",
         "order": "1",
     },
-    "list_workflow_workflow_add_group": {"input": {}, "package_id": "package-1"},
-    "list_workflow_workflow_add_placeholder": {
+    "workflow_workflow_add_group": {"input": {}, "package_id": "package-1"},
+    "workflow_workflow_add_placeholder": {
         "input": {},
         "package_id": "package-1",
     },
-    "list_workflow_workflow_add_user": {"input": {}, "package_id": "package-1"},
+    "workflow_workflow_add_user": {"input": {}, "package_id": "package-1"},
     "workflow_workflow_delete_user": {"package_id": "package-1", "order": "1"},
     "workflow_workflow_update_placeholder": {
         "input": {},
