@@ -4,6 +4,7 @@ import pytest
 from azure.core.exceptions import HttpResponseError
 
 from azure.connectors.sdk.exceptions import ConnectorException
+from azure.connectors.sdk.response import ConnectorResponseSnapshot
 
 
 class TestConnectorException:
@@ -62,6 +63,39 @@ class TestConnectorException:
 
         assert isinstance(ex, HttpResponseError)
         assert ex.status_code == 500
+        assert ex.reason == "Internal Server Error"
+        assert ex.response is not None
+        assert ex.response.status_code == 500
+        assert ex.response.body() == b"error"
+
+    def test_exception_preserves_completed_response(self):
+        """Expose response headers and content through the Azure Core contract."""
+        response = ConnectorResponseSnapshot(
+            status=429,
+            headers={"Content-Type": "application/json", "Retry-After": "30"},
+            text='{"error": "throttled"}',
+            content=b'{"error": "throttled"}',
+        )
+
+        ex = ConnectorException(
+            "POST",
+            "/items",
+            429,
+            response.text,
+            response=response,
+        )
+
+        assert ex.reason == "Too Many Requests"
+        assert ex.response is not None
+        assert ex.response.request.method == "POST"
+        assert ex.response.request.url == "/items"
+        assert ex.response.headers["Retry-After"] == "30"
+        assert ex.response.content_type == "application/json"
+        assert ex.response.text() == response.text
+        assert ex.message == (
+            'POST /items failed with status 429: {"error": "throttled"}'
+        )
+        assert str(ex).endswith('\nContent: {"error": "throttled"}')
 
     def test_exception_can_be_raised_and_caught(self):
         """Test that exception can be raised and caught."""

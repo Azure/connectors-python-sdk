@@ -89,6 +89,7 @@ class ConnectorPollingMethod(
                     request_url,
                     self._response.status,
                     self._response.text,
+                    response=self._response,
                 )
 
     def status(self) -> str:

@@ -259,6 +259,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -319,6 +320,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -395,15 +397,13 @@ class AzuretablesClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def delete_table(
@@ -454,15 +454,13 @@ class AzuretablesClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_entities(
@@ -553,6 +551,7 @@ class AzuretablesClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -652,6 +651,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -713,6 +713,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -784,6 +785,7 @@ class AzuretablesClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -869,6 +871,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def insert_replace_entity(
@@ -938,6 +941,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def merge_entity(
@@ -1018,6 +1022,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def replace_entity(
@@ -1098,6 +1103,7 @@ class AzuretablesClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_storage_accounts(
@@ -1156,6 +1162,7 @@ class AzuretablesClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url

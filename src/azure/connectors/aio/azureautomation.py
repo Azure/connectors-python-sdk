@@ -221,6 +221,7 @@ class AzureautomationClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
@@ -294,6 +295,7 @@ class AzureautomationClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -384,6 +386,7 @@ class AzureautomationClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -451,6 +454,7 @@ class AzureautomationClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -545,6 +549,7 @@ class AzureautomationClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -644,6 +649,7 @@ class AzureautomationClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -741,6 +747,7 @@ class AzureautomationClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -841,6 +848,7 @@ class AzureautomationClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url

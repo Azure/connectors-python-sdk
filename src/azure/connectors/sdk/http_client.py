@@ -422,14 +422,16 @@ class ConnectorHttpClient:
         try:
             response_chunks = []
             while True:
-                if time.monotonic() >= deadline:
+                remaining_timeout = deadline - time.monotonic()
+                if remaining_timeout <= 0:
                     raise ConnectorHttpClient._create_timeout_error(
                         url=url,
                         total_timeout=total_timeout,
                     )
 
                 response_chunk = ConnectorHttpClient._read_response_chunk(
-                    http_response
+                    http_response,
+                    read_timeout=remaining_timeout,
                 )
                 if not response_chunk:
                     break
@@ -481,7 +483,11 @@ class ConnectorHttpClient:
         )
 
     @staticmethod
-    def _read_response_chunk(http_response: Any) -> bytes:
+    def _read_response_chunk(
+        http_response: Any,
+        *,
+        read_timeout: float,
+    ) -> bytes:
         """Read one available chunk from an Azure Core Requests response."""
         internal_response = getattr(http_response, "_internal_response", None)
         raw_response = getattr(internal_response, "raw", None)
@@ -491,6 +497,27 @@ class ConnectorHttpClient:
                 "The Azure Core Requests response does not expose incremental "
                 "body reads required for total timeout enforcement."
             )
+
+        response_socket = getattr(
+            getattr(
+                getattr(
+                    getattr(raw_response, "_fp", None),
+                    "fp",
+                    None,
+                ),
+                "raw",
+                None,
+            ),
+            "_sock",
+            None,
+        )
+        set_timeout = getattr(response_socket, "settimeout", None)
+        if not callable(set_timeout):
+            raise RuntimeError(
+                "The Azure Core Requests response does not expose the active "
+                "socket required for total timeout enforcement."
+            )
+        set_timeout(read_timeout)
 
         return read_chunk(64 * 1024, decode_content=True)
 
@@ -534,6 +561,7 @@ class ConnectorHttpClient:
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None
@@ -547,6 +575,7 @@ class ConnectorHttpClient:
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None

@@ -248,6 +248,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -323,6 +324,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -384,6 +386,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -459,6 +462,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -541,6 +545,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -609,6 +614,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -684,6 +690,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -745,6 +752,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -800,15 +808,13 @@ class Office365groupsmailClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_thread_posts(
@@ -879,6 +885,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -965,6 +972,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1044,6 +1052,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1126,6 +1135,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def reply(
@@ -1191,6 +1201,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def http_request(
@@ -1242,6 +1253,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1316,6 +1328,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_groups(
@@ -1383,6 +1396,7 @@ class Office365groupsmailClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url

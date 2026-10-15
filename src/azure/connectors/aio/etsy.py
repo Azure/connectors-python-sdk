@@ -345,6 +345,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -435,6 +436,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -503,6 +505,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -566,6 +569,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -631,6 +635,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -692,6 +697,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -814,6 +820,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -883,6 +890,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -963,6 +971,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1025,6 +1034,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1085,6 +1095,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1158,6 +1169,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1231,6 +1243,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1292,6 +1305,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1348,6 +1362,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1409,6 +1424,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1470,6 +1486,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def shipping_delete_profile(
@@ -1481,7 +1498,7 @@ class EtsyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete a shipping profile
 
@@ -1499,8 +1516,7 @@ class EtsyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1521,16 +1537,19 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def shipping_update_profile(
         self,
@@ -1589,6 +1608,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1670,6 +1690,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1744,6 +1765,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1810,15 +1832,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def shipping_update_profile_destination(
@@ -1884,6 +1904,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1947,6 +1968,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2013,6 +2035,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2073,15 +2096,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def shipping_update_profile_upgrade(
@@ -2147,6 +2168,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2206,6 +2228,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2261,6 +2284,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2335,6 +2359,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2391,6 +2416,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2449,6 +2475,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2504,6 +2531,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2565,6 +2593,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2621,6 +2650,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2689,6 +2719,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2739,6 +2770,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2800,6 +2832,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2896,6 +2929,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2954,6 +2988,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3021,6 +3056,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def listing_delete(
@@ -3069,15 +3105,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def listing_get_active(
@@ -3199,6 +3233,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3280,6 +3315,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3348,6 +3384,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3421,6 +3458,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3480,15 +3518,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def listing_update_property(
@@ -3555,6 +3591,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3617,6 +3654,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3679,6 +3717,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3744,6 +3783,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3825,6 +3865,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3920,6 +3961,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3987,6 +4029,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4050,15 +4093,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def listing_get_files(
@@ -4118,6 +4159,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4188,6 +4230,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4255,6 +4298,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4317,15 +4361,13 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def listing_get_images(
@@ -4384,6 +4426,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4455,6 +4498,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4524,6 +4568,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4587,6 +4632,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4654,6 +4700,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4716,6 +4763,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4782,6 +4830,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4851,6 +4900,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4920,6 +4970,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4982,6 +5033,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5047,6 +5099,7 @@ class EtsyClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -943,6 +943,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def update_my_photo(
@@ -996,6 +997,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_my_trending_documents(
@@ -1085,6 +1087,7 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1164,6 +1167,7 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1234,6 +1238,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1330,6 +1335,7 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1400,6 +1406,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1489,6 +1496,7 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1568,6 +1576,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1631,6 +1640,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1722,6 +1732,7 @@ class Office365usersClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1794,6 +1805,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
@@ -1859,6 +1871,7 @@ class Office365usersClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

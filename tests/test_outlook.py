@@ -230,9 +230,10 @@ class TestDeleteEmail:
             new_callable=AsyncMock,
             return_value=mock_response
         ):
-            result = await client.delete_email(message_id="nonexistent")
+            with pytest.raises(ConnectorException) as exc_info:
+                await client.delete_email(message_id="nonexistent")
 
-        assert result is None
+        assert exc_info.value.status_code == 404
 
     @pytest.mark.asyncio
     async def test_other_error_response_raises_exception(self, mock_credential):

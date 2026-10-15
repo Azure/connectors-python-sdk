@@ -294,6 +294,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -371,6 +372,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -451,6 +453,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -531,6 +534,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -600,6 +604,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -671,6 +676,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def execute_dataset_query(
@@ -736,6 +742,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -807,6 +814,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -881,6 +889,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def goal_value_checkin_note(
@@ -950,6 +959,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def goal_value_checkin(
@@ -1017,6 +1027,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_goal_checkins(
@@ -1095,6 +1106,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1180,6 +1192,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def get_goal_checkin(
@@ -1247,6 +1260,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1314,6 +1328,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def initiate_export_to_file_for_pbi_reports(
@@ -1375,6 +1390,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
@@ -1438,6 +1454,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
@@ -1502,6 +1519,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1580,6 +1598,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1663,6 +1682,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1754,6 +1774,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1833,6 +1854,7 @@ class PowerbiClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1915,6 +1937,7 @@ class PowerbiClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

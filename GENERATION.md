@@ -519,8 +519,11 @@ Every generated connector client MUST satisfy these invariants before merge:
 
 - Every HTTP operation MUST capture the response and check the status code
 - Non-2xx responses MUST raise `ConnectorException`, an Azure Core
-    `HttpResponseError`, with status code and message, except that HTTP `DELETE`
-    treats HTTP 404 as an idempotent success
+    `HttpResponseError`, with status code and message, except for explicitly
+    curated resource-delete operations whose contract treats HTTP 404 as an
+    idempotent success
+- Operations with a declared 2xx response schema MUST deserialize and return
+    that payload regardless of the HTTP method
 - Void operations (DELETE, PATCH, fire-and-forget POST) MUST NOT discard the response unchecked
 
 **Correct pattern:**
@@ -529,9 +532,6 @@ response = self.http_client.send(
     method="DELETE",
     url=request_uri,
 )
-if response.status == 404:
-    return None
-
 if not (200 <= response.status < 300):
     raise ConnectorException(
         "DELETE",
@@ -550,6 +550,10 @@ self.http_client.send(  # Result discarded - silent failures!
     url=request_uri,
 )
 ```
+
+The generator owns the narrow allow-list for resource-delete operations that
+accept HTTP 404. Do not infer idempotent success from the `DELETE` verb alone;
+connectors also use that verb for actions whose missing target is an error.
 
 The aio pattern awaits the same `send` method. **Validation:**
 `test_no_unchecked_send_calls` in `tests/test_code_quality.py` scans root and aio

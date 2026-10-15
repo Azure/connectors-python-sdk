@@ -108,14 +108,18 @@ class TestCodeQuality(unittest.TestCase):
                 f"{violation_text}"
             )
 
-    def test_http_delete_operations_accept_not_found(self):
-        """Verify only generated HTTP DELETE operations accept HTTP 404."""
+    def test_only_explicit_resource_deletes_accept_not_found(self):
+        """Verify only explicitly idempotent resource deletes accept HTTP 404."""
         connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
+        expected_operations = {
+            ('aio/arm.py', 'deployments_delete'),
+            ('arm.py', 'deployments_delete'),
+        }
         connector_paths = [
             *connector_dir.glob('*.py'),
             *(connector_dir / 'aio').glob('*.py'),
         ]
-        violations: list[str] = []
+        actual_operations: set[tuple[str, str]] = set()
 
         for filepath in connector_paths:
             if filepath.name.startswith('_'):
@@ -129,22 +133,18 @@ class TestCodeQuality(unittest.TestCase):
                 if not self._sends_request(function):
                     continue
 
-                is_http_delete = self._uses_http_method(function, 'DELETE')
                 accepts_not_found = self._accepts_not_found(function)
-                if is_http_delete and not accepts_not_found:
-                    violations.append(
-                        f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
-                        f'{function.lineno}: {function.name} does not accept 404'
-                    )
-                elif not is_http_delete and accepts_not_found:
-                    violations.append(
-                        f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
-                        f'{function.lineno}: {function.name} accepts 404'
+                if accepts_not_found:
+                    relative_path = filepath.relative_to(connector_dir).as_posix()
+                    actual_operations.add((relative_path, function.name))
+                    assert self._uses_http_method(function, 'DELETE'), (
+                        f'{relative_path}:{function.lineno}: '
+                        f'{function.name} accepts 404 without using HTTP DELETE'
                     )
 
-        assert not violations, (
-            'Generated HTTP 404 guards do not match HTTP DELETE semantics:\n'
-            + '\n'.join(violations)
+        assert actual_operations == expected_operations, (
+            'Generated HTTP 404 guards do not match the explicit idempotent '
+            f'resource-delete policy: {sorted(actual_operations)}'
         )
 
     @staticmethod

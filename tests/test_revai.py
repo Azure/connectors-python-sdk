@@ -83,11 +83,6 @@ SUCCESS_CONTRACTS = {
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
 NO_RESULT_OPERATIONS = {
     "analysises_get",
-    *(
-        operation
-        for operation, (method, _, _) in SUCCESS_CONTRACTS.items()
-        if method == "DELETE"
-    ),
 }
 PAGEABLE_OPERATIONS = {
     operation

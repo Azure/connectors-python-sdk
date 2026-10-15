@@ -208,6 +208,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -257,15 +258,13 @@ class TodoClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def create_to_do(
@@ -319,6 +318,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -372,6 +372,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -426,15 +427,13 @@ class TodoClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_all_todo_lists(
@@ -493,6 +492,7 @@ class TodoClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -564,6 +564,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -619,6 +620,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -698,6 +700,7 @@ class TodoClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -772,6 +775,7 @@ class TodoClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

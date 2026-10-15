@@ -3630,6 +3630,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3679,15 +3680,13 @@ class OutlookClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def move(
@@ -3747,6 +3746,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3802,6 +3802,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def mark_as_read(
@@ -3852,6 +3853,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_attachment(
@@ -3907,6 +3909,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return response.content
@@ -3963,6 +3966,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4021,6 +4025,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4086,6 +4091,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4153,15 +4159,13 @@ class OutlookClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_contact_get_tables(
@@ -4222,6 +4226,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4338,6 +4343,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4411,6 +4417,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4473,6 +4480,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4529,15 +4537,13 @@ class OutlookClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def contact_patch_item(
@@ -4598,6 +4604,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4664,6 +4671,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 http_response.status,
                 http_response.text,
+                response=http_response,
             )
 
     def forward_email(
@@ -4723,6 +4731,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def calendar_get_item(
@@ -4781,6 +4790,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4887,6 +4897,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4964,6 +4975,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5027,6 +5039,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5188,6 +5201,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -5326,6 +5340,7 @@ class OutlookClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -5395,6 +5410,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def send_email(
@@ -5443,6 +5459,7 @@ class OutlookClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

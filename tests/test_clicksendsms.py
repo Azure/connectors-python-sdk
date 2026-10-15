@@ -211,7 +211,7 @@ class TestClicksendsmsClientOperations:
 
             assert mock_send.call_args[0][0] == "DELETE"
             assert "/lists/123" in mock_send.call_args[0][1]
-            assert result is None
+            assert result == {"data": {}}
 
     @pytest.mark.asyncio
     async def test_create_list_contact_success(self, mock_credential):
@@ -265,7 +265,7 @@ class TestClicksendsmsClientOperations:
 
             assert mock_send.call_args[0][0] == "DELETE"
             assert "/lists/123/contacts/456" in mock_send.call_args[0][1]
-            assert result is None
+            assert result == {"data": {}}
 
     @pytest.mark.asyncio
     async def test_send_mms_success(self, mock_credential):

@@ -479,6 +479,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -559,6 +560,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_in_scale_set_power_off(
@@ -633,6 +635,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_in_scale_set_redeploy(
@@ -706,6 +709,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_in_scale_set_reimage(
@@ -779,6 +783,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_in_scale_set_restart(
@@ -851,6 +856,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_in_scale_set_start(
@@ -923,6 +929,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_get(
@@ -988,6 +995,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1059,6 +1067,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_deallocate(
@@ -1127,6 +1136,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_poweroff(
@@ -1195,6 +1205,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_reapply(
@@ -1261,6 +1272,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_redeploy(
@@ -1328,6 +1340,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def virtual_machine_restart(
@@ -1394,6 +1407,7 @@ class AzurevmClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_subscriptions(
@@ -1456,6 +1470,7 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1547,6 +1562,7 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1644,6 +1660,7 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1746,6 +1763,7 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1843,6 +1861,7 @@ class AzurevmClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url

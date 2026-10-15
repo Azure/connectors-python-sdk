@@ -625,7 +625,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Attachment
 
@@ -645,8 +645,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -670,16 +669,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def attachment_download_attachment(
         self,
@@ -741,6 +743,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -818,6 +821,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -899,6 +903,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -978,6 +983,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1052,6 +1058,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1149,6 +1156,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1176,7 +1184,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Document
 
@@ -1195,8 +1203,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1218,16 +1225,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def documents_download_document_bytes(
         self,
@@ -1285,6 +1295,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1349,6 +1360,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1414,6 +1426,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1481,6 +1494,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1549,6 +1563,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1617,6 +1632,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1688,6 +1704,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1761,6 +1778,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1834,6 +1852,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1909,6 +1928,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2000,6 +2020,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2017,7 +2038,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Document Field
 
@@ -2037,8 +2058,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2061,16 +2081,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def fields_fill_form_fields(
         self,
@@ -2131,6 +2154,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2200,6 +2224,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2259,6 +2284,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2334,6 +2360,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2400,6 +2427,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2473,6 +2501,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2557,6 +2586,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2631,6 +2661,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2690,6 +2721,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2749,6 +2781,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2808,6 +2841,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -2823,7 +2857,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Package
 
@@ -2845,8 +2879,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -2864,16 +2897,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def package_download_package_bytes(
         self,
@@ -2952,6 +2988,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3025,6 +3062,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3088,6 +3126,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3151,6 +3190,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3380,6 +3420,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -3449,6 +3490,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3508,6 +3550,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3571,6 +3614,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3638,6 +3682,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3705,6 +3750,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3784,6 +3830,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3858,6 +3905,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -3955,6 +4003,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4043,6 +4092,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4117,6 +4167,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4212,6 +4263,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4288,6 +4340,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4386,6 +4439,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4499,6 +4553,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -4585,6 +4640,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4658,6 +4714,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4742,6 +4799,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4798,6 +4856,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4854,6 +4913,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4922,6 +4982,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -4992,6 +5053,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5061,6 +5123,7 @@ class SigninghubClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -5135,6 +5198,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5203,6 +5267,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5277,6 +5342,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5292,7 +5358,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Recall Document
 
@@ -5310,8 +5376,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5329,16 +5394,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def workflow_start_workflow(
         self,
@@ -5392,6 +5460,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5455,6 +5524,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5519,6 +5589,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5592,6 +5663,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5656,6 +5728,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5727,6 +5800,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5812,6 +5886,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -5828,7 +5903,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Workflow User
 
@@ -5848,8 +5923,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -5871,16 +5945,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def workflow_workflow_update_placeholder(
         self,
@@ -5948,6 +6025,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6022,6 +6100,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6089,6 +6168,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6104,7 +6184,7 @@ class SigninghubClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete Shared Space
 
@@ -6123,8 +6203,7 @@ class SigninghubClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -6142,16 +6221,19 @@ class SigninghubClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     async def work_space_get_shared_space(
         self,
@@ -6203,6 +6285,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -6264,6 +6347,7 @@ class SigninghubClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

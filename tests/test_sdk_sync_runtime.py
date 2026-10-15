@@ -256,6 +256,52 @@ def test_timeout_bounds_slow_drip_response_body() -> None:
     assert elapsed < 0.3
 
 
+def test_timeout_uses_remaining_budget_for_blocking_body_read() -> None:
+    """Reduce the body socket timeout by time already spent receiving headers."""
+
+    class DelayedBodyHandler(BaseHTTPRequestHandler):
+        """Delay both response headers and the complete response body."""
+
+        def do_GET(self) -> None:
+            """Send headers after a delay, then stall before writing the body."""
+            time.sleep(0.1)
+            self.send_response(200)
+            self.send_header("Content-Length", "1")
+            self.end_headers()
+            time.sleep(0.4)
+            try:
+                self.wfile.write(b"x")
+                self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def log_message(self, format: str, *args: object) -> None:
+            """Suppress local server request logs."""
+            del format, args
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), DelayedBodyHandler)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+    client = ConnectorHttpClient(
+        AzureKeyCredential("test-key"),
+        max_retry_attempts=1,
+        timeout_seconds=0.3,
+    )
+
+    try:
+        started_at = time.monotonic()
+        with pytest.raises(ServiceResponseTimeoutError):
+            client.send("GET", f"http://127.0.0.1:{server.server_port}/")
+        elapsed = time.monotonic() - started_at
+    finally:
+        client.close()
+        server.shutdown()
+        server.server_close()
+        server_thread.join()
+
+    assert elapsed < 0.42
+
+
 def test_default_transport_uses_standard_tls_options() -> None:
     """Apply standard Azure Core TLS options to the owned Requests transport."""
     client = ConnectorHttpClient(

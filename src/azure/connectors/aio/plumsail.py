@@ -261,6 +261,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -321,6 +322,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -390,6 +392,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -458,6 +461,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -533,6 +537,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -608,6 +613,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -681,6 +687,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -754,6 +761,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -827,6 +835,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -900,6 +909,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -969,6 +979,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1037,6 +1048,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1105,6 +1117,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1174,6 +1187,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1243,6 +1257,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1312,6 +1327,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1389,6 +1405,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1463,6 +1480,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1533,6 +1551,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1607,6 +1626,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1678,6 +1698,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1747,6 +1768,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1820,6 +1842,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1893,6 +1916,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -1967,6 +1991,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2040,6 +2065,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2118,6 +2144,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2191,6 +2218,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2263,6 +2291,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2335,6 +2364,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2403,6 +2433,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2471,6 +2502,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2543,6 +2575,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2619,6 +2652,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2694,6 +2728,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2766,6 +2801,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2838,6 +2874,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2911,6 +2948,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -2995,6 +3033,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -3076,6 +3115,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return AsyncLROPoller(
@@ -3147,6 +3187,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_documents_flow_schema_add_watermark_to_pdf(
@@ -3204,6 +3245,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_processes_flow_schema_get_processes(
@@ -3252,6 +3294,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_documents_flow_schema_parse_csv(
@@ -3309,6 +3352,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_processes_flow_schema_get_json_data(
@@ -3366,6 +3410,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_processes_flow_triggers_by_process_id_schema_get(
@@ -3422,6 +3467,7 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def flow_v1_documents_flow_schema_reg_exp_match(
@@ -3479,4 +3525,5 @@ class PlumsailClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )

@@ -501,6 +501,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -584,6 +585,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -656,15 +658,13 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_model_by_id(
@@ -728,6 +728,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -791,6 +792,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_twin_by_id(
@@ -846,6 +848,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -901,15 +904,13 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def add_twin(
@@ -968,6 +969,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1031,6 +1033,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_component(
@@ -1091,6 +1094,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1159,6 +1163,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_relationship_by_id(
@@ -1220,6 +1225,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1280,15 +1286,13 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def add_relationship(
@@ -1353,6 +1357,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1422,6 +1427,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_incoming_relationships(
@@ -1492,6 +1498,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1572,6 +1579,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def send_component_telemetry(
@@ -1636,6 +1644,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_relationships(
@@ -1704,6 +1713,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1779,6 +1789,7 @@ class AzuredigitaltwinsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

@@ -216,6 +216,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def send_messages(
@@ -282,6 +283,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def complete_message_in_queue(
@@ -351,15 +353,13 @@ class ServicebusClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def abandon_message_in_queue(
@@ -435,6 +435,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def get_deferred_message_from_queue(
@@ -510,6 +511,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -590,6 +592,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def dead_letter_message_in_queue(
@@ -672,6 +675,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def renew_lock_on_message_in_queue(
@@ -740,6 +744,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_messages_from_queue_with_peek_lock(
@@ -832,6 +837,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -897,15 +903,13 @@ class ServicebusClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def renew_lock_on_session_in_queue(
@@ -961,6 +965,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def complete_message_in_topic(
@@ -1034,15 +1039,13 @@ class ServicebusClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def abandon_message_in_topic(
@@ -1122,6 +1125,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def get_deferred_message_from_topic(
@@ -1201,6 +1205,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1285,6 +1290,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def dead_letter_message_in_topic(
@@ -1371,6 +1377,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def renew_lock_on_message_in_topic(
@@ -1443,6 +1450,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def create_topic_subscription(
@@ -1510,6 +1518,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1563,15 +1572,13 @@ class ServicebusClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_messages_from_topic_with_peek_lock(
@@ -1669,6 +1676,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1738,15 +1746,13 @@ class ServicebusClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def renew_lock_on_session_in_topic(
@@ -1806,6 +1812,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def list_entities(
@@ -1864,6 +1871,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -1938,6 +1946,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -2012,6 +2021,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -2087,6 +2097,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -2161,6 +2172,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -2243,6 +2255,7 @@ class ServicebusClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -2313,6 +2326,7 @@ class ServicebusClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

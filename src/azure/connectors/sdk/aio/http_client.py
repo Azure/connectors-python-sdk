@@ -426,6 +426,7 @@ class ConnectorHttpClient:
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None
@@ -439,6 +440,7 @@ class ConnectorHttpClient:
                 request_uri,
                 response.status,
                 response.text,
+                response=response,
             )
 
         return json.loads(response.text) if response.text else None

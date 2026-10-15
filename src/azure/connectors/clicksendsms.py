@@ -588,6 +588,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -641,6 +642,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -708,6 +710,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -762,6 +765,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -777,7 +781,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete List
 
@@ -794,8 +798,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -813,16 +816,19 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     def create_list_contact(
         self,
@@ -876,6 +882,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -932,6 +939,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -948,7 +956,7 @@ class ClicksendsmsClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> None:
+    ) -> dict[str, Any] | None:
         """
         Delete a Contact
 
@@ -966,8 +974,7 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The operation completes without a response
-                body.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -988,16 +995,19 @@ class ClicksendsmsClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
+
+        if not response.text:
+            return None
+
+        return json.loads(response.text)
 
     def send_mms(
         self,
@@ -1045,6 +1055,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1098,6 +1109,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1160,6 +1172,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1219,6 +1232,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1272,6 +1286,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -1325,6 +1340,7 @@ class ClicksendsmsClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:

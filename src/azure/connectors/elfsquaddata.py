@@ -356,6 +356,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                     request_url,
                     response.status,
                     response.text,
+                    response=response,
                 )
 
             return response, request_url
@@ -431,6 +432,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -490,6 +492,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -543,15 +546,13 @@ class ElfsquaddataClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
-        if response.status == 404:
-            return None
-
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def put_entity_by_id(
@@ -609,6 +610,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def invoke_function(
@@ -662,6 +664,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -710,6 +713,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_schemas(
@@ -753,6 +757,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_schema(
@@ -801,6 +806,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_functions(
@@ -844,6 +850,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_function_definition(
@@ -892,6 +899,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_trigger_schema(
@@ -940,6 +948,7 @@ class ElfsquaddataClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 

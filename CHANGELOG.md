@@ -61,16 +61,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Finite polling delays**: Non-finite `Retry-After` values such as `Infinity`, `NaN`, and numeric overflow now use the finite default polling interval.
 - **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
 - **Caller continuation isolation**: Caller-provided `by_page()` continuation URLs now pass through the same origin normalization as service-provided next links, preventing authenticated requests from being sent to an arbitrary host.
-- **Idempotent HTTP deletes** — generated HTTP `DELETE` operations return `None` when the service reports that the target is already absent with HTTP 404, regardless of the normalized operation name. Non-DELETE actions retain their declared response and ordinary error handling even when their names begin with `delete_`.
+- **HTTP DELETE contracts** — generated operations now preserve declared success payloads and ordinary HTTP 404 errors regardless of verb. Only explicitly curated resource deletions, currently ARM deployment deletion, treat an already absent target as idempotent success.
 - **Orderful transaction responses** — `list_transactions` now preserves and returns the runtime JSON payload despite the managed connector Swagger omitting its response schema.
 - **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
-- **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.
+- **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` and exposes the failed response status, reason, headers, and body while preserving connector-specific operation and path details.
 - **Reproducible generation**: committed Swagger snapshots, a pinned generator/compiler manifest, and offline regeneration tooling now make the complete 99-connector catalog independently verifiable.
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
   configures Azure Core retry and transport deadlines. Async clients also bound
   the complete network operation, including response loading and body reads.
   Sync clients now bound response-body loading as part of the same total deadline,
-  including responses that continuously deliver small chunks.
+  including time already spent receiving headers and responses that continuously
+  deliver small chunks.
   Sync clients preserve transport timeouts for explicit policy chains without a
   retry policy.
   Sync clients no longer run timed requests on uncancellable daemon threads, so

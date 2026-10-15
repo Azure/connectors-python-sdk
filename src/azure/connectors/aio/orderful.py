@@ -150,6 +150,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -203,6 +204,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     async def get_transaction_by_id(
@@ -253,4 +255,5 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )

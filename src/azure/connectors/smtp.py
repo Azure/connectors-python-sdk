@@ -238,4 +238,5 @@ class SmtpClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )

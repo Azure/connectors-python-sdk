@@ -494,8 +494,8 @@ class TestRemoveRecipientFromEnvelopeAsync:
     """Tests for remove_recipient_from_envelope_async method (DELETE)."""
 
     @pytest.mark.asyncio
-    async def test_success_returns_none(self, mock_credential):
-        """Test successful DELETE returns None."""
+    async def test_success_returns_declared_response(self, mock_credential):
+        """Test successful DELETE returns its declared response body."""
         client = DocusignClient(
             "https://example.azure.com/connections/test",
             credential=mock_credential,
@@ -518,7 +518,7 @@ class TestRemoveRecipientFromEnvelopeAsync:
             mock_send.assert_called_once()
             method = mock_send.call_args[0][0]
             assert method == "DELETE"
-            assert result is None
+            assert result == {"recipientsRemoved": True}
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):

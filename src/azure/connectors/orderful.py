@@ -207,6 +207,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
         if not response.text:
@@ -260,6 +261,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
     def get_transaction_by_id(
@@ -310,6 +312,7 @@ class OrderfulClient(ConnectorClientBase):
                 request_url,
                 response.status,
                 response.text,
+                response=response,
             )
 
 
