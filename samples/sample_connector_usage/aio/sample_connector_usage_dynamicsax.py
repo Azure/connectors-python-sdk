@@ -52,7 +52,7 @@ async def example_1_list_instances():
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_data_sets()]
-            datasets = result
+            datasets = items
 
             print(f"Found {len(datasets)} instance(s).")
             for dataset in datasets[:10]:
@@ -71,7 +71,7 @@ async def example_2_list_tables():
 
         async with DynamicsaxClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_tables(dataset=DATASET)]
-            tables = result
+            tables = items
 
             print(f"Found {len(tables)} table(s).")
             for table in tables[:10]:

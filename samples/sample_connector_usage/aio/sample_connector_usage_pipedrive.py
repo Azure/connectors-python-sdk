@@ -48,7 +48,7 @@ async def example_1_list_deals():
             try:
                 items = [item async for item in client.list_deals()]
 
-                deals = (result or {}).get("data", []) if isinstance(result, dict) else []
+                deals = items
                 print(f"Found {len(deals)} deal(s).")
 
             except ConnectorException as ex:

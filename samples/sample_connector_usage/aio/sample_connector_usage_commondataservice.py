@@ -63,9 +63,9 @@ async def example_1_list_datasets():
             try:
                 items = [item async for item in client.list_data_sets()]
 
-                if result and result.get("value"):
-                    print(f"Found {len(result['value'])} datasets:")
-                    for dataset in result["value"][:5]:
+                if items:
+                    print(f"Found {len(items)} datasets:")
+                    for dataset in items[:5]:
                         print(f"  - {dataset.get('Name', dataset.get('DisplayName', 'N/A'))}")
                 else:
                     print("No datasets found")
@@ -128,7 +128,7 @@ async def example_3_get_account_by_id():
                     id=account_id,
                 )
 
-                if items:
+                if result:
                     print(f"Account: {result.get('name', 'N/A')}")
                     print(f"Revenue: {result.get('revenue', 'N/A')}")
                 else:
@@ -163,7 +163,7 @@ async def example_4_create_account():
                     table="accounts",
                 )
 
-                if items:
+                if result:
                     print(f"Account created with id: {result.get('accountid', 'N/A')}")
                 else:
                     print("Account created successfully")
@@ -226,7 +226,7 @@ async def example_6_create_attachment():
                     display_name="sample-note.txt",
                 )
 
-                if items:
+                if result:
                     print(f"Attachment created with id: {result.get('annotationid', 'N/A')}")
                 else:
                     print("Attachment created successfully")
@@ -250,7 +250,7 @@ async def example_7_get_table_metadata():
                     table="accounts",
                 )
 
-                if items:
+                if result:
                     print(f"Table: {result.get('Name', result.get('DisplayName', 'N/A'))}")
                 else:
                     print("Table metadata not found")

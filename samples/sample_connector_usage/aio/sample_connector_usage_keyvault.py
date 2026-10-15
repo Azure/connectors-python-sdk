@@ -76,7 +76,7 @@ async def example_2_get_key_metadata():
             try:
                 result = await client.get_key_metadata(key_name=KEY_NAME)
 
-                if items:
+                if result:
                     print(f"Key Name: {result.get('name')}")
                     print(f"Version: {result.get('version')}")
                     print(f"Key Type: {result.get('key_type')}")
@@ -171,7 +171,7 @@ async def example_5_get_secret():
             try:
                 result = await client.get_secret(secret_name=SECRET_NAME)
 
-                if items:
+                if result:
                     print(f"Secret Name: {result.get('name')}")
                     print(f"Content Type: {result.get('content_type')}")
                     # Note: Be careful with secret values in logs
@@ -199,7 +199,7 @@ async def example_6_get_secret_metadata():
                     secret_name=SECRET_NAME
                 )
 
-                if items:
+                if result:
                     print(f"Secret Name: {result.get('name')}")
                     print(f"Version: {result.get('version')}")
                     print(f"Content Type: {result.get('content_type')}")

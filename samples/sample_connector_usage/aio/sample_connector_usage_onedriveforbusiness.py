@@ -20,7 +20,7 @@ async def example_list_root_folder() -> None:
 
         async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_root_folder()]
-            values = result
+            values = items
             print(f"Found {len(values)} items in root folder.")
 
 
@@ -48,7 +48,7 @@ async def example_create_share_link() -> None:
 
         async with OnedriveforbusinessClient(CONNECTION_RUNTIME_URL, credential) as client:
             result = await client.create_share_link(id=file_id, type_="view")
-            if items:
+            if result:
                 print(f"Share URL: {result.get('webUrl')}")
             else:
                 print("No share link was returned.")

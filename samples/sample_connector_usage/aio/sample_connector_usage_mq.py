@@ -65,7 +65,7 @@ async def example_1_send_message():
 
                 result = await client.send(input=options)
 
-                if items:
+                if result:
                     print("Message sent successfully:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -93,7 +93,7 @@ async def example_2_browse_message():
 
                 result = await client.read(input=options)
 
-                if items:
+                if result:
                     print("Browsed message:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -127,9 +127,9 @@ async def example_3_browse_messages_batch():
 
                 items = [item async for item in client.list_read_all(input=options)]
 
-                if result and isinstance(result, list):
-                    print(f"Browsed {len(result)} messages:")
-                    for i, msg in enumerate(result[:5]):  # Show first 5
+                if items:
+                    print(f"Browsed {len(items)} messages:")
+                    for i, msg in enumerate(items[:5]):  # Show first 5
                         msg_id = msg.get("messageId", "N/A")
                         data = msg.get("messageData", "")
                         preview = data[:50] if data else "(empty)"
@@ -158,7 +158,7 @@ async def example_4_receive_message():
 
                 result = await client.receive(input=options)
 
-                if items:
+                if result:
                     print("Received message (removed from queue):")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print(f"  Correlation ID: {result.get('correlationId', 'N/A')}")
@@ -188,7 +188,7 @@ async def example_5_delete_message():
 
                 result = await client.delete(input=options)
 
-                if items:
+                if result:
                     print("Deleted message:")
                     print(f"  Message ID: {result.get('messageId', 'N/A')}")
                     print("  Success: True")

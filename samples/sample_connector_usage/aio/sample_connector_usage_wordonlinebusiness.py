@@ -102,7 +102,7 @@ async def example_2_create_word_document():
                     file_name="MyDocument.docx"
                 )
 
-                if items:
+                if result:
                     print(f"Document created with ID: {result.get('id', 'N/A')}")
                     print(f"Document name: {result.get('name', 'N/A')}")
                 else:
@@ -129,7 +129,7 @@ async def example_3_create_word_document_without_filename():
 
                 result = await client.create_word_file_with_content(input=content)
 
-                if items:
+                if result:
                     print(f"Document created: {result}")
                 else:
                     print("Document created successfully")

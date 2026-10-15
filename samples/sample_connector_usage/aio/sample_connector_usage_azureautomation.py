@@ -106,7 +106,7 @@ async def example_2_create_job():
                     automation_account=AUTOMATION_ACCOUNT,
                 )
 
-                if items:
+                if result:
                     print(f"Job created: {result.get('id', 'N/A')}")
                     props = result.get("properties", {})
                     print(f"Status: {props.get('status', 'Unknown')}")
@@ -138,7 +138,7 @@ async def example_3_create_job_and_wait():
                     wait=True,
                 )
 
-                if items:
+                if result:
                     props = result.get("properties", {})
                     print(f"Job completed with status: {props.get('status')}")
                 else:
@@ -168,7 +168,7 @@ async def example_4_get_job_status():
                     job_id=JOB_ID
                 )
 
-                if items:
+                if result:
                     print(f"Job ID: {result.get('id', 'N/A')}")
                     props = result.get("properties", {})
                     print(f"Status: {props.get('status', 'Unknown')}")

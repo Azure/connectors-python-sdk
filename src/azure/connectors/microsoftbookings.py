@@ -529,7 +529,7 @@ class MicrosoftbookingsClient(ConnectorClientBase):
 
         Returns:
             ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.

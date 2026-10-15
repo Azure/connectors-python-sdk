@@ -49,7 +49,7 @@ async def example_1_list_notebooks():
                 items = [item async for item in client.list_notebooks()]
 
                 if items:
-                    notebooks = result["value"]
+                    notebooks = items
                     print(f"Found {len(notebooks)} notebooks:")
                     for nb in notebooks[:5]:
                         print(f"  - {nb.get('fileName', 'N/A')} (key: {nb.get('key', 'N/A')})")
@@ -78,7 +78,7 @@ async def example_2_list_sections():
                 )]
 
                 if items:
-                    sections = result["value"]
+                    sections = items
                     print(f"Found {len(sections)} sections:")
                     for section in sections[:5]:
                         print(f"  - {section.get('name', 'N/A')} (id: {section.get('id', 'N/A')})")
@@ -139,7 +139,7 @@ async def example_4_create_section():
                     notebook_key=NOTEBOOK_KEY
                 )
 
-                if items:
+                if result:
                     print("Section created successfully!")
                     print(f"Section ID: {result.get('id')}")
                     print(f"Section Name: {result.get('name')}")
@@ -167,7 +167,7 @@ async def example_5_create_quick_note():
 
                 result = await client.create_page_in_quick_notes(input=page_input)
 
-                if items:
+                if result:
                     print("Quick note created successfully!")
                     print(f"Page ID: {result.get('id')}")
                     print(f"Title: {result.get('title')}")
@@ -199,7 +199,7 @@ async def example_6_get_page_content():
                     page_id=PAGE_ID,
                 )
 
-                if items:
+                if result:
                     print("Page content retrieved successfully!")
                     content = str(result)[:200]
                     print(f"Content preview: {content}...")

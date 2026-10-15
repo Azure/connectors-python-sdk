@@ -47,7 +47,7 @@ async def example_1_list_subscriptions():
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_subscriptions()]
-            subscriptions = result
+            subscriptions = items
 
             print(f"Found {len(subscriptions)} subscription(s).")
             for subscription in subscriptions[:10]:
@@ -64,7 +64,7 @@ async def example_2_list_topic_types():
 
         async with AzureeventgridClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_topic_types()]
-            topic_types = result
+            topic_types = items
 
             print(f"Found {len(topic_types)} topic type(s).")
             for topic_type in topic_types[:10]:

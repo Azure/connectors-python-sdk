@@ -159,6 +159,7 @@ async def example_5_post_message():
                 items = [item async for item in client.list_post_message(input=message)]
 
                 if items:
+                    result = items[0]
                     print("Message posted successfully!")
                     print(f"  Message ID: {result.get('id')}")
                     print(f"  Web URL: {result.get('web_url')}")

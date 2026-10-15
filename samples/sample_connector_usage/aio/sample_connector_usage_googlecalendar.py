@@ -49,7 +49,6 @@ async def example_1_list_calendars():
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_calendars(min_access_role="reader")]
 
-            items = result
             print(f"Found {len(items)} calendar(s).")
             for calendar in items[:10]:
                 print(f"  - {calendar.get('summary', 'N/A')} ({calendar.get('id', 'N/A')})")
@@ -69,7 +68,7 @@ async def example_2_list_events():
         async with GooglecalendarClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_events(calendar_id=calendar_id)]
 
-            events = result
+            events = items
             print(f"Found {len(events)} event(s) in calendar '{calendar_id}'.")
             for event in events[:10]:
                 print(f"  - {event.get('summary', 'N/A')} ({event.get('id', 'N/A')})")
@@ -124,7 +123,6 @@ async def example_4_list_events_for_polling():
                     time_min="2026-07-09T00:00:00Z",
                     time_max="2026-07-10T00:00:00Z",
                 )]
-                events = result
                 print(f"Time-window query returned {len(items)} event(s).")
                 print("Persist event IDs and update times to implement change polling.")
             except ConnectorException as ex:

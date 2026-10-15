@@ -46,7 +46,7 @@ async def example_1_list_recent_shares():
             try:
                 items = [item async for item in client.list_recent_shares()]
 
-                shares = (result or {}).get("value", []) if isinstance(result, dict) else []
+                shares = items
                 print(f"Found {len(shares)} recent printer share(s).")
                 for share in shares:
                     print(f"  - {share}")

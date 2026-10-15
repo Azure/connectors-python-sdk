@@ -150,7 +150,7 @@ async def example_4_create_group_event():
                     group_id=GROUP_ID
                 )
 
-                if items:
+                if result:
                     print("Event created successfully!")
                     print(f"Event ID: {result.get('id')}")
                     print(f"Subject: {result.get('subject')}")

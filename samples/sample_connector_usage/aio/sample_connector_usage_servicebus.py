@@ -106,7 +106,7 @@ async def example_2_receive_message_from_queue():
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -141,7 +141,7 @@ async def example_3_receive_with_peek_lock():
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -185,7 +185,7 @@ async def example_4_receive_and_abandon():
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -263,7 +263,7 @@ async def example_6_receive_from_topic_subscription():
                     subscription_name=SUBSCRIPTION_NAME,
                     max_message_count=1,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -295,7 +295,7 @@ async def example_7_dead_letter_message():
                     queue_name=QUEUE_NAME,
                     max_message_count=1,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     message = messages[0]
@@ -337,7 +337,7 @@ async def example_8_batch_receive():
                     queue_name=QUEUE_NAME,
                     max_message_count=5,
                 )]
-                messages = result
+                messages = items
 
                 if messages:
                     print(f"Received {len(messages)} messages from '{QUEUE_NAME}':")

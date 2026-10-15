@@ -63,15 +63,11 @@ async def example_1_list_queues():
 
                 if items:
                     print(f"Queues in storage account '{STORAGE_ACCOUNT}':")
-                    # Result may be a list or dict with queue names
-                    if isinstance(result, list):
-                        for queue in result:
-                            if isinstance(queue, dict):
-                                print(f"  - {queue.get('name', queue)}")
-                            else:
-                                print(f"  - {queue}")
-                    elif isinstance(result, dict):
-                        print(f"  Response: {result}")
+                    for queue in items:
+                        if isinstance(queue, dict):
+                            print(f"  - {queue.get('name', queue)}")
+                        else:
+                            print(f"  - {queue}")
                 else:
                     print("No queues found or empty response.")
 
@@ -102,7 +98,7 @@ async def example_2_create_queue():
                 )
 
                 print(f"Queue '{new_queue_name}' created successfully.")
-                if items:
+                if result:
                     print(f"Response: {result}")
 
             except ConnectorException as ex:
@@ -163,7 +159,7 @@ async def example_4_get_messages():
                     visibilitytimeout="30"  # Hide messages for 30 seconds
                 )
 
-                if items:
+                if result:
                     queue_messages_list = result.get("QueueMessagesList", {})
                     messages = queue_messages_list.get("QueueMessage", [])
                     if isinstance(messages, list):

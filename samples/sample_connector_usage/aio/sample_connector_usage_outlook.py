@@ -53,7 +53,7 @@ async def example_1_list_calendars():
                 items = [item async for item in client.list_calendar_get_tables()]
 
                 if items:
-                    calendars = result.get("value", [])
+                    calendars = items
                     print(f"Found {len(calendars)} calendar(s):")
                     for cal in calendars:
                         name = cal.get("Name", cal.get("name", "N/A"))
@@ -84,7 +84,7 @@ async def example_2_list_contact_folders():
                 items = [item async for item in client.list_contact_get_tables()]
 
                 if items:
-                    folders = result.get("value", [])
+                    folders = items
                     print(f"Found {len(folders)} contact folder(s):")
                     for folder in folders:
                         name = folder.get("Name", folder.get("name", "N/A"))
@@ -120,7 +120,7 @@ async def example_3_get_calendar_events():
                 )]
 
                 if items:
-                    events = result.get("value", [])
+                    events = items
                     print(f"Found {len(events)} event(s) in calendar:")
                     for event in events[:5]:
                         subject = event.get("Subject", event.get("subject", "N/A"))
@@ -153,7 +153,7 @@ async def example_4_get_contacts():
                 )]
 
                 if items:
-                    contacts = result.get("value", [])
+                    contacts = items
                     print(f"Found {len(contacts)} contact(s):")
                     for contact in contacts[:5]:
                         display_name = contact.get("DisplayName", "N/A")

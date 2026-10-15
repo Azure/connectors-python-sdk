@@ -119,8 +119,7 @@ def example_3_upload_blob():
         return
 
     blob_name = "sample-upload.txt"
-    blob_content = "Hello from Azure Connectors SDK for Python!\nUploaded at: " + \
-                   asyncio.get_event_loop().time().__str__()
+    blob_content = "Hello from Azure Connectors SDK for Python!"
 
     with DefaultAzureCredential() as credential:
 

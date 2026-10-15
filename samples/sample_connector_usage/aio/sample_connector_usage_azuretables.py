@@ -108,7 +108,7 @@ async def example_2_create_table():
                 )
 
                 print(f"Table '{new_table_name}' created successfully.")
-                if items:
+                if result:
                     print(f"  OData ID: {result.get('odata.id', 'N/A')}")
                     print(f"  Table Name: {result.get('TableName', 'N/A')}")
 
@@ -151,7 +151,7 @@ async def example_3_create_entity():
                 )
 
                 print(f"Entity created in table '{TABLE_NAME}':")
-                if items:
+                if result:
                     print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
                     print(f"  Row Key: {result.get('RowKey', 'N/A')}")
                 else:
@@ -231,7 +231,7 @@ async def example_5_get_entity():
                     row_key=row_key
                 )
 
-                if items:
+                if result:
                     print(f"Entity found in '{TABLE_NAME}':")
                     print(f"  Partition Key: {result.get('PartitionKey', 'N/A')}")
                     print(f"  Row Key: {result.get('RowKey', 'N/A')}")

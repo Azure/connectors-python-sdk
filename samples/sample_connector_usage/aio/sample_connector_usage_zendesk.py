@@ -48,7 +48,7 @@ async def example_1_get_tables():
             try:
                 items = [item async for item in client.list_tables()]
 
-                tables = (result or {}).get("value", []) if isinstance(result, dict) else []
+                tables = items
                 print(f"Found {len(tables)} table(s).")
                 for table in tables:
                     print(f"  - {table}")
@@ -117,7 +117,7 @@ async def example_4_search_articles():
                     locale="en-us",
                 )]
 
-                articles = (result or {}).get("results", []) if isinstance(result, dict) else []
+                articles = items
                 print(f"Found {len(articles)} article(s).")
 
             except ConnectorException as ex:

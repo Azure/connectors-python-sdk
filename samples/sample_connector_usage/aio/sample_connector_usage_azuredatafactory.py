@@ -79,7 +79,7 @@ async def example_1_create_pipeline_run():
                     pipeline_name=PIPELINE_NAME,
                 )
 
-                if items:
+                if result:
                     run_id = result.get("runId", "Unknown")
                     print("Pipeline run created successfully!")
                     print(f"Run ID: {run_id}")
@@ -118,7 +118,7 @@ async def example_2_get_pipeline_run_status(run_id: str):
                     pipeline_run_name=run_id,
                 )
 
-                if items:
+                if result:
                     print(f"Pipeline: {result.get('pipelineName', 'N/A')}")
                     print(f"Run ID: {result.get('runId', 'N/A')}")
                     print(f"Status: {result.get('status', 'Unknown')}")

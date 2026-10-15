@@ -62,8 +62,8 @@ async def example_1_list_booking_businesses():
             try:
                 items = [item async for item in client.list_bookings_business_user_as_admin()]
 
-                if result and result.get("mailboxes"):
-                    mailboxes = result["mailboxes"]
+                if items:
+                    mailboxes = items
                     print(f"Found {len(mailboxes)} booking business(es):")
                     for mailbox in mailboxes:
                         print(f"  - {mailbox.get('display_name')}")

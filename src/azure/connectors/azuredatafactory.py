@@ -792,7 +792,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns:
             ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -885,7 +885,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns:
             ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -990,7 +990,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns:
             ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1091,7 +1091,7 @@ class AzuredatafactoryClient(ConnectorClientBase):
 
         Returns:
             ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.

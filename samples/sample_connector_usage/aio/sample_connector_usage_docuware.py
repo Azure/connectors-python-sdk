@@ -49,7 +49,7 @@ async def example_1_get_file_cabinets():
                     file_cabinet_type="<file-cabinet-type>",
                 )]
 
-                print(f"File cabinets result: {result}")
+                print(f"File cabinets result: {items}")
 
             except ConnectorException as ex:
                 print(f"Connector error: {ex}")

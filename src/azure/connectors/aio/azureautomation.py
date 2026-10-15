@@ -417,7 +417,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns:
             AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -506,7 +506,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns:
             AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -601,7 +601,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns:
             AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -696,7 +696,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns:
             AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -795,7 +795,7 @@ class AzureautomationClient(ConnectorClientBase):
 
         Returns:
             AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results.
+                results. Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.

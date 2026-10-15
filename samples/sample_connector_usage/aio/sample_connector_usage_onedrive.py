@@ -44,8 +44,8 @@ async def example_1_list_root_folder():
             items = [item async for item in client.list_root_folder()]
 
             if items:
-                print(f"Found {len(result['value'])} items in root folder:")
-                for item in result["value"][:10]:  # Show first 10
+                print(f"Found {len(items)} items in root folder:")
+                for item in items[:10]:  # Show first 10
                     item_type = "📁" if item.get("IsFolder") else "📄"
                     print(f"  {item_type} {item.get('Name', 'N/A')}")
             else:
@@ -162,8 +162,8 @@ async def example_5_search_files():
                 )]
 
                 if items:
-                    print(f"Found {len(result['value'])} files matching '{search_query}':")
-                    for item in result["value"]:
+                    print(f"Found {len(items)} files matching '{search_query}':")
+                    for item in items:
                         print(f"  📄 {item.get('Name', 'N/A')}")
                 else:
                     print(f"No files found matching '{search_query}'.")
@@ -254,7 +254,7 @@ async def example_8_copy_file():
                     overwrite=False
                 )
 
-                if items:
+                if result:
                     print("File copied successfully:")
                     print(f"  New ID: {result.get('Id', 'N/A')}")
                     print(f"  New Name: {result.get('Name', 'N/A')}")

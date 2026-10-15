@@ -123,7 +123,7 @@ async def example_2_get_specific_row():
                     id_column=id_column if id_column else None,
                 )
 
-                if items:
+                if result:
                     print(f"Row with ID '{row_id}':")
                     for key, value in result.items():
                         if not key.startswith("@"):
@@ -158,7 +158,7 @@ async def example_3_list_workbook_comments():
                 )]
 
                 if items:
-                    comments = result["value"]
+                    comments = items
                     print(f"Found {len(comments)} comment(s):")
                     for comment in comments[:5]:
                         comment_id = comment.get("id", "N/A")
@@ -209,7 +209,7 @@ async def example_4_create_table():
                     source=SOURCE_URL if SOURCE_URL else None,
                 )
 
-                if items:
+                if result:
                     print("Table created:")
                     print(f"  Name: {result.get('name', 'N/A')}")
                     print(f"  Title: {result.get('title', 'N/A')}")
@@ -261,7 +261,7 @@ async def example_5_update_row():
                     id_column=id_column if id_column else None,
                 )
 
-                if items:
+                if result:
                     print(f"Row '{row_id}' updated:")
                     for key, value in result.items():
                         if not key.startswith("@"):

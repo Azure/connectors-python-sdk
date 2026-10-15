@@ -90,7 +90,7 @@ async def example_2_get_twin():
                 # Get a twin by ID
                 result = await client.get_twin_by_id(twinid=twin_id)
 
-                if items:
+                if result:
                     print(f"Twin ID: {result.get('$dtId', 'Unknown')}")
                     metadata = result.get("$metadata", {})
                     print(f"Model: {metadata.get('$model', 'Unknown')}")

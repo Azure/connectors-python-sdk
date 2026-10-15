@@ -8,6 +8,8 @@ import ast
 import importlib
 import importlib.util
 import inspect
+import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -108,6 +110,28 @@ def test_all_connector_samples_match_generated_apis() -> None:
     assert len(AIO_SAMPLE_PATHS) == 99
     assert len(sample_paths) == 198
     assert issues == []
+
+
+def test_connector_samples_have_no_undefined_names() -> None:
+    """Test every sample resolves all names used by executable code."""
+    repo_root = Path(__file__).parent.parent
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "flake8",
+            "--isolated",
+            "--select",
+            "F821",
+            str(SAMPLE_DIRECTORY),
+        ],
+        check=False,
+        capture_output=True,
+        cwd=repo_root,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_sample_validator_rejects_unscoped_async_credential() -> None:

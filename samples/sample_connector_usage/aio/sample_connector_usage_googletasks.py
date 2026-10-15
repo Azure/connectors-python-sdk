@@ -50,7 +50,6 @@ async def example_1_list_task_lists():
 
         async with GoogletasksClient(CONNECTION_RUNTIME_URL, credential) as client:
             items = [item async for item in client.list_task_lists()]
-            items = result
 
             print(f"Found {len(items)} task list(s).")
             for task_list in items[:10]:
