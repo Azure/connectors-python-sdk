@@ -242,7 +242,7 @@ class TestExecuteDatasetQueryAsync:
             return_value=mock_response,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_execute_dataset_query(
+                client.execute_dataset_query(
                     input=query,
                     groupid="group-123",
                     datasetid="dataset-456",
@@ -256,7 +256,7 @@ class TestExecuteDatasetQueryAsync:
             assert "/groups/group-123/datasets/dataset-456/executeQueries" in path
             assert "pbi_source=powerAutomate" in path
             assert body is query
-            assert result == [{"Value": 1}]
+            assert result == {"firstTableRows": [{"Value": 1}]}
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -277,7 +277,7 @@ class TestExecuteDatasetQueryAsync:
         ):
             with pytest.raises(ConnectorException):
                 await resolve_generated_result(
-                    client.list_execute_dataset_query(
+                    client.execute_dataset_query(
                         input=query,
                         groupid="group-123",
                         datasetid="dataset-456",

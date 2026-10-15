@@ -221,7 +221,7 @@ async def example_7_file_tags():
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                added_tags = [item async for item in client.list_add_file_tag(id=file_id, tag="sdk-sample")]
+                added_tags = await client.add_file_tag(id=file_id, tag="sdk-sample")
                 if added_tags:
                     print(f"Add tag result: {added_tags}")
 

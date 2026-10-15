@@ -502,7 +502,7 @@ class TestPostMessage:
             return_value=mock_response
         ) as mock_send:
             _ = await resolve_generated_result(
-                client.list_post_message(input=message_input)
+                client.post_message(input=message_input)
             )
 
             mock_send.assert_called_once()
@@ -530,7 +530,7 @@ class TestPostMessage:
             new_callable=AsyncMock,
             return_value=mock_response
         ) as mock_send:
-            await resolve_generated_result(client.list_post_message(
+            await resolve_generated_result(client.post_message(
                 input=message_input,
                 network_id="net123",
             ))
@@ -560,7 +560,7 @@ class TestPostMessage:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_post_message(input=message_input)
+                    client.post_message(input=message_input)
                 )
 
             assert exc_info.value.status_code == 403

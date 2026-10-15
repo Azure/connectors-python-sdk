@@ -635,7 +635,7 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> AsyncItemPaged[str]:
         """
         Get Member Groups
 
@@ -656,8 +656,8 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `async for`.
+            AsyncItemPaged[str]: An Azure Core pager over connector results.
+                Consume it with `async for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -696,11 +696,11 @@ class MsgraphgroupsanduserClient(ConnectorClientBase):
 
         async def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], AsyncIterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            async def items() -> AsyncIterator[dict[str, Any]]:
+            async def items() -> AsyncIterator[str]:
                 for item in page.get("value", []):
                     yield item
 

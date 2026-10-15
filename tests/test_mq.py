@@ -177,7 +177,7 @@ class TestDelete:
 
 
 class TestDeleteAll:
-    """Tests for list_delete_all method."""
+    """Tests for delete_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -200,14 +200,14 @@ class TestDeleteAll:
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_delete_all(input=input_options)
+                client.delete_all(input=input_options)
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/deleteall" in call_args[0][1]
-            assert result[0]["deletedCount"] == 5
+            assert result["value"][0]["deletedCount"] == 5
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
@@ -226,9 +226,9 @@ class TestDeleteAll:
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_delete_all(input=MultipleGetValidOptions())
+                client.delete_all(input=MultipleGetValidOptions())
             )
-            assert result == []
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -248,7 +248,7 @@ class TestDeleteAll:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_delete_all(input=MultipleGetValidOptions())
+                    client.delete_all(input=MultipleGetValidOptions())
                 )
 
             assert exc_info.value.status_code == 500
@@ -327,7 +327,7 @@ class TestRead:
 
 
 class TestReadAll:
-    """Tests for list_read_all method."""
+    """Tests for read_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -350,14 +350,14 @@ class TestReadAll:
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_read_all(input=input_options)
+                client.read_all(input=input_options)
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/readall" in call_args[0][1]
-            assert len(result) == 2
+            assert len(result["value"]) == 2
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
@@ -376,9 +376,9 @@ class TestReadAll:
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_read_all(input=MultipleGetValidOptions())
+                client.read_all(input=MultipleGetValidOptions())
             )
-            assert result == []
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -398,7 +398,7 @@ class TestReadAll:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_read_all(input=MultipleGetValidOptions())
+                    client.read_all(input=MultipleGetValidOptions())
                 )
 
             assert exc_info.value.status_code == 408
@@ -477,7 +477,7 @@ class TestReceive:
 
 
 class TestReceiveAll:
-    """Tests for list_receive_all method."""
+    """Tests for receive_all method."""
 
     @pytest.mark.asyncio
     async def test_success_with_json_response(self, mock_credential):
@@ -504,14 +504,14 @@ class TestReceiveAll:
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_receive_all(input=input_options)
+                client.receive_all(input=input_options)
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/receiveall" in call_args[0][1]
-            assert len(result) == 1
+            assert len(result["value"]) == 1
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
@@ -530,9 +530,9 @@ class TestReceiveAll:
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_receive_all(input=MultipleGetValidOptions())
+                client.receive_all(input=MultipleGetValidOptions())
             )
-            assert result == []
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -552,7 +552,7 @@ class TestReceiveAll:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_receive_all(input=MultipleGetValidOptions())
+                    client.receive_all(input=MultipleGetValidOptions())
                 )
 
             assert exc_info.value.status_code == 401

@@ -125,7 +125,8 @@ async def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                items = [item async for item in client.list_read_all(input=options)]
+                result = await client.read_all(input=options)
+                items = result.get("value", []) if result else []
 
                 if items:
                     print(f"Browsed {len(items)} messages:")

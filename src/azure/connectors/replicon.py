@@ -6,11 +6,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field as dataclass_field
-from typing import Optional, Iterator, Dict, List, Any, Mapping
-from urllib.parse import quote, urljoin, urlsplit
+from typing import Optional, Dict, List, Any, Mapping
+from urllib.parse import quote
 import json
 
-from azure.core.paging import ItemPaged
 from azure.core.credentials import AzureKeyCredential, TokenCredential
 from azure.core.pipeline.transport import HttpTransport
 
@@ -18,7 +17,6 @@ from azure.connectors.sdk import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
-    ConnectorResponseSnapshot,
 )
 
 __all__ = [
@@ -527,46 +525,7 @@ class RepliconClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "replicon"
 
-    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
-            if next_link.startswith("/"):
-                return f"{self._connection_runtime_url}{next_link}"
-            if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return urljoin(current_request_url, next_link)
-
-        parsed_connection = urlsplit(self._connection_runtime_url)
-        next_link_hostname = parsed_next_link.hostname
-        connection_hostname = parsed_connection.hostname
-        if next_link_hostname is None or connection_hostname is None:
-            raise ValueError("Pagination URLs must include a hostname.")
-
-        next_link_port = parsed_next_link.port
-        if next_link_port is None:
-            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
-        connection_port = parsed_connection.port
-        if connection_port is None:
-            connection_port = 443 if parsed_connection.scheme == "https" else 80
-        if next_link_hostname.lower() == connection_hostname.lower():
-            if (
-                parsed_next_link.scheme == parsed_connection.scheme
-                and next_link_port == connection_port
-            ):
-                return next_link
-
-            raise ValueError(
-                "Pagination URL origin "
-                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
-                "must use the connection runtime scheme and port."
-            )
-
-        suffix = parsed_next_link.path
-        if parsed_next_link.query:
-            suffix += f"?{parsed_next_link.query}"
-        return f"{self._connection_runtime_url}{suffix}"
-
-    def list_bulk_get_project_details3(
+    def bulk_get_project_details3(
         self,
         input: BulkGetProjectDetails3Input | Mapping[str, Any],
         host_url: str,
@@ -575,14 +534,11 @@ class RepliconClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Get Project Details
 
         Get the project details from Replicon
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `BulkGetProjectDetails3`.
 
@@ -596,8 +552,7 @@ class RepliconClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -613,47 +568,27 @@ class RepliconClient(ConnectorClientBase):
         query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("d", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def create_project_or_apply_modifications(
         self,
@@ -850,7 +785,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_create_task_hierarchy_or_apply_modifications(
+    def create_task_hierarchy_or_apply_modifications(
         self,
         input: CreateTaskHierarchyOrApplyModificationsInput | Mapping[str, Any],
         host_url: str,
@@ -859,14 +794,11 @@ class RepliconClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Create Task Hierarchy Or Apply Modifications
 
         Create Task Hierarchy Or Apply Modifications to a Replicon Task
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `CreateTaskHierarchyOrApplyModifications`.
 
@@ -880,8 +812,7 @@ class RepliconClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -899,47 +830,27 @@ class RepliconClient(ConnectorClientBase):
         query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("d", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def move_task(
         self,
@@ -1131,7 +1042,7 @@ class RepliconClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_bulk_get_time_entered_summary(
+    def bulk_get_time_entered_summary(
         self,
         input: BulkGetTimeEnteredSummaryInput | Mapping[str, Any],
         host_url: str,
@@ -1140,14 +1051,11 @@ class RepliconClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Get Time Entered Summary
 
         Get Time Entered by Task Uri from Replicon
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `BulkGetTimeEnteredSummary`.
 
@@ -1161,8 +1069,7 @@ class RepliconClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1178,47 +1085,27 @@ class RepliconClient(ConnectorClientBase):
         query_params.append(f"hostUrl={quote(value, safe='')}")
         if query_params:
             request_url += '?' + '&'.join(query_params)
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("d", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def put_project_team_member_assignments(
         self,

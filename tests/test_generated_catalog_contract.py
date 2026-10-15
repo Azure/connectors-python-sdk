@@ -34,6 +34,37 @@ CONNECTOR_MODULE_NAMES = [
     if not path.name.startswith("_")
 ]
 
+PRIMITIVE_STRING_PAGER_OPERATIONS = [
+    ("azuread", "list_member_groups"),
+    ("eventhubs", "list_consumer_groups"),
+    ("eventhubs", "list_content_types"),
+    ("eventhubs", "list_event_hubs"),
+    ("eventhubs", "list_partition_keys"),
+    ("meetingroommap", "list_categories"),
+    ("msgraphgroupsanduser", "list_member_groups"),
+    ("onedrive", "list_file_tags"),
+    ("servicebus", "list_queues"),
+    ("servicebus", "list_session_options"),
+    ("servicebus", "list_subscriptions"),
+    ("servicebus", "list_system_properties"),
+    ("servicebus", "list_topics"),
+]
+
+EAGER_MUTATION_OPERATIONS = [
+    ("azuread", "check_member_groups"),
+    ("docusign", "add_recipient_tabs"),
+    ("mq", "delete_all"),
+    ("mq", "read_all"),
+    ("mq", "receive_all"),
+    ("onedrive", "add_file_tag"),
+    ("powerbi", "execute_dataset_query"),
+    ("replicon", "bulk_get_project_details3"),
+    ("replicon", "bulk_get_time_entered_summary"),
+    ("replicon", "create_task_hierarchy_or_apply_modifications"),
+    ("sendgrid", "add_global_suppression"),
+    ("yammer", "post_message"),
+]
+
 
 def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
     """Return the generated client type defined by a connector module."""
@@ -48,6 +79,45 @@ def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
 
     assert len(client_types) == 1, connector_module.__name__
     return client_types[0]
+
+
+@pytest.mark.parametrize(
+    ("module_name", "operation_name"),
+    PRIMITIVE_STRING_PAGER_OPERATIONS,
+)
+def test_primitive_string_collections_use_typed_pagers(
+    module_name: str,
+    operation_name: str,
+) -> None:
+    """Preserve primitive item types in generated pager annotations."""
+    connector_module = importlib.import_module(f"azure.connectors.{module_name}")
+    client_type = get_generated_client_type(connector_module)
+    return_type = get_type_hints(
+        getattr(client_type, operation_name),
+        globalns=vars(connector_module),
+    )["return"]
+
+    assert get_origin(return_type) is ItemPaged
+    assert get_args(return_type) == (str,)
+
+
+@pytest.mark.parametrize(
+    ("module_name", "operation_name"),
+    EAGER_MUTATION_OPERATIONS,
+)
+def test_mutation_collection_responses_remain_eager(
+    module_name: str,
+    operation_name: str,
+) -> None:
+    """Keep bounded mutation responses out of the lazy paging contract."""
+    connector_module = importlib.import_module(f"azure.connectors.{module_name}")
+    client_type = get_generated_client_type(connector_module)
+    return_type = get_type_hints(
+        getattr(client_type, operation_name),
+        globalns=vars(connector_module),
+    )["return"]
+
+    assert get_origin(return_type) is not ItemPaged
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)

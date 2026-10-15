@@ -58,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Collection response contracts**: Mutation and action arrays execute eagerly and preserve their response envelopes instead of delaying the request behind a pager. Primitive read collections now expose `ItemPaged[str]` and `AsyncItemPaged[str]` rather than dictionary item types.
+- **Finite polling delays**: Non-finite `Retry-After` values such as `Infinity`, `NaN`, and numeric overflow now use the finite default polling interval.
 - **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
 - **Caller continuation isolation**: Caller-provided `by_page()` continuation URLs now pass through the same origin normalization as service-provided next links, preventing authenticated requests from being sent to an arbitrary host.
 - **Idempotent resource deletes** — generated `delete_*` operations return `None` and succeed when the resource is already absent and the service returns HTTP 404, regardless of the underlying HTTP verb. DELETE-backed actions retain ordinary error handling.

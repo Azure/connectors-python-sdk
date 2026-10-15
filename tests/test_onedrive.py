@@ -876,7 +876,7 @@ class TestAddFileTag:
             return_value=mock_response
         ) as mock_send:
             await resolve_generated_result(
-                client.list_add_file_tag(
+                client.add_file_tag(
                     id="file123",
                     tag="new-tag"
                 )

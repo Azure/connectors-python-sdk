@@ -389,7 +389,7 @@ class MeetingroommapClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> ItemPaged[str]:
         """
         GetCategories
 
@@ -407,8 +407,8 @@ class MeetingroommapClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -446,11 +446,11 @@ class MeetingroommapClient(ConnectorClientBase):
 
         def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], Iterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else []
 
-            def items() -> Iterator[dict[str, Any]]:
+            def items() -> Iterator[str]:
                 for item in page:
                     yield item
 

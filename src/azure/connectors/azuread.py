@@ -1383,7 +1383,7 @@ class AzureadClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_check_member_groups(
+    def check_member_groups(
         self,
         input: CheckMemberGroupsRequest | Mapping[str, Any],
         id: str,
@@ -1392,15 +1392,12 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Check group membership
 
         If the user is a member of the given group, the result will contain the
         given id. Otherwise the result will be empty.
-
-        Returns an Azure Core pager that follows the connector continuation
-        URL.
 
         Swagger operation ID: `CheckMemberGroupsV2`.
 
@@ -1415,8 +1412,7 @@ class AzureadClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1425,47 +1421,27 @@ class AzureadClient(ConnectorClientBase):
             f"{self._connection_runtime_url}"
             f"/v2/v1.0/users/{quote(str(id), safe='')}/checkMemberGroups"
         )
-        initial_request_url = request_url
-        request_body = input
 
-        def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            def items() -> Iterator[dict[str, Any]]:
-                for item in page.get("value", []):
-                    yield item
-
-            return None, items()
-
-        return ItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     def list_member_groups(
         self,
@@ -1476,7 +1452,7 @@ class AzureadClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> ItemPaged[dict[str, Any]]:
+    ) -> ItemPaged[str]:
         """
         Get groups of a user
 
@@ -1498,8 +1474,8 @@ class AzureadClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            ItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `for`.
+            ItemPaged[str]: An Azure Core pager over connector results. Consume
+                it with `for`.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1538,11 +1514,11 @@ class AzureadClient(ConnectorClientBase):
 
         def extract_data(
             page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], Iterator[dict[str, Any]]]:
+        ) -> tuple[Optional[str], Iterator[str]]:
             response, request_url = page_response
             page = json.loads(response.text) if response.text else {}
 
-            def items() -> Iterator[dict[str, Any]]:
+            def items() -> Iterator[str]:
                 for item in page.get("value", []):
                     yield item
 

@@ -123,11 +123,12 @@ def example_3_browse_messages_batch():
                     include_info="true",
                 )
 
-                result = client.list_read_all(input=options)
+                result = client.read_all(input=options)
+                messages = result.get("value", []) if result else []
 
-                if result and isinstance(result, list):
-                    print(f"Browsed {len(result)} messages:")
-                    for i, msg in enumerate(result[:5]):  # Show first 5
+                if messages:
+                    print(f"Browsed {len(messages)} messages:")
+                    for i, msg in enumerate(messages[:5]):  # Show first 5
                         msg_id = msg.get("messageId", "N/A")
                         data = msg.get("messageData", "")
                         preview = data[:50] if data else "(empty)"

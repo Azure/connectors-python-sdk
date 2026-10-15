@@ -5,11 +5,9 @@
 
 from __future__ import annotations
 
-from typing import Optional, AsyncIterator, Any, Mapping
-from urllib.parse import urljoin, urlsplit
+from typing import Optional, Any, Mapping
 import json
 
-from azure.core.async_paging import AsyncItemPaged
 from azure.core.credentials import AzureKeyCredential
 from azure.core.credentials_async import AsyncTokenCredential
 from azure.core.pipeline.transport import AsyncHttpTransport
@@ -18,7 +16,6 @@ from azure.connectors.sdk.aio import (
     ConnectorClientBase,
     ConnectorException,
     ConnectorResponseHook,
-    ConnectorResponseSnapshot,
 )
 
 from azure.connectors.mq import (
@@ -114,45 +111,6 @@ class MqClient(ConnectorClientBase):
     def connector_name(self) -> str:
         return "mq"
 
-    def _resolve_pagination_url(self, next_link: str, current_request_url: str) -> str:
-        parsed_next_link = urlsplit(next_link)
-        if not parsed_next_link.scheme or not parsed_next_link.netloc:
-            if next_link.startswith("/"):
-                return f"{self._connection_runtime_url}{next_link}"
-            if next_link.startswith("?"):
-                return f"{current_request_url.partition('?')[0]}{next_link}"
-            return urljoin(current_request_url, next_link)
-
-        parsed_connection = urlsplit(self._connection_runtime_url)
-        next_link_hostname = parsed_next_link.hostname
-        connection_hostname = parsed_connection.hostname
-        if next_link_hostname is None or connection_hostname is None:
-            raise ValueError("Pagination URLs must include a hostname.")
-
-        next_link_port = parsed_next_link.port
-        if next_link_port is None:
-            next_link_port = 443 if parsed_next_link.scheme == "https" else 80
-        connection_port = parsed_connection.port
-        if connection_port is None:
-            connection_port = 443 if parsed_connection.scheme == "https" else 80
-        if next_link_hostname.lower() == connection_hostname.lower():
-            if (
-                parsed_next_link.scheme == parsed_connection.scheme
-                and next_link_port == connection_port
-            ):
-                return next_link
-
-            raise ValueError(
-                "Pagination URL origin "
-                f"'{parsed_next_link.scheme}://{next_link_hostname}:{next_link_port}' "
-                "must use the connection runtime scheme and port."
-            )
-
-        suffix = parsed_next_link.path
-        if parsed_next_link.query:
-            suffix += f"?{parsed_next_link.query}"
-        return f"{self._connection_runtime_url}{suffix}"
-
     async def delete(
         self,
         input: SingleGetValidOptions | Mapping[str, Any],
@@ -206,7 +164,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_delete_all(
+    async def delete_all(
         self,
         input: MultipleGetValidOptions | Mapping[str, Any],
         *,
@@ -214,14 +172,11 @@ class MqClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Delete messages
 
         Deletes messages from the queue, by doing a destructive get.
-
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
 
         Swagger operation ID: `DeleteAllV2`.
 
@@ -234,54 +189,33 @@ class MqClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `async for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/deleteall"
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page.get("value", []):
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def read(
         self,
@@ -336,7 +270,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_read_all(
+    async def read_all(
         self,
         input: MultipleGetValidOptions | Mapping[str, Any],
         *,
@@ -344,14 +278,11 @@ class MqClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Browse messages
 
         Browse messages in a queue.
-
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
 
         Swagger operation ID: `ReadAllV2`.
 
@@ -364,54 +295,33 @@ class MqClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `async for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/readall"
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page.get("value", []):
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def receive(
         self,
@@ -466,7 +376,7 @@ class MqClient(ConnectorClientBase):
 
         return json.loads(response.text)
 
-    def list_receive_all(
+    async def receive_all(
         self,
         input: MultipleGetValidOptions | Mapping[str, Any],
         *,
@@ -474,14 +384,11 @@ class MqClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> AsyncItemPaged[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """
         Receive messages
 
         Returns messages from the queue, by doing a destructive get.
-
-        Returns an Azure Core async pager that follows the connector
-        continuation URL.
 
         Swagger operation ID: `ReceiveAllV2`.
 
@@ -494,54 +401,33 @@ class MqClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            AsyncItemPaged[dict[str, Any]]: An Azure Core pager over connector
-                results. Consume it with `async for`.
+            dict[str, Any] | None: The connector operation result.
 
         Raises:
             ConnectorException: If the connector request fails.
         """
         request_url = f"{self._connection_runtime_url}/v2/receiveall"
-        initial_request_url = request_url
-        request_body = input
 
-        async def get_next(
-            continuation_token: Optional[str],
-        ) -> tuple[ConnectorResponseSnapshot, str]:
-            request_url = initial_request_url
-            if continuation_token is not None:
-                request_url = self._resolve_pagination_url(continuation_token, initial_request_url)
-            body = request_body if continuation_token is None else None
-            response = await self.http_client.send(
-                "POST", request_url, body=body,
-                timeout=timeout,
-                headers=headers,
-                client_request_id=client_request_id,
-                response_hook=response_hook,
+        response = await self.http_client.send(
+            "POST", request_url, body=input,
+            timeout=timeout,
+            headers=headers,
+            client_request_id=client_request_id,
+            response_hook=response_hook,
+        )
+
+        if not (200 <= response.status < 300):
+            raise ConnectorException(
+                "POST",
+                request_url,
+                response.status,
+                response.text,
             )
 
-            if not (200 <= response.status < 300):
-                raise ConnectorException(
-                    "POST",
-                    request_url,
-                    response.status,
-                    response.text,
-                )
+        if not response.text:
+            return None
 
-            return response, request_url
-
-        async def extract_data(
-            page_response: tuple[ConnectorResponseSnapshot, str],
-        ) -> tuple[Optional[str], AsyncIterator[dict[str, Any]]]:
-            response, request_url = page_response
-            page = json.loads(response.text) if response.text else {}
-
-            async def items() -> AsyncIterator[dict[str, Any]]:
-                for item in page.get("value", []):
-                    yield item
-
-            return None, items()
-
-        return AsyncItemPaged(get_next, extract_data)
+        return json.loads(response.text)
 
     async def send(
         self,

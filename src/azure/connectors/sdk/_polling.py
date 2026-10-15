@@ -2,6 +2,7 @@
 
 """Shared helpers for connector long-running operation polling."""
 
+import math
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from typing import Mapping, Optional
@@ -79,7 +80,12 @@ def get_retry_after_seconds(response: ConnectorResponseSnapshot) -> float:
         return DEFAULT_POLLING_INTERVAL_SECONDS
 
     try:
-        return max(0.0, float(retry_after))
+        delay = float(retry_after)
+        return (
+            max(0.0, delay)
+            if math.isfinite(delay)
+            else DEFAULT_POLLING_INTERVAL_SECONDS
+        )
     except ValueError:
         try:
             retry_at = parsedate_to_datetime(retry_after)

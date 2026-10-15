@@ -1294,14 +1294,14 @@ class TestCheckMemberGroups:
             return_value=mock_response
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_check_member_groups(input=check_input, id="user-123")
+                client.check_member_groups(input=check_input, id="user-123")
             )
 
             mock_send.assert_called_once()
             call_args = mock_send.call_args
             assert call_args[0][0] == "POST"
             assert "/v2/v1.0/users/user-123/checkMemberGroups" in call_args[0][1]
-            assert result == ["group-123"]
+            assert result == {"value": ["group-123"]}
 
     @pytest.mark.asyncio
     async def test_success_user_is_not_member(self, mock_credential):
@@ -1321,9 +1321,9 @@ class TestCheckMemberGroups:
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_check_member_groups(input=check_input, id="user-123")
+                client.check_member_groups(input=check_input, id="user-123")
             )
-            assert result == []
+            assert result == {"value": []}
 
     @pytest.mark.asyncio
     async def test_empty_response_returns_empty_page(self, mock_credential):
@@ -1343,9 +1343,9 @@ class TestCheckMemberGroups:
             return_value=mock_response
         ):
             result = await resolve_generated_result(
-                client.list_check_member_groups(input=check_input, id="user-123")
+                client.check_member_groups(input=check_input, id="user-123")
             )
-            assert result == []
+            assert result is None
 
     @pytest.mark.asyncio
     async def test_error_response_raises_exception(self, mock_credential):
@@ -1366,7 +1366,7 @@ class TestCheckMemberGroups:
         ):
             with pytest.raises(ConnectorException) as exc_info:
                 await resolve_generated_result(
-                    client.list_check_member_groups(
+                    client.check_member_groups(
                         input=check_input,
                         id="nonexistent-user",
                     )

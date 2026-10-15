@@ -219,7 +219,7 @@ def example_7_file_tags():
 
                 # Add a new tag
                 print("Adding tag 'sdk-sample'...")
-                client.list_add_file_tag(id=file_id, tag="sdk-sample")
+                client.add_file_tag(id=file_id, tag="sdk-sample")
 
                 # Get updated tags
                 tags_result = client.list_file_tags(id=file_id)

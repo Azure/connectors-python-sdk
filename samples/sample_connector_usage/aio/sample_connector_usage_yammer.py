@@ -156,10 +156,9 @@ async def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                items = [item async for item in client.list_post_message(input=message)]
+                result = await client.post_message(input=message)
 
-                if items:
-                    result = items[0]
+                if result:
                     print("Message posted successfully!")
                     print(f"  Message ID: {result.get('id')}")
                     print(f"  Web URL: {result.get('web_url')}")

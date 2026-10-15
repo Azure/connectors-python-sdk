@@ -154,7 +154,7 @@ def example_5_post_message():
                     title="SDK Test Message"
                 )
 
-                result = client.list_post_message(input=message)
+                result = client.post_message(input=message)
 
                 if result:
                     print("Message posted successfully!")

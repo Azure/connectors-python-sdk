@@ -156,6 +156,9 @@ def test_root_and_aio_operation_surfaces_match(module_name: str) -> None:
         is_long_running = get_origin(root_return_type) is LROPoller
         if is_pageable:
             assert get_origin(aio_return_type) is AsyncItemPaged, operation_name
+            assert get_args(aio_return_type) == get_args(
+                root_return_type
+            ), operation_name
         elif is_long_running:
             assert get_origin(aio_return_type) is AsyncLROPoller, operation_name
             assert get_args(aio_return_type) == get_args(

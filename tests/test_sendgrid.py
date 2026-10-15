@@ -127,7 +127,7 @@ class TestSendgridClientOperations:
             return_value=mock_response,
         ) as mock_send:
             result = await resolve_generated_result(
-                client.list_add_global_suppression(
+                client.add_global_suppression(
                     input=AddGlobalSuppressRequestAndResponse(
                         recipient_emails=["a@b.com"]
                     ),
@@ -138,7 +138,7 @@ class TestSendgridClientOperations:
             assert method == "POST"
             assert url.endswith("/suppressions/global")
             assert mock_send.call_args.kwargs["body"] is not None
-            assert result == ["a@b.com"]
+            assert result == {"recipient_emails": ["a@b.com"]}
 
     @pytest.mark.asyncio
     async def test_get_global_suppression_success(self, mock_credential):
@@ -378,7 +378,7 @@ class TestSendgridClientErrorHandling:
     @pytest.mark.parametrize(
         "operation",
         [
-            "list_add_global_suppression",
+            "add_global_suppression",
             "get_global_suppression",
             "delete_global_suppression",
             "add_recipient_to_list",
@@ -405,9 +405,9 @@ class TestSendgridClientErrorHandling:
             return_value=mock_response,
         ):
             with pytest.raises(ConnectorException) as exc_info:
-                if operation == "list_add_global_suppression":
+                if operation == "add_global_suppression":
                     await resolve_generated_result(
-                        client.list_add_global_suppression(
+                        client.add_global_suppression(
                             input=AddGlobalSuppressRequestAndResponse()
                         )
                     )

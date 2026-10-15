@@ -292,6 +292,14 @@ def test_retry_after_supports_http_dates_and_defaults() -> None:
     ) == 1.0
 
 
+@pytest.mark.parametrize("retry_after", ["Infinity", "-Infinity", "NaN", "1e309"])
+def test_retry_after_defaults_for_non_finite_numbers(retry_after: str) -> None:
+    """Use the finite default when Retry-After cannot represent a sleep delay."""
+    assert get_retry_after_seconds(
+        create_response(202, {"Retry-After": retry_after})
+    ) == 1.0
+
+
 def test_foreign_polling_url_is_rebased_without_forwarding_its_origin() -> None:
     """Preserve backend path and query while using the authenticated runtime."""
     resolved = resolve_polling_url(
