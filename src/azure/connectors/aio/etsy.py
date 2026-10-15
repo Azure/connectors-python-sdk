@@ -1481,7 +1481,7 @@ class EtsyClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Delete a shipping profile
 
@@ -1499,7 +1499,8 @@ class EtsyClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1520,6 +1521,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1527,11 +1531,6 @@ class EtsyClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     async def shipping_update_profile(
         self,
@@ -1811,6 +1810,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -2070,6 +2072,9 @@ class EtsyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -3064,6 +3069,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3471,6 +3479,9 @@ class EtsyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(
@@ -4039,6 +4050,9 @@ class EtsyClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -4302,6 +4316,9 @@ class EtsyClient(ConnectorClientBase):
             client_request_id=client_request_id,
             response_hook=response_hook,
         )
+
+        if response.status == 404:
+            return None
 
         if not (200 <= response.status < 300):
             raise ConnectorException(

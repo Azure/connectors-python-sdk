@@ -24,20 +24,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Generated clients now follow the Azure SDK sync/aio namespace convention** — synchronous clients live in `azure.connectors.<connector>` and asynchronous clients live in `azure.connectors.aio.<connector>`. Both surfaces use the same unsuffixed operation names. The previous root asynchronous clients and `_async` operation aliases are removed without compatibility shims.
 - **Pageable operations now return Azure Core pagers** — root clients return `ItemPaged` and aio clients return `AsyncItemPaged`. Pager construction is not awaited; iterate normally or asynchronously, or use `by_page(continuation_token=...)` for page boundaries.
 - **Generated models have one owner** — dataclasses, aliases, enums, and `TRIGGER_OPERATIONS` are defined in root connector modules and shared by aio modules. Import models from `azure.connectors.<connector>` in both modes.
-- **Generated clients now use the asynchronous Azure Core pipeline** — every client requires a caller-owned `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
+- **Generated clients now use Azure Core pipelines** — root clients require a caller-owned `TokenCredential` or `AzureKeyCredential`, while aio clients require an `AsyncTokenCredential` or `AzureKeyCredential`. The legacy token-provider classes and `ConnectorClientOptions` have been removed; retry, timeout, transport, and policy settings are passed directly to the client. Operations also expose keyword-only `timeout`, `headers`, `client_request_id`, and `response_hook` controls.
 - **Automatic retries are now method-safe by default** — `GET`, `HEAD`, `OPTIONS`, and `TRACE` retain configured retries. `POST`, `PUT`, `PATCH`, `DELETE`, and unknown methods make one attempt for transient responses and transport errors. Set `retry_unsafe_http_methods=True` directly on a generated client only when replay is acceptable; retry count, timeout, and backoff settings are also direct client keyword arguments. ([#85](https://github.com/Azure/connectors-python-sdk/issues/85))
-- Jira `list_issues_async` now exposes the live optional `fields` query parameter
+- Jira `list_issues` now exposes the live optional `fields` query parameter
   instead of sending an internal `fields=*all` default. Pass `fields` and
   `next_page_token` by keyword; `fields` precedes the token in the generated signature.
-- This regeneration propagates the async-iterator paging contract to 32 additional
+- This regeneration propagates the Azure Core paging contract to 32 additional
   connectors, extending [Fix Dataverse list pagination (#84)](https://github.com/Azure/connectors-python-sdk/pull/84).
-  Pageable operations return items rather than response dictionaries. Consume them
-  with `async for`, or collect them with
-  `[item async for item in client.get_items_async(...)]`; samples use this contract.
+  Pageable operations return items rather than response dictionaries. Iterate root
+  pagers with `for` and aio pagers with `async for`; samples use this contract.
 
 - Seismic Planner `CustomPropertyValues.localizations` now exposes `Dict[str, CustomPropertyDataDisplay]` instead of `Dict[str, Any]`. Callers can access typed values directly, such as `localizations["en-US"].name`. ([Azure/Connectors-NET-SDK#262](https://github.com/Azure/Connectors-NET-SDK/issues/262), AzureUX-BPM PR 17131877)
 
-- Microsoft Dataverse `get_items_async` now returns an `AsyncIterator[dict[str, Any]]`. Callers must use `async for` instead of awaiting a single response dictionary; iteration preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
+- Microsoft Dataverse `get_items` now returns `ItemPaged[dict[str, Any]]` from root clients and `AsyncItemPaged[dict[str, Any]]` from aio clients. Iterate instead of awaiting a single response dictionary; paging preserves and follows `@odata.nextLink` until all rows are returned. ([Azure/Connectors-NET-SDK#208](https://github.com/Azure/Connectors-NET-SDK/issues/208), AzureUX-BPM PR 17086991)
 
 - Regenerated all 99 supported connector clients from current live managed connector metadata using the Azure Core contract generator.
 - Corrected generated parameter types across connector operations, including pagination values, numeric identifiers, and Boolean options. Callers must now pass the annotated `int` and `bool` values instead of string representations.
@@ -62,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Finite polling delays**: Non-finite `Retry-After` values such as `Infinity`, `NaN`, and numeric overflow now use the finite default polling interval.
 - **Collection paging classification**: Explicit pageable responses now infer omitted item properties and follow continuation fields present in the response schema. Bounded read envelopes select their primary array over auxiliary array metadata and expose Azure-guideline `list_*` operations returning `ItemPaged` or `AsyncItemPaged`; mutation and action arrays execute eagerly under their action names.
 - **Caller continuation isolation**: Caller-provided `by_page()` continuation URLs now pass through the same origin normalization as service-provided next links, preventing authenticated requests from being sent to an arbitrary host.
-- **Idempotent resource deletes** — generated `delete_*` operations return `None` and succeed when the resource is already absent and the service returns HTTP 404, regardless of the underlying HTTP verb. DELETE-backed actions retain ordinary error handling.
+- **Idempotent HTTP deletes** — generated HTTP `DELETE` operations return `None` when the service reports that the target is already absent with HTTP 404, regardless of the normalized operation name. Non-DELETE actions retain their declared response and ordinary error handling even when their names begin with `delete_`.
 - **Orderful transaction responses** — `list_transactions` now preserves and returns the runtime JSON payload despite the managed connector Swagger omitting its response schema.
 - **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
 - **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` while preserving connector-specific status, operation, path, and response-body details.
@@ -99,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generated caller-supplied and internal-default query values escape reserved
   characters, including `/`, so paths, URLs, and collection values remain within
   their intended query parameters.
-- **Microsoft Dataverse**: Corrected `create_attachment_async()` to accept GUID/string row IDs instead of integers.
+- **Microsoft Dataverse**: Corrected `create_attachment()` to accept GUID/string row IDs instead of integers.
 
 ## [0.5.0b1] - 2026-08-31
 

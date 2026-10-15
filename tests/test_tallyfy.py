@@ -160,7 +160,9 @@ class TestTallyfyClient:
         assert url.endswith(expected_url_suffix)
         assert (mock_send.call_args.kwargs["body"] is not None) is expects_body
         expected_result = (
-            [{"ok": True}]
+            None
+            if expected_method == "DELETE"
+            else [{"ok": True}]
             if operation == "list_organization_users"
             else {"ok": True}
         )

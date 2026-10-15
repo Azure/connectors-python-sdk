@@ -81,7 +81,14 @@ SUCCESS_CONTRACTS = {
     "vocabulary_get": ("GET", "/speechtotext/v1/vocabularies/value", False),
 }
 ALL_OPERATIONS = list(SUCCESS_CONTRACTS)
-NO_RESULT_OPERATIONS = {"analysises_get"}
+NO_RESULT_OPERATIONS = {
+    "analysises_get",
+    *(
+        operation
+        for operation, (method, _, _) in SUCCESS_CONTRACTS.items()
+        if method == "DELETE"
+    ),
+}
 PAGEABLE_OPERATIONS = {
     operation
     for operation in ALL_OPERATIONS

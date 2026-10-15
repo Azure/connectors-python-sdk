@@ -108,8 +108,8 @@ class TestCodeQuality(unittest.TestCase):
                 f"{violation_text}"
             )
 
-    def test_resource_delete_operations_accept_not_found(self):
-        """Verify generated resource deletes, but not actions, accept HTTP 404."""
+    def test_http_delete_operations_accept_not_found(self):
+        """Verify only generated HTTP DELETE operations accept HTTP 404."""
         connector_dir = ROOT_PATH / 'src' / 'azure' / 'connectors'
         connector_paths = [
             *connector_dir.glob('*.py'),
@@ -129,24 +129,21 @@ class TestCodeQuality(unittest.TestCase):
                 if not self._sends_request(function):
                     continue
 
-                is_resource_delete = (
-                    function.name.startswith('delete_')
-                    and not self._uses_http_post(function)
-                )
+                is_http_delete = self._uses_http_method(function, 'DELETE')
                 accepts_not_found = self._accepts_not_found(function)
-                if is_resource_delete and not accepts_not_found:
+                if is_http_delete and not accepts_not_found:
                     violations.append(
                         f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
                         f'{function.lineno}: {function.name} does not accept 404'
                     )
-                elif not is_resource_delete and accepts_not_found:
+                elif not is_http_delete and accepts_not_found:
                     violations.append(
                         f'{filepath.relative_to(ROOT_PATH).as_posix()}:'
                         f'{function.lineno}: {function.name} accepts 404'
                     )
 
         assert not violations, (
-            'Generated HTTP 404 guards do not match resource-delete semantics:\n'
+            'Generated HTTP 404 guards do not match HTTP DELETE semantics:\n'
             + '\n'.join(violations)
         )
 
@@ -161,15 +158,15 @@ class TestCodeQuality(unittest.TestCase):
         )
 
     @staticmethod
-    def _uses_http_post(function: ast.AST) -> bool:
-        """Return whether a function sends an HTTP POST request."""
+    def _uses_http_method(function: ast.AST, method: str) -> bool:
+        """Return whether a function sends the specified HTTP method."""
         return any(
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
             and node.func.attr == 'send'
             and node.args
             and isinstance(node.args[0], ast.Constant)
-            and node.args[0].value == 'POST'
+            and node.args[0].value == method
             for node in ast.walk(function)
         )
 

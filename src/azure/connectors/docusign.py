@@ -3823,7 +3823,7 @@ class DocusignClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Remove recipient from an envelope
 
@@ -3842,7 +3842,8 @@ class DocusignClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -3875,6 +3876,9 @@ class DocusignClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -3882,11 +3886,6 @@ class DocusignClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def get_recipient_fields(
         self,

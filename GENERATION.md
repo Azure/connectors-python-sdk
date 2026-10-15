@@ -519,7 +519,8 @@ Every generated connector client MUST satisfy these invariants before merge:
 
 - Every HTTP operation MUST capture the response and check the status code
 - Non-2xx responses MUST raise `ConnectorException`, an Azure Core
-    `HttpResponseError`, with status code and message
+    `HttpResponseError`, with status code and message, except that HTTP `DELETE`
+    treats HTTP 404 as an idempotent success
 - Void operations (DELETE, PATCH, fire-and-forget POST) MUST NOT discard the response unchecked
 
 **Correct pattern:**
@@ -528,6 +529,9 @@ response = self.http_client.send(
     method="DELETE",
     url=request_uri,
 )
+if response.status == 404:
+    return None
+
 if not (200 <= response.status < 300):
     raise ConnectorException(
         "DELETE",
@@ -565,7 +569,7 @@ non-2xx responses raise `ConnectorException`.
 | POST with body | At least 1 test asserting body is forwarded + 1 error test |
 | PUT with body | At least 1 test asserting body is forwarded + 1 error test |
 | PATCH with body | At least 1 test asserting body is forwarded + 1 error test |
-| DELETE | At least 1 success test + 1 error test verifying exception raised; `delete_*` resource methods must also cover HTTP 404 as success |
+| DELETE | At least 1 success test + 1 non-404 error test verifying exception raised; HTTP 404 must be covered as success regardless of the operation name |
 
 **Connectors with >20 public methods** are not required to have a test class per method. Representative coverage — one test group per HTTP verb type used by the connector — satisfies the acceptance criteria, provided the body-forwarding and non-2xx paths are both covered.
 
@@ -636,7 +640,7 @@ Track known generator issues here to prevent silent recurrence across releases.
 | Mutation arrays were lazy and primitive pagers used dictionary item types | Fixed in generator | `azuread`, `docusign`, `eventhubs`, `meetingroommap`, `mq`, `msgraphgroupsanduser`, `onedrive`, `powerbi`, `replicon`, `sendgrid`, `servicebus`, `yammer` | Fixed | Bounded mutation responses execute eagerly under action names and preserve response envelopes. Read collections retain primitive pager item types in sync and aio contracts. |
 | Caller continuation URLs bypassed pagination origin normalization | Fixed in generator | All pageable connectors | Fixed | `by_page(continuation_token=...)` now routes caller tokens through the same URL resolver as service-provided next links before transport receives the request. |
 | Typeless dynamic request models omitted mapping inputs | Fixed in generator | `docuware` | Fixed | Dynamic dataclass request annotations now accept either the generated model or `Mapping[str, Any]`. |
-| HTTP verb used as a proxy for resource-delete semantics | Fixed in generator | `clicksendsms`, `servicebus`, `zohosign`, and other delete operations | Fixed | Generated `delete_*` methods return `None` and accept HTTP 404 even when the transport verb is PUT. DELETE-backed actions retain ordinary non-2xx failure behavior. |
+| Operation name used as a proxy for HTTP DELETE semantics | Fixed in generator | `arm`, `zohosign`, and other delete operations | Fixed | Generated HTTP `DELETE` methods return `None` for HTTP 404 regardless of their normalized names. Non-DELETE operations preserve their response and ordinary failure behavior even when their names begin with `delete_`. |
 | Successful response discarded when Swagger omits its schema | Fixed in generator | `orderful` | Fixed | The Python-specific `ListTransactions` override preserves the runtime JSON payload without changing other language emitters. |
 | Create/update operations missing request body | [BPM #TBD](https://dev.azure.com/msazure/One/_workitems/edit/TBD) | Varies by connector | Investigation | Some POST/PATCH operations may drop body parameters |
 

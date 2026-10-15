@@ -53,6 +53,10 @@ SHARED_PACKAGE_EXPORT_NAMES = {
     "TriggerCallbackBody",
     "TriggerCallbackPayload",
 }
+NOT_FOUND_CONTRACT_OPERATIONS = [
+    ("arm", "deployments_delete", "DELETE", True),
+    ("zohosign", "delete_document", "PUT", False),
+]
 
 
 def test_package_roots_export_generated_clients_lazily() -> None:
@@ -113,6 +117,57 @@ async def invoke_generated_operation(
         return await awaited_result.result()
 
     return awaited_result
+
+
+@pytest.mark.parametrize(
+    (
+        "module_name",
+        "operation_name",
+        "expected_method",
+        "accepts_not_found",
+    ),
+    NOT_FOUND_CONTRACT_OPERATIONS,
+)
+@pytest.mark.asyncio
+async def test_not_found_contract_follows_http_method(
+    module_name: str,
+    operation_name: str,
+    expected_method: str,
+    accepts_not_found: bool,
+    mock_credential: Any,
+) -> None:
+    """Apply idempotent HTTP 404 handling only to DELETE requests."""
+    connector_module = importlib.import_module(
+        f"azure.connectors.aio.{module_name}"
+    )
+    client_type = get_generated_client_type(connector_module)
+    client = client_type(
+        "https://example.azure.com/connections/test",
+        credential=mock_credential,
+    )
+
+    with patch.object(
+        client._http_client,
+        "send",
+        new_callable=AsyncMock,
+        return_value=MockResponse(status=404, text="not found"),
+    ) as mock_send:
+        if accepts_not_found:
+            result = await invoke_generated_operation(
+                client,
+                operation_name,
+                connector_module,
+            )
+            assert result is None
+        else:
+            with pytest.raises(ConnectorException):
+                await invoke_generated_operation(
+                    client,
+                    operation_name,
+                    connector_module,
+                )
+
+    assert mock_send.call_args.args[0] == expected_method
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)

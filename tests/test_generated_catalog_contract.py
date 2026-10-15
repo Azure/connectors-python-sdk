@@ -65,6 +65,11 @@ EAGER_MUTATION_OPERATIONS = [
     ("yammer", "post_message"),
 ]
 
+NOT_FOUND_CONTRACT_OPERATIONS = [
+    ("arm", "deployments_delete", "DELETE", True),
+    ("zohosign", "delete_document", "PUT", False),
+]
+
 
 def get_generated_client_type(connector_module: ModuleType) -> type[Any]:
     """Return the generated client type defined by a connector module."""
@@ -118,6 +123,53 @@ def test_mutation_collection_responses_remain_eager(
     )["return"]
 
     assert get_origin(return_type) is not ItemPaged
+
+
+@pytest.mark.parametrize(
+    (
+        "module_name",
+        "operation_name",
+        "expected_method",
+        "accepts_not_found",
+    ),
+    NOT_FOUND_CONTRACT_OPERATIONS,
+)
+def test_not_found_contract_follows_http_method(
+    module_name: str,
+    operation_name: str,
+    expected_method: str,
+    accepts_not_found: bool,
+) -> None:
+    """Apply idempotent HTTP 404 handling only to DELETE requests."""
+    connector_module = importlib.import_module(f"azure.connectors.{module_name}")
+    client_type = get_generated_client_type(connector_module)
+    client = client_type(
+        "https://example.azure.com/connections/test",
+        credential=AzureKeyCredential("test-key"),
+    )
+
+    with patch.object(
+        client._http_client,
+        "send",
+        new_callable=MagicMock,
+        return_value=MockResponse(status=404, text="not found"),
+    ) as mock_send:
+        if accepts_not_found:
+            result = invoke_sync_generated_operation(
+                client,
+                operation_name,
+                connector_module,
+            )
+            assert result is None
+        else:
+            with pytest.raises(ConnectorException):
+                invoke_sync_generated_operation(
+                    client,
+                    operation_name,
+                    connector_module,
+                )
+
+    assert mock_send.call_args.args[0] == expected_method
 
 
 @pytest.mark.parametrize("module_name", CONNECTOR_MODULE_NAMES)

@@ -1420,7 +1420,7 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Disassociates a row from a multi-valued relationship
 
@@ -1440,7 +1440,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1468,6 +1469,9 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1475,11 +1479,6 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def disassociate_single_value_record_delete_item(
         self,
@@ -1492,7 +1491,7 @@ class CommondataserviceClient(ConnectorClientBase):
         headers: Optional[Mapping[str, str]] = None,
         client_request_id: Optional[str] = None,
         response_hook: Optional[ConnectorResponseHook] = None,
-    ) -> dict[str, Any] | None:
+    ) -> None:
         """
         Disassociates a row from a single-valued relationship
 
@@ -1511,7 +1510,8 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook: A callback invoked with the connector response.
 
         Returns:
-            dict[str, Any] | None: The connector operation result.
+            dict[str, Any] | None: The operation completes without a response
+                body.
 
         Raises:
             ConnectorException: If the connector request fails.
@@ -1537,6 +1537,9 @@ class CommondataserviceClient(ConnectorClientBase):
             response_hook=response_hook,
         )
 
+        if response.status == 404:
+            return None
+
         if not (200 <= response.status < 300):
             raise ConnectorException(
                 "DELETE",
@@ -1544,11 +1547,6 @@ class CommondataserviceClient(ConnectorClientBase):
                 response.status,
                 response.text,
             )
-
-        if not response.text:
-            return None
-
-        return json.loads(response.text)
 
     def get_attachment_content(
         self,
