@@ -100,12 +100,12 @@ LogicAppsCompiler.exe <output-directory> --directClient --connectors=office365
 LogicAppsCompiler.exe <output-directory> --directClient --language=csharp --connectors=office365
 ```
 
-## Capture and Deterministic Regeneration
+## Catalog Regeneration
 
 To refresh connector contracts, set the source subscription and region
-explicitly, use a new empty temporary `ARMCACHE_PATH`, and capture raw responses
-with `--swagger-output-directory`. Review the snapshot changes before replacing
-the committed files under `swagger-cache/`.
+explicitly and use a new empty temporary `ARMCACHE_PATH`. Generate into an
+isolated output directory so the complete result can be reviewed before it
+replaces the committed client catalog.
 
 ```powershell
 $env:AZURE_SUBSCRIPTION_ID = "<live-subscription-id>"
@@ -118,8 +118,7 @@ New-Item -ItemType Directory -Path $liveCachePath, $outputDirectory -Force | Out
 try {
     $env:ARMCACHE_PATH = $liveCachePath
     dotnet LogicAppsCompiler.dll $outputDirectory --directClient --language=python `
-        "--connectors=$connectorNames" `
-        "--swagger-output-directory=<snapshot-output-directory>"
+        "--connectors=$connectorNames"
 }
 finally {
     $env:ARMCACHE_PATH = $previousCachePath
@@ -127,19 +126,10 @@ finally {
 }
 ```
 
-After committing exactly one `<connector>.swagger.json` snapshot per generated
-connector, regenerate the complete catalog offline:
-
-```powershell
-python scripts/regenerate_connectors.py <path-to-LogicAppsCompiler.dll> `
-    --generator-revision=<full-AzureUX-BPM-commit> `
-    --captured-at-utc=<UTC-capture-timestamp>
-```
-
-The helper validates exact snapshot and sync/aio inventories, generates into an
-isolated directory before replacing outputs, writes the lazy client registry and
-package type stubs, and updates `generation.manifest.json` with canonical hashes.
-Run it a second time and require a clean diff to prove reproducibility.
+Record the full AzureUX-BPM generator revision, compiler hash, source metadata,
+and canonical generated-output hashes in `generation.manifest.json`. Validate
+exact sync/aio inventory parity, the lazy client registry, and package type stubs
+before committing the reviewed output.
 
 ### Pageable Results
 

@@ -19,7 +19,6 @@ REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPOSITORY_ROOT / "generation.manifest.json"
 CONNECTOR_DIRECTORY = REPOSITORY_ROOT / "src" / "azure" / "connectors"
 ASYNC_CONNECTOR_DIRECTORY = CONNECTOR_DIRECTORY / "aio"
-SNAPSHOT_DIRECTORY = REPOSITORY_ROOT / "swagger-cache"
 EXPECTED_GENERATOR_REVISION = "b9c9fd25aeeefb309e17054b9bd0697f9b6d4f41"
 
 
@@ -65,7 +64,7 @@ def stub_client_names(path: Path) -> set[str]:
 
 
 def test_generation_manifest_covers_exact_connector_inventory() -> None:
-    """Verify every generated module and snapshot has one manifest entry."""
+    """Verify every generated sync and aio module has one manifest entry."""
     manifest = load_manifest()
     manifest_names = [entry["apiName"] for entry in manifest["connectors"]]
     connector_names = sorted(
@@ -78,27 +77,18 @@ def test_generation_manifest_covers_exact_connector_inventory() -> None:
         for path in ASYNC_CONNECTOR_DIRECTORY.glob("*.py")
         if path.name != "__init__.py"
     )
-    snapshot_names = sorted(
-        path.name.removesuffix(".swagger.json")
-        for path in SNAPSHOT_DIRECTORY.glob("*.swagger.json")
-    )
-
     assert manifest["manifestVersion"] == 1
     assert manifest["generator"]["revision"] == EXPECTED_GENERATOR_REVISION
     assert manifest_names == sorted(manifest_names)
     assert manifest_names == connector_names
     assert manifest_names == async_connector_names
-    assert manifest_names == snapshot_names
 
 
 def test_generation_manifest_hashes_match_committed_files() -> None:
-    """Verify snapshot and generated output hashes match the manifest."""
+    """Verify generated output hashes match the manifest."""
     manifest = load_manifest()
 
     for entry in manifest["connectors"]:
-        assert canonical_sha256(
-            REPOSITORY_ROOT / entry["swaggerSnapshot"]
-        ) == entry["swaggerSha256"]
         assert canonical_sha256(
             REPOSITORY_ROOT / entry["outputFile"]
         ) == entry["outputSha256"]

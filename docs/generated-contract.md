@@ -55,14 +55,14 @@ remain filtered by the existing operation-retention rules.
 
 ## Regeneration evidence
 
-Commit one raw Swagger snapshot per connector under `swagger-cache/`. The
-`generation.manifest.json` file records the exact generator commit and compiler
-hash, source subscription and region, capture time, and hashes for every
-snapshot, generated module, registry, and package type stub.
+The `generation.manifest.json` file records the exact generator commit and
+compiler hash, source subscription and region, capture time, and hashes for
+every generated module, registry, and package type stub. Source Swagger files
+used during generation are not committed to this repository.
 
-Use `scripts/regenerate_connectors.py` to regenerate the complete sync/aio
-catalog offline from those snapshots. A second run with the pinned compiler and
-unchanged snapshots must produce no repository changes.
+Use the pinned generator revision and the live-metadata workflow in
+`GENERATION.md` to refresh the complete sync/aio catalog. Review source metadata
+changes and generated output together before updating the manifest.
 
 Before submission, verify exact root/aio catalog parity, compile every generated
 module, run connector and runtime tests, validate both sample catalogs, build

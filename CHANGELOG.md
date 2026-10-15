@@ -65,7 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Orderful transaction responses** — `list_transactions` now preserves and returns the runtime JSON payload despite the managed connector Swagger omitting its response schema.
 - **Relative continuation URLs** — pagers now resolve bare relative continuation links against the current page URL, preserving nested resource paths.
 - **Azure Core exception compatibility**: `ConnectorException` now derives from `HttpResponseError` and exposes the failed response status, reason, headers, and body while preserving connector-specific operation and path details.
-- **Reproducible generation**: committed Swagger snapshots, a pinned generator/compiler manifest, and offline regeneration tooling now make the complete 99-connector catalog independently verifiable.
+- **Generation provenance**: a pinned generator/compiler manifest records source metadata and canonical hashes for the complete 99-connector sync/aio catalog.
 - **Request timeout enforcement**: Client-level and per-operation `timeout`
   configures Azure Core retry and transport deadlines. Async clients also bound
   the complete network operation, including response loading and body reads.
